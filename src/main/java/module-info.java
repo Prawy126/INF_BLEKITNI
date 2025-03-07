@@ -1,4 +1,4 @@
-module org.example.projekt {
+module org.example.gui {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.web;
@@ -11,6 +11,10 @@ module org.example.projekt {
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
 
-    opens org.example.projekt to javafx.fxml;
-    exports org.example.projekt;
+    opens org.example.gui to javafx.fxml;
+    exports org.example.gui;
+    /*exports org.example.database;
+    exports org.example.hypermarket;
+    exports org.example.sys;
+    exports org.example.pdflib;*/
 }

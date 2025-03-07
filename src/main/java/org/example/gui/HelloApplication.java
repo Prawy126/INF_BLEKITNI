@@ -1,4 +1,13 @@
-package org.example.projekt;
+package org.example.gui;
+
+// Jakub
+// - sprawdzenie poprawności
+
+// Mateusz
+// - połączenie z backendem
+
+// Łukasz
+// - design
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
