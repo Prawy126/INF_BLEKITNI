@@ -9,6 +9,8 @@ package org.example.gui;
 // Łukasz
 // - design
 
+// Logowanie
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
