@@ -17,6 +17,10 @@ import java.io.File;
 
 public class HelloApplication extends Application {
 
+    // Przykładowy użytkownik (ustawiony na sztywno)
+    private final String hardcodedUsername = "admin";
+    private final String hardcodedPassword = "admin";
+
     @Override
     public void start(Stage primaryStage) {
         // Główne tło
@@ -75,6 +79,7 @@ public class HelloApplication extends Application {
 
         Button loginButton = new Button("Zaloguj");
         styleButton(loginButton, "#2980B9");
+        loginButton.setOnAction(e -> handleLogin(loginField.getText(), passwordField.getText()));
 
         Button cvButton = new Button("Złóż CV");
         styleButton(cvButton, "#1F618D");
@@ -94,6 +99,24 @@ public class HelloApplication extends Application {
         primaryStage.setScene(scene);
         primaryStage.setTitle("Stonka - Logowanie");
         primaryStage.show();
+    }
+
+    // Sprawdzenie poprawności loginu i hasła
+    private void handleLogin(String enteredUsername, String enteredPassword) {
+        if (enteredUsername.equals(hardcodedUsername) && enteredPassword.equals(hardcodedPassword)) {
+            showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zalogowano pomyślnie!", "Witaj, " + enteredUsername + "!");
+        } else {
+            showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowe dane logowania!", "Spróbuj ponownie.");
+        }
+    }
+
+    // Funkcja do wyświetlania komunikatów
+    private void showAlert(Alert.AlertType type, String title, String header, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     // Animacja zanikania i pojawiania
@@ -148,3 +171,4 @@ public class HelloApplication extends Application {
         launch(args);
     }
 }
+ 
