@@ -1,6 +1,9 @@
 package org.example.gui;
 
-import javafx.application.Application;
+import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -8,16 +11,16 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
-public class AdminPanel extends Application {
+public class AdminPanel {
 
     private BorderPane root;
     private Stage primaryStage;
     private AdminPanelController controller;
 
-    @Override
-    public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;
+    public AdminPanel(Stage stage) {
+        this.primaryStage = stage;
         this.controller = new AdminPanelController(this);
 
         primaryStage.setTitle("Panel administratora");
@@ -25,6 +28,7 @@ public class AdminPanel extends Application {
         // Główna struktura układu
         root = new BorderPane();
         root.setPadding(new Insets(10));
+        root.setStyle("-fx-background-color: lightblue;"); // Dopasowanie do ekranu logowania
 
         // Lewy panel nawigacyjny
         VBox menu = createMenu();
@@ -32,6 +36,10 @@ public class AdminPanel extends Application {
 
         // Domyślnie wyświetl widok użytkowników
         controller.showUserManagement();
+
+        // Animacje
+        animateFadeIn(menu, 1000);
+        animateSlideDown(menu, 800);
 
         // Scena
         Scene scene = new Scene(root, 700, 450);
@@ -42,26 +50,67 @@ public class AdminPanel extends Application {
     private VBox createMenu() {
         VBox menu = new VBox(10);
         menu.setPadding(new Insets(10));
-        menu.setStyle("-fx-background-color: #E0E0E0;");
+        menu.setStyle("-fx-background-color: #E0E0E0; -fx-border-radius: 10; -fx-background-radius: 10;");
         menu.setAlignment(Pos.TOP_LEFT);
 
-        Button usersButton = new Button("Użytkownicy");
+        Button usersButton = createStyledButton("Użytkownicy");
         usersButton.setOnAction(e -> controller.showUserManagement());
 
-        Button configButton = new Button("Konfiguracja");
+        Button configButton = createStyledButton("Konfiguracja");
         configButton.setOnAction(e -> controller.showConfigPanel());
 
-        Button reportsButton = new Button("Raporty");
+        Button reportsButton = createStyledButton("Raporty");
         reportsButton.setOnAction(e -> controller.showReportsPanel());
 
-        Button issuesButton = new Button("Zgłoszenia");
+        Button issuesButton = createStyledButton("Zgłoszenia");
         issuesButton.setOnAction(e -> controller.showIssuesPanel());
 
-        Button logoutButton = new Button("Wyloguj");
+        Button logoutButton = createStyledButton("Wyloguj", "#E74C3C"); // Czerwony przycisk
         logoutButton.setOnAction(e -> controller.logout());
 
-        menu.getChildren().addAll(usersButton, configButton, issuesButton, reportsButton, logoutButton);
+        menu.getChildren().addAll(usersButton, configButton, reportsButton, issuesButton, logoutButton);
         return menu;
+    }
+
+    private Button createStyledButton(String text) {
+        return createStyledButton(text, "#2980B9"); // Domyślnie niebieski
+    }
+
+    private Button createStyledButton(String text, String color) {
+        Button button = new Button(text);
+        button.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white; -fx-font-weight: bold;");
+
+        // Efekt powiększenia po najechaniu
+        button.setOnMouseEntered(e -> {
+            ScaleTransition scale = new ScaleTransition(Duration.millis(200), button);
+            scale.setToX(1.1);
+            scale.setToY(1.1);
+            scale.play();
+        });
+
+        button.setOnMouseExited(e -> {
+            ScaleTransition scale = new ScaleTransition(Duration.millis(200), button);
+            scale.setToX(1);
+            scale.setToY(1);
+            scale.play();
+        });
+
+        return button;
+    }
+
+    private void animateFadeIn(VBox element, int duration) {
+        FadeTransition fade = new FadeTransition(Duration.millis(duration), element);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+        fade.play();
+    }
+
+    private void animateSlideDown(VBox element, int duration) {
+        TranslateTransition slide = new TranslateTransition(Duration.millis(duration), element);
+        slide.setFromY(-50);
+        slide.setToY(0);
+        slide.setInterpolator(Interpolator.EASE_BOTH);
+        slide.play();
     }
 
     public void setCenterPane(javafx.scene.layout.Pane pane) {
@@ -70,9 +119,5 @@ public class AdminPanel extends Application {
 
     public Stage getPrimaryStage() {
         return primaryStage;
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }

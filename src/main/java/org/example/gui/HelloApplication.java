@@ -18,8 +18,6 @@ import java.io.File;
 public class HelloApplication extends Application {
 
     // Przykładowy użytkownik (ustawiony na sztywno)
-    private final String hardcodedUsername = "admin";
-    private final String hardcodedPassword = "admin";
 
     @Override
     public void start(Stage primaryStage) {
@@ -79,7 +77,7 @@ public class HelloApplication extends Application {
 
         Button loginButton = new Button("Zaloguj");
         styleButton(loginButton, "#2980B9");
-        loginButton.setOnAction(e -> handleLogin(loginField.getText(), passwordField.getText()));
+        loginButton.setOnAction(e -> handleLogin(loginField.getText(), passwordField.getText(), root));
 
         Button cvButton = new Button("Złóż CV");
         styleButton(cvButton, "#1F618D");
@@ -101,10 +99,29 @@ public class HelloApplication extends Application {
         primaryStage.show();
     }
 
-    // Sprawdzenie poprawności loginu i hasła
-    private void handleLogin(String enteredUsername, String enteredPassword) {
-        if (enteredUsername.equals(hardcodedUsername) && enteredPassword.equals(hardcodedPassword)) {
+    private final String adminUsername = "admin";
+    private final String adminPassword = "admin";
+    private final String cashierUsername = "kasjer";
+    private final String cashierPassword = "kasjer";
+
+    private void handleLogin(String enteredUsername, String enteredPassword, VBox root) {
+        if ((enteredUsername.equals(adminUsername) && enteredPassword.equals(adminPassword)) ||
+                (enteredUsername.equals(cashierUsername) && enteredPassword.equals(cashierPassword))) {
+
             showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zalogowano pomyślnie!", "Witaj, " + enteredUsername + "!");
+
+            // Zamknij okno logowania
+            Stage currentStage = (Stage) root.getScene().getWindow();
+            currentStage.close();
+
+            // Otwórz odpowiedni panel
+            if (enteredUsername.equals(adminUsername)) {
+                Stage adminStage = new Stage();
+                new AdminPanel(adminStage);
+            } else {
+                Stage cashierStage = new Stage();
+                new CashierPanel(cashierStage);
+            }
         } else {
             showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowe dane logowania!", "Spróbuj ponownie.");
         }
@@ -171,4 +188,3 @@ public class HelloApplication extends Application {
         launch(args);
     }
 }
- 
