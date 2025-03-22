@@ -26,7 +26,7 @@ public class ManagerPanel {
         controller.showTaskPanel();
 
         animateFadeIn(root, 800);
-        Scene scene = new Scene(root, 800, 500);
+        Scene scene = new Scene(root, 800, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
