@@ -17,8 +17,6 @@ import java.io.File;
 
 public class HelloApplication extends Application {
 
-    // Przykładowy użytkownik (ustawiony na sztywno)
-
     @Override
     public void start(Stage primaryStage) {
         // Główne tło
