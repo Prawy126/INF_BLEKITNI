@@ -91,18 +91,21 @@ public class AdminPanelController {
         reportType.setPrefWidth(200);
 
         Label dateLabel = new Label("Wybierz zakres dat");
-        TextField startDateField = new TextField();
-        startDateField.setPromptText("Początkowa data");
 
-        TextField endDateField = new TextField();
-        endDateField.setPromptText("Końcowa data");
+        // Zamiana TextField na DatePicker
+        DatePicker startDatePicker = new DatePicker();
+        startDatePicker.setPromptText("Data początkowa");
+
+        DatePicker endDatePicker = new DatePicker();
+        endDatePicker.setPromptText("Data końcowa");
 
         Button generateButton = new Button("Generuj raport");
         generateButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
 
-        layout.getChildren().addAll(titleLabel, reportType, dateLabel, startDateField, endDateField, generateButton);
+        layout.getChildren().addAll(titleLabel, reportType, dateLabel, startDatePicker, endDatePicker, generateButton);
         adminPanel.setCenterPane(layout);
     }
+
 
     public void showIssuesPanel() {
         VBox layout = new VBox(15);
