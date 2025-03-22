@@ -46,4 +46,34 @@ public class Admin extends Person {
         employee.setSalary(newSalary);
     }
 
+    public void updateNameEmployee(Employee employee, String newName){
+        employee.setName(newName);
+    }
+    public void updateSurnameEmployee(Employee employee, String newSurname){
+        employee.setSurname(newSurname);
+    }
+    public void updateAgeEmployee(Employee employee, int newAge){
+        employee.setAge(newAge);
+    }
+    public void updateAddressEmployee(Employee employee, String newAddress){
+        employee.setAddress(newAddress);
+    }
+    public void updatePasswordEmployee(Employee employee, String newPassword){
+        employee.setPassword(newPassword);
+    }
+    public void updateEmailEmployee(Employee employee, String newEmail){
+        employee.setEmail(newEmail);
+    }
+    public void updateEmployeeIdEmployee(Employee employee, String newEmployeeId){
+        employee.setEmployeeId(newEmployeeId);
+    }
+    public void updateDepartmentEmployee(Employee employee, String newDepartment){
+        employee.setDepartment(newDepartment);
+    }
+    public void updatePositionEmployee(Employee employee, String newPosition){
+        employee.setPosition(newPosition);
+    }
+    public void updateSalaryEmployee(Employee employee, double newSalary){
+        employee.setSalary(newSalary);
+    }
 }
