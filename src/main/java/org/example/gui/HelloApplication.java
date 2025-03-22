@@ -103,25 +103,31 @@ public class HelloApplication extends Application {
     private final String adminPassword = "admin";
     private final String cashierUsername = "kasjer";
     private final String cashierPassword = "kasjer";
+    private final String managerUsername = "kierownik";
+    private final String managerPassword = "kierownik";
 
     private void handleLogin(String enteredUsername, String enteredPassword, VBox root) {
-        if ((enteredUsername.equals(adminUsername) && enteredPassword.equals(adminPassword)) ||
-                (enteredUsername.equals(cashierUsername) && enteredPassword.equals(cashierPassword))) {
-
+        if (enteredUsername.equals(adminUsername) && enteredPassword.equals(adminPassword)) {
             showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zalogowano pomyślnie!", "Witaj, " + enteredUsername + "!");
-
-            // Zamknij okno logowania
             Stage currentStage = (Stage) root.getScene().getWindow();
             currentStage.close();
+            Stage adminStage = new Stage();
+            new AdminPanel(adminStage);
 
-            // Otwórz odpowiedni panel
-            if (enteredUsername.equals(adminUsername)) {
-                Stage adminStage = new Stage();
-                new AdminPanel(adminStage);
-            } else {
-                Stage cashierStage = new Stage();
-                new CashierPanel(cashierStage);
-            }
+        } else if (enteredUsername.equals(cashierUsername) && enteredPassword.equals(cashierPassword)) {
+            showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zalogowano pomyślnie!", "Witaj, " + enteredUsername + "!");
+            Stage currentStage = (Stage) root.getScene().getWindow();
+            currentStage.close();
+            Stage cashierStage = new Stage();
+            new CashierPanel(cashierStage);
+
+        } else if (enteredUsername.equals(managerUsername) && enteredPassword.equals(managerPassword)) {
+            showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zalogowano pomyślnie!", "Witaj, " + enteredUsername + "!");
+            Stage currentStage = (Stage) root.getScene().getWindow();
+            currentStage.close();
+            Stage managerStage = new Stage();
+            new ManagerPanel(managerStage);
+
         } else {
             showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowe dane logowania!", "Spróbuj ponownie.");
         }

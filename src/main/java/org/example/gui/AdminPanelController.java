@@ -106,7 +106,6 @@ public class AdminPanelController {
         adminPanel.setCenterPane(layout);
     }
 
-
     public void showIssuesPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
@@ -125,6 +124,13 @@ public class AdminPanelController {
 
     public void logout() {
         primaryStage.close();
+
+        Stage loginStage = new Stage();
+        try {
+            new HelloApplication().start(loginStage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
 
