@@ -1,18 +1,15 @@
 package org.example.sys;
 
-public class Admin extends Person {
-    private boolean admin = true;
-    public Admin(String name, String surname, String login, String password) {
-        super(name, surname, login, password);
+public class Logistician extends Employee{
+    private boolean logistician = true;
+    public Logistician(String name, int age, String address, String password, String email, String employeeId, String department, String position, double salary) {
+        super(name, age, address, password, email, employeeId, department, position, salary);
     }
-    public Admin(){
-
+    public boolean isLogistician() {
+        return logistician;
     }
-    public boolean isAdmin() {
-        return admin;
-    }
-    public void setAdmin(boolean admin) {
-        this.admin = admin;
+    public void setLogistician(boolean logistician) {
+        this.logistician = logistician;
     }
 
     public void updateName(Employee employee, String newName){
@@ -58,22 +55,5 @@ public class Admin extends Person {
     public void updateAddressEmployee(Employee employee, String newAddress){
         employee.setAddress(newAddress);
     }
-    public void updatePasswordEmployee(Employee employee, String newPassword){
-        employee.setPassword(newPassword);
-    }
-    public void updateEmailEmployee(Employee employee, String newEmail){
-        employee.setEmail(newEmail);
-    }
-    public void updateEmployeeIdEmployee(Employee employee, String newEmployeeId){
-        employee.setEmployeeId(newEmployeeId);
-    }
-    public void updateDepartmentEmployee(Employee employee, String newDepartment){
-        employee.setDepartment(newDepartment);
-    }
-    public void updatePositionEmployee(Employee employee, String newPosition){
-        employee.setPosition(newPosition);
-    }
-    public void updateSalaryEmployee(Employee employee, double newSalary){
-        employee.setSalary(newSalary);
-    }
+
 }

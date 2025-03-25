@@ -1,10 +1,14 @@
 package org.example.sys;
 
+import java.util.Date;
+
 public class Employee extends Person{
     private String employeeId;
     private String department;
     private String position;
     private double salary;
+    private boolean l4 = false;
+    private Date date = null;
 
     public Employee(String name, int age, String address, String password, String email, String employeeId, String department, String position, double salary) {
         super(name, address, password, email);
@@ -48,4 +52,14 @@ public class Employee extends Person{
     public void setSalary(double salary) {
         this.salary = salary;
     }
+
+    public boolean isL4() {
+        return l4;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+        this.l4 = true;
+    }
+
 }
