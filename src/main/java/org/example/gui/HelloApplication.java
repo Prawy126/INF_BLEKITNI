@@ -3,6 +3,7 @@ package org.example.gui;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -25,7 +26,7 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage primaryStage) {
         // Główne tło
-        VBox root = new VBox(15);
+        VBox root = new VBox(20); // Zwiększamy odstęp między sekcjami
         root.setAlignment(Pos.CENTER);
         root.setStyle("-fx-background-color: lightblue; -fx-padding: 30;");
 
@@ -64,31 +65,41 @@ public class HelloApplication extends Application {
         passwordField.setPromptText("Tutaj podaj hasło");
         passwordField.setStyle("-fx-background-color: #FFD966; -fx-padding: 5;");
 
-        // Dodanie pól do siatki
+        // Dodanie pól do siatki (przeniesienie etykiet nad pola)
         grid.add(loginLabel, 0, 0);
         grid.add(loginField, 1, 0);
         grid.add(passwordLabel, 0, 1);
         grid.add(passwordField, 1, 1);
 
-        // Przyciski
-        HBox buttonBox = new HBox(15);
-        buttonBox.setAlignment(Pos.CENTER);
-
-        Button exitButton = new Button("Wyjście");
-        styleButton(exitButton, "#E74C3C");
-        exitButton.setOnAction(e -> exitApplication());
+        // Przyciski logowania i resetowania hasła
+        HBox topButtonBox = new HBox(15);
+        topButtonBox.setAlignment(Pos.CENTER);
 
         Button loginButton = new Button("Zaloguj");
         styleButton(loginButton, "#2980B9");
         loginButton.setOnAction(e -> handleLogin(loginField.getText(), passwordField.getText(), root));
 
+        Button resetPasswordButton = new Button("Resetowanie hasła");
+        styleButton(resetPasswordButton, "#F39C12");
+        resetPasswordButton.setOnAction(e -> showResetPasswordWindow());
+
+        topButtonBox.getChildren().addAll(loginButton, resetPasswordButton);
+
+        // Przyciski "Złóż CV" i "Wyjście"
+        HBox bottomButtonBox = new HBox(15);
+        bottomButtonBox.setAlignment(Pos.CENTER);
+
         Button cvButton = new Button("Złóż CV");
         styleButton(cvButton, "#1F618D");
 
-        buttonBox.getChildren().addAll(exitButton, loginButton, cvButton);
+        Button exitButton = new Button("Wyjście");
+        styleButton(exitButton, "#E74C3C");
+        exitButton.setOnAction(e -> exitApplication());
+
+        bottomButtonBox.getChildren().addAll(cvButton, exitButton);
 
         // Układ główny
-        root.getChildren().addAll(imageView, titleLabel, welcomeLabel, grid, buttonBox);
+        root.getChildren().addAll(imageView, titleLabel, welcomeLabel, grid, topButtonBox, bottomButtonBox);
 
         // Animacje
         animateFadeIn(titleLabel, 1000);
@@ -188,6 +199,102 @@ public class HelloApplication extends Application {
                 Platform.exit();
             }
         });
+    }
+
+    // Wyświetlanie formularza składania CV
+    private void showCVForm(Stage primaryStage) {
+        // Tworzenie nowego okna
+        Stage cvStage = new Stage();
+        cvStage.setTitle("Formularz składania CV");
+
+        // Układ formularza
+        VBox vbox = new VBox(10);
+        vbox.setStyle("-fx-padding: 20;");
+        vbox.setAlignment(Pos.CENTER);
+
+        // Pola formularza
+        TextField nameField = new TextField();
+        nameField.setPromptText("Imię i nazwisko");
+
+        TextField emailField = new TextField();
+        emailField.setPromptText("E-mail");
+
+        TextField phoneField = new TextField();
+        phoneField.setPromptText("Numer telefonu");
+
+        TextArea experienceField = new TextArea();
+        experienceField.setPromptText("Doświadczenie zawodowe");
+        experienceField.setPrefRowCount(4);
+
+        Button submitButton = new Button("Wyślij CV");
+        submitButton.setOnAction(e -> {
+            String email = emailField.getText();
+            String phone = phoneField.getText();
+
+            // Walidacja e-maila
+            if (!isEmailValid(email)) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowy format e-maila!", "Spróbuj ponownie.");
+                return;
+            }
+
+            // Walidacja numeru telefonu
+            if (!isPhoneNumberValid(phone)) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowy numer telefonu!", "Spróbuj ponownie.");
+                return;
+            }
+
+            // Akcja składania CV
+            showAlert(Alert.AlertType.INFORMATION, "Sukces", "CV zostało wysłane!", "Dziękujemy za przesłanie CV.");
+            cvStage.close();
+        });
+
+        // Dodanie wszystkich elementów do formularza
+        vbox.getChildren().addAll(nameField, emailField, phoneField, experienceField, submitButton);
+
+        // Tworzenie i ustawienie sceny
+        Scene cvScene = new Scene(vbox, 400, 400);
+        cvStage.setScene(cvScene);
+        cvStage.show();
+    }
+
+    // Walidacja e-maila
+    private boolean isEmailValid(String email) {
+        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        return email.matches(emailRegex);
+    }
+
+    // Walidacja numeru telefonu (numer może zawierać spacje)
+    private boolean isPhoneNumberValid(String phoneNumber) {
+        String phoneRegex = "^(\\+48\\s?)?\\d{3}\\s?\\d{3}\\s?\\d{3}$";
+        return phoneNumber.matches(phoneRegex);
+    }
+
+    // Okno resetowania hasła
+    private void showResetPasswordWindow() {
+        Stage resetStage = new Stage();
+        resetStage.setTitle("Resetowanie hasła");
+
+        VBox resetLayout = new VBox(10);
+        resetLayout.setPadding(new Insets(20));
+        resetLayout.setAlignment(Pos.CENTER);
+
+        Label emailLabel = new Label("Podaj swój email:");
+        TextField emailField = new TextField();
+        emailField.setPromptText("Email");
+
+        Button sendCodeButton = new Button("Wyślij kod odzyskiwania");
+        sendCodeButton.setOnAction(e -> handleSendResetCode(emailField.getText()));
+
+        resetLayout.getChildren().addAll(emailLabel, emailField, sendCodeButton);
+
+        Scene resetScene = new Scene(resetLayout, 300, 200);
+        resetStage.setScene(resetScene);
+        resetStage.show();
+    }
+
+    private void handleSendResetCode(String email) {
+        // W tym miejscu można dodać logikę wysyłania kodu resetującego hasło
+        showAlert(Alert.AlertType.INFORMATION, "Kod wysłany", "Kod odzyskiwania został wysłany na email", "Proszę sprawdzić swoją skrzynkę.");
     }
 
     public static void main(String[] args) {

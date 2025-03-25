@@ -18,10 +18,11 @@ public class CashierPanelController {
 
         Button addToCartButton = new Button("Dodaj do koszyka");
         Button finalizeSaleButton = new Button("Finalizuj sprzedaż");
-        Button logoutButton = new Button("Wyloguj się");
+        // Usuwamy przycisk "Wyloguj się" z ekranu sprzedaży, bo jest już w lewym panelu
+        // Button logoutButton = new Button("Wyloguj się");
 
         layout.setAlignment(Pos.CENTER);
-        layout.getChildren().addAll(addToCartButton, finalizeSaleButton, logoutButton);
+        layout.getChildren().addAll(addToCartButton, finalizeSaleButton); // Brak przycisku logout
 
         cashierPanel.setCenterPane(layout);
     }
