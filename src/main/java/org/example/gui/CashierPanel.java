@@ -1,12 +1,18 @@
 package org.example.gui;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class CashierPanel {
     private BorderPane root;
@@ -29,6 +35,10 @@ public class CashierPanel {
         // Domyślnie wyświetl ekran sprzedaży
         controller.showSalesScreen();
 
+        // Animacje
+        animateFadeIn(menu, 1000);
+        animateSlideDown(menu, 800);
+
         // Scena
         Scene scene = new Scene(root, 700, 450);
         primaryStage.setScene(scene);
@@ -36,31 +46,87 @@ public class CashierPanel {
     }
 
     private VBox createMenu() {
-        VBox menu = new VBox(10);
-        menu.setPadding(new Insets(10));
-        menu.setStyle("-fx-background-color: #E0E0E0;");
+        VBox menu = new VBox(15);
+        menu.setPadding(new Insets(20));
+        menu.setStyle("-fx-background-color: #E0E0E0; -fx-border-radius: 10; -fx-background-radius: 10;");
         menu.setAlignment(Pos.TOP_LEFT);
 
-        Button salesButton = new Button("Ekran sprzedaży");
+        // Dodanie logo w lewym górnym rogu
+        Image image = new Image(getClass().getResourceAsStream("/logo.png"));
+        ImageView logo = new ImageView(image);
+        logo.setFitWidth(100);
+        logo.setFitHeight(100);
+        logo.setPreserveRatio(true);
+
+        // Przycisk ekranu sprzedaży
+        Button salesButton = createStyledButton("Ekran sprzedaży");
         salesButton.setOnAction(e -> controller.showSalesScreen());
 
-        Button reportsButton = new Button("Raporty sprzedaży");
+        // Przycisk raportów sprzedaży
+        Button reportsButton = createStyledButton("Raporty sprzedaży");
         reportsButton.setOnAction(e -> controller.showSalesReportsPanel());
 
-        Button closeShiftButton = new Button("Zamknięcie zmiany");
+        // Przycisk zamknięcia zmiany
+        Button closeShiftButton = createStyledButton("Zamknięcie zmiany");
         closeShiftButton.setOnAction(e -> controller.showCloseShiftPanel());
 
-        Button issueReportButton = new Button("Zgłoszenie awarii");
+        // Przycisk zgłoszenia awarii
+        Button issueReportButton = createStyledButton("Zgłoszenie awarii");
         issueReportButton.setOnAction(e -> controller.showIssueReportPanel());
 
-        Button logoutButton = new Button("Wyloguj się");
+        // Przycisk wylogowania
+        Button logoutButton = createStyledButton("Wyloguj się", "#E74C3C"); // Czerwony przycisk
         logoutButton.setOnAction(e -> controller.logout());
 
+        // Dodanie logo na górze, a następnie przycisków menu
+        menu.getChildren().add(logo);
         menu.getChildren().addAll(salesButton, reportsButton, closeShiftButton, issueReportButton, logoutButton);
+
         return menu;
     }
 
-    public void setCenterPane(javafx.scene.layout.Pane pane) {
+    private Button createStyledButton(String text) {
+        return createStyledButton(text, "#2980B9"); // Domyślnie niebieski
+    }
+
+    private Button createStyledButton(String text, String color) {
+        Button button = new Button(text);
+        button.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white; -fx-font-weight: bold;");
+
+        // Efekt powiększenia po najechaniu
+        button.setOnMouseEntered(e -> {
+            ScaleTransition scale = new ScaleTransition(Duration.millis(200), button);
+            scale.setToX(1.1);
+            scale.setToY(1.1);
+            scale.play();
+        });
+
+        button.setOnMouseExited(e -> {
+            ScaleTransition scale = new ScaleTransition(Duration.millis(200), button);
+            scale.setToX(1);
+            scale.setToY(1);
+            scale.play();
+        });
+
+        return button;
+    }
+
+    private void animateFadeIn(VBox element, int duration) {
+        FadeTransition fade = new FadeTransition(Duration.millis(duration), element);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+        fade.play();
+    }
+
+    private void animateSlideDown(VBox element, int duration) {
+        TranslateTransition slide = new TranslateTransition(Duration.millis(duration), element);
+        slide.setFromY(-50);
+        slide.setToY(0);
+        slide.setInterpolator(Interpolator.EASE_BOTH);
+        slide.play();
+    }
+
+    public void setCenterPane(Pane pane) {
         root.setCenter(pane);
     }
 

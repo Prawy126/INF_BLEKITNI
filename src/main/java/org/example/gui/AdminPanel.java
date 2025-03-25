@@ -8,10 +8,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+
+import java.util.Objects;
 
 public class AdminPanel {
 
@@ -53,6 +57,14 @@ public class AdminPanel {
         menu.setStyle("-fx-background-color: #E0E0E0; -fx-border-radius: 10; -fx-background-radius: 10;");
         menu.setAlignment(Pos.TOP_LEFT);
 
+        // Dodanie logo w lewym górnym rogu
+        Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/logo.png")));
+        ImageView logo = new ImageView(image);
+        logo.setFitWidth(100);  // Ustawiamy odpowiednią szerokość logo
+        logo.setFitHeight(100); // Ustawiamy odpowiednią wysokość logo
+        logo.setPreserveRatio(true); // Zachowanie proporcji
+
+        // Przycisk użytkowników
         Button usersButton = createStyledButton("Użytkownicy");
         usersButton.setOnAction(e -> controller.showUserManagement());
 
@@ -68,7 +80,10 @@ public class AdminPanel {
         Button logoutButton = createStyledButton("Wyloguj", "#E74C3C"); // Czerwony przycisk
         logoutButton.setOnAction(e -> controller.logout());
 
+        // Dodanie logo na górze, a następnie przycisków menu
+        menu.getChildren().add(logo);
         menu.getChildren().addAll(usersButton, configButton, reportsButton, issuesButton, logoutButton);
+
         return menu;
     }
 

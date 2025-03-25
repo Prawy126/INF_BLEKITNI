@@ -28,15 +28,6 @@ public class ManagerPanelController {
         taskTable = new TableView<>();
         taskTable.setMinHeight(200);
 
-        Button addTaskButton = new Button("Dodaj zadanie");
-        addTaskButton.setOnAction(e -> showAddTaskPanel());
-
-        Button assignEmployeeButton = new Button("Przypisz pracownika do zadania");
-        assignEmployeeButton.setOnAction(e -> showAssignEmployeeDialog());
-
-        Button absenceButton = new Button("Wnioski o nieobecność");
-        absenceButton.setOnAction(e -> showAbsencePanel());
-
         Label recruitLabel = new Label("Panel rekrutacji");
         ListView<String> recruitmentList = new ListView<>();
         recruitmentList.getItems().addAll("Jan Kowalski - CV.pdf", "Anna Nowak - CV.pdf");
@@ -48,10 +39,7 @@ public class ManagerPanelController {
 
         recruitButtons.getChildren().addAll(inviteButton, rejectButton);
 
-        Button logoutButton = new Button("Wyloguj się");
-        logoutButton.setOnAction(e -> logout());
-
-        layout.getChildren().addAll(taskLabel, taskTable, addTaskButton, assignEmployeeButton, absenceButton, recruitLabel, recruitmentList, recruitButtons, logoutButton);
+        layout.getChildren().addAll(taskLabel, taskTable, recruitLabel, recruitmentList, recruitButtons);
         managerPanel.setCenterPane(layout);
     }
 
