@@ -8,8 +8,9 @@ public class Person {
     private String password;
     private String  email;
 
-    public Person(String name, String address, String password, String email) {
+    public Person(String name, String surname,int age, String address, String password, String email) {
         this.name = name;
+        this.surname = surname;
         this.age = age;
         this.address = address;
         this.password = password;
@@ -17,6 +18,13 @@ public class Person {
     }
     public Person(){
 
+    }
+    public Person(String name, String surname,int age, String password, String email) {
+        this.name = name;
+        this.surname = surname;
+        this.password = password;
+        this.email = email;
+        this.age = age;
     }
 
     public String getSurname() {

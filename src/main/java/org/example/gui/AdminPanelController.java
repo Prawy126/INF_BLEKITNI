@@ -1,11 +1,14 @@
 package org.example.gui;
 
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+import org.example.sys.Employee;
 
 public class AdminPanelController {
 
@@ -24,8 +27,38 @@ public class AdminPanelController {
         Label titleLabel = new Label("Lista użytkowników");
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
-        TableView<String> tableView = new TableView<>();
-        tableView.setMinHeight(200);
+        TableView<Employee> tableView = new TableView<>();
+
+        TableColumn<Employee, String> nameCol = new TableColumn<>("Imię");
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        TableColumn<Employee, Integer> ageCol = new TableColumn<>("Wiek");
+        ageCol.setCellValueFactory(new PropertyValueFactory<>("age"));
+
+        TableColumn<Employee, String> cityCol = new TableColumn<>("Adres");
+        cityCol.setCellValueFactory(new PropertyValueFactory<>("address"));
+
+        TableColumn<Employee, String> emCol = new TableColumn<>("Login");
+        emCol.setCellValueFactory(new PropertyValueFactory<>("email"));
+
+        TableColumn<Employee, String> empCol = new TableColumn<>("Rodzaj konta");
+        empCol.setCellValueFactory(new PropertyValueFactory<>("employeeId"));
+
+        TableColumn<Employee, String> depCol = new TableColumn<>("Oddział");
+        depCol.setCellValueFactory(new PropertyValueFactory<>("department"));
+
+        TableColumn<Employee, String> posCol = new TableColumn<>("Stanowisko");
+        posCol.setCellValueFactory(new PropertyValueFactory<>("position"));
+
+        TableColumn<Employee, Integer> salCol = new TableColumn<>("Wynagrodzenie");
+        salCol.setCellValueFactory(new PropertyValueFactory<>("salary")); // poprawione
+
+        tableView.getColumns().addAll(nameCol, ageCol, cityCol, emCol, empCol, depCol, posCol, salCol);
+        tableView.getItems().addAll(
+                new Employee("Jan", "Nowak",25, "Kraków", "kasjer", "kasjer", "kasjer", "IT", "Developer", 5000),
+                new Employee("Łukasz", "Banan",30, "Warszawa", "admin", "admin", "admin", "IT", "Developer", 5000),
+                new Employee("Krzysztof", "Kępa",35, "Gdańsk", "manager", "manager", "manager", "IT", "Developer", 5000)
+        );
 
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER);

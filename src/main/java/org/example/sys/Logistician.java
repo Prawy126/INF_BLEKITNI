@@ -2,8 +2,8 @@ package org.example.sys;
 
 public class Logistician extends Employee{
     private boolean logistician = true;
-    public Logistician(String name, int age, String address, String password, String email, String employeeId, String department, String position, double salary) {
-        super(name, age, address, password, email, employeeId, department, position, salary);
+    public Logistician(String name, String surname,int age, String address, String password, String email, String employeeId, String department, String position, double salary) {
+        super(name, surname,age, address, password, email, employeeId, department, position, salary);
     }
     public boolean isLogistician() {
         return logistician;

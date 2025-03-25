@@ -2,9 +2,10 @@ package org.example.sys;
 
 public class Admin extends Person {
     private boolean admin = true;
-    public Admin(String name, String surname, String login, String password) {
-        super(name, surname, password, login);
+    public Admin(String name, String surname, int age,String adress,String login, String password) {
+        super(name, surname, age, adress,password, login);
     }
+    public Admin(String name, String surname, int age, String login, String password){super(name,surname,age,password,login);}
     public Admin(){
 
     }

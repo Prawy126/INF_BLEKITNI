@@ -102,9 +102,9 @@ public class HelloApplication extends Application {
         primaryStage.show();
     }
 
-    Admin admin = new Admin("Jan", "Kowalski", "admin", "admin");
-    Employee employee = new Employee("Jan", 25, "Kraków", "kasjer", "kasjer", "kasjer", "IT", "Developer", 5000);
-    Menager menager = new Menager("Jan", 40, "Rzeszów","kierownik", "kierownik", "kierownik", "IT", "Developer", 5000);
+    Admin admin = new Admin("Jan", "Kowalski", 40,"admin", "admin");
+    Employee employee = new Employee("Jan", "Nowak",25, "Kraków", "kasjer", "kasjer", "kasjer", "IT", "Developer", 5000);
+    Menager menager = new Menager("Jan", "Waiderko",40, "Rzeszów","kierownik", "kierownik", "kierownik", "IT", "Developer", 5000);
 
     private void handleLogin(String enteredUsername, String enteredPassword, VBox root) {
         if (enteredUsername.equals(admin.getEmail()) && enteredPassword.equals(admin.getPassword())) {

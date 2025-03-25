@@ -17,5 +17,5 @@ module org.example.gui {
     exports org.example.hypermarket;
     exports org.example.sys;
     exports org.example.pdflib;*/
-
+    opens org.example.sys to javafx.base;
 }
