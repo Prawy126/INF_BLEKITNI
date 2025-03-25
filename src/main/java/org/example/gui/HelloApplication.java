@@ -84,6 +84,7 @@ public class HelloApplication extends Application {
 
         Button cvButton = new Button("Złóż CV");
         styleButton(cvButton, "#1F618D");
+        cvButton.setOnAction(e -> showCVForm(primaryStage));  // Wywołanie formularza CV
 
         buttonBox.getChildren().addAll(exitButton, loginButton, cvButton);
 
@@ -188,6 +189,74 @@ public class HelloApplication extends Application {
                 Platform.exit();
             }
         });
+    }
+
+    // Wyświetlanie formularza składania CV
+    private void showCVForm(Stage primaryStage) {
+        // Tworzenie nowego okna
+        Stage cvStage = new Stage();
+        cvStage.setTitle("Formularz składania CV");
+
+        // Układ formularza
+        VBox vbox = new VBox(10);
+        vbox.setStyle("-fx-padding: 20;");
+        vbox.setAlignment(Pos.CENTER);
+
+        // Pola formularza
+        TextField nameField = new TextField();
+        nameField.setPromptText("Imię i nazwisko");
+
+        TextField emailField = new TextField();
+        emailField.setPromptText("E-mail");
+
+        TextField phoneField = new TextField();
+        phoneField.setPromptText("Numer telefonu");
+
+        TextArea experienceField = new TextArea();
+        experienceField.setPromptText("Doświadczenie zawodowe");
+        experienceField.setPrefRowCount(4);
+
+        Button submitButton = new Button("Wyślij CV");
+        submitButton.setOnAction(e -> {
+            String email = emailField.getText();
+            String phone = phoneField.getText();
+
+            // Walidacja e-maila
+            if (!isEmailValid(email)) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowy format e-maila!", "Spróbuj ponownie.");
+                return;
+            }
+
+            // Walidacja numeru telefonu
+            if (!isPhoneNumberValid(phone)) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowy numer telefonu!", "Spróbuj ponownie.");
+                return;
+            }
+
+            // Akcja składania CV
+            showAlert(Alert.AlertType.INFORMATION, "Sukces", "CV zostało wysłane!", "Dziękujemy za przesłanie CV.");
+            cvStage.close();
+        });
+
+        // Dodanie wszystkich elementów do formularza
+        vbox.getChildren().addAll(nameField, emailField, phoneField, experienceField, submitButton);
+
+        // Tworzenie i ustawienie sceny
+        Scene cvScene = new Scene(vbox, 400, 400);
+        cvStage.setScene(cvScene);
+        cvStage.show();
+    }
+
+    // Walidacja e-maila
+    private boolean isEmailValid(String email) {
+        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        return email.matches(emailRegex);
+    }
+
+    // Walidacja numeru telefonu (numer może zawierać spacje)
+    private boolean isPhoneNumberValid(String phoneNumber) {
+        String phoneRegex = "^(\\+48\\s?)?\\d{3}\\s?\\d{3}\\s?\\d{3}$";
+        return phoneNumber.matches(phoneRegex);
     }
 
     public static void main(String[] args) {
