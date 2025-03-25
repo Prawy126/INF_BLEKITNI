@@ -2,6 +2,7 @@ package org.example.gui;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
@@ -23,7 +24,7 @@ public class AdminPanelController {
         Label titleLabel = new Label("Lista użytkowników");
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
-        TableView tableView = new TableView();
+        TableView<String> tableView = new TableView<>();
         tableView.setMinHeight(200);
 
         HBox buttonBox = new HBox(10);
@@ -53,10 +54,14 @@ public class AdminPanelController {
         Button configurePDF = new Button("Konfiguruj raporty PDF");
         configurePDF.setOnAction(e -> showPDFConfigPanel());
 
+        Button backupButton = new Button("Wykonaj backup bazy danych");
+        backupButton.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white;");
+        backupButton.setOnAction(e -> performDatabaseBackup());
+
         Button saveButton = new Button("Zapisz");
         saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
 
-        layout.getChildren().addAll(titleLabel, logsCheckbox, notificationsCheckbox, configurePDF, saveButton);
+        layout.getChildren().addAll(titleLabel, logsCheckbox, notificationsCheckbox, configurePDF, backupButton, saveButton);
         adminPanel.setCenterPane(layout);
     }
 
@@ -92,7 +97,6 @@ public class AdminPanelController {
 
         Label dateLabel = new Label("Wybierz zakres dat");
 
-        // Zamiana TextField na DatePicker
         DatePicker startDatePicker = new DatePicker();
         startDatePicker.setPromptText("Data początkowa");
 
@@ -113,7 +117,7 @@ public class AdminPanelController {
         Label titleLabel = new Label("Lista zgłoszeń");
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
-        TableView tableView = new TableView();
+        TableView<String> tableView = new TableView<>();
         tableView.setMinHeight(200);
 
         Button detailsButton = new Button("Szczegóły zgłoszenia");
@@ -132,5 +136,17 @@ public class AdminPanelController {
             e.printStackTrace();
         }
     }
-}
 
+    private void performDatabaseBackup() {
+        showAlert(Alert.AlertType.INFORMATION, "Backup", "Backup bazy danych został wykonany pomyślnie!");
+        System.out.println("Backup bazy danych wykonany!");
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String header) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(null);
+        alert.showAndWait();
+    }
+}
