@@ -13,6 +13,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.example.sys.Admin;
+import org.example.sys.Employee;
+import org.example.sys.Menager;
+
 import java.io.File;
 
 public class HelloApplication extends Application {
@@ -97,29 +101,26 @@ public class HelloApplication extends Application {
         primaryStage.show();
     }
 
-    private final String adminUsername = "admin";
-    private final String adminPassword = "admin";
-    private final String cashierUsername = "kasjer";
-    private final String cashierPassword = "kasjer";
-    private final String managerUsername = "kierownik";
-    private final String managerPassword = "kierownik";
+    Admin admin = new Admin("Jan", "Kowalski", "admin", "admin");
+    Employee employee = new Employee("Jan", 25, "Kraków", "kasjer", "kasjer", "kasjer", "IT", "Developer", 5000);
+    Menager menager = new Menager("Jan", 40, "Rzeszów","kierownik", "kierownik", "kierownik", "IT", "Developer", 5000);
 
     private void handleLogin(String enteredUsername, String enteredPassword, VBox root) {
-        if (enteredUsername.equals(adminUsername) && enteredPassword.equals(adminPassword)) {
+        if (enteredUsername.equals(admin.getEmail()) && enteredPassword.equals(admin.getPassword())) {
             showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zalogowano pomyślnie!", "Witaj, " + enteredUsername + "!");
             Stage currentStage = (Stage) root.getScene().getWindow();
             currentStage.close();
             Stage adminStage = new Stage();
             new AdminPanel(adminStage);
 
-        } else if (enteredUsername.equals(cashierUsername) && enteredPassword.equals(cashierPassword)) {
+        } else if (enteredUsername.equals(employee.getEmail()) && enteredPassword.equals(employee.getEmail())) {
             showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zalogowano pomyślnie!", "Witaj, " + enteredUsername + "!");
             Stage currentStage = (Stage) root.getScene().getWindow();
             currentStage.close();
             Stage cashierStage = new Stage();
             new CashierPanel(cashierStage);
 
-        } else if (enteredUsername.equals(managerUsername) && enteredPassword.equals(managerPassword)) {
+        } else if (enteredUsername.equals(menager.getEmail()) && enteredPassword.equals(menager.getPassword())) {
             showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zalogowano pomyślnie!", "Witaj, " + enteredUsername + "!");
             Stage currentStage = (Stage) root.getScene().getWindow();
             currentStage.close();
