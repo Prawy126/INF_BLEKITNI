@@ -18,6 +18,7 @@ import org.example.sys.Employee;
 import org.example.sys.Menager;
 
 import java.io.File;
+import java.util.Objects;
 
 public class HelloApplication extends Application {
 
@@ -29,9 +30,9 @@ public class HelloApplication extends Application {
         root.setStyle("-fx-background-color: lightblue; -fx-padding: 30;");
 
         // **Dodanie obrazka**
-        Image image = new Image(new File("W://LS/obraz.png").toURI().toString());
+        Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/logo.png")));
         ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(100); // Dostosuj szerokość
+        imageView.setFitWidth(150); // Dostosuj szerokość
         imageView.setPreserveRatio(true);
         primaryStage.getIcons().add(image);
 
@@ -90,9 +91,9 @@ public class HelloApplication extends Application {
         root.getChildren().addAll(imageView, titleLabel, welcomeLabel, grid, buttonBox);
 
         // Animacje
-        animateFadeIn(titleLabel, 1000); // Nagłówek pojawia się płynnie
+        animateFadeIn(titleLabel, 1000);
         animateFadeIn(welcomeLabel, 1200);
-        animateSlideDown(grid, 1000); // Pola logowania przesuwają się w dół
+        animateSlideDown(grid, 1000);
 
         // Ustawienia sceny
         Scene scene = new Scene(root, 600, 500);
