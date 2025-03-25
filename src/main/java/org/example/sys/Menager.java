@@ -11,12 +11,12 @@ public class Menager extends Employee{
     private Date date = null;
     List<Employee> employees;
 
-    public Menager(String name, int age, String address, String password, String email, String employeeId, String department, String position, double salary) {
-        super(name, age, address, password, email, employeeId, department, position, salary);
+    public Menager(String name, String surname, int age, String address, String password, String email, String employeeId, String department, String position, double salary) {
+        super(name, surname,age, address, password, email, employeeId, department, position, salary);
     }
 
-    public Menager(String name, int age, String address, String password, String email, String employeeId, String department, String position, double salary, List<Employee> employees) {
-        super(name, age, address, password, email, employeeId, department, position, salary);
+    public Menager(String name, String surname,int age, String address, String password, String email, String employeeId, String department, String position, double salary, List<Employee> employees) {
+        super(name, surname,age, address, password, email, employeeId, department, position, salary);
         this.employees = employees;
     }
 

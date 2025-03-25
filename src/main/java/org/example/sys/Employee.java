@@ -10,13 +10,14 @@ public class Employee extends Person{
     private boolean l4 = false;
     private Date date = null;
 
-    public Employee(String name, int age, String address, String password, String email, String employeeId, String department, String position, double salary) {
-        super(name, address, password, email);
+    public Employee(String name,String lastName, int age, String address, String password, String email, String employeeId, String department, String position, double salary) {
+        super(name,lastName, age,address,password,email);
         this.employeeId = employeeId;
         this.department = department;
         this.position = position;
         this.salary = salary;
     }
+
 
     public Employee() {
     }
