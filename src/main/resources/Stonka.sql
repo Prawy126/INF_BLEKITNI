@@ -103,7 +103,8 @@ CREATE TABLE Zadania_Pracownicy (
     FOREIGN KEY (Id_zadania) REFERENCES Zadania(Id)
 );
 
--- Przykładowe dane testowe
+-- === Wstawianie danych (po utworzeniu WSZYSTKICH tabel) ===
+
 INSERT INTO Adresy (Miejscowosc, Numer_domu, Numer_mieszkania, Kod_pocztowy, Miasto)
 VALUES ('Warszawa', '12A', '3', '00-001', 'Warszawa');
 

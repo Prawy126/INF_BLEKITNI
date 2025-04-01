@@ -1,56 +1,46 @@
 package org.example.database;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.sql.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 
 public class DatabaseInitializer {
 
-    private static final String DB_NAME = "stonka";
-    private static final String SQL_FILE = "src/main/resources/Stonka.sql";
-    private static final String MYSQL_URL = "jdbc:mysql://localhost:3306/?useSSL=false&serverTimezone=UTC";
-    private static final String MYSQL_USER = "root";
-    private static final String MYSQL_PASSWORD = "";
+    private static final String DB_NAME = "StonkaDB";
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+    private static final String USER = "root";
+    private static final String PASS = "";
 
     public static void initialize() {
-        try {
-            // 1. Połączenie z serwerem MySQL
-            Connection connection = DriverManager.getConnection(MYSQL_URL, MYSQL_USER, MYSQL_PASSWORD);
-            Statement statement = connection.createStatement();
-
-            // 2. Tworzenie bazy jeśli nie istnieje
+        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
             System.out.println("Tworzenie bazy danych: " + DB_NAME);
-            statement.executeUpdate("CREATE DATABASE IF NOT EXISTS " + DB_NAME);
-            statement.close();
-            connection.close();
+            Statement stmt = conn.createStatement();
+            stmt.execute("CREATE DATABASE IF NOT EXISTS " + DB_NAME);
+            stmt.execute("USE " + DB_NAME);
 
-            // 3. Połączenie z utworzoną bazą danych
-            Connection dbConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306/" + DB_NAME + "?useSSL=false&serverTimezone=UTC", MYSQL_USER, MYSQL_PASSWORD);
-            Statement dbStatement = dbConnection.createStatement();
+            System.out.println("Importowanie pliku SQL...");
+            executeSqlScript(conn, "src/main/resources/Stonka.sql");
 
-            // 4. Wczytywanie zapytań z pliku SQL
-            System.out.println("Importowanie pliku SQL: " + SQL_FILE);
-            BufferedReader reader = new BufferedReader(new FileReader(SQL_FILE));
-            StringBuilder queryBuilder = new StringBuilder();
-            String line;
+            System.out.println("Baza danych gotowa.");
+        } catch (Exception e) {
+            System.out.println("Błąd podczas tworzenia bazy danych:");
+            e.printStackTrace();
+        }
+    }
 
-            while ((line = reader.readLine()) != null) {
-                queryBuilder.append(line);
-                if (line.trim().endsWith(";")) {
-                    dbStatement.execute(queryBuilder.toString());
-                    queryBuilder.setLength(0);
+    private static void executeSqlScript(Connection conn, String filePath) throws Exception {
+        String sql = new String(Files.readAllBytes(Paths.get(filePath)));
+        String[] statements = sql.split(";");
+
+        try (Statement stmt = conn.createStatement()) {
+            for (String s : statements) {
+                s = s.trim();
+                if (!s.isEmpty()) {
+                    stmt.execute(s);
                 }
             }
-
-            reader.close();
-            dbStatement.close();
-            dbConnection.close();
-
-            System.out.println("Baza danych została załadowana pomyślnie!");
-
-        } catch (Exception e) {
-            System.err.println("Błąd podczas tworzenia bazy danych:");
-            e.printStackTrace();
         }
     }
 }
