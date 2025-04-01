@@ -298,6 +298,7 @@ public class HelloApplication extends Application {
     }
 
     public static void main(String[] args) {
-        launch(args);
+        org.example.database.DatabaseInitializer.initialize(); // inicjalizacja bazy danych przed startem GUI
+        launch(args); // start GUI
     }
 }
