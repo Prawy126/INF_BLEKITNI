@@ -4,13 +4,27 @@ import java.time.LocalDate;
 
 public class Registration {
     String message;
-    Person person;
+    String name;
+    String surname;
+    String title;
     LocalDate date;
+    StatusRegistration status = StatusRegistration.OCZEKUJACY;
 
-    public Registration(String message, Person person, LocalDate date) {
+    public Registration(String message, String name, String surname, LocalDate date, String title) {
         this.message = message;
-        this.person = person;
+        this.title = title;
+        this.name = name;
+        this.surname = surname;
         this.date = date;
+    }
+
+    public Registration(String message, String name, String surname, LocalDate date, String title, StatusRegistration status) {
+        this.message = message;
+        this.title = title;
+        this.name = name;
+        this.surname = surname;
+        this.date = date;
+        this.status = status;
     }
 
     public Registration(String message, LocalDate date) {
@@ -22,8 +36,16 @@ public class Registration {
         return message;
     }
 
-    public Person getPerson() {
-        return person;
+    public String getTitle() {
+        return title;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getSurname() {
+        return surname;
     }
 
     public LocalDate getDate() {
@@ -34,12 +56,35 @@ public class Registration {
         this.message = message;
     }
 
-    public void setPerson(Person person) {
-        this.person = person;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     public void setDate(LocalDate date) {
         this.date = date;
     }
 
+    public StatusRegistration getStatus() {
+        return status;
+    }
+
+    public void setStatusAccept(){
+        this.status = StatusRegistration.ZAAKCEPTOWANY;
+    }
+
+    public void setStatusReject(){
+        this.status = StatusRegistration.ODRZUCONY;
+    }
+
+    public void setStatusRealized(){
+        this.status = StatusRegistration.ZREALIZOWANY;
+    }
 }
