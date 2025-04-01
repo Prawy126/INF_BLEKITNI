@@ -6,11 +6,11 @@ import java.sql.*;
 
 public class DatabaseInitializer {
 
-    private static final String DB_NAME = "stonka";
+    private static final String DB_NAME = "StonkaDB";
     private static final String SQL_FILE = "src/main/resources/Stonka.sql";
     private static final String MYSQL_URL = "jdbc:mysql://localhost:3306/?useSSL=false&serverTimezone=UTC";
     private static final String MYSQL_USER = "root";
-    private static final String MYSQL_PASSWORD = "";
+    private static final String MYSQL_PASSWORD = "twoje_haslo";
 
     public static void initialize() {
         try {
