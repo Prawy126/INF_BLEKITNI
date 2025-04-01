@@ -4,12 +4,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
-import javafx.stage.Stage;
+import javafx.stage.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.TableCell;
 import javafx.util.Callback;
 
 public class CashierPanelController {
@@ -67,8 +67,8 @@ public class CashierPanelController {
         Button pdfButton = new Button("Generuj raport do PDF");
         Button csvButton = new Button("Generuj raport do CSV");
 
-        pdfButton.setOnAction(e -> showAlert("Generowanie PDF", "Raport PDF został wygenerowany (symulacja)."));
-        csvButton.setOnAction(e -> showAlert("Generowanie CSV", "Raport CSV został wygenerowany (symulacja)."));
+        pdfButton.setOnAction(e -> showReportGenerationDialog("PDF"));
+        csvButton.setOnAction(e -> showReportGenerationDialog("CSV"));
 
         buttons.getChildren().addAll(pdfButton, csvButton);
 
@@ -114,6 +114,42 @@ public class CashierPanelController {
         alert.setHeaderText(null);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    // Nowa funkcjonalność: Dialog do wyboru typu raportu i daty
+    private void showReportGenerationDialog(String reportType) {
+        Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle("Wybór raportu");
+
+        VBox layout = new VBox(10);
+        layout.setPadding(new Insets(20));
+
+        // Wybór typu raportu
+        Label typeLabel = new Label("Wybierz typ raportu:");
+        ComboBox<String> reportTypeCombo = new ComboBox<>();
+        reportTypeCombo.getItems().addAll("Dobowy", "Miesięczny");
+        reportTypeCombo.setValue("Dobowy");
+
+        // Wybór daty
+        Label dateLabel = new Label("Wybierz datę:");
+        DatePicker datePicker = new DatePicker();
+
+        // Przycisk generowania raportu
+        Button generateButton = new Button("Generuj raport");
+        generateButton.setOnAction(e -> {
+            String selectedType = reportTypeCombo.getValue();
+            String selectedDate = datePicker.getValue().toString();
+            showAlert("Generowanie raportu",
+                    "Typ raportu: " + selectedType + "\nData: " + selectedDate + "\nRodzaj: " + reportType);
+            dialog.close();
+        });
+
+        layout.getChildren().addAll(typeLabel, reportTypeCombo, dateLabel, datePicker, generateButton);
+
+        Scene scene = new Scene(layout, 300, 250);
+        dialog.setScene(scene);
+        dialog.show();
     }
 
     public void showCloseShiftPanel() {
