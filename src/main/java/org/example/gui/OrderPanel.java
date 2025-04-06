@@ -1,6 +1,7 @@
 package org.example.gui;
 
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.geometry.Insets;
 import javafx.collections.FXCollections;

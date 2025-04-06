@@ -1,14 +1,18 @@
 package org.example.sys;
 
 public class Person {
+
     private String name;
     private String surname;
     private int age;
     private String address;
     private String password;
-    private String  email;
+    private String email;
 
-    public Person(String name, String surname,int age, String address, String password, String email) {
+    public Person() {
+    }
+
+    public Person(String name, String surname, int age, String address, String password, String email) {
         this.name = name;
         this.surname = surname;
         this.age = age;
@@ -16,23 +20,13 @@ public class Person {
         this.password = password;
         this.email = email;
     }
-    public Person(){
 
-    }
-    public Person(String name, String surname,int age, String password, String email) {
-        this.name = name;
-        this.surname = surname;
-        this.password = password;
-        this.email = email;
-        this.age = age;
+    public String getName() {
+        return name;
     }
 
     public String getSurname() {
         return surname;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public int getAge() {
@@ -55,16 +49,16 @@ public class Person {
         this.name = name;
     }
 
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
     public void setAge(int age) {
         this.age = age;
     }
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
     }
 
     public void setPassword(String password) {
@@ -74,10 +68,17 @@ public class Person {
     public void setEmail(String email) {
         this.email = email;
     }
-    public boolean isPassword(String password){
-        return this.password.equals(password);
+
+    public boolean matchesPassword(String password) {
+        return this.password != null && this.password.equals(password);
     }
-    public boolean isEmail(String email){
-        return this.email.equals(email);
+
+    public boolean matchesEmail(String email) {
+        return this.email != null && this.email.equals(email);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s (%d), %s, %s", name, surname, age, address, email);
     }
 }

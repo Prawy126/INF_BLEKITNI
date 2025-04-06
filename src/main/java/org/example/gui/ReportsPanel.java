@@ -3,11 +3,12 @@ package org.example.gui;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.geometry.Insets;
+
 import java.time.LocalDate;
 
 public class ReportsPanel extends VBox {
 
-    private ComboBox<String> reportTypeCombo;
+    private ComboBox<ReportType> reportTypeCombo;
     private DatePicker startDatePicker;
     private DatePicker endDatePicker;
     private TextArea reportOutput;
@@ -20,28 +21,24 @@ public class ReportsPanel extends VBox {
     }
 
     private void initializeUI() {
-        Label titleLabel = new Label("Panel Raportów");
+        Label titleLabel = new Label("Reports Panel");
         titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         reportTypeCombo = new ComboBox<>();
-        reportTypeCombo.getItems().addAll(
-                "Sprzedaż dzienna",
-                "Sprzedaż miesięczna",
-                "Najpopularniejsze produkty",
-                "Stan magazynowy",
-                "Rotacja towaru"
-        );
-        reportTypeCombo.setPromptText("Wybierz typ raportu");
+        reportTypeCombo.getItems().addAll(ReportType.values());
+        reportTypeCombo.setPromptText("Select report type");
 
         startDatePicker = new DatePicker();
         endDatePicker = new DatePicker();
 
-        HBox dateRangeBox = new HBox(10, new Label("Od:"), startDatePicker, new Label("Do:"), endDatePicker);
+        HBox dateRangeBox = new HBox(10,
+                new Label("From:"), startDatePicker,
+                new Label("To:"), endDatePicker);
 
-        Button generateButton = new Button("Generuj raport");
+        Button generateButton = new Button("Generate Report");
         generateButton.setOnAction(e -> generateReport());
 
-        Button exportButton = new Button("Eksportuj do PDF");
+        Button exportButton = new Button("Export to PDF");
         exportButton.setOnAction(e -> exportToPDF());
 
         HBox buttonsBox = new HBox(10, generateButton, exportButton);
@@ -52,7 +49,7 @@ public class ReportsPanel extends VBox {
 
         getChildren().addAll(
                 titleLabel,
-                new Label("Typ raportu:"),
+                new Label("Report Type:"),
                 reportTypeCombo,
                 dateRangeBox,
                 buttonsBox,
@@ -62,24 +59,62 @@ public class ReportsPanel extends VBox {
     }
 
     private void generateReport() {
-        String reportType = reportTypeCombo.getValue();
+        ReportType reportType = reportTypeCombo.getValue();
         LocalDate startDate = startDatePicker.getValue();
         LocalDate endDate = endDatePicker.getValue();
 
-        // Tutaj logika generowania raportu
-        String reportContent = "Wygenerowano raport: " + reportType + "\n";
-        reportContent += "Zakres dat: " + startDate + " - " + endDate + "\n\n";
-        reportContent += "Przykładowe dane raportu...\n";
-        reportContent += "--------------------------------\n";
-        reportContent += "Produkt 1: 120 szt.\n";
-        reportContent += "Produkt 2: 85 szt.\n";
-        reportContent += "Produkt 3: 42 szt.\n";
+        if (reportType == null || startDate == null || endDate == null) {
+            showAlert("Missing data", "Please select a report type and date range.");
+            return;
+        }
 
+        String reportContent = createReportContent(reportType, startDate, endDate);
         reportOutput.setText(reportContent);
     }
 
+    private String createReportContent(ReportType reportType, LocalDate startDate, LocalDate endDate) {
+        return String.format(
+                "Report generated: %s%nDate range: %s to %s%n%nSample report data:%n" +
+                        "--------------------------------%n" +
+                        "Product 1: 120 pcs%n" +
+                        "Product 2: 85 pcs%n" +
+                        "Product 3: 42 pcs%n",
+                reportType.getDisplayName(), startDate, endDate
+        );
+    }
+
     private void exportToPDF() {
-        // Tutaj logika eksportu do PDF
-        System.out.println("Eksportowanie raportu do PDF...");
+        System.out.println("Exporting report to PDF...");
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    public enum ReportType {
+        DAILY_SALES("Daily Sales"),
+        MONTHLY_SALES("Monthly Sales"),
+        MOST_POPULAR_PRODUCTS("Most Popular Products"),
+        STOCK_LEVEL("Stock Level"),
+        PRODUCT_ROTATION("Product Rotation");
+
+        private final String displayName;
+
+        ReportType(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        @Override
+        public String toString() {
+            return displayName;
+        }
     }
 }
