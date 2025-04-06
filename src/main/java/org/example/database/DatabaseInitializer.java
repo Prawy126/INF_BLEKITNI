@@ -13,36 +13,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
-/**
- * Klasa odpowiedzialna za inicjalizację bazy danych.
- * Tworzy bazę danych oraz wykonuje skrypt SQL inicjalizacyjny.
- */
-public class DatabaseInitializer {
+public class DatabaseInitializer implements ILacz {
 
-    // Nazwa bazy danych
-    private static final String DB_NAME = "StonkaDB";
-
-    // URL połączenia z serwerem MySQL
-    private static final String DB_URL =
-            "jdbc:mysql://localhost:3306/?useSSL=false"
-                    + "&allowPublicKeyRetrieval=true"
-                    + "&serverTimezone=UTC";
-
-    // Dane logowania do bazy danych
-    private static final String USER = "root";
-    private static final String PASS = "twoje_haslo";
-
-    /**
-     * Inicjalizuje bazę danych:
-     * - tworzy bazę danych, jeśli nie istnieje
-     * - wykonuje skrypt SQL z pliku
-     */
     public static void initialize() {
-        try (Connection conn = DriverManager.getConnection(
-                DB_URL,
-                USER,
-                PASS)) {
-
+        try (Connection conn = DriverManager.getConnection(DB_NAME, MYSQL_URL, MYSQL_PASSWORD)) {
             System.out.println("Tworzenie bazy danych: " + DB_NAME);
 
             Statement stmt = conn.createStatement();
