@@ -6,6 +6,7 @@ import javafx.scene.layout.*;
 import javafx.geometry.Insets;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.example.sys.Order;
 
 public class OrderPanel extends VBox {
 

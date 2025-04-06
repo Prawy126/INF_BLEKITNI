@@ -1,4 +1,4 @@
-package org.example.gui;
+package org.example.sys;
 
 public class Order {
     private int id;

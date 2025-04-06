@@ -77,6 +77,10 @@ public class Person {
         return this.email != null && this.email.equals(email);
     }
 
+    public boolean isPassword(String password) {
+        return this.password != null && this.password.equals(password);
+    }
+
     @Override
     public String toString() {
         return String.format("%s %s (%d), %s, %s", name, surname, age, address, email);

@@ -1,12 +1,16 @@
 package org.example.database;
 
-//Maciej, Michał
-
 public interface ILacz {
 
-    static final String DB_NAME = "StonkaDB";
-    static final String SQL_FILE = "src/main/resources/Stonka.sql";
-    static final String MYSQL_URL = "jdbc:mysql://localhost:3306/?useSSL=false&serverTimezone=UTC";
-    static final String MYSQL_USER = "root";
-    static final String MYSQL_PASSWORD = "twoje_haslo";
+    String DB_NAME = "StonkaDB";
+    String SQL_FILE = "src/main/resources/Stonka.sql";
+
+    // Pierwszy URL – do stworzenia bazy danych
+    String MYSQL_SERVER_URL = "jdbc:mysql://localhost:3306/?useSSL=false&serverTimezone=UTC";
+
+    // Drugi URL – do połączenia z bazą danych
+    String MYSQL_DB_URL = "jdbc:mysql://localhost:3306/StonkaDB?useSSL=false&serverTimezone=UTC";
+
+    String MYSQL_USER = "root";
+    String MYSQL_PASSWORD = "";
 }
