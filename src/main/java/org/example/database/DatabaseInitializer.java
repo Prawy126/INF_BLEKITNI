@@ -6,16 +6,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
-public class DatabaseInitializer {
-
-    private static final String DB_NAME = "StonkaDB";
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-    private static final String USER = "root";
-    private static final String PASS = "twoje_haslo";
-
+public class DatabaseInitializer implements ILacz {
 
     public static void initialize() {
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS)) {
+        try (Connection conn = DriverManager.getConnection(DB_NAME, MYSQL_URL, MYSQL_PASSWORD)) {
             System.out.println("Tworzenie bazy danych: " + DB_NAME);
             Statement stmt = conn.createStatement();
             stmt.execute("CREATE DATABASE IF NOT EXISTS " + DB_NAME);
