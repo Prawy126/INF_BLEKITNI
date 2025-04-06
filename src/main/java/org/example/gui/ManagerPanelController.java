@@ -1,3 +1,10 @@
+/*
+ * Classname: ManagerPanelController
+ * Version information: 1.0
+ * Date: 2025-04-06
+ * Copyright notice: © BŁĘKITNI
+ */
+
 package org.example.gui;
 
 import javafx.geometry.Insets;
@@ -8,6 +15,10 @@ import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+/**
+ * Kontroler logiki interfejsu użytkownika dla panelu kierownika.
+ * Obsługuje zadania, wnioski o nieobecność oraz przypisania pracowników.
+ */
 public class ManagerPanelController {
 
     private final ManagerPanel managerPanel;
@@ -15,11 +26,19 @@ public class ManagerPanelController {
     private TableView<String> taskTable;
     private TableView<String> absenceTable;
 
+    /**
+     * Konstruktor kontrolera.
+     *
+     * @param managerPanel główny panel kierownika
+     */
     public ManagerPanelController(ManagerPanel managerPanel) {
         this.managerPanel = managerPanel;
         this.primaryStage = managerPanel.getPrimaryStage();
     }
 
+    /**
+     * Wyświetla panel zadań oraz panel rekrutacji.
+     */
     public void showTaskPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
@@ -30,19 +49,31 @@ public class ManagerPanelController {
 
         Label recruitLabel = new Label("Panel rekrutacji");
         ListView<String> recruitmentList = new ListView<>();
-        recruitmentList.getItems().addAll("Jan Kowalski - CV.pdf", "Anna Nowak - CV.pdf");
+        recruitmentList.getItems().addAll(
+                "Jan Kowalski - CV.pdf",
+                "Anna Nowak - CV.pdf"
+        );
 
         HBox recruitButtons = new HBox(10);
         recruitButtons.setAlignment(Pos.CENTER);
         Button inviteButton = new Button("Zaproszenie na rozmowę");
         Button rejectButton = new Button("Odrzuć aplikację");
-
         recruitButtons.getChildren().addAll(inviteButton, rejectButton);
 
-        layout.getChildren().addAll(taskLabel, taskTable, recruitLabel, recruitmentList, recruitButtons);
+        layout.getChildren().addAll(
+                taskLabel,
+                taskTable,
+                recruitLabel,
+                recruitmentList,
+                recruitButtons
+        );
+
         managerPanel.setCenterPane(layout);
     }
 
+    /**
+     * Wyświetla panel dodawania nowego zadania.
+     */
     public void showAddTaskPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
@@ -76,7 +107,9 @@ public class ManagerPanelController {
         backButton.setOnAction(e -> showTaskPanel());
 
         Button saveButton = new Button("Zapisz");
-        saveButton.setStyle("-fx-background-color: #2980B9; -fx-text-fill: white;");
+        saveButton.setStyle(
+                "-fx-background-color: #2980B9; -fx-text-fill: white;"
+        );
         saveButton.setOnAction(e -> {
             taskTable.getItems().add(nameField.getText());
             showTaskPanel();
@@ -97,6 +130,9 @@ public class ManagerPanelController {
         managerPanel.setCenterPane(layout);
     }
 
+    /**
+     * Wyświetla panel z wnioskami o nieobecność.
+     */
     public void showAbsencePanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
@@ -109,16 +145,24 @@ public class ManagerPanelController {
         buttonBox.setAlignment(Pos.CENTER);
         Button approveButton = new Button("Zatwierdź");
         Button rejectButton = new Button("Odrzuć");
-
         buttonBox.getChildren().addAll(approveButton, rejectButton);
 
         Button backButton = new Button("Wróć");
         backButton.setOnAction(e -> showTaskPanel());
 
-        layout.getChildren().addAll(absenceLabel, absenceTable, buttonBox, backButton);
+        layout.getChildren().addAll(
+                absenceLabel,
+                absenceTable,
+                buttonBox,
+                backButton
+        );
+
         managerPanel.setCenterPane(layout);
     }
 
+    /**
+     * Wyświetla okno dialogowe przypisywania pracownika do zadania.
+     */
     public void showAssignEmployeeDialog() {
         Stage dialogStage = new Stage();
         dialogStage.initModality(Modality.APPLICATION_MODAL);
@@ -134,7 +178,11 @@ public class ManagerPanelController {
 
         Label employeeLabel = new Label("Wybierz pracownika:");
         ComboBox<String> employeeComboBox = new ComboBox<>();
-        employeeComboBox.getItems().addAll("Anna Nowak", "Jan Kowalski", "Marek Wiśniewski");
+        employeeComboBox.getItems().addAll(
+                "Anna Nowak",
+                "Jan Kowalski",
+                "Marek Wiśniewski"
+        );
 
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER);
@@ -145,10 +193,16 @@ public class ManagerPanelController {
             String selectedEmployee = employeeComboBox.getValue();
 
             if (selectedTask != null && selectedEmployee != null) {
-                System.out.println("Przypisano: " + selectedEmployee + " do " + selectedTask);
+                System.out.println(
+                        "Przypisano: " + selectedEmployee + " do " + selectedTask
+                );
                 dialogStage.close();
             } else {
-                showAlert(Alert.AlertType.WARNING, "Błąd", "Wybierz zarówno zadanie, jak i pracownika.");
+                showAlert(
+                        Alert.AlertType.WARNING,
+                        "Błąd",
+                        "Wybierz zarówno zadanie, jak i pracownika."
+                );
             }
         });
 
@@ -157,13 +211,22 @@ public class ManagerPanelController {
 
         buttonBox.getChildren().addAll(assignButton, cancelButton);
 
-        dialogLayout.getChildren().addAll(taskLabel, taskComboBox, employeeLabel, employeeComboBox, buttonBox);
+        dialogLayout.getChildren().addAll(
+                taskLabel,
+                taskComboBox,
+                employeeLabel,
+                employeeComboBox,
+                buttonBox
+        );
 
         Scene scene = new Scene(dialogLayout, 300, 200);
         dialogStage.setScene(scene);
         dialogStage.showAndWait();
     }
 
+    /**
+     * Zamyka panel kierownika i uruchamia ekran logowania.
+     */
     public void logout() {
         primaryStage.close();
         Stage loginStage = new Stage();
@@ -174,6 +237,9 @@ public class ManagerPanelController {
         }
     }
 
+    /**
+     * Pomocnicza metoda do wyświetlania alertów.
+     */
     private void showAlert(Alert.AlertType type, String title, String header) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
