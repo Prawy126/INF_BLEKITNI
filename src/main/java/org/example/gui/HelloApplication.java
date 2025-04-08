@@ -19,12 +19,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.example.sys.Admin;
 import org.example.sys.Employee;
 import org.example.sys.Menager;
 
+import java.io.File;
 import java.util.Objects;
 
 /**
@@ -115,6 +117,7 @@ public class HelloApplication extends Application {
 
         Button cvButton = new Button("Złóż CV");
         styleButton(cvButton, "#1F618D");
+        cvButton.setOnAction(e -> showCVForm());
 
         Button exitButton = new Button("Wyjście");
         styleButton(exitButton, "#E74C3C");
@@ -140,6 +143,163 @@ public class HelloApplication extends Application {
         primaryStage.setTitle("Stonka - Logowanie");
         primaryStage.show();
     }
+
+    /**
+     * Wyświetla formularz do składania CV.
+     */
+    private void showCVForm() {
+        Stage cvStage = new Stage();
+        cvStage.setTitle("Składanie CV");
+
+        VBox cvLayout = new VBox(15);
+        cvLayout.setPadding(new Insets(20));
+        cvLayout.setAlignment(Pos.CENTER);
+
+        // Formularz danych osobowych
+        GridPane formGrid = new GridPane();
+        formGrid.setAlignment(Pos.CENTER);
+        formGrid.setHgap(10);
+        formGrid.setVgap(10);
+
+        // Pola formularza
+        Label nameLabel = new Label("Imię:");
+        TextField nameField = new TextField();
+
+        Label surnameLabel = new Label("Nazwisko:");
+        TextField surnameField = new TextField();
+
+        Label emailLabel = new Label("Email:");
+        TextField emailField = new TextField();
+
+        Label phoneLabel = new Label("Telefon:");
+        TextField phoneField = new TextField();
+
+        Label positionLabel = new Label("Stanowisko:");
+        ComboBox<String> positionCombo = new ComboBox<>();
+        positionCombo.getItems().addAll(
+                "Kasjer", "Sprzedawca", "Magazynier",
+                "Kierownik działu", "Specjalista ds. marketingu"
+        );
+        positionCombo.setPromptText("Wybierz stanowisko");
+
+        // Dodanie pól do grid
+        formGrid.add(nameLabel, 0, 0);
+        formGrid.add(nameField, 1, 0);
+        formGrid.add(surnameLabel, 0, 1);
+        formGrid.add(surnameField, 1, 1);
+        formGrid.add(emailLabel, 0, 2);
+        formGrid.add(emailField, 1, 2);
+        formGrid.add(phoneLabel, 0, 3);
+        formGrid.add(phoneField, 1, 3);
+        formGrid.add(positionLabel, 0, 4);
+        formGrid.add(positionCombo, 1, 4);
+
+        // Obsługa załączania pliku CV
+        Label cvFileLabel = new Label("Załącz CV (PDF/DOCX):");
+        Button attachButton = new Button("Wybierz plik");
+        Label fileNameLabel = new Label("Nie wybrano pliku");
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Dokumenty", "*.pdf", "*.docx", "*.doc")
+        );
+
+        attachButton.setOnAction(e -> {
+            File selectedFile = fileChooser.showOpenDialog(cvStage);
+            if (selectedFile != null) {
+                fileNameLabel.setText(selectedFile.getName());
+            }
+        });
+
+        HBox fileBox = new HBox(10);
+        fileBox.setAlignment(Pos.CENTER_LEFT);
+        fileBox.getChildren().addAll(attachButton, fileNameLabel);
+
+        // Przycisk wysłania
+        Button submitButton = new Button("Wyślij aplikację");
+        submitButton.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white;");
+        submitButton.setOnAction(e -> {
+            if (validateCVForm(nameField, surnameField, emailField, phoneField, positionCombo, fileNameLabel)) {
+                showAlert(
+                        Alert.AlertType.INFORMATION,
+                        "Sukces",
+                        "Aplikacja wysłana",
+                        "Dziękujemy za przesłanie CV. Skontaktujemy się z Tobą w ciągu 7 dni."
+                );
+                cvStage.close();
+            }
+        });
+
+        cvLayout.getChildren().addAll(
+                new Label("Formularz aplikacyjny"),
+                formGrid,
+                cvFileLabel,
+                fileBox,
+                submitButton
+        );
+
+        Scene cvScene = new Scene(cvLayout, 400, 450);
+        cvStage.setScene(cvScene);
+        cvStage.show();
+    }
+
+    /**
+     * Waliduje formularz CV.
+     */
+    private boolean validateCVForm(
+            TextField nameField,
+            TextField surnameField,
+            TextField emailField,
+            TextField phoneField,
+            ComboBox<String> positionCombo,
+            Label fileNameLabel
+    ) {
+        if (nameField.getText().isEmpty() || surnameField.getText().isEmpty()) {
+            showAlert(
+                    Alert.AlertType.ERROR,
+                    "Błąd",
+                    "Brakujące dane",
+                    "Proszę podać imię i nazwisko."
+            );
+            return false;
+        }
+
+        if (emailField.getText().isEmpty() || !emailField.getText().contains("@")) {
+            showAlert(
+                    Alert.AlertType.ERROR,
+                    "Błąd",
+                    "Nieprawidłowy email",
+                    "Proszę podać poprawny adres email."
+            );
+            return false;
+        }
+
+        if (positionCombo.getValue() == null) {
+            showAlert(
+                    Alert.AlertType.ERROR,
+                    "Błąd",
+                    "Nie wybrano stanowiska",
+                    "Proszę wybrać stanowisko, na które aplikujesz."
+            );
+            return false;
+        }
+
+        if (fileNameLabel.getText().equals("Nie wybrano pliku")) {
+            showAlert(
+                    Alert.AlertType.ERROR,
+                    "Błąd",
+                    "Brak załącznika",
+                    "Proszę załączyć plik CV."
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    // Reszta metod pozostaje bez zmian (handleLogin, showAlert, animateFadeIn,
+    // animateSlideDown, styleButton, exitApplication, showResetPasswordWindow,
+    // handleSendResetCode, main)
 
     /**
      * Obsługuje logikę logowania i przekierowuje na odpowiedni panel.
