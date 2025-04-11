@@ -11,7 +11,7 @@ public class DatabaseInitializer {
     private static final String DB_NAME = "StonkaDB";
     private static final String DB_URL = "jdbc:mysql://localhost:3306/?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     private static final String USER = "root";
-    private static final String PASS = "twoje_haslo";
+    private static final String PASS = "";
 
 
     public static void initialize() {

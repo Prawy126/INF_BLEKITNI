@@ -3,7 +3,7 @@ CREATE DATABASE IF NOT EXISTS StonkaDB;
 USE StonkaDB;
 
 -- Tabela Adresy
-CREATE TABLE Adresy (
+CREATE TABLE IF NOT EXISTS Adresy (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Miejscowosc VARCHAR(100),
     Numer_domu VARCHAR(10),
@@ -13,7 +13,7 @@ CREATE TABLE Adresy (
 );
 
 -- Tabela Pracownicy
-CREATE TABLE Pracownicy (
+CREATE TABLE IF NOT EXISTS Pracownicy (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Imie VARCHAR(100),
     Nazwisko VARCHAR(100),
@@ -27,7 +27,7 @@ CREATE TABLE Pracownicy (
 );
 
 -- Tabela Zadania
-CREATE TABLE Zadania (
+CREATE TABLE IF NOT EXISTS Zadania (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Nazwa VARCHAR(100),
     Data DATE,
@@ -36,7 +36,7 @@ CREATE TABLE Zadania (
 );
 
 -- Tabela Wnioski o nieobecnosc
-CREATE TABLE Wnioski_o_nieobecnosc (
+CREATE TABLE IF NOT EXISTS Wnioski_o_nieobecnosc (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Typ_wniosku VARCHAR(100),
     Data_rozpoczecia DATE,
@@ -47,7 +47,7 @@ CREATE TABLE Wnioski_o_nieobecnosc (
 );
 
 -- Tabela Produkty
-CREATE TABLE Produkty (
+CREATE TABLE IF NOT EXISTS Produkty (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Nazwa VARCHAR(100),
     Cena DECIMAL(10,2),
@@ -55,7 +55,7 @@ CREATE TABLE Produkty (
 );
 
 -- Tabela Zamowienia
-CREATE TABLE Zamowienia (
+CREATE TABLE IF NOT EXISTS Zamowienia (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Id_produktu INT,
     Id_pracownika INT,
@@ -67,7 +67,7 @@ CREATE TABLE Zamowienia (
 );
 
 -- Tabela Transakcje
-CREATE TABLE Transakcje (
+CREATE TABLE IF NOT EXISTS Transakcje (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Id_pracownika INT,
     Data DATE,
@@ -75,7 +75,7 @@ CREATE TABLE Transakcje (
 );
 
 -- Tabela relacji Transakcje <-> Produkty
-CREATE TABLE Transakcje_Produkty (
+CREATE TABLE IF NOT EXISTS Transakcje_Produkty (
     Id_transakcji INT,
     Id_produktu INT,
     PRIMARY KEY (Id_transakcji, Id_produktu),
@@ -84,7 +84,7 @@ CREATE TABLE Transakcje_Produkty (
 );
 
 -- Tabela Raporty
-CREATE TABLE Raporty (
+CREATE TABLE IF NOT EXISTS Raporty (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Typ_raportu VARCHAR(100),
     Data_poczatku DATE,
@@ -95,7 +95,7 @@ CREATE TABLE Raporty (
 );
 
 -- Tabela relacji wiele-do-wielu dla zadań i pracowników
-CREATE TABLE Zadania_Pracownicy (
+CREATE TABLE IF NOT EXISTS Zadania_Pracownicy (
     Id_pracownika INT,
     Id_zadania INT,
     PRIMARY KEY (Id_pracownika, Id_zadania),
@@ -103,20 +103,20 @@ CREATE TABLE Zadania_Pracownicy (
     FOREIGN KEY (Id_zadania) REFERENCES Zadania(Id)
 );
 
--- === Wstawianie danych (po utworzeniu WSZYSTKICH tabel) ===
+-- === Wstawianie danych z zabezpieczeniem przed duplikatami ===
 
-INSERT INTO Adresy (Miejscowosc, Numer_domu, Numer_mieszkania, Kod_pocztowy, Miasto)
-VALUES ('Warszawa', '12A', '3', '00-001', 'Warszawa');
+INSERT IGNORE INTO Adresy (Id, Miejscowosc, Numer_domu, Numer_mieszkania, Kod_pocztowy, Miasto)
+VALUES (1, 'Warszawa', '12A', '3', '00-001', 'Warszawa');
 
-INSERT INTO Pracownicy (Imie, Nazwisko, Wiek, Id_adresu, Login, Haslo, Zarobki, Stanowisko)
-VALUES ('Jan', 'Kowalski', 35, 1, 'admin', 'admin123', 4500.00, 'Kierownik');
+INSERT IGNORE INTO Pracownicy (Id, Imie, Nazwisko, Wiek, Id_adresu, Login, Haslo, Zarobki, Stanowisko)
+VALUES (1, 'Jan', 'Kowalski', 35, 1, 'admin', 'admin123', 4500.00, 'Kierownik');
 
-INSERT INTO Produkty (Nazwa, Cena, IloscWmagazynie)
-VALUES ('Mleko', 2.99, 150),
-       ('Chleb', 3.49, 200);
+INSERT IGNORE INTO Produkty (Id, Nazwa, Cena, IloscWmagazynie)
+VALUES (1, 'Mleko', 2.99, 150),
+       (2, 'Chleb', 3.49, 200);
 
-INSERT INTO Zadania (Nazwa, Data, Status, Opis)
-VALUES ('Sprawdzenie stanu magazynu', '2025-04-01', 'Nowe', 'Weryfikacja towaru przed dostawą');
+INSERT IGNORE INTO Zadania (Id, Nazwa, Data, Status, Opis)
+VALUES (1, 'Sprawdzenie stanu magazynu', '2025-04-01', 'Nowe', 'Weryfikacja towaru przed dostawą');
 
-INSERT INTO Zadania_Pracownicy (Id_pracownika, Id_zadania)
+INSERT IGNORE INTO Zadania_Pracownicy (Id_pracownika, Id_zadania)
 VALUES (1, 1);
