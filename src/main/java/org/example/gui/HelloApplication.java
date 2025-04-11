@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.example.sys.Admin;
 import org.example.sys.Employee;
+import org.example.sys.Logistician;
 import org.example.sys.Menager;
 
 import java.io.File;
@@ -116,6 +117,8 @@ public class HelloApplication extends Application {
     Admin admin = new Admin("Jan", "Kowalski", 40,"admin", "admin");
     Employee employee = new Employee("Jan", "Nowak",25, "Kraków", "kasjer", "kasjer", "kasjer", "IT", "Developer", 5000);
     Menager menager = new Menager("Jan", "Waiderko",40, "Rzeszów","kierownik", "kierownik", "kierownik", "IT", "Developer", 5000);
+    Logistician logistician = new Logistician("Anna", "Nowak", 30, "Poznań", "logistyk", "logistyk", "logistyk", "Logistyka", "Logistyk", 4800);
+
 
     private void handleLogin(String enteredUsername, String enteredPassword, VBox root) {
         if (enteredUsername.equals(admin.getEmail()) && enteredPassword.equals(admin.getPassword())) {
@@ -138,7 +141,12 @@ public class HelloApplication extends Application {
             currentStage.close();
             Stage managerStage = new Stage();
             new ManagerPanel(managerStage);
-
+        } else if (enteredUsername.equals(logistician.getEmail()) && enteredPassword.equals(logistician.getPassword())) {
+            showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zalogowano pomyślnie!", "Witaj, " + enteredUsername + "!");
+            Stage currentStage = (Stage) root.getScene().getWindow();
+            currentStage.close();
+            Stage logisticianStage = new Stage();
+            new LogisticianPanel(logisticianStage);
         } else {
             showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowe dane logowania!", "Spróbuj ponownie.");
         }
@@ -298,6 +306,7 @@ public class HelloApplication extends Application {
     }
 
     public static void main(String[] args) {
-        launch(args);
+        org.example.database.DatabaseInitializer.initialize(); // inicjalizacja bazy danych przed startem GUI
+        launch(args); // start GUI
     }
 }
