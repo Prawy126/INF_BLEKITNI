@@ -1,19 +1,28 @@
 /*
  * Classname: LogisticianPanel
- * Version information: 1.0
- * Date: 2025-04-06
+ * Version information: 1.1
+ * Date: 2025-04-11
  * Copyright notice: © BŁĘKITNI
  */
 
 package org.example.gui;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+
+import java.util.Objects;
 
 /**
  * Klasa reprezentująca panel logistyka w aplikacji GUI.
@@ -35,71 +44,109 @@ public class LogisticianPanel {
 
         primaryStage.setTitle("Panel logistyka");
 
-        // Główna struktura układu
         root = new BorderPane();
         root.setPadding(new Insets(10));
+        root.setStyle("-fx-background-color: lightblue;");
 
-        // Lewy panel nawigacyjny
         VBox menu = createMenu();
         root.setLeft(menu);
 
-        // Domyślnie wyświetl widok raportów magazynowych
-        controller.showInventoryReports();
+        controller.showInventoryReports(); // domyślny widok
 
-        // Inicjalizacja sceny
+        animateFadeIn(menu, 1000);
+        animateSlideDown(menu, 800);
+
         Scene scene = new Scene(root, 700, 450);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
     /**
-     * Tworzy menu boczne z przyciskami nawigacyjnymi.
-     *
-     * @return VBox zawierający menu
+     * Tworzy menu boczne z logo i przyciskami.
      */
     private VBox createMenu() {
         VBox menu = new VBox(10);
         menu.setPadding(new Insets(10));
         menu.setAlignment(Pos.TOP_LEFT);
-        menu.setStyle("-fx-background-color: #E0E0E0;");
+        menu.setStyle("-fx-background-color: #E0E0E0; -fx-border-radius: 10; -fx-background-radius: 10;");
 
-        Button inventoryButton = new Button("Zarządzanie magazynem");
+        // logo
+        Image image = new Image(Objects.requireNonNull(
+                getClass().getResourceAsStream("/logo.png")
+        ));
+        ImageView logo = new ImageView(image);
+        logo.setFitWidth(100);
+        logo.setFitHeight(100);
+        logo.setPreserveRatio(true);
+
+        // przyciski
+        Button inventoryButton = createStyledButton("Zarządzanie magazynem");
         inventoryButton.setOnAction(e -> controller.showInventoryManagement());
 
-        Button ordersButton = new Button("Zamówienia");
+        Button ordersButton = createStyledButton("Zamówienia");
         ordersButton.setOnAction(e -> controller.showOrdersPanel());
 
-        Button reportsButton = new Button("Raporty magazynowe");
+        Button reportsButton = createStyledButton("Raporty magazynowe");
         reportsButton.setOnAction(e -> controller.showInventoryReports());
 
-        Button logoutButton = new Button("Wyloguj");
+        Button logoutButton = createStyledButton("Wyloguj", "#E74C3C");
         logoutButton.setOnAction(e -> controller.logout());
 
-        menu.getChildren().addAll(
-                inventoryButton,
-                ordersButton,
-                reportsButton,
-                logoutButton
-        );
+        menu.getChildren().addAll(logo, inventoryButton, ordersButton, reportsButton, logoutButton);
 
         return menu;
     }
 
     /**
-     * Ustawia panel centralny w układzie głównym.
-     *
-     * @param pane nowy panel do wyświetlenia
+     * Stylizuje przyciski jak w panelu admina.
      */
+    private Button createStyledButton(String text) {
+        return createStyledButton(text, "#2980B9");
+    }
+
+    private Button createStyledButton(String text, String color) {
+        Button button = new Button(text);
+        button.setStyle("-fx-background-color: " + color
+                + "; -fx-text-fill: white; -fx-font-weight: bold;");
+
+        button.setOnMouseEntered(e -> {
+            ScaleTransition scale = new ScaleTransition(Duration.millis(200), button);
+            scale.setToX(1.1);
+            scale.setToY(1.1);
+            scale.play();
+        });
+
+        button.setOnMouseExited(e -> {
+            ScaleTransition scale = new ScaleTransition(Duration.millis(200), button);
+            scale.setToX(1);
+            scale.setToY(1);
+            scale.play();
+        });
+
+        return button;
+    }
+
+    private void animateFadeIn(VBox element, int duration) {
+        FadeTransition fade = new FadeTransition(Duration.millis(duration), element);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+        fade.play();
+    }
+
+    private void animateSlideDown(VBox element, int duration) {
+        TranslateTransition slide = new TranslateTransition(Duration.millis(duration), element);
+        slide.setFromY(-50);
+        slide.setToY(0);
+        slide.setInterpolator(Interpolator.EASE_BOTH);
+        slide.play();
+    }
+
     public void setCenterPane(javafx.scene.layout.Pane pane) {
         root.setCenter(pane);
     }
 
-    /**
-     * Zwraca główną scenę przypisaną do panelu logistyka.
-     *
-     * @return obiekt Stage
-     */
     public Stage getPrimaryStage() {
         return primaryStage;
     }
 }
+

@@ -1,7 +1,7 @@
 /*
  * Classname: LogisticianPanelController
- * Version information: 1.0
- * Date: 2025-04-06
+ * Version information: 1.1
+ * Date: 2025-04-11
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -120,5 +120,12 @@ public class LogisticianPanelController {
      */
     public void logout() {
         primaryStage.close();
+
+        Stage loginStage = new Stage();
+        try {
+            new HelloApplication().start(loginStage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

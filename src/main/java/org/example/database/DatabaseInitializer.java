@@ -1,7 +1,7 @@
 /*
  * Classname: DatabaseInitializer
- * Version information: 1.0
- * Date: 2025-04-06
+ * Version information: 1.1
+ * Date: 2025-04-11
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -16,24 +16,15 @@ import java.sql.Statement;
 public class DatabaseInitializer implements ILacz {
 
     public static void initialize() {
+        // Połączenie do serwera MySQL (bez wskazania konkretnej bazy)
         try (Connection conn = DriverManager.getConnection(MYSQL_SERVER_URL, MYSQL_USER, MYSQL_PASSWORD)) {
 
             System.out.println("Tworzenie bazy danych: " + DB_NAME);
 
-            Statement stmt = conn.createStatement();
-
-            // Tworzenie bazy danych jeśli jeszcze nie istnieje
-            stmt.execute("CREATE DATABASE IF NOT EXISTS " + DB_NAME);
-            stmt.close(); // zamykamy ten statement
-
-
-            // Ustawienie kontekstu na nowo utworzoną bazę
-            stmt.execute("USE " + DB_NAME);
-
-            System.out.println("Importowanie pliku SQL...");
-            executeSqlScript(conn, "src/main/resources/Stonka.sql");
-
-            System.out.println("Baza danych gotowa.");
+            // Tworzenie bazy danych
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute("CREATE DATABASE IF NOT EXISTS " + DB_NAME);
+            }
 
         } catch (Exception e) {
             System.out.println("Błąd podczas tworzenia bazy danych:");
@@ -41,9 +32,10 @@ public class DatabaseInitializer implements ILacz {
             return;
         }
 
+        // Połączenie do właściwej bazy danych + import danych
         try (Connection conn = DriverManager.getConnection(MYSQL_DB_URL, MYSQL_USER, MYSQL_PASSWORD)) {
             System.out.println("Importowanie pliku SQL...");
-            executeSqlScript(conn, SQL_FILE);
+            executeSqlScript(conn, "src/main/resources/Stonka.sql");
             System.out.println("Baza danych gotowa.");
         } catch (Exception e) {
             System.out.println("Błąd podczas importowania danych:");
@@ -58,22 +50,15 @@ public class DatabaseInitializer implements ILacz {
      * @param filePath Ścieżka do pliku SQL
      * @throws Exception w przypadku błędu odczytu lub wykonania zapytania
      */
-    private static void executeSqlScript(
-            Connection conn,
-            String filePath
-    ) throws Exception {
-
-        // Wczytaj cały plik SQL jako jeden łańcuch znaków
+    private static void executeSqlScript(Connection conn, String filePath) throws Exception {
         String sql = new String(Files.readAllBytes(Paths.get(filePath)));
-
-        // Podziel zapytania po średniku
         String[] statements = sql.split(";");
 
         try (Statement stmt = conn.createStatement()) {
             for (String s : statements) {
-                String trimmed = s.trim(); // Usuń białe znaki
+                String trimmed = s.trim();
                 if (!trimmed.isEmpty()) {
-                    stmt.execute(trimmed); // Wykonaj zapytanie jeśli nie jest puste
+                    stmt.execute(trimmed);
                 }
             }
         }
