@@ -17,6 +17,7 @@ import javafx.util.Duration;
 import org.example.sys.Admin;
 import org.example.sys.Employee;
 import org.example.sys.Menager;
+import org.example.sys.Person;
 
 import java.io.File;
 import java.util.Objects;
@@ -117,6 +118,7 @@ public class HelloApplication extends Application {
     Employee employee = new Employee("Jan", "Nowak", 25, "Kraków", "kasjer", "kasjer", "kasjer", "IT", "Developer", 5000);
     Menager menager = new Menager("Jan", "Waiderko", 40, "Rzeszów", "kierownik", "kierownik", "kierownik", "IT", "Developer", 5000);
     Employee standardEmployee = new Employee("Paweł", "Lis", 30, "Wrocław", "pracownik", "pracownik", "pracownik", "Logistyka", "Magazynier", 4000);
+    Person standardClient = new Person("Paweł", "Lis", 30, "Wrocław", "klient", "klient");
 
     private void handleLogin(String enteredUsername, String enteredPassword, VBox root) {
         if (enteredUsername.equals(admin.getEmail()) && enteredPassword.equals(admin.getPassword())) {
@@ -146,6 +148,12 @@ public class HelloApplication extends Application {
             currentStage.close();
             Stage employeeStage = new Stage();
             new EmployeePanel(employeeStage);
+        } else if (enteredUsername.equals(standardClient.getEmail()) && enteredPassword.equals(standardClient.getPassword())) {
+            showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zalogowano pomyślnie!", "Witaj, " + enteredUsername + "!");
+            Stage currentStage = (Stage) root.getScene().getWindow();
+            currentStage.close();
+            Stage standardClient = new Stage();
+            new ClientPanel(standardClient);
         } else {
             showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowe dane logowania!", "Spróbuj ponownie.");
         }

@@ -1,16 +1,21 @@
 package org.example.gui;
 
-import javafx.application.Application;
 import javafx.stage.Stage;
 
-public class ClientPanel extends Application {
+public class ClientPanel {
+    private final Stage primaryStage;
+    private final ClientPanelController controller;
 
-    public static void main(String[] args) {
-        launch(args);
+    public ClientPanel(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+        this.controller = new ClientPanelController(this);
+        primaryStage.setTitle("Panel klienta - Panel zakupowy");
+
+        controller.showClientPanel();
+        primaryStage.show();
     }
 
-    @Override
-    public void start(Stage primaryStage) {
-
+    public Stage getPrimaryStage() {
+        return primaryStage;
     }
 }
