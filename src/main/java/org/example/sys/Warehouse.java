@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class Warehouse {
 
-    private final List<Product> products;
+    private List<Product> products;
 
     public Warehouse(List<Product> products) {
         this.products = products != null ? products : new ArrayList<>();

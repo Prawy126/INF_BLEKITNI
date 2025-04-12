@@ -1,6 +1,6 @@
 package org.example.sys;
 
-enum StatusRegistration {
+public enum StatusRegistration {
     OCZEKUJACY("Oczekujący"),
     ZAAKCEPTOWANY("Zaakceptowany"),
     ODRZUCONY("Odrzucony"),

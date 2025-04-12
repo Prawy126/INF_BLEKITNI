@@ -81,6 +81,10 @@ public class Person {
         return this.password != null && this.password.equals(password);
     }
 
+    /**
+     * Metoda toString została nadpisana na potrzeby tej klasy
+     * <p>Format:</p>
+     * <p>imię, nazwisko, (wiek), adres, email</p>*/
     @Override
     public String toString() {
         return String.format("%s %s (%d), %s, %s", name, surname, age, address, email);
