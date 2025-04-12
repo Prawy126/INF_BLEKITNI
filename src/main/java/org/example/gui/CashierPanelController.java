@@ -176,6 +176,12 @@ public class CashierPanelController {
 
     public void logout() {
         cashierPanel.getPrimaryStage().close();
+        Stage loginStage = new Stage();
+        try {
+            new HelloApplication().start(loginStage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // Wewnętrzna klasa pomocnicza do przechowywania danych raportu
