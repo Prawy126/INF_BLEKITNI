@@ -1,7 +1,7 @@
 /*
  * Classname: HelloApplication
- * Version information: 1.0
- * Date: 2025-04-06
+ * Version information: 1.1
+ * Date: 2025-04-11
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -27,6 +27,10 @@ import org.example.sys.Employee;
 import org.example.sys.Menager;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Objects;
 
 /**
@@ -35,17 +39,6 @@ import java.util.Objects;
  * na odpowiedni panel w zależności od roli.
  */
 public class HelloApplication extends Application {
-
-    // Przykładowe dane logowania użytkowników
-    Admin admin = new Admin("Jan", "Kowalski", 40,"admin", "admin");
-    Employee employee = new Employee(
-            "Jan", "Nowak",25, "Kraków",
-            "kasjer", "kasjer", "kasjer", "IT", "Developer", 5000
-    );
-    Menager menager = new Menager(
-            "Jan", "Waiderko",40, "Rzeszów",
-            "kierownik", "kierownik", "kierownik", "IT", "Developer", 5000
-    );
 
     /**
      * Punkt wejścia do aplikacji JavaFX.
@@ -308,66 +301,77 @@ public class HelloApplication extends Application {
      * @param enteredPassword hasło
      * @param root kontener GUI
      */
-    private void handleLogin(
-            String enteredUsername,
-            String enteredPassword,
-            VBox root
-    ) {
-        if (enteredUsername.equals(admin.getEmail())
-                && enteredPassword.equals(admin.getPassword())) {
+    private void handleLogin(String enteredUsername,
+                             String enteredPassword,
+                             VBox root) {
+        try (Connection conn = DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/StonkaDB", "root", "")) {
 
-            showAlert(
-                    Alert.AlertType.INFORMATION,
-                    "Sukces",
-                    "Zalogowano pomyślnie!",
-                    "Witaj, " + enteredUsername + "!"
-            );
+            String query = "SELECT * FROM Pracownicy WHERE Login = ? AND Haslo = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, enteredUsername);
+                stmt.setString(2, enteredPassword);
 
-            Stage currentStage = (Stage) root.getScene().getWindow();
-            currentStage.close();
-            Stage adminStage = new Stage();
-            new AdminPanel(adminStage);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        String stanowisko = rs.getString("Stanowisko");
 
-        } else if (enteredUsername.equals(employee.getEmail())
-                && enteredPassword.equals(employee.getEmail())) {
+                        showAlert(
+                                Alert.AlertType.INFORMATION,
+                                "Sukces",
+                                "Zalogowano pomyślnie!",
+                                "Witaj, " + rs.getString("Imie") + "!"
+                        );
 
-            // FIXME: Walidacja może być nie poprawna
-            showAlert(
-                    Alert.AlertType.INFORMATION,
-                    "Sukces",
-                    "Zalogowano pomyślnie!",
-                    "Witaj, " + enteredUsername + "!"
-            );
+                        Stage currentStage = (Stage) root.getScene().getWindow();
+                        currentStage.close();
+                        Stage nextStage = new Stage();
 
-            Stage currentStage = (Stage) root.getScene().getWindow();
-            currentStage.close();
-            Stage cashierStage = new Stage();
-            new CashierPanel(cashierStage);
+                        // Przekierowanie według stanowiska
+                        switch (stanowisko.toLowerCase()) {
+                            case "admin":
+                                new AdminPanel(nextStage);
+                                break;
+                            case "kierownik":
+                                new ManagerPanel(nextStage);
+                                break;
+                            case "kasjer":
+                                new CashierPanel(nextStage);
+                                break;
+                            case "logistyk":
+                                new LogisticianPanel(nextStage);
+                                break;
+                            default:
+                                showAlert(
+                                        Alert.AlertType.WARNING,
+                                        "Brak panelu",
+                                        "Nieznana rola użytkownika",
+                                        "Stanowisko: " + stanowisko
+                                );
+                                break;
+                        }
+                    } else {
+                        showAlert(
+                                Alert.AlertType.ERROR,
+                                "Błąd",
+                                "Nieprawidłowe dane logowania!",
+                                "Spróbuj ponownie."
+                        );
+                    }
+                }
+            }
 
-        } else if (enteredUsername.equals(menager.getEmail())
-                && enteredPassword.equals(menager.getPassword())) {
-
-            showAlert(
-                    Alert.AlertType.INFORMATION,
-                    "Sukces",
-                    "Zalogowano pomyślnie!",
-                    "Witaj, " + enteredUsername + "!"
-            );
-
-            Stage currentStage = (Stage) root.getScene().getWindow();
-            currentStage.close();
-            Stage managerStage = new Stage();
-            new ManagerPanel(managerStage);
-
-        } else {
+        } catch (Exception e) {
+            e.printStackTrace();
             showAlert(
                     Alert.AlertType.ERROR,
                     "Błąd",
-                    "Nieprawidłowe dane logowania!",
-                    "Spróbuj ponownie."
+                    "Wystąpił błąd połączenia",
+                    e.getMessage()
             );
         }
     }
+
 
     /**
      * Wyświetla komunikat typu Alert.

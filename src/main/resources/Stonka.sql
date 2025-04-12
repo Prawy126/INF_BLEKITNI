@@ -105,18 +105,35 @@ CREATE TABLE IF NOT EXISTS Zadania_Pracownicy (
 
 -- === Wstawianie danych z zabezpieczeniem przed duplikatami ===
 
+-- Adresy
 INSERT IGNORE INTO Adresy (Id, Miejscowosc, Numer_domu, Numer_mieszkania, Kod_pocztowy, Miasto)
-VALUES (1, 'Warszawa', '12A', '3', '00-001', 'Warszawa');
+VALUES
+    (1, 'Warszawa', '12A', '3', '00-001', 'Warszawa'),
+    (2, 'Kraków', '10', '5', '30-001', 'Kraków'),
+    (3, 'Poznań', '20', NULL, '60-002', 'Poznań'),
+    (4, 'Gdańsk', '8', '2A', '80-003', 'Gdańsk');
 
+-- Pracownicy
 INSERT IGNORE INTO Pracownicy (Id, Imie, Nazwisko, Wiek, Id_adresu, Login, Haslo, Zarobki, Stanowisko)
-VALUES (1, 'Jan', 'Kowalski', 35, 1, 'admin', 'admin123', 4500.00, 'Kierownik');
+VALUES
+    (1, 'Jan', 'Kowalski', 35, 1, 'admin', 'admin123', 4500.00, 'kierownik'),
+    (2, 'Anna', 'Adminowska', 30, 2, 'admin', 'admin123', 6000.00, 'admin'),
+    (3, 'Piotr', 'Logistykiewicz', 28, 3, 'logistyk', 'log123', 4500.00, 'logistyk'),
+    (4, 'Kasia', 'Kasjerka', 22, 4, 'kasjer', 'kasjer123', 3500.00, 'kasjer');
 
+-- Produkty
 INSERT IGNORE INTO Produkty (Id, Nazwa, Cena, IloscWmagazynie)
-VALUES (1, 'Mleko', 2.99, 150),
-       (2, 'Chleb', 3.49, 200);
+VALUES
+    (1, 'Mleko', 2.99, 150),
+    (2, 'Chleb', 3.49, 200);
 
+-- Zadania
 INSERT IGNORE INTO Zadania (Id, Nazwa, Data, Status, Opis)
-VALUES (1, 'Sprawdzenie stanu magazynu', '2025-04-01', 'Nowe', 'Weryfikacja towaru przed dostawą');
+VALUES
+    (1, 'Sprawdzenie stanu magazynu', '2025-04-01', 'Nowe', 'Weryfikacja towaru przed dostawą');
 
+-- Powiązanie zadania z pracownikiem
 INSERT IGNORE INTO Zadania_Pracownicy (Id_pracownika, Id_zadania)
-VALUES (1, 1);
+VALUES
+    (1, 1);
+
