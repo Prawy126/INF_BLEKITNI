@@ -113,9 +113,10 @@ public class HelloApplication extends Application {
         primaryStage.show();
     }
 
-    Admin admin = new Admin("Jan", "Kowalski", 40,"admin", "admin");
-    Employee employee = new Employee("Jan", "Nowak",25, "Kraków", "kasjer", "kasjer", "kasjer", "IT", "Developer", 5000);
-    Menager menager = new Menager("Jan", "Waiderko",40, "Rzeszów","kierownik", "kierownik", "kierownik", "IT", "Developer", 5000);
+    Admin admin = new Admin("Jan", "Kowalski", 40, "admin", "admin");
+    Employee employee = new Employee("Jan", "Nowak", 25, "Kraków", "kasjer", "kasjer", "kasjer", "IT", "Developer", 5000);
+    Menager menager = new Menager("Jan", "Waiderko", 40, "Rzeszów", "kierownik", "kierownik", "kierownik", "IT", "Developer", 5000);
+    Employee standardEmployee = new Employee("Paweł", "Lis", 30, "Wrocław", "pracownik", "pracownik", "pracownik", "Logistyka", "Magazynier", 4000);
 
     private void handleLogin(String enteredUsername, String enteredPassword, VBox root) {
         if (enteredUsername.equals(admin.getEmail()) && enteredPassword.equals(admin.getPassword())) {
@@ -139,6 +140,12 @@ public class HelloApplication extends Application {
             Stage managerStage = new Stage();
             new ManagerPanel(managerStage);
 
+        } else if (enteredUsername.equals(standardEmployee.getEmail()) && enteredPassword.equals(standardEmployee.getPassword())) {
+            showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zalogowano pomyślnie!", "Witaj, " + enteredUsername + "!");
+            Stage currentStage = (Stage) root.getScene().getWindow();
+            currentStage.close();
+            Stage employeeStage = new Stage();
+            new EmployeePanel(employeeStage);
         } else {
             showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowe dane logowania!", "Spróbuj ponownie.");
         }
