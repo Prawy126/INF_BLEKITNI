@@ -19,7 +19,7 @@ class DatabaseInitializerTest {
     private static final String TEST_URL = "jdbc:mysql://localhost:3306/" + DB_NAME + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     private static final String ROOT_URL = "jdbc:mysql://localhost:3306/?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     private static final String USER = "root";
-    private static final String PASS = "";
+    private static final String PASS = "twoje_haslo";
 
     @Test
     @Order(1)
@@ -32,7 +32,7 @@ class DatabaseInitializerTest {
             Statement stmt = conn.createStatement();
 
             // Sprawdzenie czy jakaś przykładowa tabela istnieje
-            ResultSet rs = stmt.executeQuery("SELECT * FROM produkty");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM Produkty");
             assertTrue(rs.next(), "Tabela 'produkty' powinna istnieć po inicjalizacji.");
         }
     }
