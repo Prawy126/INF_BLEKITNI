@@ -369,7 +369,6 @@ public class HelloApplication extends Application {
         }
     }
 
-
     /**
      * Wyświetla komunikat typu Alert.
      */
