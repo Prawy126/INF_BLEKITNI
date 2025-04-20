@@ -1,3 +1,10 @@
+/*
+ * Classname: CashierPanelController
+ * Version information: 1.0
+ * Date: 2025-04-06
+ * Copyright notice: © BŁĘKITNI
+ */
+
 package org.example.gui;
 
 import javafx.collections.FXCollections;
@@ -12,30 +19,46 @@ import javafx.stage.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.util.Callback;
 
+/**
+ * Kontroler logiki interfejsu użytkownika dla panelu kasjera.
+ * Odpowiada za obsługę przełączania widoków.
+ */
 public class CashierPanelController {
 
     private final CashierPanel cashierPanel;
 
+    /**
+     * Tworzy kontroler dla panelu kasjera.
+     *
+     * @param cashierPanel główny panel kasjera
+     */
     public CashierPanelController(CashierPanel cashierPanel) {
         this.cashierPanel = cashierPanel;
     }
 
+    /**
+     * Wyświetla ekran sprzedaży z przyciskami do dodawania produktów
+     * i finalizacji transakcji.
+     */
     public void showSalesScreen() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
 
         Button addToCartButton = new Button("Dodaj do koszyka");
         Button finalizeSaleButton = new Button("Finalizuj sprzedaż");
 
-        layout.setAlignment(Pos.CENTER);
         layout.getChildren().addAll(addToCartButton, finalizeSaleButton);
-
         cashierPanel.setCenterPane(layout);
     }
 
+    /**
+     * Wyświetla panel raportów sprzedaży z opcją eksportu do PDF lub CSV.
+     */
     public void showSalesReportsPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
 
         Label titleLabel = new Label("Raporty sprzedażowe");
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
@@ -152,28 +175,37 @@ public class CashierPanelController {
         dialog.show();
     }
 
+    /**
+     * Wyświetla ekran umożliwiający zamknięcie zmiany.
+     */
     public void showCloseShiftPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
 
         Button closeShiftButton = new Button("Zamknij zmianę");
-        layout.setAlignment(Pos.CENTER);
-        layout.getChildren().addAll(closeShiftButton);
 
+        layout.getChildren().addAll(closeShiftButton);
         cashierPanel.setCenterPane(layout);
     }
 
+    /**
+     * Wyświetla formularz do zgłoszenia problemu lub awarii.
+     */
     public void showIssueReportPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
 
         Button reportIssueButton = new Button("Zgłoś problem");
-        layout.setAlignment(Pos.CENTER);
-        layout.getChildren().addAll(reportIssueButton);
 
+        layout.getChildren().addAll(reportIssueButton);
         cashierPanel.setCenterPane(layout);
     }
 
+    /**
+     * Zamyka aplikację po wylogowaniu użytkownika.
+     */
     public void logout() {
         cashierPanel.getPrimaryStage().close();
         Stage loginStage = new Stage();
