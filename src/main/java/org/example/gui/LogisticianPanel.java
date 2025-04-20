@@ -89,10 +89,13 @@ public class LogisticianPanel {
         Button reportsButton = createStyledButton("Raporty magazynowe");
         reportsButton.setOnAction(e -> controller.showInventoryReports());
 
+        Button absenceButton = createStyledButton("Złóż wniosek o nieobecność");
+        absenceButton.setOnAction(e -> controller.showAbsenceRequestForm());
+
         Button logoutButton = createStyledButton("Wyloguj", "#E74C3C");
         logoutButton.setOnAction(e -> controller.logout());
 
-        menu.getChildren().addAll(logo, inventoryButton, ordersButton, reportsButton, logoutButton);
+        menu.getChildren().addAll(logo, inventoryButton, ordersButton, reportsButton, absenceButton, logoutButton);
 
         return menu;
     }

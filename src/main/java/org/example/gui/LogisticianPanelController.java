@@ -306,6 +306,47 @@ public class LogisticianPanelController {
     }
 
     /**
+     * Wyświetla formularz zgłoszenia wniosku o nieobecność.
+     */
+    public void showAbsenceRequestForm() {
+        Stage stage = new Stage();
+        stage.setTitle("Wniosek o nieobecność");
+
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(20));
+        grid.setVgap(10);
+        grid.setHgap(10);
+
+        Label reasonLabel = new Label("Powód:");
+        TextField reasonField = new TextField();
+
+        Label fromDateLabel = new Label("Data od:");
+        DatePicker fromDatePicker = new DatePicker();
+
+        Label toDateLabel = new Label("Data do:");
+        DatePicker toDatePicker = new DatePicker();
+
+        Button submitButton = new Button("Złóż wniosek");
+        submitButton.setOnAction(e -> {
+            if (reasonField.getText().isEmpty() || fromDatePicker.getValue() == null || toDatePicker.getValue() == null) {
+                new Alert(Alert.AlertType.WARNING, "Uzupełnij wszystkie pola.").showAndWait();
+            } else {
+                new Alert(Alert.AlertType.INFORMATION, "Wniosek złożony pomyślnie.").showAndWait();
+                stage.close();
+            }
+        });
+
+        grid.add(reasonLabel, 0, 0);   grid.add(reasonField, 1, 0);
+        grid.add(fromDateLabel, 0, 1); grid.add(fromDatePicker, 1, 1);
+        grid.add(toDateLabel, 0, 2);   grid.add(toDatePicker, 1, 2);
+        grid.add(submitButton, 1, 3);
+
+        Scene scene = new Scene(grid, 350, 250);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    /**
      * Zwraca przykładową listę zamówień.
      */
     private ObservableList<Order> getSampleOrders() {

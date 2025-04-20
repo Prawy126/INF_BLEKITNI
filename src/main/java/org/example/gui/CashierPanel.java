@@ -100,6 +100,9 @@ public class CashierPanel {
         Button issueReportButton = createStyledButton("Zgłoszenie awarii");
         issueReportButton.setOnAction(e -> controller.showIssueReportPanel());
 
+        Button absenceButton = createStyledButton("Złóż wniosek o nieobecność");
+        absenceButton.setOnAction(e -> controller.showAbsenceRequestForm());
+
         // Przycisk wylogowania (czerwony)
         Button logoutButton = createStyledButton("Wyloguj się", "#E74C3C");
         logoutButton.setOnAction(e -> controller.logout());
@@ -110,6 +113,7 @@ public class CashierPanel {
                 reportsButton,
                 closeShiftButton,
                 issueReportButton,
+                absenceButton,
                 logoutButton
         );
 
