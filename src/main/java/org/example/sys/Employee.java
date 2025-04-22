@@ -1,6 +1,10 @@
 package org.example.sys;
 
+import org.example.wyjatki.PasswordException;
+import org.example.wyjatki.SalaryException;
+
 import java.util.Date;
+import java.util.UUID;
 
 public class Employee extends Person {
     private String employeeId;
@@ -12,13 +16,17 @@ public class Employee extends Person {
 
     public Employee(String name, String surname, int age, String address,
                     String password, String email,
-                    String employeeId, String department,
-                    String position, double salary) {
+                    String department,
+                    String position, double salary) throws PasswordException , SalaryException {
         super(name, surname, age, address, password, email);
-        this.employeeId = employeeId;
+        this.employeeId = generateEmployeeId();
         this.department = department;
+        if (salary < 0) {
+            throw new SalaryException("Pensja nie może być ujemna oraz nie może być zerowa.");
+        }else {
+            this.salary = salary;
+        }
         this.position = position;
-        this.salary = salary;
     }
 
     public Employee() {
@@ -26,10 +34,6 @@ public class Employee extends Person {
 
     public String getEmployeeId() {
         return employeeId;
-    }
-
-    public void setEmployeeId(String employeeId) {
-        this.employeeId = employeeId;
     }
 
     public String getDepartment() {
@@ -52,8 +56,13 @@ public class Employee extends Person {
         return salary;
     }
 
-    public void setSalary(double salary) {
-        this.salary = salary;
+    public void setSalary(double salary) throws SalaryException {
+        if(salary < 0) {
+            throw new SalaryException("Pensja nie może być ujemna oraz nie może być zerowa.");
+        }
+        else{
+            this.salary = salary;
+        }
     }
 
     public boolean isOnSickLeave() {
@@ -67,5 +76,9 @@ public class Employee extends Person {
 
     public Date getSickLeaveStartDate() {
         return sickLeaveStartDate;
+    }
+
+    private String generateEmployeeId() {
+        return UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 }

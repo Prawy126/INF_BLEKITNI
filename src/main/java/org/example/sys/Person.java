@@ -1,5 +1,7 @@
 package org.example.sys;
 
+import org.example.wyjatki.PasswordException;
+
 public class Person {
 
     private String name;
@@ -12,11 +14,14 @@ public class Person {
     public Person() {
     }
 
-    public Person(String name, String surname, int age, String address, String password, String email) {
+    public Person(String name, String surname, int age, String address, String password, String email) throws PasswordException {
         this.name = name;
         this.surname = surname;
         this.age = age;
         this.address = address;
+        if(password == null || password.length() < 8) {
+            throw new PasswordException("Hasło musi mieć co najmniej 8 znaków");
+        }
         this.password = password;
         this.email = email;
     }

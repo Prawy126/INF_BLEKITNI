@@ -14,6 +14,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import org.example.sys.Employee;
+import org.example.wyjatki.PasswordException;
 
 /**
  * Kontroler odpowiedzialny za obsługę logiki interfejsu
@@ -87,13 +88,12 @@ public class AdminPanelController {
                 salCol);
 
         // Przykładowe dane testowe
-        tableView.getItems().addAll(
+        try{tableView.getItems().addAll(
                 new Employee(
                         "Jan",
                         "Nowak",
                         25,
                         "Kraków",
-                        "kasjer",
                         "kasjer",
                         "kasjer",
                         "IT",
@@ -107,7 +107,6 @@ public class AdminPanelController {
                         "Warszawa",
                         "admin",
                         "admin",
-                        "admin",
                         "IT",
                         "Developer",
                         5000
@@ -119,12 +118,25 @@ public class AdminPanelController {
                         "Gdańsk",
                         "manager",
                         "manager",
-                        "manager",
                         "IT",
                         "Developer",
                         5000
                 )
-        );
+        );}
+        catch (PasswordException e){
+            System.out.println("Hasło musi mieć co najmniej 8 znaków");
+        }
+        catch (NullPointerException e) {
+            System.out.println("Nie można dodać przykładowych danych do tabeli.");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            showAlert(
+                    Alert.AlertType.ERROR,
+                    "Błąd",
+                    "Nie można dodać przykładowych danych do tabeli."
+            );
+        }
 
         // Przycisk dodawania/usuwania
         HBox buttonBox = new HBox(10);
