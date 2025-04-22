@@ -1,10 +1,3 @@
-/*
- * Classname: HelloApplication
- * Version information: 1.1
- * Date: 2025-04-11
- * Copyright notice: © BŁĘKITNI
- */
-
 package org.example.gui;
 
 import javafx.animation.*;
@@ -22,29 +15,13 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.example.sys.Admin;
-import org.example.sys.Employee;
-import org.example.sys.Menager;
+import org.example.sys.Login;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.Objects;
 
-/**
- * Główna klasa uruchamiająca aplikację GUI dla hipermarketu Stonka.
- * Zawiera logikę interfejsu logowania i przekierowywania użytkownika
- * na odpowiedni panel w zależności od roli.
- */
 public class HelloApplication extends Application {
 
-    /**
-     * Punkt wejścia do aplikacji JavaFX.
-     *
-     * @param primaryStage główna scena aplikacji
-     */
     @Override
     public void start(Stage primaryStage) {
         VBox root = new VBox(20);
@@ -93,7 +70,7 @@ public class HelloApplication extends Application {
 
         Button loginButton = new Button("Zaloguj");
         styleButton(loginButton, "#2980B9");
-        loginButton.setOnAction(e -> handleLogin(
+        loginButton.setOnAction(e -> Login.attemptLogin(
                 loginField.getText(),
                 passwordField.getText(),
                 root
@@ -137,9 +114,6 @@ public class HelloApplication extends Application {
         primaryStage.show();
     }
 
-    /**
-     * Wyświetla formularz do składania CV.
-     */
     private void showCVForm() {
         Stage cvStage = new Stage();
         cvStage.setTitle("Składanie CV");
@@ -148,13 +122,11 @@ public class HelloApplication extends Application {
         cvLayout.setPadding(new Insets(20));
         cvLayout.setAlignment(Pos.CENTER);
 
-        // Formularz danych osobowych
         GridPane formGrid = new GridPane();
         formGrid.setAlignment(Pos.CENTER);
         formGrid.setHgap(10);
         formGrid.setVgap(10);
 
-        // Pola formularza
         Label nameLabel = new Label("Imię:");
         TextField nameField = new TextField();
 
@@ -175,7 +147,6 @@ public class HelloApplication extends Application {
         );
         positionCombo.setPromptText("Wybierz stanowisko");
 
-        // Dodanie pól do grid
         formGrid.add(nameLabel, 0, 0);
         formGrid.add(nameField, 1, 0);
         formGrid.add(surnameLabel, 0, 1);
@@ -187,7 +158,6 @@ public class HelloApplication extends Application {
         formGrid.add(positionLabel, 0, 4);
         formGrid.add(positionCombo, 1, 4);
 
-        // Obsługa załączania pliku CV
         Label cvFileLabel = new Label("Załącz CV (PDF/DOCX):");
         Button attachButton = new Button("Wybierz plik");
         Label fileNameLabel = new Label("Nie wybrano pliku");
@@ -208,17 +178,13 @@ public class HelloApplication extends Application {
         fileBox.setAlignment(Pos.CENTER_LEFT);
         fileBox.getChildren().addAll(attachButton, fileNameLabel);
 
-        // Przycisk wysłania
         Button submitButton = new Button("Wyślij aplikację");
         submitButton.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white;");
         submitButton.setOnAction(e -> {
             if (validateCVForm(nameField, surnameField, emailField, phoneField, positionCombo, fileNameLabel)) {
-                showAlert(
-                        Alert.AlertType.INFORMATION,
-                        "Sukces",
-                        "Aplikacja wysłana",
-                        "Dziękujemy za przesłanie CV. Skontaktujemy się z Tobą w ciągu 7 dni."
-                );
+                showAlert(Alert.AlertType.INFORMATION,
+                        "Sukces", "Aplikacja wysłana",
+                        "Dziękujemy za przesłanie CV. Skontaktujemy się z Tobą w ciągu 7 dni.");
                 cvStage.close();
             }
         });
@@ -236,152 +202,33 @@ public class HelloApplication extends Application {
         cvStage.show();
     }
 
-    /**
-     * Waliduje formularz CV.
-     */
-    private boolean validateCVForm(
-            TextField nameField,
-            TextField surnameField,
-            TextField emailField,
-            TextField phoneField,
-            ComboBox<String> positionCombo,
-            Label fileNameLabel
-    ) {
+    private boolean validateCVForm(TextField nameField, TextField surnameField,
+                                   TextField emailField, TextField phoneField,
+                                   ComboBox<String> positionCombo, Label fileNameLabel) {
         if (nameField.getText().isEmpty() || surnameField.getText().isEmpty()) {
-            showAlert(
-                    Alert.AlertType.ERROR,
-                    "Błąd",
-                    "Brakujące dane",
-                    "Proszę podać imię i nazwisko."
-            );
+            showAlert(Alert.AlertType.ERROR, "Błąd", "Brakujące dane", "Proszę podać imię i nazwisko.");
             return false;
         }
 
         if (emailField.getText().isEmpty() || !emailField.getText().contains("@")) {
-            showAlert(
-                    Alert.AlertType.ERROR,
-                    "Błąd",
-                    "Nieprawidłowy email",
-                    "Proszę podać poprawny adres email."
-            );
+            showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowy email", "Proszę podać poprawny adres email.");
             return false;
         }
 
         if (positionCombo.getValue() == null) {
-            showAlert(
-                    Alert.AlertType.ERROR,
-                    "Błąd",
-                    "Nie wybrano stanowiska",
-                    "Proszę wybrać stanowisko, na które aplikujesz."
-            );
+            showAlert(Alert.AlertType.ERROR, "Błąd", "Nie wybrano stanowiska", "Proszę wybrać stanowisko.");
             return false;
         }
 
         if (fileNameLabel.getText().equals("Nie wybrano pliku")) {
-            showAlert(
-                    Alert.AlertType.ERROR,
-                    "Błąd",
-                    "Brak załącznika",
-                    "Proszę załączyć plik CV."
-            );
+            showAlert(Alert.AlertType.ERROR, "Błąd", "Brak załącznika", "Proszę załączyć plik CV.");
             return false;
         }
 
         return true;
     }
 
-    // Reszta metod pozostaje bez zmian (handleLogin, showAlert, animateFadeIn,
-    // animateSlideDown, styleButton, exitApplication, showResetPasswordWindow,
-    // handleSendResetCode, main)
-
-    /**
-     * Obsługuje logikę logowania i przekierowuje na odpowiedni panel.
-     *
-     * @param enteredUsername login
-     * @param enteredPassword hasło
-     * @param root kontener GUI
-     */
-    private void handleLogin(String enteredUsername,
-                             String enteredPassword,
-                             VBox root) {
-        try (Connection conn = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/StonkaDB", "root", "")) {
-
-            String query = "SELECT * FROM Pracownicy WHERE Login = ? AND Haslo = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setString(1, enteredUsername);
-                stmt.setString(2, enteredPassword);
-
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        String stanowisko = rs.getString("Stanowisko");
-
-                        showAlert(
-                                Alert.AlertType.INFORMATION,
-                                "Sukces",
-                                "Zalogowano pomyślnie!",
-                                "Witaj, " + rs.getString("Imie") + "!"
-                        );
-
-                        Stage currentStage = (Stage) root.getScene().getWindow();
-                        currentStage.close();
-                        Stage nextStage = new Stage();
-
-                        // Przekierowanie według stanowiska
-                        switch (stanowisko.toLowerCase()) {
-                            case "admin":
-                                new AdminPanel(nextStage);
-                                break;
-                            case "kierownik":
-                                new ManagerPanel(nextStage);
-                                break;
-                            case "kasjer":
-                                new CashierPanel(nextStage);
-                                break;
-                            case "logistyk":
-                                new LogisticianPanel(nextStage);
-                                break;
-                            default:
-                                showAlert(
-                                        Alert.AlertType.WARNING,
-                                        "Brak panelu",
-                                        "Nieznana rola użytkownika",
-                                        "Stanowisko: " + stanowisko
-                                );
-                                break;
-                        }
-                    } else {
-                        showAlert(
-                                Alert.AlertType.ERROR,
-                                "Błąd",
-                                "Nieprawidłowe dane logowania!",
-                                "Spróbuj ponownie."
-                        );
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert(
-                    Alert.AlertType.ERROR,
-                    "Błąd",
-                    "Wystąpił błąd połączenia",
-                    e.getMessage()
-            );
-        }
-    }
-
-
-    /**
-     * Wyświetla komunikat typu Alert.
-     */
-    private void showAlert(
-            Alert.AlertType type,
-            String title,
-            String header,
-            String content
-    ) {
+    public static void showAlert(Alert.AlertType type, String title, String header, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(header);
@@ -389,65 +236,37 @@ public class HelloApplication extends Application {
         alert.showAndWait();
     }
 
-    /**
-     * Animuje płynne pojawienie się napisu.
-     */
     private void animateFadeIn(Label label, int duration) {
-        FadeTransition fade = new FadeTransition(
-                Duration.millis(duration),
-                label
-        );
+        FadeTransition fade = new FadeTransition(Duration.millis(duration), label);
         fade.setFromValue(0);
         fade.setToValue(1);
         fade.play();
     }
 
-    /**
-     * Animuje przesunięcie formularza w dół.
-     */
     private void animateSlideDown(GridPane grid, int duration) {
-        TranslateTransition slide = new TranslateTransition(
-                Duration.millis(duration),
-                grid
-        );
+        TranslateTransition slide = new TranslateTransition(Duration.millis(duration), grid);
         slide.setFromY(-50);
         slide.setToY(0);
         slide.setInterpolator(Interpolator.EASE_BOTH);
         slide.play();
     }
 
-    /**
-     * Nadaje styl oraz animacje przyciskowi.
-     */
     private void styleButton(Button button, String color) {
-        button.setStyle(
-                "-fx-background-color: " + color + "; "
-                        + "-fx-text-fill: black; "
-                        + "-fx-font-weight: bold;"
-        );
+        button.setStyle("-fx-background-color: " + color + "; -fx-text-fill: black; -fx-font-weight: bold;");
         button.setOnMouseEntered(e -> {
-            ScaleTransition scale = new ScaleTransition(
-                    Duration.millis(200),
-                    button
-            );
+            ScaleTransition scale = new ScaleTransition(Duration.millis(200), button);
             scale.setToX(1.1);
             scale.setToY(1.1);
             scale.play();
         });
         button.setOnMouseExited(e -> {
-            ScaleTransition scale = new ScaleTransition(
-                    Duration.millis(200),
-                    button
-            );
+            ScaleTransition scale = new ScaleTransition(Duration.millis(200), button);
             scale.setToX(1);
             scale.setToY(1);
             scale.play();
         });
     }
 
-    /**
-     * Zamyka aplikację po potwierdzeniu użytkownika.
-     */
     private void exitApplication() {
         Alert confirmExit = new Alert(Alert.AlertType.CONFIRMATION);
         confirmExit.setTitle("Potwierdzenie wyjścia");
@@ -461,9 +280,6 @@ public class HelloApplication extends Application {
         });
     }
 
-    /**
-     * Wyświetla okno resetowania hasła.
-     */
     private void showResetPasswordWindow() {
         Stage resetStage = new Stage();
         resetStage.setTitle("Resetowanie hasła");
@@ -477,9 +293,7 @@ public class HelloApplication extends Application {
         emailField.setPromptText("Email");
 
         Button sendCodeButton = new Button("Wyślij kod odzyskiwania");
-        sendCodeButton.setOnAction(e -> handleSendResetCode(
-                emailField.getText()
-        ));
+        sendCodeButton.setOnAction(e -> handleSendResetCode(emailField.getText()));
 
         resetLayout.getChildren().addAll(emailLabel, emailField, sendCodeButton);
 
@@ -488,21 +302,13 @@ public class HelloApplication extends Application {
         resetStage.show();
     }
 
-    /**
-     * Obsługuje wysyłkę kodu do resetowania hasła.
-     */
     private void handleSendResetCode(String email) {
-        showAlert(
-                Alert.AlertType.INFORMATION,
+        showAlert(Alert.AlertType.INFORMATION,
                 "Kod wysłany",
                 "Kod odzyskiwania został wysłany na email",
-                "Proszę sprawdzić swoją skrzynkę."
-        );
+                "Proszę sprawdzić swoją skrzynkę.");
     }
 
-    /**
-     * Główna metoda uruchamiająca aplikację.
-     */
     public static void main(String[] args) {
         org.example.database.DatabaseInitializer.initialize();
         launch(args);
