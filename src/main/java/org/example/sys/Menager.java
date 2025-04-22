@@ -1,5 +1,8 @@
 package org.example.sys;
 
+import org.example.wyjatki.PasswordException;
+import org.example.wyjatki.SalaryException;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -9,14 +12,14 @@ public class Menager extends Employee {
     private List<Employee> employees = new ArrayList<>();
 
     public Menager(String name, String surname, int age, String address, String password,
-                   String email, String employeeId, String department, String position, double salary) {
-        super(name, surname, age, address, password, email, employeeId, department, position, salary);
+                   String email, String department, String position, double salary) throws PasswordException, SalaryException {
+        super(name, surname, age, address, password, email, department, position, salary);
     }
 
     public Menager(String name, String surname, int age, String address, String password,
-                   String email, String employeeId, String department, String position, double salary,
-                   List<Employee> employees) {
-        this(name, surname, age, address, password, email, employeeId, department, position, salary);
+                   String email, String department, String position, double salary,
+                   List<Employee> employees) throws PasswordException, SalaryException {
+        this(name, surname, age, address, password, email, department, position, salary);
         this.employees = employees != null ? employees : new ArrayList<>();
     }
 
@@ -66,10 +69,6 @@ public class Menager extends Employee {
         employee.setEmail(newEmail);
     }
 
-    public void updateEmployeeId(Employee employee, String newEmployeeId) {
-        employee.setEmployeeId(newEmployeeId);
-    }
-
     public void updateDepartment(Employee employee, String newDepartment) {
         employee.setDepartment(newDepartment);
     }
@@ -78,7 +77,7 @@ public class Menager extends Employee {
         employee.setPosition(newPosition);
     }
 
-    public void updateSalary(Employee employee, double newSalary) {
+    public void updateSalary(Employee employee, double newSalary) throws SalaryException {
         employee.setSalary(newSalary);
     }
 

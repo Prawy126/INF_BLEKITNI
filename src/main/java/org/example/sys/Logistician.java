@@ -1,10 +1,13 @@
 package org.example.sys;
 
 
+import org.example.wyjatki.PasswordException;
+import org.example.wyjatki.SalaryException;
+
 public class Logistician extends Employee{
     private boolean logistician = true;
-    public Logistician(String name, String surname, int age, String address, String password, String email, String employeeId, String department, String position, double salary) {
-        super(name, surname, age, address, password, email, employeeId, department, position, salary);
+    public Logistician(String name, String surname, int age, String address, String password, String email, String department, String position, double salary) throws PasswordException, SalaryException {
+        super(name, surname, age, address, password, email, department, position, salary);
     }
     public boolean isLogistician() {
         return logistician;
@@ -38,10 +41,6 @@ public class Logistician extends Employee{
         employee.setEmail(newEmail);
     }
 
-    public void updateEmployeeId(Employee employee, String newEmployeeId) {
-        employee.setEmployeeId(newEmployeeId);
-    }
-
     public void updateDepartment(Employee employee, String newDepartment) {
         employee.setDepartment(newDepartment);
     }
@@ -50,7 +49,7 @@ public class Logistician extends Employee{
         employee.setPosition(newPosition);
     }
 
-    public void updateSalary(Employee employee, double newSalary) {
+    public void updateSalary(Employee employee, double newSalary) throws SalaryException {
         employee.setSalary(newSalary);
     }
 }

@@ -1,12 +1,15 @@
 package org.example.sys;
 
+import org.example.wyjatki.PasswordException;
+import org.example.wyjatki.SalaryException;
+
 public class Admin extends Person {
 
-    public Admin(String name, String surname, int age, String address, String login, String password) {
+    public Admin(String name, String surname, int age, String address, String login, String password) throws PasswordException {
         super(name, surname, age, address, password, login);
     }
 
-    public Admin(String name, String surname, int age, String login, String password) {
+    public Admin(String name, String surname, int age, String login, String password) throws PasswordException {
         super(name, surname, age, null, password, login);
     }
 
@@ -42,10 +45,6 @@ public class Admin extends Person {
         employee.setEmail(newEmail);
     }
 
-    public void updateEmployeeId(Employee employee, String newEmployeeId) {
-        employee.setEmployeeId(newEmployeeId);
-    }
-
     public void updateDepartment(Employee employee, String newDepartment) {
         employee.setDepartment(newDepartment);
     }
@@ -54,7 +53,8 @@ public class Admin extends Person {
         employee.setPosition(newPosition);
     }
 
-    public void updateSalary(Employee employee, double newSalary) {
+    public void updateSalary(Employee employee, double newSalary)throws SalaryException {
         employee.setSalary(newSalary);
+
     }
 }
