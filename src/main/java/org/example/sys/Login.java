@@ -1,23 +1,23 @@
-/*
- * Classname: Login
- * Version information: 1.0
- * Date: 2025-04-22
- * Copyright notice: © BŁĘKITNI
- */
-
 package org.example.sys;
 
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.gui.*;
+import org.example.gui.HelloApplication;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Login {
+
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public static void attemptLogin(
             String username,
@@ -90,5 +90,60 @@ public class Login {
             );
         }
     }
-}
 
+    /**
+     * Funkcja do wysyłania kodu odzyskiwania hasła.
+     * Generuje losowy kod i wysyła go na podany adres e-mail.
+     *
+     * @param email Adres e-mail użytkownika
+     */
+    public static void sendResetCode(String email) {
+        String resetCode = generateRandomCode(6);
+        executor.submit(() -> {
+            try {
+                sendEmail(email, resetCode);
+                Platform.runLater(() -> {
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    HelloApplication.showAlert(
+                            Alert.AlertType.ERROR,
+                            "Błąd wysyłania e-maila",
+                            "Wystąpił problem z wysyłką e-maila",
+                            e.getMessage()
+                    );
+                });
+            }
+        });
+    }
+
+    /**
+     * Funkcja generująca losowy kod o podanej długości.
+     *
+     * @param length Długość generowanego kodu
+     * @return Generowany kod
+     */
+    private static String generateRandomCode(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+        StringBuilder code = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            code.append(chars.charAt(random.nextInt(chars.length())));
+        }
+
+        return code.toString();
+    }
+
+    /**
+     * Funkcja symulująca wysyłanie e-maila.
+     * W prawdziwej aplikacji należy użyć np. JavaMail API.
+     *
+     * @param email    Adres e-mail odbiorcy
+     * @param resetCode Kod do resetowania hasła
+     */
+    private static void sendEmail(String email, String resetCode) {
+        System.out.println("Wysyłanie e-maila do: " + email);
+        System.out.println("Kod: " + resetCode);
+    }
+}

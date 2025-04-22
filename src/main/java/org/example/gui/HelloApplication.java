@@ -293,7 +293,21 @@ public class HelloApplication extends Application {
         emailField.setPromptText("Email");
 
         Button sendCodeButton = new Button("Wyślij kod odzyskiwania");
-        sendCodeButton.setOnAction(e -> handleSendResetCode(emailField.getText()));
+        sendCodeButton.setOnAction(e -> {
+            String email = emailField.getText();
+            if (email.isEmpty()) {
+                HelloApplication.showAlert(
+                        Alert.AlertType.ERROR,
+                        "Błąd",
+                        "Brak adresu email",
+                        "Proszę podać adres e-mail, na który ma zostać wysłany kod."
+                );
+            } else {
+                Login.sendResetCode(email);
+                resetStage.close();
+                showVerificationWindow();
+            }
+        });
 
         resetLayout.getChildren().addAll(emailLabel, emailField, sendCodeButton);
 
@@ -302,12 +316,37 @@ public class HelloApplication extends Application {
         resetStage.show();
     }
 
-    private void handleSendResetCode(String email) {
-        showAlert(Alert.AlertType.INFORMATION,
-                "Kod wysłany",
-                "Kod odzyskiwania został wysłany na email",
-                "Proszę sprawdzić swoją skrzynkę.");
+    // Funkcja do wyświetlania okna weryfikacyjnego
+    public void showVerificationWindow() {
+        Stage verificationStage = new Stage();
+        verificationStage.setTitle("Weryfikacja kodu");
+
+        VBox verificationLayout = new VBox(10);
+        verificationLayout.setPadding(new Insets(20));
+        verificationLayout.setAlignment(Pos.CENTER);
+
+        Label codeLabel = new Label("Podaj kod weryfikacyjny:");
+        TextField codeField = new TextField();
+        codeField.setPromptText("Kod");
+
+        Button verifyButton = new Button("Zweryfikuj");
+        verifyButton.setOnAction(e -> {
+            String code = codeField.getText();
+            if (code.length() == 6) {
+                showAlert(Alert.AlertType.INFORMATION, "Sukces", "Kod poprawny", "Kod weryfikacyjny jest poprawny.");
+                verificationStage.close();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Niepoprawny kod", "Proszę podać poprawny 6-znakowy kod.");
+            }
+        });
+
+        verificationLayout.getChildren().addAll(codeLabel, codeField, verifyButton);
+
+        Scene verificationScene = new Scene(verificationLayout, 300, 200);
+        verificationStage.setScene(verificationScene);
+        verificationStage.show();
     }
+
 
     public static void main(String[] args) {
         org.example.database.DatabaseInitializer.initialize();
