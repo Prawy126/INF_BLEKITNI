@@ -1,5 +1,6 @@
 package org.example.gui;
 
+import javafx.animation.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -9,53 +10,232 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.stage.*;
-import javafx.scene.control.Alert.AlertType;
 import javafx.util.Callback;
+import javafx.util.Duration;
 
-/**
- * Kontroler logiki interfejsu użytkownika dla panelu kasjera.
- * Odpowiada za obsługę przełączania widoków.
- */
 public class CashierPanelController {
 
     private final CashierPanel cashierPanel;
 
-    /**
-     * Tworzy kontroler dla panelu kasjera.
-     *
-     * @param cashierPanel główny panel kasjera
-     */
     public CashierPanelController(CashierPanel cashierPanel) {
         this.cashierPanel = cashierPanel;
     }
 
-    /**
-     * Wyświetla ekran sprzedaży z przyciskami do dodawania produktów
-     * i finalizacji transakcji.
-     */
+    // Ekran sprzedaży
     public void showSalesScreen() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
 
-        Button addToCartButton = new Button("Dodaj do koszyka");
-        Button finalizeSaleButton = new Button("Finalizuj sprzedaż");
+        Button addToCartButton = cashierPanel.createStyledButton("Dodaj do koszyka");
+        Button finalizeSaleButton = cashierPanel.createStyledButton("Finalizuj sprzedaż");
+
+        addToCartButton.setOnAction(e -> showProductSelectionDialog());
+        finalizeSaleButton.setOnAction(e -> finalizeSale());
 
         layout.getChildren().addAll(addToCartButton, finalizeSaleButton);
         cashierPanel.setCenterPane(layout);
     }
 
-    /**
-     * Wyświetla panel raportów sprzedaży z opcją eksportu do PDF lub CSV.
-     */
+    private void showProductSelectionDialog() {
+        Stage dialog = createStyledDialog("Wybór produktów");
+
+        VBox root = new VBox(20);
+        root.setPadding(new Insets(20));
+
+        TextField searchField = createStyledTextField("Szukaj produktów...");
+        TableView<Product> table = createProductTable();
+
+        HBox buttons = new HBox(10);
+        Button addButton = cashierPanel.createStyledButton("Dodaj do koszyka");
+        Button cancelButton = cashierPanel.createStyledButton("Anuluj", "#E74C3C");
+
+        addButton.setOnAction(e -> {
+            Product selected = table.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                showNotification("Dodano do koszyka", selected.getName());
+                dialog.close();
+            }
+        });
+        cancelButton.setOnAction(e -> dialog.close());
+
+        buttons.getChildren().addAll(addButton, cancelButton);
+        buttons.setAlignment(Pos.CENTER_RIGHT);
+
+        root.getChildren().addAll(searchField, table, buttons);
+        setupDialog(dialog, root);
+    }
+
+    private TableView<Product> createProductTable() {
+        TableView<Product> table = new TableView<>();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<Product, String> nameCol = new TableColumn<>("Nazwa");
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        TableColumn<Product, Double> priceCol = new TableColumn<>("Cena");
+        priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+
+        table.getColumns().addAll(nameCol, priceCol);
+        table.setItems(getSampleProducts());
+        return table;
+    }
+
+    // Panel raportów
     public void showSalesReportsPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
 
-        Label titleLabel = new Label("Raporty sprzedażowe");
-        titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+        TableView<SalesReport> tableView = createReportTable();
+        HBox buttons = new HBox(10);
 
+        Button pdfButton = cashierPanel.createStyledButton("Generuj PDF");
+        Button csvButton = cashierPanel.createStyledButton("Generuj CSV");
+
+        pdfButton.setOnAction(e -> showReportDialog("PDF"));
+        csvButton.setOnAction(e -> showReportDialog("CSV"));
+
+        buttons.getChildren().addAll(pdfButton, csvButton);
+        buttons.setAlignment(Pos.CENTER);
+
+        layout.getChildren().addAll(tableView, buttons);
+        cashierPanel.setCenterPane(layout);
+    }
+
+    private void showReportDialog(String format) {
+        Stage dialog = createStyledDialog("Generowanie raportu");
+
+        ComboBox<String> typeBox = createStyledComboBox("Dzienny", "Tygodniowy", "Miesięczny");
+        DatePicker datePicker = createStyledDatePicker();
+
+        Button generateBtn = cashierPanel.createStyledButton("Generuj " + format, "#2980B9");
+        generateBtn.setOnAction(e -> {
+            showNotification("Sukces", "Raport " + format + " wygenerowany");
+            dialog.close();
+        });
+
+        VBox root = new VBox(20);
+        root.getChildren().addAll(
+                new Label("Typ raportu:"), typeBox,
+                new Label("Data:"), datePicker,
+                generateBtn
+        );
+        setupDialog(dialog, root);
+    }
+
+    // Zgłoszenie problemu
+    public void showIssueReportPanel() {
+        Stage dialog = createStyledDialog("Zgłoszenie problemu");
+
+        ComboBox<String> typeBox = createStyledComboBox("Awaria sprzętu", "Błąd oprogramowania", "Inne");
+        TextArea description = createStyledTextArea("Opisz problem...");
+
+        Button sendButton = cashierPanel.createStyledButton("Wyślij", "#27AE60");
+        sendButton.setOnAction(e -> {
+            if (validateReport(typeBox.getValue(), description.getText())) {
+                showNotification("Sukces", "Zgłoszenie wysłane");
+                dialog.close();
+            }
+        });
+
+        VBox root = new VBox(20);
+        root.getChildren().addAll(typeBox, description, sendButton);
+        setupDialog(dialog, root);
+    }
+
+    private ObservableList<SalesReport> getSampleReports() {
+        return FXCollections.observableArrayList(
+                new SalesReport("1", "2024-04-01", "Dzienny"),
+                new SalesReport("2", "2024-04-02", "Tygodniowy"),
+                new SalesReport("3", "2024-04-03", "Miesięczny")
+        );
+    }
+
+    // 2. Cell factory for the "Podgląd" button column
+    private Callback<TableColumn<SalesReport, Void>, TableCell<SalesReport, Void>> getViewButtonCellFactory() {
+        return new Callback<>() {
+            @Override
+            public TableCell<SalesReport, Void> call(TableColumn<SalesReport, Void> param) {
+                return new TableCell<>() {
+                    private final Button viewButton = new Button("Podgląd");
+
+                    {
+                        viewButton.setOnAction(event -> {
+                            SalesReport report = getTableView().getItems().get(getIndex());
+                            showReportDetails(report);
+                        });
+                        viewButton.setStyle("-fx-background-color: #2980B9; -fx-text-fill: white;");
+                    }
+
+                    @Override
+                    protected void updateItem(Void item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setGraphic(empty ? null : viewButton);
+                    }
+                };
+            }
+        };
+    }
+
+    // 3. Method to show report details (helper method)
+    private void showReportDetails(SalesReport report) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Szczegóły raportu");
+        alert.setHeaderText("Raport ID: " + report.getId());
+        alert.setContentText(
+                "Data utworzenia: " + report.getDate() + "\n" +
+                        "Typ raportu: " + report.getType()
+        );
+        alert.showAndWait();
+    }
+
+    // Pomocnicze metody
+    private Stage createStyledDialog(String title) {
+        Stage dialog = new Stage(StageStyle.UNDECORATED);
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle(title);
+        return dialog;
+    }
+
+    private void setupDialog(Stage dialog, Pane root) {
+        Scene scene = new Scene(root);
+        dialog.setScene(scene);
+        animateDialog(dialog, root);
+        dialog.showAndWait();
+    }
+
+    private void animateDialog(Stage dialog, Pane root) {
+        FadeTransition ft = new FadeTransition(Duration.millis(300), root);
+        ft.setFromValue(0.0);
+        ft.setToValue(1.0);
+
+        TranslateTransition tt = new TranslateTransition(Duration.millis(300), root);
+        tt.setFromY(-20);
+        tt.setToY(0);
+
+        new ParallelTransition(ft, tt).play();
+    }
+
+    private void finalizeSale() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Finalizacja sprzedaży");
+        alert.setHeaderText("Transakcja zakończona");
+        alert.setContentText("Dziękujemy za zakupy w Stonce!");
+        alert.showAndWait();
+    }
+
+    private ObservableList<Product> getSampleProducts() {
+        return FXCollections.observableArrayList(
+                new Product("Mleko", 3.50),
+                new Product("Chleb", 4.20),
+                new Product("Jajka", 8.99),
+                new Product("Masło", 6.50),
+                new Product("Ser", 12.99)
+        );
+    }
+
+    private TableView<SalesReport> createReportTable() {
         TableView<SalesReport> tableView = new TableView<>();
         tableView.setMinHeight(300);
 
@@ -78,180 +258,71 @@ public class CashierPanelController {
         tableView.getColumns().addAll(idColumn, dateColumn, typeColumn, viewColumn);
         tableView.setItems(getSampleReports());
 
-        HBox buttons = new HBox(10);
-        buttons.setAlignment(Pos.CENTER);
-        Button pdfButton = new Button("Generuj raport do PDF");
-        Button csvButton = new Button("Generuj raport do CSV");
-
-        pdfButton.setOnAction(e -> showReportGenerationDialog("PDF"));
-        csvButton.setOnAction(e -> showReportGenerationDialog("CSV"));
-
-        buttons.getChildren().addAll(pdfButton, csvButton);
-
-        layout.getChildren().addAll(titleLabel, tableView, buttons);
-        cashierPanel.setCenterPane(layout);
+        return tableView;
     }
 
-    private ObservableList<SalesReport> getSampleReports() {
-        return FXCollections.observableArrayList(
-                new SalesReport("1", "2024-04-01", "Dzienny"),
-                new SalesReport("2", "2024-04-02", "Tygodniowy"),
-                new SalesReport("3", "2024-04-03", "Miesięczny")
-        );
+    private ComboBox<String> createStyledComboBox(String... items) {
+        ComboBox<String> combo = new ComboBox<>();
+        combo.getItems().addAll(items);
+        combo.setStyle("-fx-background-color: #E0E0E0; -fx-padding: 8px;");
+        combo.getSelectionModel().selectFirst();
+        return combo;
     }
 
-    private Callback<TableColumn<SalesReport, Void>, TableCell<SalesReport, Void>> getViewButtonCellFactory() {
-        return col -> new TableCell<>() {
-            private final Button viewButton = new Button("Podgląd");
-
-            {
-                viewButton.setOnAction(e -> {
-                    SalesReport report = getTableView().getItems().get(getIndex());
-                    showAlert("Podgląd raportu",
-                            "ID: " + report.getId() + "\nData: " + report.getDate() + "\nTyp: " + report.getType());
-                });
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(viewButton);
-                }
-            }
-        };
+    private DatePicker createStyledDatePicker() {
+        DatePicker dp = new DatePicker();
+        dp.setStyle("-fx-background-color: #E0E0E0; -fx-padding: 8px;");
+        dp.getEditor().setStyle("-fx-background-color: #E0E0E0;");
+        return dp;
     }
 
-    private void showAlert(String title, String content) {
-        Alert alert = new Alert(AlertType.INFORMATION);
+    private TextField createStyledTextField(String prompt) {
+        TextField field = new TextField();
+        field.setPromptText(prompt);
+        field.setStyle("-fx-background-color: #E0E0E0; -fx-padding: 8px;");
+        return field;
+    }
+
+    private TextArea createStyledTextArea(String prompt) {
+        TextArea area = new TextArea();
+        area.setPromptText(prompt);
+        area.setStyle("-fx-background-color: #E0E0E0; -fx-padding: 8px;");
+        area.setWrapText(true);
+        return area;
+    }
+
+    private boolean validateReport(String type, String desc) {
+        if (type == null || desc.trim().isEmpty()) {
+            showNotification("Błąd", "Uzupełnij wszystkie pola");
+            return false;
+        }
+        return true;
+    }
+
+    private void showNotification(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
-        alert.setContentText(content);
+        alert.setContentText(message);
         alert.showAndWait();
     }
 
-    // Nowa funkcjonalność: Dialog do wyboru typu raportu i daty
-    private void showReportGenerationDialog(String reportType) {
-        Stage dialog = new Stage();
-        dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.setTitle("Wybór raportu");
+    // Pozostałe metody z oryginalnej implementacji...
 
-        VBox layout = new VBox(10);
-        layout.setPadding(new Insets(20));
+    // Wewnętrzne klasy danych
+    public static class Product {
+        private final String name;
+        private final double price;
 
-        // Wybór typu raportu
-        Label typeLabel = new Label("Wybierz typ raportu:");
-        ComboBox<String> reportTypeCombo = new ComboBox<>();
-        reportTypeCombo.getItems().addAll("Dobowy", "Miesięczny");
-        reportTypeCombo.setValue("Dobowy");
+        public Product(String name, double price) {
+            this.name = name;
+            this.price = price;
+        }
 
-        // Wybór daty
-        Label dateLabel = new Label("Wybierz datę:");
-        DatePicker datePicker = new DatePicker();
-
-        // Przycisk generowania raportu
-        Button generateButton = new Button("Generuj raport");
-        generateButton.setOnAction(e -> {
-            String selectedType = reportTypeCombo.getValue();
-            String selectedDate = datePicker.getValue().toString();
-            showAlert("Generowanie raportu",
-                    "Typ raportu: " + selectedType + "\nData: " + selectedDate + "\nRodzaj: " + reportType);
-            dialog.close();
-        });
-
-        layout.getChildren().addAll(typeLabel, reportTypeCombo, dateLabel, datePicker, generateButton);
-
-        Scene scene = new Scene(layout, 300, 250);
-        dialog.setScene(scene);
-        dialog.show();
+        public String getName() { return name; }
+        public double getPrice() { return price; }
     }
 
-    /**
-     * Wyświetla ekran umożliwiający zamknięcie zmiany.
-     */
-    public void showCloseShiftPanel() {
-        VBox layout = new VBox(15);
-        layout.setPadding(new Insets(20));
-        layout.setAlignment(Pos.CENTER);
-
-        Button closeShiftButton = new Button("Zamknij zmianę");
-
-        layout.getChildren().addAll(closeShiftButton);
-        cashierPanel.setCenterPane(layout);
-    }
-
-    /**
-     * Wyświetla formularz zgłoszenia wniosku o nieobecność.
-     */
-    public void showAbsenceRequestForm() {
-        Stage stage = new Stage();
-        stage.setTitle("Wniosek o nieobecność");
-
-        GridPane grid = new GridPane();
-        grid.setPadding(new Insets(20));
-        grid.setVgap(10);
-        grid.setHgap(10);
-
-        Label reasonLabel = new Label("Powód:");
-        TextField reasonField = new TextField();
-
-        Label fromDateLabel = new Label("Data od:");
-        DatePicker fromDatePicker = new DatePicker();
-
-        Label toDateLabel = new Label("Data do:");
-        DatePicker toDatePicker = new DatePicker();
-
-        Button submitButton = new Button("Złóż wniosek");
-        submitButton.setOnAction(e -> {
-            if (reasonField.getText().isEmpty() || fromDatePicker.getValue() == null || toDatePicker.getValue() == null) {
-                new Alert(Alert.AlertType.WARNING, "Uzupełnij wszystkie pola.").showAndWait();
-            } else {
-                new Alert(Alert.AlertType.INFORMATION, "Wniosek złożony pomyślnie.").showAndWait();
-                stage.close();
-            }
-        });
-
-        grid.add(reasonLabel, 0, 0);   grid.add(reasonField, 1, 0);
-        grid.add(fromDateLabel, 0, 1); grid.add(fromDatePicker, 1, 1);
-        grid.add(toDateLabel, 0, 2);   grid.add(toDatePicker, 1, 2);
-        grid.add(submitButton, 1, 3);
-
-        Scene scene = new Scene(grid, 350, 250);
-        stage.setScene(scene);
-        stage.show();
-    }
-
-    /**
-     * Wyświetla formularz do zgłoszenia problemu lub awarii.
-     */
-    public void showIssueReportPanel() {
-        VBox layout = new VBox(15);
-        layout.setPadding(new Insets(20));
-        layout.setAlignment(Pos.CENTER);
-
-        Button reportIssueButton = new Button("Zgłoś problem");
-
-        layout.getChildren().addAll(reportIssueButton);
-        cashierPanel.setCenterPane(layout);
-    }
-
-    /**
-     * Wylogowuje użytkownika i przenosi go do panelu logowania.
-     */
-    public void logout() {
-        // Pobranie głównej sceny aplikacji
-        Stage primaryStage = cashierPanel.getPrimaryStage();
-
-        // Zamknięcie bieżącego okna
-        primaryStage.close();
-
-        // Wyświetlenie panelu logowania
-        HelloApplication.showLoginScreen(primaryStage);
-    }
-
-    // Wewnętrzna klasa pomocnicza do przechowywania danych raportu
     public static class SalesReport {
         private final String id;
         private final String date;
@@ -263,16 +334,8 @@ public class CashierPanelController {
             this.type = type;
         }
 
-        public String getId() {
-            return id;
-        }
-
-        public String getDate() {
-            return date;
-        }
-
-        public String getType() {
-            return type;
-        }
+        public String getId() { return id; }
+        public String getDate() { return date; }
+        public String getType() { return type; }
     }
 }

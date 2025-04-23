@@ -120,7 +120,7 @@ public class CashierPanel {
      * @param text etykieta przycisku
      * @return gotowy przycisk
      */
-    private Button createStyledButton(String text) {
+    Button createStyledButton(String text) {
         return createStyledButton(text, "#2980B9");
     }
 
@@ -131,7 +131,7 @@ public class CashierPanel {
      * @param color kolor tła przycisku
      * @return gotowy przycisk
      */
-    private Button createStyledButton(String text, String color) {
+    Button createStyledButton(String text, String color) {
         Button button = new Button(text);
         button.setStyle(
                 "-fx-background-color: " + color + "; "
