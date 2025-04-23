@@ -1,5 +1,7 @@
 package org.example.sys;
 
+import org.example.wyjatki.AgeException;
+import org.example.wyjatki.NameException;
 import org.example.wyjatki.PasswordException;
 
 public class Person {
@@ -14,10 +16,28 @@ public class Person {
     public Person() {
     }
 
-    public Person(String name, String surname, int age, String address, String password, String email) throws PasswordException {
-        this.name = name;
-        this.surname = surname;
-        this.age = age;
+    public Person(String name, String surname, int age, String address, String password, String email) throws PasswordException, AgeException, NameException {
+        if(name == null || name.isEmpty()) {
+            throw new NameException("Imię nie może być puste");
+        }else if(name.length() < 2) {
+            throw new NameException("Imię musi mieć co najmniej 2 znaki");
+        } else {
+            this.name = name;
+        }
+        if(surname == null || surname.isEmpty()) {
+            throw new NameException("Nazwisko nie może być puste");
+        }else if(surname.length() < 2) {
+            throw new NameException("Nazwisko musi mieć co najmniej 2 znaki");
+        } else {
+            this.surname = surname;
+        }
+        if( age < 0 || age > 120) {
+            throw new AgeException("Wiek musi być liczbą całkowitą z przedziału 0-120");
+        } else if (age < 18) {
+            throw new AgeException("Osoba musi mieć co najmniej 18 lat");
+        } else{
+            this.age = age;
+        }
         this.address = address;
         if(password == null || password.length() < 8) {
             throw new PasswordException("Hasło musi mieć co najmniej 8 znaków");
@@ -50,27 +70,56 @@ public class Person {
         return email;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String name) throws NullPointerException, AgeException {
+        if(name == null) {
+            throw new NullPointerException("Imię nie może być puste");
+        }else if(name.length() < 2) {
+            throw new NameException("Imię musi mieć co najmniej 2 znaki");
+        } else {
+            this.name = name;
+        }
     }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
+    public void setSurname(String surname) throws NullPointerException, AgeException{
+        if(surname == null) {
+            throw new NullPointerException("Nazwisko nie może być puste");
+        }else if(surname.length() < 2) {
+            throw new NameException("Nazwisko musi mieć co najmniej 2 znaki");
+        } else {
+            this.surname = surname;
+        }
     }
 
-    public void setAge(int age) {
-        this.age = age;
+    public void setAge(int age) throws AgeException{
+        if( age < 0 || age > 120) {
+            throw new AgeException("Wiek musi być liczbą całkowitą z przedziału 0-120");
+        } else if (age < 18) {
+            //Musimy jeszcze uzgodnić czy możemy przepuścić osoby młodsze ni ż 18 lat
+            throw new AgeException("Osoba musi mieć co najmniej 18 lat");
+        } else{
+            this.age = age;
+        }
     }
 
-    public void setAddress(String address) {
+    public void setAddress(String address) throws NullPointerException{
+        if(address == null) {
+            throw new NullPointerException("Adres nie może być pusty");
+        }
         this.address = address;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPassword(String password) throws PasswordException{
+        if(password.length() < 8){
+            throw new PasswordException("Hasło musi mieć co najmniej 8 znaków");
+        } else {
+            this.password = password;
+        }
     }
 
-    public void setEmail(String email) {
+    public void setEmail(String email) throws NullPointerException{
+        if(email == null) {
+            throw new NullPointerException("Email nie może być pusty");
+        }
         this.email = email;
     }
 
@@ -80,10 +129,6 @@ public class Person {
 
     public boolean matchesEmail(String email) {
         return this.email != null && this.email.equals(email);
-    }
-
-    public boolean isPassword(String password) {
-        return this.password != null && this.password.equals(password);
     }
 
     /**

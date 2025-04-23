@@ -61,7 +61,7 @@ public class Menager extends Employee {
         employee.setAddress(newAddress);
     }
 
-    public void updatePassword(Employee employee, String newPassword) {
+    public void updatePassword(Employee employee, String newPassword)throws PasswordException {
         employee.setPassword(newPassword);
     }
 

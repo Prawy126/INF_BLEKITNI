@@ -1,12 +1,13 @@
 package org.example.sys;
 
 
+import org.example.wyjatki.AgeException;
 import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
 
 public class Logistician extends Employee{
     private boolean logistician = true;
-    public Logistician(String name, String surname, int age, String address, String password, String email, String department, String position, double salary) throws PasswordException, SalaryException {
+    public Logistician(String name, String surname, int age, String address, String password, String email, String department, String position, double salary) throws PasswordException, SalaryException, AgeException {
         super(name, surname, age, address, password, email, department, position, salary);
     }
     public boolean isLogistician() {
@@ -33,7 +34,7 @@ public class Logistician extends Employee{
         employee.setAddress(newAddress);
     }
 
-    public void updatePassword(Employee employee, String newPassword) {
+    public void updatePassword(Employee employee, String newPassword)throws PasswordException {
         employee.setPassword(newPassword);
     }
 
