@@ -12,6 +12,7 @@ import javafx.scene.layout.*;
 import javafx.stage.*;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import java.time.LocalDate;
 
 public class CashierPanelController {
 
@@ -205,6 +206,83 @@ public class CashierPanelController {
         dialog.showAndWait();
     }
 
+    public void showCloseShiftPanel() {
+        VBox layout = new VBox(15);
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
+
+        Button confirmButton = cashierPanel.createStyledButton("Potwierdź zamknięcie zmiany", "#E67E22");
+        confirmButton.setOnAction(e -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Zamknięcie zmiany");
+            alert.setHeaderText("Zmiana została pomyślnie zamknięta");
+            alert.setContentText("Dziękujemy za pracę w tej zmianie!");
+            alert.showAndWait();
+        });
+
+        layout.getChildren().add(confirmButton);
+        cashierPanel.setCenterPane(layout);
+    }
+
+    public void showAbsenceRequestForm() {
+        Stage stage = new Stage();
+        stage.setTitle("Wniosek o nieobecność");
+
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(20));
+        grid.setVgap(10);
+        grid.setHgap(10);
+
+        Label reasonLabel = new Label("Powód:");
+        TextField reasonField = new TextField();
+
+        Label fromDateLabel = new Label("Data od:");
+        DatePicker fromDatePicker = new DatePicker();
+
+        Label toDateLabel = new Label("Data do:");
+        DatePicker toDatePicker = new DatePicker();
+
+        Button submitButton = cashierPanel.createStyledButton("Wyślij wniosek", "#27AE60");
+        submitButton.setOnAction(e -> {
+            if (validateAbsenceForm(reasonField.getText(), fromDatePicker.getValue(), toDatePicker.getValue())) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Sukces");
+                alert.setHeaderText("Wniosek został wysłany");
+                alert.setContentText("Oczekuj potwierdzenia od kierownika");
+                alert.showAndWait();
+                stage.close();
+            }
+        });
+
+        grid.add(reasonLabel, 0, 0);
+        grid.add(reasonField, 1, 0);
+        grid.add(fromDateLabel, 0, 1);
+        grid.add(fromDatePicker, 1, 1);
+        grid.add(toDateLabel, 0, 2);
+        grid.add(toDatePicker, 1, 2);
+        grid.add(submitButton, 1, 3);
+
+        Scene scene = new Scene(grid, 400, 250);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private boolean validateAbsenceForm(String reason, LocalDate fromDate, LocalDate toDate) {
+        if (reason == null || reason.trim().isEmpty()) {
+            showNotification("Błąd", "Musisz podać powód nieobecności");
+            return false;
+        }
+        if (fromDate == null || toDate == null) {
+            showNotification("Błąd", "Musisz wybrać datę rozpoczęcia i zakończenia");
+            return false;
+        }
+        if (fromDate.isAfter(toDate)) {
+            showNotification("Błąd", "Data rozpoczęcia nie może być późniejsza niż zakończenia");
+            return false;
+        }
+        return true;
+    }
+
     private void animateDialog(Stage dialog, Pane root) {
         FadeTransition ft = new FadeTransition(Duration.millis(300), root);
         ft.setFromValue(0.0);
@@ -337,5 +415,11 @@ public class CashierPanelController {
         public String getId() { return id; }
         public String getDate() { return date; }
         public String getType() { return type; }
+    }
+
+    public void logout() {
+        Stage primaryStage = cashierPanel.getPrimaryStage();
+        primaryStage.close();
+        HelloApplication.showLoginScreen(primaryStage);
     }
 }
