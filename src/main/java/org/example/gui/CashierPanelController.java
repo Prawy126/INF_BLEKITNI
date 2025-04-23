@@ -1,10 +1,3 @@
-/*
- * Classname: CashierPanelController
- * Version information: 1.0
- * Date: 2025-04-06
- * Copyright notice: © BŁĘKITNI
- */
-
 package org.example.gui;
 
 import javafx.collections.FXCollections;
@@ -245,16 +238,17 @@ public class CashierPanelController {
     }
 
     /**
-     * Zamyka aplikację po wylogowaniu użytkownika.
+     * Wylogowuje użytkownika i przenosi go do panelu logowania.
      */
     public void logout() {
-        cashierPanel.getPrimaryStage().close();
-        Stage loginStage = new Stage();
-        try {
-            new HelloApplication().start(loginStage);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // Pobranie głównej sceny aplikacji
+        Stage primaryStage = cashierPanel.getPrimaryStage();
+
+        // Zamknięcie bieżącego okna
+        primaryStage.close();
+
+        // Wyświetlenie panelu logowania
+        HelloApplication.showLoginScreen(primaryStage);
     }
 
     // Wewnętrzna klasa pomocnicza do przechowywania danych raportu

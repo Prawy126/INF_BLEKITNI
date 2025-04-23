@@ -1,10 +1,3 @@
-/*
- * Classname: CashierPanel
- * Version information: 1.0
- * Date: 2025-04-06
- * Copyright notice: © BŁĘKITNI
- */
-
 package org.example.gui;
 
 import javafx.animation.FadeTransition;
@@ -100,6 +93,7 @@ public class CashierPanel {
         Button issueReportButton = createStyledButton("Zgłoszenie awarii");
         issueReportButton.setOnAction(e -> controller.showIssueReportPanel());
 
+        // Przycisk wniosku o nieobecność
         Button absenceButton = createStyledButton("Złóż wniosek o nieobecność");
         absenceButton.setOnAction(e -> controller.showAbsenceRequestForm());
 

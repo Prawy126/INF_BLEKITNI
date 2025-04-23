@@ -42,6 +42,25 @@ public class HelloApplication extends Application {
      *
      * @param primaryStage główna scena aplikacji
      */
+
+    public static void showLoginScreen(Stage primaryStage) {
+        try {
+            // Tworzenie nowego obiektu HelloApplication
+            HelloApplication app = new HelloApplication();
+
+            // Uruchomienie metody start z podanym Stage
+            app.start(primaryStage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(
+                    Alert.AlertType.ERROR,
+                    "Błąd",
+                    "Wystąpił błąd podczas wyświetlania ekranu logowania",
+                    e.getMessage()
+            );
+        }
+    }
+
     @Override
     public void start(Stage primaryStage) {
         VBox root = new VBox(20);
