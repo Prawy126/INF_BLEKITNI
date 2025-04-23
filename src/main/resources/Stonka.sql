@@ -120,16 +120,16 @@ VALUES
 
 INSERT INTO Pracownicy (Imie, Nazwisko, Wiek, Id_adresu, Login, Haslo, Zarobki, Stanowisko)
 VALUES
-('Jan', 'Kowalski', 35, 1, 'admin', SHA2('admin123', 256), 4500.00, 'Kierownik'),
-('Anna', 'Nowak', 28, 2, 'anowak', SHA2('nowak456', 256), 3500.00, 'Kasjer'),
-('Marek', 'Wiśniewski', 40, 3, 'mwis', SHA2('marek123', 256), 4000.00, 'Magazynier'),
-('Zofia', 'Maj', 33, 4, 'zmaj', SHA2('zofia789', 256), 3700.00, 'Logistyk'),
-('Adam', 'Nowicki', 29, 5, 'anowicki', SHA2('adam321', 256), 3600.00, 'Kasjer'),
-('Ewa', 'Jankowska', 31, 6, 'ejanko', SHA2('ewa456', 256), 3900.00, 'Sprzedawca'),
-('Kamil', 'Kowalczyk', 45, 7, 'kkowal', SHA2('kamil888', 256), 4700.00, 'Menadżer'),
-('Barbara', 'Kaczmarek', 27, 8, 'bkacz', SHA2('barbara987', 256), 3400.00, 'Kasjer'),
-('Piotr', 'Zieliński', 38, 9, 'pziel', SHA2('piotr111', 256), 4100.00, 'Magazynier'),
-('Magda', 'Szymańska', 36, 10, 'mszym', SHA2('magda654', 256), 4300.00, 'Logistyk');
+('Jan', 'Kowalski', 35, 1, 'admin', 'admin123', 4500.00, 'Kierownik'),
+('Anna', 'Nowak', 28, 2, 'anowak', 'nowak456', 3500.00, 'Kasjer'),
+('Marek', 'Wiśniewski', 40, 3, 'mwis', 'marek123', 4000.00, 'Magazynier'),
+('Zofia', 'Maj', 33, 4, 'zmaj', 'zofia789', 3700.00, 'Logistyk'),
+('Adam', 'Nowicki', 29, 5, 'anowicki', 'adam321', 3600.00, 'Kasjer'),
+('Ewa', 'Jankowska', 31, 6, 'ejanko', 'ewa456', 3900.00, 'Sprzedawca'),
+('Kamil', 'Kowalczyk', 45, 7, 'kkowal', 'kamil888', 4700.00, 'Menadżer'),
+('Barbara', 'Kaczmarek', 27, 8, 'bkacz', 'barbara987', 3400.00, 'Kasjer'),
+('Piotr', 'Zieliński', 38, 9, 'pziel', 'piotr111', 4100.00, 'Magazynier'),
+('Magda', 'Szymańska', 36, 10, 'mszym', 'magda654', 4300.00, 'Logistyk');
 
 INSERT INTO Produkty (Nazwa, Cena, IloscWmagazynie)
 VALUES 
