@@ -1,5 +1,6 @@
--- Tworzenie bazy danych
-CREATE DATABASE IF NOT EXISTS StonkaDB;
+-- Usuwanie i tworzenie bazy danych
+DROP DATABASE IF EXISTS StonkaDB;
+CREATE DATABASE StonkaDB;
 USE StonkaDB;
 
 -- Tabela Adresy
@@ -103,37 +104,100 @@ CREATE TABLE IF NOT EXISTS Zadania_Pracownicy (
     FOREIGN KEY (Id_zadania) REFERENCES Zadania(Id)
 );
 
--- === Wstawianie danych z zabezpieczeniem przed duplikatami ===
+-- === Wstawianie danych ===
+INSERT INTO Adresy (Miejscowosc, Numer_domu, Numer_mieszkania, Kod_pocztowy, Miasto)
+VALUES 
+('Warszawa', '12A', '3', '00-001', 'Warszawa'),
+('Kraków', '5', NULL, '30-002', 'Kraków'),
+('Gdańsk', '7B', '10', '80-001', 'Gdańsk'),
+('Wrocław', '20', NULL, '50-003', 'Wrocław'),
+('Poznań', '16', '8', '60-002', 'Poznań'),
+('Łódź', '3C', '2', '90-003', 'Łódź'),
+('Szczecin', '10', NULL, '70-005', 'Szczecin'),
+('Lublin', '4', '1', '20-001', 'Lublin'),
+('Katowice', '9A', NULL, '40-002', 'Katowice'),
+('Rzeszów', '22', '5', '35-003', 'Rzeszów');
 
--- Adresy
-INSERT IGNORE INTO Adresy (Id, Miejscowosc, Numer_domu, Numer_mieszkania, Kod_pocztowy, Miasto)
+INSERT INTO Pracownicy (Imie, Nazwisko, Wiek, Id_adresu, Login, Haslo, Zarobki, Stanowisko)
 VALUES
-    (1, 'Warszawa', '12A', '3', '00-001', 'Warszawa'),
-    (2, 'Kraków', '10', '5', '30-001', 'Kraków'),
-    (3, 'Poznań', '20', NULL, '60-002', 'Poznań'),
-    (4, 'Gdańsk', '8', '2A', '80-003', 'Gdańsk');
+('Jan', 'Kowalski', 35, 1, 'admin', SHA2('admin123', 256), 4500.00, 'Kierownik'),
+('Anna', 'Nowak', 28, 2, 'anowak', SHA2('nowak456', 256), 3500.00, 'Kasjer'),
+('Marek', 'Wiśniewski', 40, 3, 'mwis', SHA2('marek123', 256), 4000.00, 'Magazynier'),
+('Zofia', 'Maj', 33, 4, 'zmaj', SHA2('zofia789', 256), 3700.00, 'Logistyk'),
+('Adam', 'Nowicki', 29, 5, 'anowicki', SHA2('adam321', 256), 3600.00, 'Kasjer'),
+('Ewa', 'Jankowska', 31, 6, 'ejanko', SHA2('ewa456', 256), 3900.00, 'Sprzedawca'),
+('Kamil', 'Kowalczyk', 45, 7, 'kkowal', SHA2('kamil888', 256), 4700.00, 'Menadżer'),
+('Barbara', 'Kaczmarek', 27, 8, 'bkacz', SHA2('barbara987', 256), 3400.00, 'Kasjer'),
+('Piotr', 'Zieliński', 38, 9, 'pziel', SHA2('piotr111', 256), 4100.00, 'Magazynier'),
+('Magda', 'Szymańska', 36, 10, 'mszym', SHA2('magda654', 256), 4300.00, 'Logistyk');
 
--- Pracownicy
-INSERT IGNORE INTO Pracownicy (Id, Imie, Nazwisko, Wiek, Id_adresu, Login, Haslo, Zarobki, Stanowisko)
+INSERT INTO Produkty (Nazwa, Cena, IloscWmagazynie)
+VALUES 
+('Mleko', 2.99, 150),
+('Chleb', 3.49, 200),
+('Masło', 5.79, 80),
+('Jajka', 6.99, 100),
+('Ser', 4.59, 90),
+('Jogurt', 1.99, 120),
+('Sok pomarańczowy', 3.99, 110),
+('Makaron', 2.49, 140),
+('Ryż', 2.89, 160),
+('Olej', 5.99, 70);
+
+INSERT INTO Zadania (Nazwa, Data, Status, Opis)
+VALUES 
+('Sprawdzenie stanu magazynu', '2025-04-01', 'Nowe', 'Weryfikacja towaru przed dostawą'),
+('Inwentaryzacja', '2025-04-15', 'Nowe', 'Spis towarów'),
+('Dostawa mleka', '2025-04-10', 'Zakończone', 'Odbiór dostawy'),
+('Wymiana regałów', '2025-04-12', 'W trakcie', 'Wymiana regałów w dziale nabiałowym'),
+('Porządkowanie zaplecza', '2025-04-08', 'Zakończone', 'Czyszczenie i sortowanie towarów');
+
+INSERT INTO Zadania_Pracownicy (Id_pracownika, Id_zadania)
+VALUES 
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4),
+(5, 5);
+
+INSERT INTO Wnioski_o_nieobecnosc (Typ_wniosku, Data_rozpoczecia, Data_zakonczenia, Opis, Id_pracownika)
 VALUES
-    (1, 'Jan', 'Kowalski', 35, 1, 'admin', 'admin123', 4500.00, 'kierownik'),
-    (2, 'Anna', 'Adminowska', 30, 2, 'admin', 'admin123', 6000.00, 'admin'),
-    (3, 'Piotr', 'Logistykiewicz', 28, 3, 'logistyk', 'log123', 4500.00, 'logistyk'),
-    (4, 'Kasia', 'Kasjerka', 22, 4, 'kasjer', 'kasjer123', 3500.00, 'kasjer');
+('Urlop wypoczynkowy', '2025-05-01', '2025-05-10', 'Wakacje w górach', 1),
+('Zwolnienie lekarskie', '2025-04-20', '2025-04-25', 'Przeziębienie', 2),
+('Urlop bezpłatny', '2025-06-01', '2025-06-15', 'Wyjazd zagraniczny', 3),
+('Urlop na żądanie', '2025-04-22', '2025-04-22', 'Sprawy rodzinne', 4),
+('Opieka nad dzieckiem', '2025-05-05', '2025-05-07', 'Chore dziecko', 5);
 
--- Produkty
-INSERT IGNORE INTO Produkty (Id, Nazwa, Cena, IloscWmagazynie)
+INSERT INTO Zamowienia (Id_produktu, Id_pracownika, Ilosc, Cena, Data)
 VALUES
-    (1, 'Mleko', 2.99, 150),
-    (2, 'Chleb', 3.49, 200);
+(1, 1, 50, 149.50, '2025-04-05'),
+(2, 2, 100, 349.00, '2025-04-06'),
+(3, 3, 30, 173.70, '2025-04-07'),
+(4, 4, 40, 279.60, '2025-04-08'),
+(5, 5, 25, 114.75, '2025-04-09');
 
--- Zadania
-INSERT IGNORE INTO Zadania (Id, Nazwa, Data, Status, Opis)
+INSERT INTO Transakcje (Id_pracownika, Data)
 VALUES
-    (1, 'Sprawdzenie stanu magazynu', '2025-04-01', 'Nowe', 'Weryfikacja towaru przed dostawą');
+(1, '2025-04-10'),
+(2, '2025-04-11'),
+(3, '2025-04-12'),
+(4, '2025-04-13'),
+(5, '2025-04-14');
 
--- Powiązanie zadania z pracownikiem
-INSERT IGNORE INTO Zadania_Pracownicy (Id_pracownika, Id_zadania)
+INSERT INTO Transakcje_Produkty (Id_transakcji, Id_produktu)
 VALUES
-    (1, 1);
+(1, 1),
+(1, 2),
+(2, 3),
+(3, 4),
+(4, 5),
+(5, 1),
+(5, 5);
 
+INSERT INTO Raporty (Typ_raportu, Data_poczatku, Data_zakonczenia, Id_pracownika, Plik)
+VALUES
+('Raport miesięczny', '2025-04-01', '2025-04-30', 1, 'raport_kwiecien.pdf'),
+('Stan magazynu', '2025-04-01', '2025-04-15', 2, 'magazyn_15kwiecien.pdf'),
+('Sprzedaż dzienna', '2025-04-10', '2025-04-10', 3, 'sprzedaz_10kwietnia.pdf'),
+('Wnioski o nieobecność', '2025-04-01', '2025-04-30', 4, 'wnioski_kwiecien.pdf'),
+('Zamówienia i dostawy', '2025-04-01', '2025-04-20', 5, 'zamowienia_dostawy.pdf');
