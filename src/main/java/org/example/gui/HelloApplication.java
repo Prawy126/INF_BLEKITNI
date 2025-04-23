@@ -372,7 +372,7 @@ public class HelloApplication extends Application {
     /**
      * Wyświetla komunikat typu Alert.
      */
-    private void showAlert(
+    public static void showAlert(
             Alert.AlertType type,
             String title,
             String header,
