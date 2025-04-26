@@ -17,7 +17,7 @@ public class Main {
         // zapisałem linka do stworzenia hasła aplikacji
         String toEmailAddress = "mp125151@stud.ur.edu.pl";
         String  fromEmailAddress = "michal190713@gmail.com";
-        String password = "bdjx oans tnic tpps"; // UWAGA: Nie przechowuj hasła w kodzie!
+        String password = "tutaj wpisz wygenerowane hasło"; // UWAGA: Nie przechowuj hasła w kodzie!
         String subject = "test";
         String bodyText = "nie wiem czy to działa";
 
