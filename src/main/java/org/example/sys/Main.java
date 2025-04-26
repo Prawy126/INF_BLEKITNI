@@ -6,15 +6,27 @@ package org.example.sys;
 import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+
 public class Main {
 
     public static void main(String[] args) {
-        try{
-            Logistician logistician =  new Logistician("Michał", "Pilecki", 21, "adres", "hasło321312", "email", "dział", "stanowisko", -5000);
-        }catch (PasswordException e){
-            System.out.println("Hasło musi mieć co najmniej 8 znaków");
-        } catch (SalaryException e) {
-            throw new RuntimeException(e);
+        // TODO: Założyć jakiś mail i ustawić hasło aplikacji
+        // https://myaccount.google.com/apppasswords?spm=a2ty_o01.29997173.0.0.5d57c9212jdST3
+        // zapisałem linka do stworzenia hasła aplikacji
+        String toEmailAddress = "mp125151@stud.ur.edu.pl";
+        String  fromEmailAddress = "michal190713@gmail.com";
+        String password = "bdjx oans tnic tpps"; // UWAGA: Nie przechowuj hasła w kodzie!
+        String subject = "test";
+        String bodyText = "nie wiem czy to działa";
+
+        try {
+            EmailSender.sendEmail(toEmailAddress, fromEmailAddress, password, subject, bodyText);
+            System.out.println("Wiadomość została wysłana!");
+        } catch (MessagingException e) {
+            System.out.println("Nie udało się wysłać wiadomości.");
+            e.printStackTrace();
         }
     }
 }
