@@ -11,7 +11,8 @@ module org.example.gui {
     requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
     requires java.sql;
-   // requires org.junit.jupiter.api;
+    requires java.mail;
+    // requires org.junit.jupiter.api;
 
     opens org.example.gui to javafx.fxml;
     exports org.example.gui;
