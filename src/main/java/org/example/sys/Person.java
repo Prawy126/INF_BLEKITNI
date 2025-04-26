@@ -11,12 +11,12 @@ public class Person {
     private int age;
     private String address;
     private String password;
-    private String email;
+
 
     public Person() {
     }
 
-    public Person(String name, String surname, int age, String address, String password, String email) throws PasswordException, AgeException, NameException {
+    public Person(String name, String surname, int age, String address, String password) throws PasswordException, AgeException, NameException {
         if(name == null || name.isEmpty()) {
             throw new NameException("Imię nie może być puste");
         }else if(name.length() < 2) {
@@ -43,7 +43,6 @@ public class Person {
             throw new PasswordException("Hasło musi mieć co najmniej 8 znaków");
         }
         this.password = password;
-        this.email = email;
     }
 
     public String getName() {
@@ -64,10 +63,6 @@ public class Person {
 
     public String getPassword() {
         return password;
-    }
-
-    public String getEmail() {
-        return email;
     }
 
     public void setName(String name) throws NullPointerException, AgeException {
@@ -116,19 +111,8 @@ public class Person {
         }
     }
 
-    public void setEmail(String email) throws NullPointerException{
-        if(email == null) {
-            throw new NullPointerException("Email nie może być pusty");
-        }
-        this.email = email;
-    }
-
     public boolean matchesPassword(String password) {
         return this.password != null && this.password.equals(password);
-    }
-
-    public boolean matchesEmail(String email) {
-        return this.email != null && this.email.equals(email);
     }
 
     /**
@@ -137,6 +121,6 @@ public class Person {
      * <p>imię, nazwisko, (wiek), adres, email</p>*/
     @Override
     public String toString() {
-        return String.format("%s %s (%d), %s, %s", name, surname, age, address, email);
+        return String.format("%s %s (%d), %s, %s", name, surname, age, address);
     }
 }

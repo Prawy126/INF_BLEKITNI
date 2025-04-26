@@ -4,11 +4,14 @@ package org.example.sys;
 import org.example.wyjatki.AgeException;
 import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
+import org.example.sys.Address;
+
+import java.math.BigDecimal;
 
 public class Logistician extends Employee{
     private boolean logistician = true;
-    public Logistician(String name, String surname, int age, String address, String password, String email, String department, String position, double salary) throws PasswordException, SalaryException, AgeException {
-        super(name, surname, age, address, password, email, department, position, salary);
+    public Logistician(String name, String surname, int age, String login,Address address, String password, String department, BigDecimal salary) throws PasswordException, SalaryException, AgeException {
+        super(name, surname, age,address, login, password, department,salary);
     }
     public boolean isLogistician() {
         return logistician;
@@ -19,38 +22,30 @@ public class Logistician extends Employee{
     }
 
     public void updateName(Employee employee, String newName) {
-        employee.setName(newName);
+        employee.setImie(newName);
     }
 
     public void updateSurname(Employee employee, String newSurname) {
-        employee.setSurname(newSurname);
+        employee.setNazwisko(newSurname);
     }
 
     public void updateAge(Employee employee, int newAge) {
-        employee.setAge(newAge);
+        employee.setWiek(newAge);
     }
 
-    public void updateAddress(Employee employee, String newAddress) {
-        employee.setAddress(newAddress);
+    public void updateAddress(Employee employee, Address newAddress) {
+        employee.setAdres(newAddress);
     }
 
     public void updatePassword(Employee employee, String newPassword)throws PasswordException {
-        employee.setPassword(newPassword);
-    }
-
-    public void updateEmail(Employee employee, String newEmail) {
-        employee.setEmail(newEmail);
+        employee.setHaslo(newPassword);
     }
 
     public void updateDepartment(Employee employee, String newDepartment) {
-        employee.setDepartment(newDepartment);
+        employee.setStanowisko(newDepartment);
     }
 
-    public void updatePosition(Employee employee, String newPosition) {
-        employee.setPosition(newPosition);
-    }
-
-    public void updateSalary(Employee employee, double newSalary) throws SalaryException {
-        employee.setSalary(newSalary);
+    public void updateSalary(Employee employee, BigDecimal newSalary) throws SalaryException {
+        employee.setZarobki(newSalary);
     }
 }

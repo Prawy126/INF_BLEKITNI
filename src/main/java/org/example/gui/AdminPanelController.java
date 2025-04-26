@@ -16,6 +16,8 @@ import javafx.stage.Stage;
 import org.example.sys.Employee;
 import org.example.wyjatki.PasswordException;
 
+import java.math.BigDecimal;
+
 /**
  * Kontroler odpowiedzialny za obsługę logiki interfejsu
  * administratora w aplikacji GUI.
@@ -47,95 +49,64 @@ public class AdminPanelController {
 
         TableView<Employee> tableView = new TableView<>();
 
-        // Kolumny tabeli
+// Kolumny tabeli
         TableColumn<Employee, String> nameCol = new TableColumn<>("Imię");
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("imie"));
+
+        TableColumn<Employee, String> surnameCol = new TableColumn<>("Nazwisko");
+        surnameCol.setCellValueFactory(new PropertyValueFactory<>("nazwisko"));
 
         TableColumn<Employee, Integer> ageCol = new TableColumn<>("Wiek");
-        ageCol.setCellValueFactory(new PropertyValueFactory<>("age"));
+        ageCol.setCellValueFactory(new PropertyValueFactory<>("wiek"));
 
-        TableColumn<Employee, String> cityCol = new TableColumn<>("Adres");
-        cityCol.setCellValueFactory(new PropertyValueFactory<>("address"));
+        TableColumn<Employee, String> loginCol = new TableColumn<>("Login");
+        loginCol.setCellValueFactory(new PropertyValueFactory<>("login"));
 
-        TableColumn<Employee, String> emCol = new TableColumn<>("Login");
-        emCol.setCellValueFactory(new PropertyValueFactory<>("email"));
+        TableColumn<Employee, String> stanowiskoCol = new TableColumn<>("Stanowisko");
+        stanowiskoCol.setCellValueFactory(new PropertyValueFactory<>("stanowisko"));
 
-        TableColumn<Employee, String> empCol = new TableColumn<>(
-                "Rodzaj konta"
-        );
-        empCol.setCellValueFactory(new PropertyValueFactory<>("employeeId"));
+        TableColumn<Employee, BigDecimal> zarobkiCol = new TableColumn<>("Zarobki");
+        zarobkiCol.setCellValueFactory(new PropertyValueFactory<>("zarobki"));
 
-        TableColumn<Employee, String> depCol = new TableColumn<>("Oddział");
-        depCol.setCellValueFactory(new PropertyValueFactory<>("department"));
-
-        TableColumn<Employee, String> posCol = new TableColumn<>("Stanowisko");
-        posCol.setCellValueFactory(new PropertyValueFactory<>("position"));
-
-        TableColumn<Employee, Integer> salCol = new TableColumn<>(
-                "Wynagrodzenie"
-        );
-        salCol.setCellValueFactory(new PropertyValueFactory<>("salary"));
 
         // Dodanie kolumn do tabeli
         tableView.getColumns().addAll(
                 nameCol,
+                surnameCol,
                 ageCol,
-                cityCol,
-                emCol,
-                empCol,
-                depCol,
-                posCol,
-                salCol);
+                loginCol,
+                stanowiskoCol,
+                zarobkiCol
+        );
 
         // Przykładowe dane testowe
-        try{tableView.getItems().addAll(
-                new Employee(
-                        "Jan",
-                        "Nowak",
-                        25,
-                        "Kraków",
-                        "kasjer",
-                        "kasjer",
-                        "IT",
-                        "Developer",
-                        5000
-                ),
-                new Employee(
-                        "Łukasz",
-                        "Banan",
-                        30,
-                        "Warszawa",
-                        "admin",
-                        "admin",
-                        "IT",
-                        "Developer",
-                        5000
-                ),
-                new Employee(
-                        "Krzysztof",
-                        "Kępa",
-                        35,
-                        "Gdańsk",
-                        "manager",
-                        "manager",
-                        "IT",
-                        "Developer",
-                        5000
-                )
-        );}
-        catch (PasswordException e){
-            System.out.println("Hasło musi mieć co najmniej 8 znaków");
-        }
-        catch (NullPointerException e) {
-            System.out.println("Nie można dodać przykładowych danych do tabeli.");
-        }
-        catch (Exception e) {
-            e.printStackTrace();
+        try {
+            Employee emp1 = new Employee();
+            emp1.setImie("Jan");
+            emp1.setNazwisko("Nowak");
+            emp1.setWiek(25);
+            emp1.setLogin("kasjer123");
+            emp1.setHaslo("haslo123");
+            emp1.setStanowisko("kasjer");
+            emp1.setZarobki(new BigDecimal("5000"));
+
+            Employee emp2 = new Employee();
+            emp2.setImie("Anna");
+            emp2.setNazwisko("Kowalska");
+            emp2.setWiek(30);
+            emp2.setLogin("admin123");
+            emp2.setHaslo("haslo123");
+            emp2.setStanowisko("admin");
+            emp2.setZarobki(new BigDecimal("6000"));
+
+            tableView.getItems().addAll(emp1, emp2);
+        } catch (Exception e) {
             showAlert(
                     Alert.AlertType.ERROR,
                     "Błąd",
                     "Nie można dodać przykładowych danych do tabeli."
             );
+            e.printStackTrace();
         }
 
         // Przycisk dodawania/usuwania
