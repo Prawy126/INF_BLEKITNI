@@ -305,11 +305,7 @@ public class HelloApplication extends Application {
 
         return true;
     }
-
-    // Reszta metod pozostaje bez zmian (handleLogin, showAlert, animateFadeIn,
-    // animateSlideDown, styleButton, exitApplication, showResetPasswordWindow,
-    // handleSendResetCode, main)
-
+    
     /**
      * Obsługuje logikę logowania i przekierowuje na odpowiedni panel.
      *
@@ -317,75 +313,8 @@ public class HelloApplication extends Application {
      * @param enteredPassword hasło
      * @param root kontener GUI
      */
-    private void handleLogin(String enteredUsername,
-                             String enteredPassword,
-                             VBox root) {
-        try (Connection conn = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/StonkaDB", "root", "")) {
-
-            String query = "SELECT * FROM Pracownicy WHERE Login = ? AND Haslo = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setString(1, enteredUsername);
-                stmt.setString(2, enteredPassword);
-
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        String stanowisko = rs.getString("Stanowisko");
-
-                        showAlert(
-                                Alert.AlertType.INFORMATION,
-                                "Sukces",
-                                "Zalogowano pomyślnie!",
-                                "Witaj, " + rs.getString("Imie") + "!"
-                        );
-
-                        Stage currentStage = (Stage) root.getScene().getWindow();
-                        currentStage.close();
-                        Stage nextStage = new Stage();
-
-                        // Przekierowanie według stanowiska
-                        switch (stanowisko.toLowerCase()) {
-                            case "admin":
-                                new AdminPanel(nextStage);
-                                break;
-                            case "kierownik":
-                                new ManagerPanel(nextStage);
-                                break;
-                            case "kasjer":
-                                new CashierPanel(nextStage);
-                                break;
-                            case "logistyk":
-                                new LogisticianPanel(nextStage);
-                                break;
-                            default:
-                                showAlert(
-                                        Alert.AlertType.WARNING,
-                                        "Brak panelu",
-                                        "Nieznana rola użytkownika",
-                                        "Stanowisko: " + stanowisko
-                                );
-                                break;
-                        }
-                    } else {
-                        showAlert(
-                                Alert.AlertType.ERROR,
-                                "Błąd",
-                                "Nieprawidłowe dane logowania!",
-                                "Spróbuj ponownie."
-                        );
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert(
-                    Alert.AlertType.ERROR,
-                    "Błąd",
-                    "Wystąpił błąd połączenia",
-                    e.getMessage()
-            );
-        }
+    private void handleLogin(String enteredUsername, String enteredPassword, VBox root) {
+        org.example.sys.Login.attemptLogin(enteredUsername, enteredPassword, root);
     }
 
     /**
