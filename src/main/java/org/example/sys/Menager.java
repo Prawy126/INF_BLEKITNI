@@ -2,24 +2,25 @@ package org.example.sys;
 
 import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
-
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.example.sys.Address;
 
 public class Menager extends Employee {
 
     private List<Employee> employees = new ArrayList<>();
 
-    public Menager(String name, String surname, int age, String address, String password,
-                   String email, String department, String position, double salary) throws PasswordException, SalaryException {
-        super(name, surname, age, address, password, email, department, position, salary);
+    public Menager(String name, String surname, int age, Address address,String login, String password,
+                    String department, BigDecimal salary) throws PasswordException, SalaryException {
+        super(name, surname, age, address, login, password, department, salary);
     }
 
-    public Menager(String name, String surname, int age, String address, String password,
-                   String email, String department, String position, double salary,
+    public Menager(String name, String surname, int age, Address address, String login, String password,
+                   String department, BigDecimal salary,
                    List<Employee> employees) throws PasswordException, SalaryException {
-        this(name, surname, age, address, password, email, department, position, salary);
+        this(name, surname, age, address,login,  password, department, salary);
         this.employees = employees != null ? employees : new ArrayList<>();
     }
 
@@ -46,43 +47,31 @@ public class Menager extends Employee {
     }
 
     public void updateName(Employee employee, String newName) {
-        employee.setName(newName);
+        employee.setImie(newName);
     }
 
     public void updateSurname(Employee employee, String newSurname) {
-        employee.setSurname(newSurname);
+        employee.setNazwisko(newSurname);
     }
 
     public void updateAge(Employee employee, int newAge) {
-        employee.setAge(newAge);
+        employee.setWiek(newAge);
     }
 
-    public void updateAddress(Employee employee, String newAddress) {
-        employee.setAddress(newAddress);
+    public void updateAddress(Employee employee,Address newAddress) {
+        employee.setAdres(newAddress);
     }
 
     public void updatePassword(Employee employee, String newPassword)throws PasswordException {
-        employee.setPassword(newPassword);
-    }
-
-    public void updateEmail(Employee employee, String newEmail) {
-        employee.setEmail(newEmail);
+        employee.setHaslo(newPassword);
     }
 
     public void updateDepartment(Employee employee, String newDepartment) {
-        employee.setDepartment(newDepartment);
+        employee.setStanowisko(newDepartment);
     }
 
-    public void updatePosition(Employee employee, String newPosition) {
-        employee.setPosition(newPosition);
-    }
-
-    public void updateSalary(Employee employee, double newSalary) throws SalaryException {
-        employee.setSalary(newSalary);
-    }
-
-    public String getPosition(Employee employee) {
-        return employee.getPosition();
+    public void updateSalary(Employee employee, BigDecimal newSalary) throws SalaryException {
+        employee.setZarobki(newSalary);
     }
 
     public Employee getEmployee(Employee employee) {

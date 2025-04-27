@@ -1,84 +1,93 @@
 package org.example.sys;
 
-import org.example.wyjatki.PasswordException;
+import jakarta.persistence.*;
 import org.example.wyjatki.SalaryException;
 
+import org.example.sys.Address;
+import java.math.BigDecimal;
 import java.util.Date;
-import java.util.UUID;
 
-public class Employee extends Person {
-    private String employeeId;
-    private String department;
-    private String position;
-    private double salary;
+@Entity
+@Table(name = "Pracownicy")
+@Access(AccessType.FIELD)
+public class Employee {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    private String imie;
+    private String nazwisko;
+    private int wiek;
+
+    @ManyToOne
+    @JoinColumn(name = "Id_adresu")
+    private Address adres;
+
+    private String login;
+    private String haslo;
+
+    @Column(name = "Zarobki", precision = 10, scale = 2)
+    private BigDecimal zarobki;
+
+    @Column(name = "Stanowisko")
+    private String stanowisko;
+
+    // Pola związane z urlopem
     private boolean onSickLeave;
     private Date sickLeaveStartDate;
-
-    public Employee(String name, String surname, int age, String address,
-                    String password, String email,
-                    String department,
-                    String position, double salary) throws PasswordException , SalaryException {
-        super(name, surname, age, address, password, email);
-        this.employeeId = generateEmployeeId();
-        this.department = department;
-        if (salary < 0) {
-            throw new SalaryException("Pensja nie może być ujemna oraz nie może być zerowa.");
-        }else {
-            this.salary = salary;
-        }
-        this.position = position;
-    }
-
     public Employee() {
+        // Konstruktor bezparametrowy wymagany przez JPA
+    }
+    public Employee(String imie, String nazwisko, int wiek, Address address, String login, String haslo, String stanowisko, BigDecimal zarobki) throws SalaryException {
+        this.imie = imie;
+        this.nazwisko = nazwisko;
+        this.wiek = wiek;
+        this.login = login;
+        this.haslo = haslo;
+        this.stanowisko = stanowisko;
+        setZarobki(zarobki);  // używamy settera dla walidacji
+        this.onSickLeave = false;
+        this.sickLeaveStartDate = null;
+        this.adres = address;
     }
 
-    public String getEmployeeId() {
-        return employeeId;
-    }
+    // Gettery i settery
+    public int getId() { return id; }
 
-    public String getDepartment() {
-        return department;
-    }
+    public String getImie() { return imie; }
+    public void setImie(String imie) { this.imie = imie; }
 
-    public void setDepartment(String department) {
-        this.department = department;
-    }
+    public String getNazwisko() { return nazwisko; }
+    public void setNazwisko(String nazwisko) { this.nazwisko = nazwisko; }
 
-    public String getPosition() {
-        return position;
-    }
+    public int getWiek() { return wiek; }
+    public void setWiek(int wiek) { this.wiek = wiek; }
 
-    public void setPosition(String position) {
-        this.position = position;
-    }
+    public Address getAdres() { return adres; }
+    public void setAdres(Address adres) { this.adres = adres; }
 
-    public double getSalary() {
-        return salary;
-    }
+    public String getLogin() { return login; }
+    public void setLogin(String login) { this.login = login; }
 
-    public void setSalary(double salary) throws SalaryException {
-        if(salary < 0) {
-            throw new SalaryException("Pensja nie może być ujemna oraz nie może być zerowa.");
+    public String getHaslo() { return haslo; }
+    public void setHaslo(String haslo) { this.haslo = haslo; }
+
+    public BigDecimal getZarobki() { return zarobki; }
+    public void setZarobki(BigDecimal zarobki) throws SalaryException {
+        if(zarobki.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new SalaryException("Wynagrodzenie musi być większe od zera");
         }
-        else{
-            this.salary = salary;
-        }
+        this.zarobki = zarobki;
     }
 
-    public boolean isOnSickLeave() {
-        return onSickLeave;
-    }
+    public String getStanowisko() { return stanowisko; }
+    public void setStanowisko(String stanowisko) { this.stanowisko = stanowisko; }
 
+    // Metody związane z urlopem
+    public boolean isOnSickLeave() { return onSickLeave; }
     public void startSickLeave(Date startDate) {
         this.sickLeaveStartDate = startDate;
         this.onSickLeave = true;
-    }
-
-    public Date getSickLeaveStartDate() {
-        return sickLeaveStartDate;
-    }
-
-    private String generateEmployeeId() {
-        return UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
 }
