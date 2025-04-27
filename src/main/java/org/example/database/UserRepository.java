@@ -13,6 +13,16 @@ public class UserRepository {
         this.emf = Persistence.createEntityManagerFactory("myPU");
     }
 
+    public List<Employee> pobierzWszystkichPracownikow() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createQuery("SELECT e FROM Employee e", Employee.class)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
     /** Zwraca listę wszystkich kasjerów. */
     public List<Employee> pobierzKasjerow() {
         EntityManager em = emf.createEntityManager();
@@ -77,14 +87,16 @@ public class UserRepository {
      * Usuwa pracownika na podstawie identyfikatora.
      * Pobiera encję przy pomocy find(), aby móc użyć remove().
      */
-    public void usunPracownika(Long idPracownika) {
+
+    //TODO: Przemyśleć problem z więzami integralności, jak usunie się pracownika to jego raporty powinny zostać, a narazie jest naruszenie więzów integralności
+    public void usunPracownika(Employee pracownik) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            Employee pracownik = em.find(Employee.class, idPracownika);
-            if (pracownik != null) {
-                em.remove(pracownik);
+            Employee managed = em.find(Employee.class, pracownik.getId());
+            if (managed != null) {
+                em.remove(managed);
             }
             tx.commit();
         } finally {
@@ -92,6 +104,24 @@ public class UserRepository {
             em.close();
         }
     }
+
+    public Employee znajdzPoLoginieIHasle(String login, String haslo) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT e FROM Employee e WHERE e.login = :login AND e.haslo = :haslo",
+                            Employee.class
+                    )
+                    .setParameter("login", login)
+                    .setParameter("haslo", haslo)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null; // nie znaleziono użytkownika
+        } finally {
+            em.close();
+        }
+    }
+
 
     /** Opcjonalnie: metoda do zamknięcia fabryki przy zamykaniu aplikacji. */
     public void close() {

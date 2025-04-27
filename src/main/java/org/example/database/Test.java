@@ -54,8 +54,8 @@ public class Test {
             System.out.println(">>> Po aktualizacji: " + poAktualizacji.getImie() + " " + poAktualizacji.getNazwisko()
                     + ", zarobki: " + poAktualizacji.getZarobki());
 
-            userRepo.usunPracownika((long) poAktualizacji.getId());
-            System.out.println(">>> Usunięto pracownika o id = " + poAktualizacji.getId());
+            //userRepo.usunPracownika((long) poAktualizacji.getId());
+            //System.out.println(">>> Usunięto pracownika o id = " + poAktualizacji.getId());
 
             System.out.println("\n>>> Lista kasjerów po usunięciu:");
             wypiszKasjerow(userRepo.pobierzKasjerow());

@@ -129,7 +129,8 @@ VALUES
 ('Kamil', 'Kowalczyk', 45, 7, 'kkowal', 'kamil888', 4700.00, 'Menadżer'),
 ('Barbara', 'Kaczmarek', 27, 8, 'bkacz', 'barbara987', 3400.00, 'Kasjer'),
 ('Piotr', 'Zieliński', 38, 9, 'pziel', 'piotr111', 4100.00, 'Magazynier'),
-('Magda', 'Szymańska', 36, 10, 'mszym', 'magda654', 4300.00, 'Logistyk');
+('Magda', 'Szymańska', 36, 10, 'mszym', 'magda654', 4300.00, 'Logistyk'),
+('Janusz', 'Kowalik', 35, 1, 'admin2', 'admin2', 4500.00, 'Admin');
 
 INSERT INTO Produkty (Nazwa, Cena, IloscWmagazynie)
 VALUES 
