@@ -146,6 +146,8 @@ public class HelloApplication extends Application {
         Scene scene = new Scene(root, 600, 500);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Stonka - Logowanie");
+        primaryStage.setMinWidth(700);
+        primaryStage.setMinHeight(450);
         primaryStage.show();
     }
 

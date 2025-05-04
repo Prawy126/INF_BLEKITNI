@@ -9,6 +9,8 @@ public class ClientPanel {
     public ClientPanel(Stage primaryStage) {
         this.primaryStage = primaryStage;
         this.controller = new ClientPanelController(this);
+        primaryStage.setMinWidth(700);
+        primaryStage.setMinHeight(450);
         primaryStage.setTitle("Panel klienta - Panel zakupowy");
 
         controller.showClientPanel();
