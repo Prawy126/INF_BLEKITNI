@@ -41,6 +41,8 @@ public class AdminPanel {
      */
     public AdminPanel(Stage stage) {
         this.primaryStage = stage;
+        primaryStage.setMinWidth(700);
+        primaryStage.setMinHeight(450);
         this.controller = new AdminPanelController(this);
 
         primaryStage.setTitle("Panel administratora");

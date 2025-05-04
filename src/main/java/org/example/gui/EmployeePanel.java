@@ -16,6 +16,8 @@ public class EmployeePanel {
         this.controller = new EmployeePanelController(this);
 
         primaryStage.setTitle("Panel pracownika");
+        primaryStage.setMinWidth(700);
+        primaryStage.setMinHeight(450);
 
         root = new BorderPane();
         root.setPadding(new Insets(10));

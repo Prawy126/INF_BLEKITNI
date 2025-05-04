@@ -25,7 +25,7 @@ public class Login {
             VBox root)
     {
         try (Connection conn = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/StonkaDB", "root", "")) {
+                "jdbc:mysql://localhost:3306/StonkaDB", "root", "twoje_haslo")) {
 
             String query = "SELECT * FROM Pracownicy WHERE Login = ? AND Haslo = ?";
             try (PreparedStatement stmt = conn.prepareStatement(query)) {

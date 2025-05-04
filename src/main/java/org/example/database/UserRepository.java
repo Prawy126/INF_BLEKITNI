@@ -2,7 +2,6 @@ package org.example.database;
 
 import jakarta.persistence.*;
 import org.example.sys.Employee;
-
 import java.util.List;
 
 public class UserRepository {

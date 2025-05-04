@@ -31,6 +31,8 @@ public class CashierPanel {
      */
     public CashierPanel(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        primaryStage.setMinWidth(700);
+        primaryStage.setMinHeight(450);
         this.controller = new CashierPanelController(this);
         primaryStage.setTitle("Panel kasjera");
 

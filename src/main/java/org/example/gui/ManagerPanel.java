@@ -43,6 +43,8 @@ public class ManagerPanel {
         this.controller = new ManagerPanelController(this);
 
         primaryStage.setTitle("Panel kierownika");
+        primaryStage.setMinWidth(700);
+        primaryStage.setMinHeight(450);
 
         root = new BorderPane();
         root.setPadding(new Insets(10));

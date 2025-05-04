@@ -40,6 +40,8 @@ public class LogisticianPanel {
      */
     public LogisticianPanel(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        primaryStage.setMinWidth(700);
+        primaryStage.setMinHeight(450);
         this.controller = new LogisticianPanelController(this);
 
         primaryStage.setTitle("Panel logistyka");
