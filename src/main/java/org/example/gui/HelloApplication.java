@@ -333,8 +333,8 @@ public class HelloApplication extends Application {
         verifyButton.setOnAction(e -> {
             String code = codeField.getText();
             if (code.length() == 6) {
-                showAlert(Alert.AlertType.INFORMATION, "Sukces", "Kod poprawny", "Kod weryfikacyjny jest poprawny.");
                 verificationStage.close();
+                showNewPasswordWindow();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Błąd", "Niepoprawny kod", "Proszę podać poprawny 6-znakowy kod.");
             }
@@ -346,6 +346,53 @@ public class HelloApplication extends Application {
         verificationStage.setScene(verificationScene);
         verificationStage.show();
     }
+
+    private void showNewPasswordWindow() {
+        Stage passwordStage = new Stage();
+        passwordStage.setTitle("Ustaw nowe hasło");
+
+        VBox layout = new VBox(10);
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
+
+        Label newPasswordLabel = new Label("Nowe hasło:");
+        PasswordField newPasswordField = new PasswordField();
+        newPasswordField.setPromptText("Wprowadź nowe hasło");
+
+        Label repeatPasswordLabel = new Label("Powtórz hasło:");
+        PasswordField repeatPasswordField = new PasswordField();
+        repeatPasswordField.setPromptText("Powtórz nowe hasło");
+
+        Button submitButton = new Button("Zapisz nowe hasło");
+        submitButton.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white;");
+        submitButton.setOnAction(e -> {
+            String newPass = newPasswordField.getText();
+            String repeatPass = repeatPasswordField.getText();
+
+            if (newPass.isEmpty() || repeatPass.isEmpty()) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Puste pola", "Proszę wypełnić oba pola hasła.");
+            } else if (!newPass.equals(repeatPass)) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Hasła nie są zgodne", "Upewnij się, że oba hasła są identyczne.");
+            } else if (newPass.length() < 8) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Hasło za krótkie", "Hasło musi mieć co najmniej 8 znaków.");
+            } else {
+                // TODO: Dodać logikę do aktualizacji hasła w bazie danych
+                showAlert(Alert.AlertType.INFORMATION, "Sukces", "Hasło zmienione", "Twoje hasło zostało zaktualizowane.");
+                passwordStage.close();
+            }
+        });
+
+        layout.getChildren().addAll(
+                newPasswordLabel, newPasswordField,
+                repeatPasswordLabel, repeatPasswordField,
+                submitButton
+        );
+
+        Scene scene = new Scene(layout, 300, 250);
+        passwordStage.setScene(scene);
+        passwordStage.show();
+    }
+
 
 
     public static void main(String[] args) {
