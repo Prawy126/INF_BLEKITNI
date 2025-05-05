@@ -31,7 +31,8 @@ import java.util.Objects;
  * Zawiera logikę interfejsu logowania i przekierowywania użytkownika
  * na odpowiedni panel w zależności od roli.
  */
-public class HelloApplication extends Application {
+public class
+HelloApplication extends Application {
 
     /**
      * Punkt wejścia do aplikacji JavaFX.
