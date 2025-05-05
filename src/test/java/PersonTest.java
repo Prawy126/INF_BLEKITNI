@@ -1,4 +1,5 @@
 import org.example.sys.Person;
+import org.example.wyjatki.PasswordException;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -6,7 +7,13 @@ class PersonTest {
 
     @Test
     void testParameterizedConstructor() {
-        Person person = new Person("Jan", "Kowalski", 30, "ul. Testowa 1", "secret", "jan@example.com");
+        Person person = null;
+        //otuliłem to try-catch, bo sypało
+        try {
+            person = new Person("Jan", "Kowalski", 30, "ul. Testowa 1", "secret", "jan@example.com");
+        } catch (PasswordException e) {
+            throw new RuntimeException(e);
+        }
 
         // Porównanie wartości
         assertEquals("Jan", person.getName());
@@ -45,7 +52,13 @@ class PersonTest {
 
     @Test
     void testToString() {
-        Person person = new Person("Anna", "Nowak", 25, "ul. Kwiatowa 5", "pass123", "anna@example.com");
+        Person person = null;
+        //tutaj też
+        try {
+            person = new Person("Anna", "Nowak", 25, "ul. Kwiatowa 5", "pass123", "anna@example.com");
+        } catch (PasswordException e) {
+            throw new RuntimeException(e);
+        }
         String result = person.toString();
         String expected = "Anna Nowak (25), ul. Kwiatowa 5, anna@example.com";
         assertEquals(expected, result);

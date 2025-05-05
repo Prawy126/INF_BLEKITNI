@@ -5,12 +5,11 @@ import javafx.scene.control.Alert;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.gui.*;
-import org.example.gui.HelloApplication;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import javax.mail.MessagingException;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.*;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,11 +18,7 @@ public class Login {
 
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public static void attemptLogin(
-            String username,
-            String password,
-            VBox root)
-    {
+    public static void attemptLogin(String username, String password, VBox root) {
         try (Connection conn = DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/StonkaDB", "root", "")) {
 
@@ -93,57 +88,83 @@ public class Login {
 
     /**
      * Funkcja do wysyłania kodu odzyskiwania hasła.
-     * Generuje losowy kod i wysyła go na podany adres e-mail.
+     * Generuje losowy kod i wysyła go na podany adres e-mail wraz z dodatkowymi informacjami.
      *
-     * @param email Adres e-mail użytkownika
+     * @param email       Adres e-mail użytkownika
      */
     public static void sendResetCode(String email) {
         String resetCode = generateRandomCode(6);
+
+        // Tu ustaw dodatkową treść e-maila
+        String subject = "Kod resetowania hasła";
+        String body = "Otrzymujesz ten kod w celu zresetowania hasła w systemie Stonka.\n\n"
+                + "Twój kod resetujący to: " + resetCode;
+
         executor.submit(() -> {
             try {
-                sendEmail(email, resetCode);
-                Platform.runLater(() -> {
-                });
+                sendEmail(email, subject, body);
+                Platform.runLater(() -> HelloApplication.showAlert(
+                        Alert.AlertType.INFORMATION,
+                        "E-mail wysłany",
+                        "Kod resetowania został wysłany",
+                        "Sprawdź swoją skrzynkę pocztową."
+                ));
             } catch (Exception e) {
-                Platform.runLater(() -> {
-                    HelloApplication.showAlert(
-                            Alert.AlertType.ERROR,
-                            "Błąd wysyłania e-maila",
-                            "Wystąpił problem z wysyłką e-maila",
-                            e.getMessage()
-                    );
-                });
+                Platform.runLater(() -> HelloApplication.showAlert(
+                        Alert.AlertType.ERROR,
+                        "Błąd wysyłania e-maila",
+                        "Wystąpił problem z wysyłką e-maila",
+                        e.getMessage()
+                ));
             }
         });
     }
 
+
     /**
-     * Funkcja generująca losowy kod o podanej długości.
+     * Wysyła e-mail do wskazanego odbiorcy, używając danych logowania z pliku PASS.txt.
      *
-     * @param length Długość generowanego kodu
-     * @return Generowany kod
+     * @param toEmail adres e-mail odbiorcy
+     * @param subject temat wiadomości
+     * @param body    treść wiadomości
+     */
+    public static void sendEmail(String toEmail, String subject, String body) {
+        String filePath = "PASS.txt";
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String fromEmail = reader.readLine();
+            String password = reader.readLine();
+
+            if (fromEmail == null || password == null) {
+                System.out.println("Plik PASS.txt jest niekompletny.");
+                return;
+            }
+
+            EmailSender.sendEmail(toEmail, fromEmail, password, subject, body);
+            System.out.println("E-mail został wysłany!");
+
+        } catch (IOException e) {
+            System.out.println("Błąd podczas odczytu pliku PASS.txt.");
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            System.out.println("Błąd podczas wysyłania e-maila.");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Generuje losowy kod o podanej długości.
+     *
+     * @param length długość kodu
+     * @return losowy kod
      */
     private static String generateRandomCode(int length) {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random = new Random();
         StringBuilder code = new StringBuilder(length);
-
         for (int i = 0; i < length; i++) {
             code.append(chars.charAt(random.nextInt(chars.length())));
         }
-
         return code.toString();
-    }
-
-    /**
-     * Funkcja symulująca wysyłanie e-maila.
-     * W prawdziwej aplikacji należy użyć np. JavaMail API.
-     *
-     * @param email    Adres e-mail odbiorcy
-     * @param resetCode Kod do resetowania hasła
-     */
-    private static void sendEmail(String email, String resetCode) {
-        System.out.println("Wysyłanie e-maila do: " + email);
-        System.out.println("Kod: " + resetCode);
     }
 }

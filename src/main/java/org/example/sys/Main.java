@@ -15,9 +15,9 @@ public class Main {
         // TODO: Założyć jakiś mail i ustawić hasło aplikacji
         // https://myaccount.google.com/apppasswords?spm=a2ty_o01.29997173.0.0.5d57c9212jdST3
         // zapisałem linka do stworzenia hasła aplikacji
-        String toEmailAddress = "mp125151@stud.ur.edu.pl";
-        String  fromEmailAddress = "michal190713@gmail.com";
-        String password = "bdjx oans tnic tpps"; // UWAGA: Nie przechowuj hasła w kodzie!
+        String toEmailAddress = "";
+        String  fromEmailAddress = "";
+        String password = ""; // UWAGA: Nie przechowuj hasła w kodzie!
         String subject = "test";
         String bodyText = "nie wiem czy to działa";
 
