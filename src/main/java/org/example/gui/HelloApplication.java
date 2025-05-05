@@ -22,6 +22,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.example.sys.Login;
 
 import java.io.File;
 import java.util.Objects;
@@ -106,7 +107,7 @@ HelloApplication extends Application {
 
         Button loginButton = new Button("Zaloguj");
         styleButton(loginButton, "#2980B9");
-        loginButton.setOnAction(e -> handleLogin(
+        loginButton.setOnAction(e -> Login.attemptLogin(
                 loginField.getText(),
                 passwordField.getText(),
                 root
@@ -304,7 +305,7 @@ HelloApplication extends Application {
 
         return true;
     }
-    
+
     /**
      * Obsługuje logikę logowania i przekierowuje na odpowiedni panel.
      *
@@ -420,9 +421,21 @@ HelloApplication extends Application {
         emailField.setPromptText("Email");
 
         Button sendCodeButton = new Button("Wyślij kod odzyskiwania");
-        sendCodeButton.setOnAction(e -> handleSendResetCode(
-                emailField.getText()
-        ));
+        sendCodeButton.setOnAction(e -> {
+            String email = emailField.getText();
+            if (email.isEmpty()) {
+                HelloApplication.showAlert(
+                        Alert.AlertType.ERROR,
+                        "Błąd",
+                        "Brak adresu email",
+                        "Proszę podać adres e-mail, na który ma zostać wysłany kod."
+                );
+            } else {
+                Login.sendResetCode(email);
+                resetStage.close();
+                showVerificationWindow();
+            }
+        });
 
         resetLayout.getChildren().addAll(emailLabel, emailField, sendCodeButton);
 
@@ -431,17 +444,84 @@ HelloApplication extends Application {
         resetStage.show();
     }
 
-    /**
-     * Obsługuje wysyłkę kodu do resetowania hasła.
-     */
-    private void handleSendResetCode(String email) {
-        showAlert(
-                Alert.AlertType.INFORMATION,
-                "Kod wysłany",
-                "Kod odzyskiwania został wysłany na email",
-                "Proszę sprawdzić swoją skrzynkę."
-        );
+    // Funkcja do wyświetlania okna weryfikacyjnego
+    public void showVerificationWindow() {
+        Stage verificationStage = new Stage();
+        verificationStage.setTitle("Weryfikacja kodu");
+
+        VBox verificationLayout = new VBox(10);
+        verificationLayout.setPadding(new Insets(20));
+        verificationLayout.setAlignment(Pos.CENTER);
+
+        Label codeLabel = new Label("Podaj kod weryfikacyjny:");
+        TextField codeField = new TextField();
+        codeField.setPromptText("Kod");
+
+        Button verifyButton = new Button("Zweryfikuj");
+        verifyButton.setOnAction(e -> {
+            String code = codeField.getText();
+            if (code.length() == 6) {
+                verificationStage.close();
+                showNewPasswordWindow();
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Niepoprawny kod", "Proszę podać poprawny 6-znakowy kod.");
+            }
+        });
+
+        verificationLayout.getChildren().addAll(codeLabel, codeField, verifyButton);
+
+        Scene verificationScene = new Scene(verificationLayout, 300, 200);
+        verificationStage.setScene(verificationScene);
+        verificationStage.show();
     }
+
+    private void showNewPasswordWindow() {
+        Stage passwordStage = new Stage();
+        passwordStage.setTitle("Ustaw nowe hasło");
+
+        VBox layout = new VBox(10);
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
+
+        Label newPasswordLabel = new Label("Nowe hasło:");
+        PasswordField newPasswordField = new PasswordField();
+        newPasswordField.setPromptText("Wprowadź nowe hasło");
+
+        Label repeatPasswordLabel = new Label("Powtórz hasło:");
+        PasswordField repeatPasswordField = new PasswordField();
+        repeatPasswordField.setPromptText("Powtórz nowe hasło");
+
+        Button submitButton = new Button("Zapisz nowe hasło");
+        submitButton.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white;");
+        submitButton.setOnAction(e -> {
+            String newPass = newPasswordField.getText();
+            String repeatPass = repeatPasswordField.getText();
+
+            if (newPass.isEmpty() || repeatPass.isEmpty()) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Puste pola", "Proszę wypełnić oba pola hasła.");
+            } else if (!newPass.equals(repeatPass)) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Hasła nie są zgodne", "Upewnij się, że oba hasła są identyczne.");
+            } else if (newPass.length() < 8) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Hasło za krótkie", "Hasło musi mieć co najmniej 8 znaków.");
+            } else {
+                // TODO: Dodać logikę do aktualizacji hasła w bazie danych
+                showAlert(Alert.AlertType.INFORMATION, "Sukces", "Hasło zmienione", "Twoje hasło zostało zaktualizowane.");
+                passwordStage.close();
+            }
+        });
+
+        layout.getChildren().addAll(
+                newPasswordLabel, newPasswordField,
+                repeatPasswordLabel, repeatPasswordField,
+                submitButton
+        );
+
+        Scene scene = new Scene(layout, 300, 250);
+        passwordStage.setScene(scene);
+        passwordStage.show();
+    }
+
+
 
     /**
      * Główna metoda uruchamiająca aplikację.
