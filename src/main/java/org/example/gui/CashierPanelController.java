@@ -133,6 +133,8 @@ public class CashierPanelController {
         TextArea description = createStyledTextArea("Opisz problem...");
 
         Button sendButton = cashierPanel.createStyledButton("Wyślij", "#27AE60");
+        Button cancelButton = cashierPanel.createStyledButton("Anuluj", "#E74C3C");
+
         sendButton.setOnAction(e -> {
             if (validateReport(typeBox.getValue(), description.getText())) {
                 showNotification("Sukces", "Zgłoszenie wysłane");
@@ -140,10 +142,22 @@ public class CashierPanelController {
             }
         });
 
+        cancelButton.setOnAction(e -> dialog.close());
+
+        HBox buttons = new HBox(10, sendButton, cancelButton);
+        buttons.setAlignment(Pos.CENTER_RIGHT);
+
         VBox root = new VBox(20);
-        root.getChildren().addAll(typeBox, description, sendButton);
+        root.setPadding(new Insets(20));
+        root.getChildren().addAll(
+                new Label("Typ zgłoszenia:"), typeBox,
+                new Label("Opis:"), description,
+                buttons
+        );
+
         setupDialog(dialog, root);
     }
+
 
     private ObservableList<SalesReport> getSampleReports() {
         return FXCollections.observableArrayList(
@@ -193,7 +207,7 @@ public class CashierPanelController {
 
     // Pomocnicze metody
     private Stage createStyledDialog(String title) {
-        Stage dialog = new Stage(StageStyle.UNDECORATED);
+        Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setTitle(title);
         return dialog;

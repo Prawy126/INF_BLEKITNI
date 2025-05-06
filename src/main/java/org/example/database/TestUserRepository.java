@@ -60,8 +60,8 @@ public class TestUserRepository {
             Employee znalezionyPoLoginie = userRepo.znajdzPoLoginie("mbrzo");
             System.out.println(
                     "\n>>> Znaleziony po loginie: " +
-                            znalezionyPoLoginie.getImie() + " " +
-                            znalezionyPoLoginie.getNazwisko()
+                            znalezionyPoLoginie.getName() + " " +
+                            znalezionyPoLoginie.getSurname()
             );
 
             // === 5. Wyszukiwanie po loginie i haśle ===
@@ -70,8 +70,8 @@ public class TestUserRepository {
             if (znalezionyPoLoginieIHasle != null) {
                 System.out.println(
                         ">>> Znaleziony użytkownik (login + hasło): " +
-                                znalezionyPoLoginieIHasle.getImie() + " " +
-                                znalezionyPoLoginieIHasle.getNazwisko()
+                                znalezionyPoLoginieIHasle.getName() + " " +
+                                znalezionyPoLoginieIHasle.getSurname()
                 );
             } else {
                 System.out.println(
@@ -80,15 +80,15 @@ public class TestUserRepository {
             }
 
             // === 6. Aktualizacja pracownika ===
-            znalezionyPoLoginie.setNazwisko("Brzoza");
+            znalezionyPoLoginie.setSurname("Brzoza");
             znalezionyPoLoginie.setZarobki(new BigDecimal("3400.00"));
             userRepo.aktualizujPracownika(znalezionyPoLoginie);
             System.out.println(">>> Zaktualizowano nazwisko i pensję.");
 
             Employee poAktualizacji = userRepo.znajdzPoLoginie("mbrzo");
             System.out.println(
-                    ">>> Po aktualizacji: " + poAktualizacji.getImie() + " " +
-                            poAktualizacji.getNazwisko() + ", zarobki: " +
+                    ">>> Po aktualizacji: " + poAktualizacji.getName() + " " +
+                            poAktualizacji.getSurname() + ", zarobki: " +
                             poAktualizacji.getZarobki()
             );
 
@@ -135,8 +135,8 @@ public class TestUserRepository {
                     "ID: %-3d Imię: %-10s Nazwisko: %-12s Login: %-8s "
                             + "Zarobki: %8.2f zł%n",
                     e.getId(),
-                    e.getImie(),
-                    e.getNazwisko(),
+                    e.getName(),
+                    e.getSurname(),
                     e.getLogin(),
                     e.getZarobki()
             );

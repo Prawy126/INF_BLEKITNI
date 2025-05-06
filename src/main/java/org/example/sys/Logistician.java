@@ -22,15 +22,15 @@ public class Logistician extends Employee{
     }
 
     public void updateName(Employee employee, String newName) {
-        employee.setImie(newName);
+        employee.setName(newName);
     }
 
     public void updateSurname(Employee employee, String newSurname) {
-        employee.setNazwisko(newSurname);
+        employee.setSurname(newSurname);
     }
 
     public void updateAge(Employee employee, int newAge) {
-        employee.setWiek(newAge);
+        employee.setAge(newAge);
     }
 
     public void updateAddress(Employee employee, Address newAddress) {
@@ -38,7 +38,7 @@ public class Logistician extends Employee{
     }
 
     public void updatePassword(Employee employee, String newPassword)throws PasswordException {
-        employee.setHaslo(newPassword);
+        employee.setPassword(newPassword);
     }
 
     public void updateDepartment(Employee employee, String newDepartment) {

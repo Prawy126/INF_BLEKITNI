@@ -241,7 +241,7 @@ public class ManagerPanelController {
         Label employeeLabel = new Label("Wybierz pracownika:");
         ComboBox<String> employeeComboBox = new ComboBox<>();
         userRepository.pobierzWszystkichPracownikow().forEach(p ->
-                employeeComboBox.getItems().add(p.getImie() + " " + p.getNazwisko())
+                employeeComboBox.getItems().add(p.getName() + " " + p.getSurname())
         );
 
         HBox buttonBox = new HBox(10);

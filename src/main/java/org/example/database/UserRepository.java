@@ -159,7 +159,7 @@ public class UserRepository {
         try {
             return em.createQuery(
                             "SELECT e FROM Employee e WHERE e.login = :login "
-                                    + "AND e.haslo = :haslo",
+                                    + "AND e.password = :haslo",
                             Employee.class
                     ).setParameter("login", login)
                     .setParameter("haslo", haslo)

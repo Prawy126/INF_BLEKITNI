@@ -53,45 +53,36 @@ public class AdminPanelController {
 
         tableView = new TableView<>();
 
-        // Kolumny tabeli
-        TableColumn<Employee, String> nameCol =
-                new TableColumn<>("Imię");
-        nameCol.setCellValueFactory(
-                new PropertyValueFactory<>("imie"));
+        // === Poprawione nazwy pól zgodnie z getterami ===
+        TableColumn<Employee, String> nameCol = new TableColumn<>("Imię");
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-        TableColumn<Employee, String> surnameCol =
-                new TableColumn<>("Nazwisko");
-        surnameCol.setCellValueFactory(
-                new PropertyValueFactory<>("nazwisko"));
+        TableColumn<Employee, String> surnameCol = new TableColumn<>("Nazwisko");
+        surnameCol.setCellValueFactory(new PropertyValueFactory<>("surname"));
 
-        TableColumn<Employee, Integer> ageCol =
-                new TableColumn<>("Wiek");
-        ageCol.setCellValueFactory(
-                new PropertyValueFactory<>("wiek"));
+        TableColumn<Employee, Integer> ageCol = new TableColumn<>("Wiek");
+        ageCol.setCellValueFactory(new PropertyValueFactory<>("age"));
 
-        TableColumn<Employee, String> loginCol =
-                new TableColumn<>("Login");
-        loginCol.setCellValueFactory(
-                new PropertyValueFactory<>("login"));
+        TableColumn<Employee, String> loginCol = new TableColumn<>("Login");
+        loginCol.setCellValueFactory(new PropertyValueFactory<>("login"));
 
-        TableColumn<Employee, String> stanowiskoCol =
-                new TableColumn<>("Stanowisko");
-        stanowiskoCol.setCellValueFactory(
-                new PropertyValueFactory<>("stanowisko"));
+        TableColumn<Employee, String> emailCol = new TableColumn<>("Email");
+        emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
 
-        TableColumn<Employee, BigDecimal> zarobkiCol =
-                new TableColumn<>("Zarobki");
-        zarobkiCol.setCellValueFactory(
-                new PropertyValueFactory<>("zarobki"));
+        TableColumn<Employee, String> stanowiskoCol = new TableColumn<>("Stanowisko");
+        stanowiskoCol.setCellValueFactory(new PropertyValueFactory<>("stanowisko"));
+
+        TableColumn<Employee, BigDecimal> zarobkiCol = new TableColumn<>("Zarobki");
+        zarobkiCol.setCellValueFactory(new PropertyValueFactory<>("zarobki"));
 
         tableView.getColumns().addAll(
                 nameCol, surnameCol, ageCol,
-                loginCol, stanowiskoCol, zarobkiCol
+                loginCol, emailCol, stanowiskoCol, zarobkiCol
         );
 
         odswiezListePracownikow();
 
-        // Przyciski
+        // === Przyciski ===
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER);
 
@@ -131,9 +122,10 @@ public class AdminPanelController {
         Label titleLabel = new Label("Edytuj użytkownika");
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
-        TextField nameField = new TextField(selected.getImie());
-        TextField surnameField = new TextField(selected.getNazwisko());
+        TextField nameField = new TextField(selected.getName());
+        TextField surnameField = new TextField(selected.getSurname());
         TextField loginField = new TextField(selected.getLogin());
+        TextField emailField = new TextField(selected.getEmail());
 
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText(
@@ -147,7 +139,7 @@ public class AdminPanelController {
         stanowiskoBox.setValue(selected.getStanowisko());
 
         TextField ageField = new TextField(
-                String.valueOf(selected.getWiek())
+                String.valueOf(selected.getAge())
         );
         TextField salaryField = new TextField(
                 String.valueOf(selected.getZarobki())
@@ -161,8 +153,8 @@ public class AdminPanelController {
 
         formLayout.getChildren().addAll(
                 titleLabel, nameField, surnameField,
-                loginField, passwordField, stanowiskoBox,
-                ageField, salaryField, buttons
+                loginField, passwordField, emailField,
+                stanowiskoBox, ageField, salaryField, buttons
         );
 
         adminPanel.setCenterPane(formLayout);
@@ -172,6 +164,7 @@ public class AdminPanelController {
                 if (nameField.getText().isEmpty()
                         || surnameField.getText().isEmpty()
                         || loginField.getText().isEmpty()
+                        || emailField.getText().isEmpty()
                         || stanowiskoBox.getValue() == null
                         || ageField.getText().isEmpty()
                         || salaryField.getText().isEmpty()) {
@@ -183,16 +176,17 @@ public class AdminPanelController {
                     return;
                 }
 
-                selected.setImie(nameField.getText());
-                selected.setNazwisko(surnameField.getText());
+                selected.setName(nameField.getText());
+                selected.setSurname(surnameField.getText());
                 selected.setLogin(loginField.getText());
+                selected.setEmail(emailField.getText());
 
                 if (!passwordField.getText().isEmpty()) {
-                    selected.setHaslo(passwordField.getText());
+                    selected.setPassword(passwordField.getText());
                 }
 
                 selected.setStanowisko(stanowiskoBox.getValue());
-                selected.setWiek(
+                selected.setAge(
                         Integer.parseInt(ageField.getText())
                 );
                 selected.setZarobki(
@@ -260,6 +254,9 @@ public class AdminPanelController {
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Hasło");
 
+        TextField emailField = new TextField();
+        emailField.setPromptText("Email");
+
         ComboBox<String> stanowiskoBox = new ComboBox<>();
         stanowiskoBox.getItems().addAll(
                 "Kasjer", "Kierownik", "Admin", "Logistyk"
@@ -280,8 +277,8 @@ public class AdminPanelController {
 
         formLayout.getChildren().addAll(
                 titleLabel, nameField, surnameField,
-                loginField, passwordField, stanowiskoBox,
-                ageField, salaryField, buttons
+                loginField, passwordField, emailField,
+                stanowiskoBox, ageField, salaryField, buttons
         );
 
         adminPanel.setCenterPane(formLayout);
@@ -292,6 +289,7 @@ public class AdminPanelController {
                         || surnameField.getText().isEmpty()
                         || loginField.getText().isEmpty()
                         || passwordField.getText().isEmpty()
+                        || emailField.getText().isEmpty()
                         || stanowiskoBox.getValue() == null
                         || ageField.getText().isEmpty()
                         || salaryField.getText().isEmpty()) {
@@ -309,12 +307,13 @@ public class AdminPanelController {
                 );
 
                 Employee nowy = new Employee();
-                nowy.setImie(nameField.getText());
-                nowy.setNazwisko(surnameField.getText());
+                nowy.setName(nameField.getText());
+                nowy.setSurname(surnameField.getText());
                 nowy.setLogin(loginField.getText());
-                nowy.setHaslo(passwordField.getText());
+                nowy.setPassword(passwordField.getText());
+                nowy.setEmail(emailField.getText());
                 nowy.setStanowisko(stanowiskoBox.getValue());
-                nowy.setWiek(wiek);
+                nowy.setAge(wiek);
                 nowy.setZarobki(zarobki);
 
                 userRepository.dodajPracownika(nowy);
