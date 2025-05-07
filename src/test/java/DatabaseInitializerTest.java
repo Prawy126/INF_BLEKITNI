@@ -19,7 +19,7 @@ class DatabaseInitializerTest {
     private static final String TEST_URL = "jdbc:mysql://localhost:3306/" + DB_NAME + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     private static final String ROOT_URL = "jdbc:mysql://localhost:3306/?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     private static final String USER = "root";
-    private static final String PASS = "twoje_haslo";
+    private static final String PASS = "";
 
     @Test
     @Order(1)

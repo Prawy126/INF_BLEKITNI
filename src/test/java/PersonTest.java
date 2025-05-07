@@ -1,97 +1,69 @@
 import org.example.sys.Person;
+import org.example.wyjatki.AgeException;
+import org.example.wyjatki.NameException;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class PersonTest {
 
     @Test
     void testParameterizedConstructor() {
-        try{
-            Person person = new Person("Jan", "Kowalski", 30, "ul. Testowa 1", "secret", "jan@example.com");
-            // Porównanie wartości
+        try {
+            Person person = new Person("Jan", "Kowalski", 30, "jan@example.com");
+
             assertEquals("Jan", person.getName());
             assertEquals("Kowalski", person.getSurname());
             assertEquals(30, person.getAge());
-            assertEquals("ul. Testowa 1", person.getAddress());
-            assertEquals("secret", person.getPassword());
             assertEquals("jan@example.com", person.getEmail());
-        }catch (Exception e){
-            e.printStackTrace();
+        } catch (Exception e) {
+            fail("Wyjątek w konstruktorze: " + e.getMessage());
         }
     }
 
     @Test
-    void testMatchesPassword() {
-        try{
-            Person person = new Person();
-            person.setPassword("correctPass");
-            assertTrue(person.matchesPassword("correctPass"));
-            assertFalse(person.matchesPassword("wrongPass"));
-            assertFalse(person.matchesPassword(null));
-            person.setPassword(null);
-            assertFalse(person.matchesPassword("correctPass"));
-            assertFalse(person.matchesPassword(null));
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
+    void testToString() throws Exception {
+        Person person = new Person("Anna", "Nowak", 25, "anna@example.com");
+        String expected = "Anna Nowak (25), anna@example.com";
+        assertEquals(expected, person.toString());
     }
 
     @Test
-    void testMatchesEmail() {
+    void testSettersAndGetters() throws Exception {
         Person person = new Person();
-        person.setEmail("test@example.com");
 
-        assertTrue(person.matchesEmail("test@example.com"));
-        assertFalse(person.matchesEmail("wrong@example.com"));
-        assertFalse(person.matchesEmail(null));
+        person.setName("Piotr");
+        person.setSurname("Wiśniewski");
+        person.setAge(40);
+        person.setEmail("piotr@example.com");
 
-        person.setEmail(null);
-        assertFalse(person.matchesEmail("test@example.com"));
-        assertFalse(person.matchesEmail(null));
+        assertEquals("Piotr", person.getName());
+        assertEquals("Wiśniewski", person.getSurname());
+        assertEquals(40, person.getAge());
+        assertEquals("piotr@example.com", person.getEmail());
     }
 
     @Test
-    void testToString() {
-        try{
-            Person person = new Person("Anna", "Nowak", 25, "ul. Kwiatowa 5", "pass123", "anna@example.com");
-            String result = person.toString();
-            String expected = "Anna Nowak (25), ul. Kwiatowa 5, anna@example.com";
-            assertEquals(expected, result);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-    }
-
-    @Test
-    void testSettersAndGetters() {
-        try{
-            Person person = new Person();
-            person.setName("Piotr");
-            person.setSurname("Wiśniewski");
-            person.setAge(40);
-            person.setAddress("ul. Leśna 10");
-            person.setPassword("newPass");
-            person.setEmail("piotr@example.com");
-
-            assertEquals("Piotr", person.getName());
-            assertEquals("Wiśniewski", person.getSurname());
-            assertEquals(40, person.getAge());
-            assertEquals("ul. Leśna 10", person.getAddress());
-            assertEquals("newPass", person.getPassword());
-            assertEquals("piotr@example.com", person.getEmail());
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    @Test
-    void testEdgeCasesForAge() {
+    void testSetNameInvalid() {
         Person person = new Person();
-        person.setAge(0);
-        assertEquals(0, person.getAge());
-        person.setAge(-1);
-        assertEquals(-1, person.getAge());
+        assertThrows(NameException.class, () -> person.setName(""));
+        assertThrows(NameException.class, () -> person.setName("A"));
+        assertThrows(NameException.class, () -> person.setName(null));
+    }
+
+    @Test
+    void testSetSurnameInvalid() {
+        Person person = new Person();
+        assertThrows(NameException.class, () -> person.setSurname(""));
+        assertThrows(NameException.class, () -> person.setSurname("B"));
+        assertThrows(NameException.class, () -> person.setSurname(null));
+    }
+
+    @Test
+    void testSetAgeInvalid() {
+        Person person = new Person();
+        assertThrows(AgeException.class, () -> person.setAge(-1));
+        assertThrows(AgeException.class, () -> person.setAge(130));
+        assertThrows(AgeException.class, () -> person.setAge(17));
     }
 }

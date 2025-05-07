@@ -22,10 +22,15 @@ CREATE TABLE IF NOT EXISTS Pracownicy (
     Id_adresu INT,
     Login VARCHAR(100),
     Haslo VARCHAR(100),
+    Email VARCHAR(100),
     Zarobki DECIMAL(10,2),
     Stanowisko VARCHAR(100),
+    onSickLeave BOOLEAN DEFAULT FALSE,
+    sickLeaveStartDate DATE,
     FOREIGN KEY (Id_adresu) REFERENCES Adresy(Id)
-);
+    );
+
+
 
 -- Tabela Zadania
 CREATE TABLE IF NOT EXISTS Zadania (
@@ -118,18 +123,20 @@ VALUES
 ('Katowice', '9A', NULL, '40-002', 'Katowice'),
 ('Rzeszów', '22', '5', '35-003', 'Rzeszów');
 
-INSERT INTO Pracownicy (Imie, Nazwisko, Wiek, Id_adresu, Login, Haslo, Zarobki, Stanowisko)
+INSERT INTO Pracownicy
+(Imie, Nazwisko, Wiek, Id_adresu, Login, Haslo, Email, Zarobki, Stanowisko, onSickLeave, sickLeaveStartDate)
 VALUES
-('Jan', 'Kowalski', 35, 1, 'admin', 'admin123', 4500.00, 'Kierownik'),
-('Anna', 'Nowak', 28, 2, 'anowak', 'nowak456', 3500.00, 'Kasjer'),
-('Marek', 'Wiśniewski', 40, 3, 'mwis', 'marek123', 4000.00, 'Magazynier'),
-('Zofia', 'Maj', 33, 4, 'zmaj', 'zofia789', 3700.00, 'Logistyk'),
-('Adam', 'Nowicki', 29, 5, 'anowicki', 'adam321', 3600.00, 'Kasjer'),
-('Ewa', 'Jankowska', 31, 6, 'ejanko', 'ewa456', 3900.00, 'Sprzedawca'),
-('Kamil', 'Kowalczyk', 45, 7, 'kkowal', 'kamil888', 4700.00, 'Menadżer'),
-('Barbara', 'Kaczmarek', 27, 8, 'bkacz', 'barbara987', 3400.00, 'Kasjer'),
-('Piotr', 'Zieliński', 38, 9, 'pziel', 'piotr111', 4100.00, 'Magazynier'),
-('Magda', 'Szymańska', 36, 10, 'mszym', 'magda654', 4300.00, 'Logistyk');
+    ('Jan', 'Kowalski', 35, 1, 'admin', 'admin123', 'jan.kowalski@example.com', 4500.00, 'Kierownik', FALSE, NULL),
+    ('Anna', 'Nowak', 28, 2, 'anowak', 'nowak456', 'anna.nowak@example.com', 3500.00, 'Kasjer', TRUE, '2025-04-20'),
+    ('Marek', 'Wiśniewski', 40, 3, 'mwis', 'marek123', 'marek.w@example.com', 4000.00, 'Magazynier', FALSE, NULL),
+    ('Zofia', 'Maj', 33, 4, 'zmaj', 'zofia789', 'z.maj@example.com', 3700.00, 'Logistyk', FALSE, NULL),
+    ('Adam', 'Nowicki', 29, 5, 'anowicki', 'adam321', 'adam.nowicki@example.com', 3600.00, 'Kasjer', FALSE, NULL),
+    ('Ewa', 'Jankowska', 31, 6, 'ejanko', 'ewa456', 'ewa.j@example.com', 3900.00, 'Sprzedawca', FALSE, NULL),
+    ('Kamil', 'Kowalczyk', 45, 7, 'kkowal', 'kamil888', 'kamil.k@example.com', 4700.00, 'Menadżer', FALSE, NULL),
+    ('Barbara', 'Kaczmarek', 27, 8, 'bkacz', 'barbara987', 'b.kaczmarek@example.com', 3400.00, 'Kasjer', TRUE, '2025-04-18'),
+    ('Piotr', 'Zieliński', 38, 9, 'pziel', 'piotr111', 'piotr.z@example.com', 4100.00, 'Magazynier', FALSE, NULL),
+    ('Magda', 'Szymańska', 36, 10, 'mszym', 'magda654', 'magda.s@example.com', 4300.00, 'Logistyk', FALSE, NULL),
+    ('Janusz', 'Kowalik', 35, 1, 'admin2', 'admin2', 'janusz.kowalik@example.com', 4500.00, 'Admin', FALSE, NULL);
 
 INSERT INTO Produkty (Nazwa, Cena, IloscWmagazynie)
 VALUES 

@@ -1,154 +1,129 @@
+import org.example.sys.Address;
 import org.example.sys.Employee;
 import org.example.sys.Logistician;
+import org.example.wyjatki.AgeException;
+import org.example.wyjatki.PasswordException;
+import org.example.wyjatki.SalaryException;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class LogisticianTest {
 
     @Test
-    void testConstructorInitialization() {
-        try{
-            Logistician logistician = new Logistician("John", "Doe", 30, "123 Street", "pass123", "john@example.com", "Logistics", "Logistician", 4000);
-            assertEquals("John", logistician.getName());
-            assertEquals("Doe", logistician.getSurname());
-            assertEquals(30, logistician.getAge());
-            assertEquals("123 Street", logistician.getAddress());
-            assertEquals("pass123", logistician.getPassword());
-            assertEquals("john@example.com", logistician.getEmail());
-            assertEquals("E123", logistician.getEmployeeId());
-            assertEquals("Logistics", logistician.getDepartment());
-            assertEquals("Logistician", logistician.getPosition());
-            assertEquals(4000, logistician.getSalary(), 0.01);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
+    void testConstructorInitialization() throws Exception {
+        Address address = new Address();
+        address.setMiasto("Wrocław");
+
+        Logistician logistician = new Logistician(
+                "John", "Doe", 30, "jdoe", address, "pass12345", "Logistician", new BigDecimal("4000")
+        );
+
+        assertEquals("John", logistician.getName());
+        assertEquals("Doe", logistician.getSurname());
+        assertEquals(30, logistician.getAge());
+        assertEquals("jdoe", logistician.getLogin());
+        assertEquals("pass12345", logistician.getPassword());
+        assertEquals("Logistician", logistician.getStanowisko());
+        assertEquals(new BigDecimal("4000"), logistician.getZarobki());
+        assertEquals("Wrocław", logistician.getAdres().getMiasto());
+        assertTrue(logistician.isLogistician());
     }
 
     @Test
     void testIsLogistician() {
-        try{
-            Logistician logistician = new Logistician("John", "Doe", 30, "123 Street", "pass123", "john@example.com",  "Logistics", "Logistician", 4000);
-            assertTrue(logistician.isLogistician());
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
+        Logistician logistician = exampleLogistician();
+        assertTrue(logistician.isLogistician());
     }
 
     @Test
     void testUpdateName() {
-        try{
-            Logistician logistician = new Logistician("John", "Doe", 30, "123 Street", "pass123", "john@example.com",  "Logistics", "Logistician", 4000);
-            Employee employee = new Employee("Jane", "Smith", 25, "456 Street", "pass456", "jane@example.com",  "HR", "Manager", 5000);
-            logistician.updateName(employee, "Alice");
-            assertEquals("Alice", employee.getName());
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        Logistician logistician = exampleLogistician();
+        Employee employee = exampleEmployee();
 
+        logistician.updateName(employee, "Alice");
+        assertEquals("Alice", employee.getName());
     }
 
     @Test
     void testUpdateSurname() {
-        try{
-            Logistician logistician = new Logistician("John", "Doe", 30, "123 Street", "pass123", "john@example.com", "Logistics", "Logistician", 4000);
-            Employee employee = new Employee("Jane", "Smith", 25, "456 Street", "pass456", "jane@example.com", "HR", "Manager", 5000);
-            logistician.updateSurname(employee, "Brown");
-            assertEquals("Brown", employee.getSurname());
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        Logistician logistician = exampleLogistician();
+        Employee employee = exampleEmployee();
 
+        logistician.updateSurname(employee, "Nowak");
+        assertEquals("Nowak", employee.getSurname());
     }
 
     @Test
     void testUpdateAge() {
-        try{
-            Logistician logistician = new Logistician("John", "Doe", 30, "123 Street", "pass123", "john@example.com", "E123",  "Logistician", 4000);
-            Employee employee = new Employee("Jane", "Smith", 25, "456 Street", "pass456", "jane@example.com", "HR", "Manager", 5000);
-            logistician.updateAge(employee, 35);
-            assertEquals(35, employee.getAge());
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        Logistician logistician = exampleLogistician();
+        Employee employee = exampleEmployee();
 
+        logistician.updateAge(employee, 45);
+        assertEquals(45, employee.getAge());
     }
 
     @Test
     void testUpdateAddress() {
-        try{
-            Logistician logistician = new Logistician("John", "Doe", 30, "123 Street", "pass123", "john@example.com", "E123",  "Logistician", 4000);
-            Employee employee = new Employee("Jane", "Smith", 25, "456 Street", "pass456", "jane@example.com", "HR", "Manager", 5000);
-            logistician.updateAddress(employee, "789 Avenue");
-            assertEquals("789 Avenue", employee.getAddress());
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        Logistician logistician = exampleLogistician();
+        Employee employee = exampleEmployee();
 
+        Address newAddress = new Address();
+        newAddress.setMiasto("Gdańsk");
+
+        logistician.updateAddress(employee, newAddress);
+        assertEquals("Gdańsk", employee.getAdres().getMiasto());
     }
 
     @Test
-    void testUpdatePassword() {
-        try{
-            Logistician logistician = new Logistician("John", "Doe", 30, "123 Street", "pass123", "john@example.com", "Logistics", "Logistician", 4000);
-            Employee employee = new Employee("Jane", "Smith", 25, "456 Street", "pass456", "jane@example.com", "HR", "Manager", 5000);
-            logistician.updatePassword(employee, "newPass");
-            assertEquals("newPass", employee.getPassword());
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+    void testUpdatePassword() throws Exception {
+        Logistician logistician = exampleLogistician();
+        Employee employee = exampleEmployee();
 
-    }
-
-    @Test
-    void testUpdateEmail() {
-        try{
-            Logistician logistician = new Logistician("John", "Doe", 30, "123 Street", "pass123", "john@example.com", "Logistics", "Logistician", 4000);
-            Employee employee = new Employee("Jane", "Smith", 25, "456 Street", "pass456", "jane@example.com", "HR", "Manager", 5000);
-            logistician.updateEmail(employee, "new.email@example.com");
-            assertEquals("new.email@example.com", employee.getEmail());
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
+        logistician.updatePassword(employee, "newStrongPass");
+        assertEquals("newStrongPass", employee.getPassword());
     }
 
     @Test
     void testUpdateDepartment() {
-        try{
-            Logistician logistician = new Logistician("John", "Doe", 30, "123 Street", "pass123", "john@example.com",  "Logistics", "Logistician", 4000);
-            Employee employee = new Employee("Jane", "Smith", 25, "456 Street", "pass456", "jane@example.com", "HR", "Manager", 5000);
-            logistician.updateDepartment(employee, "Finance");
-            assertEquals("Finance", employee.getDepartment());
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        Logistician logistician = exampleLogistician();
+        Employee employee = exampleEmployee();
 
+        logistician.updateDepartment(employee, "Transport");
+        assertEquals("Transport", employee.getStanowisko());
     }
 
     @Test
-    void testUpdatePosition() {
-        try{
-            Logistician logistician = new Logistician("John", "Doe", 30, "123 Street", "pass123", "john@example.com",  "Logistics", "Logistician", 4000);
-            Employee employee = new Employee("Jane", "Smith", 25, "456 Street", "pass456", "jane@example.com", "HR", "Manager", 5000);
-            logistician.updatePosition(employee, "Senior Manager");
-            assertEquals("Senior Manager", employee.getPosition());
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+    void testUpdateSalary() throws Exception {
+        Logistician logistician = exampleLogistician();
+        Employee employee = exampleEmployee();
 
+        logistician.updateSalary(employee, new BigDecimal("6800.00"));
+        assertEquals(new BigDecimal("6800.00"), employee.getZarobki());
     }
 
-    @Test
-    void testUpdateSalary() {
-        try{
-            Logistician logistician = new Logistician("John", "Doe", 30, "123 Street", "pass123", "john@example.com",  "Logistics", "Logistician", 4000);
-            Employee employee = new Employee("Jane", "Smith", 25, "456 Street", "pass456", "jane@example.com", "HR", "Manager", 5000);
-            logistician.updateSalary(employee, 7000);
-            assertEquals(7000, employee.getSalary(), 0.01);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+    // ==== POMOCNICZE ==== //
 
+    private Logistician exampleLogistician() {
+        try {
+            Address addr = new Address();
+            addr.setMiasto("Lublin");
+            return new Logistician("Jan", "Kowalski", 35, "jkowal", addr, "secure1234", "Logistician", new BigDecimal("5000"));
+        } catch (Exception e) {
+            throw new RuntimeException("Błąd tworzenia logistyka", e);
+        }
+    }
+
+    private Employee exampleEmployee() {
+        try {
+            Address addr = new Address();
+            addr.setMiasto("Poznań");
+            return new Employee("Anna", "Nowak", 28, "anna@example.com",
+                    "anowak", "password123", addr, "Sprzedawca", new BigDecimal("4500"));
+        } catch (Exception e) {
+            throw new RuntimeException("Błąd tworzenia pracownika", e);
+        }
     }
 }

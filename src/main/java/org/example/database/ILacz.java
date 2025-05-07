@@ -12,5 +12,5 @@ public interface ILacz {
     String MYSQL_DB_URL = "jdbc:mysql://localhost:3306/StonkaDB?useSSL=false&serverTimezone=UTC";
 
     String MYSQL_USER = "root";
-    String MYSQL_PASSWORD = "twoje_haslo";  // Jakby co, to ja tu usunąłem poprzednie hasło - Mateusz
+    String MYSQL_PASSWORD = "";
 }
