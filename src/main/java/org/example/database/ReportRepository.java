@@ -3,6 +3,7 @@ package org.example.database;
 import jakarta.persistence.*;
 import org.example.sys.Report;
 
+import java.io.File;
 import java.util.List;
 
 public class ReportRepository {
@@ -50,10 +51,17 @@ public class ReportRepository {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            Report raport = em.find(Report.class, id);
-            if (raport != null) {
-                em.remove(raport);
+
+            Report managed = em.find(Report.class, id);
+            if (managed != null) {
+                File file = new File(managed.getSciezkaPliku());
+                if (file.exists() && file.isFile()) {
+                    file.delete();
+                }
+
+                em.remove(managed);
             }
+
             tx.commit();
         } finally {
             if (tx.isActive()) tx.rollback();
