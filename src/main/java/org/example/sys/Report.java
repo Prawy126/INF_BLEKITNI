@@ -1,7 +1,7 @@
 package org.example.sys;
 
 import jakarta.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "Raporty")
@@ -17,31 +17,27 @@ public class Report {
     private String typRaportu;
 
     @Column(name = "Data_poczatku", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date dataPoczatku;
+    private LocalDate dataPoczatku;
 
     @Column(name = "Data_zakonczenia", nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date dataZakonczenia;
+    private LocalDate dataZakonczenia;
 
     @ManyToOne
     @JoinColumn(name = "Id_pracownika", nullable = false)
     private Employee pracownik;
 
     @Column(name = "Plik", nullable = false)
-    private String plik;
+    private String sciezkaPliku;
 
     public Report() {}
 
-    public Report(String typRaportu, Date dataPoczatku, Date dataZakonczenia, Employee pracownik, String plik) {
+    public Report(String typRaportu, LocalDate dataPoczatku, LocalDate dataZakonczenia, Employee pracownik, String sciezkaPliku) {
         this.typRaportu = typRaportu;
         this.dataPoczatku = dataPoczatku;
         this.dataZakonczenia = dataZakonczenia;
         this.pracownik = pracownik;
-        this.plik = plik;
+        this.sciezkaPliku = sciezkaPliku;
     }
-
-    // === Gettery i settery ===
 
     public int getId() {
         return id;
@@ -55,19 +51,19 @@ public class Report {
         this.typRaportu = typRaportu;
     }
 
-    public Date getDataPoczatku() {
+    public LocalDate getDataPoczatku() {
         return dataPoczatku;
     }
 
-    public void setDataPoczatku(Date dataPoczatku) {
+    public void setDataPoczatku(LocalDate dataPoczatku) {
         this.dataPoczatku = dataPoczatku;
     }
 
-    public Date getDataZakonczenia() {
+    public LocalDate getDataZakonczenia() {
         return dataZakonczenia;
     }
 
-    public void setDataZakonczenia(Date dataZakonczenia) {
+    public void setDataZakonczenia(LocalDate dataZakonczenia) {
         this.dataZakonczenia = dataZakonczenia;
     }
 
@@ -79,11 +75,11 @@ public class Report {
         this.pracownik = pracownik;
     }
 
-    public String getPlik() {
-        return plik;
+    public String getSciezkaPliku() {
+        return sciezkaPliku;
     }
 
-    public void setPlik(String plik) {
-        this.plik = plik;
+    public void setSciezkaPliku(String sciezkaPliku) {
+        this.sciezkaPliku = sciezkaPliku;
     }
 }

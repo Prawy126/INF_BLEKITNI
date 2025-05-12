@@ -4,7 +4,7 @@ import org.example.sys.Report;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,8 +30,8 @@ class ReportTest {
         employee.setStanowisko("Kierownik");
         employee.setAdres(address);
 
-        Date start = new Date();
-        Date end = new Date();
+        LocalDate start = LocalDate.of(2025, 5, 1);
+        LocalDate end = LocalDate.of(2025, 5, 31);
 
         Report report = new Report("Miesięczny", start, end, employee, "plik.pdf");
 
@@ -39,15 +39,15 @@ class ReportTest {
         assertEquals(start, report.getDataPoczatku());
         assertEquals(end, report.getDataZakonczenia());
         assertEquals(employee, report.getPracownik());
-        assertEquals("plik.pdf", report.getPlik());
+        assertEquals("plik.pdf", report.getSciezkaPliku());
     }
 
     @Test
     void testSettersAndGetters() {
         Report report = new Report();
 
-        Date startDate = new Date();
-        Date endDate = new Date();
+        LocalDate startDate = LocalDate.of(2025, 6, 1);
+        LocalDate endDate = LocalDate.of(2025, 6, 10);
 
         Employee employee = new Employee();
         employee.setName("Anna");
@@ -56,13 +56,13 @@ class ReportTest {
         report.setDataPoczatku(startDate);
         report.setDataZakonczenia(endDate);
         report.setPracownik(employee);
-        report.setPlik("raport_dzienny.pdf");
+        report.setSciezkaPliku("raport_dzienny.pdf");
 
         assertEquals("Dzienny", report.getTypRaportu());
         assertEquals(startDate, report.getDataPoczatku());
         assertEquals(endDate, report.getDataZakonczenia());
         assertEquals(employee, report.getPracownik());
-        assertEquals("raport_dzienny.pdf", report.getPlik());
+        assertEquals("raport_dzienny.pdf", report.getSciezkaPliku());
     }
 
     @Test
@@ -73,6 +73,6 @@ class ReportTest {
         assertNull(report.getDataPoczatku());
         assertNull(report.getDataZakonczenia());
         assertNull(report.getPracownik());
-        assertNull(report.getPlik());
+        assertNull(report.getSciezkaPliku());
     }
 }
