@@ -1,5 +1,5 @@
 /*
- * Classname: TestProductRepository
+ * Classname: TestWarehouseRepository
  * Version information: 1.0
  * Date: 2025-05-12
  * Copyright notice: © BŁĘKITNI
@@ -7,50 +7,51 @@
 
 package org.example.database;
 
-import org.example.sys.Product;
+import org.example.sys.Warehouse;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Klasa testująca działanie ProductRepository.
+ * Klasa testująca działanie WarehouseRepository.
  */
-public class TestProductRepository {
+public class TestWarehouseRepository {
 
     public static void main(String[] args) {
-        ProductRepository productRepo = new ProductRepository();
+        WarehouseRepository repo = new WarehouseRepository();
 
         try {
             // === 1. Dodanie nowego produktu ===
-            Product produkt = new Product("Jogurt truskawkowy", "Nabiał", 3.49, 120);
-            productRepo.dodajProdukt(produkt);
+            Warehouse produkt = new Warehouse("Jogurt truskawkowy", new BigDecimal("3.49"), 120);
+            repo.dodajProdukt(produkt);
             System.out.println(">>> Dodano produkt!");
 
             // === 2. Lista wszystkich produktów ===
             System.out.println("\n>>> Lista produktów:");
-            wypiszProdukty(productRepo.pobierzWszystkieProdukty());
+            wypiszProdukty(repo.pobierzWszystkieProdukty());
 
             // === 3. Aktualizacja produktu ===
-            produkt.setPrice(3.99);
-            produkt.setQuantity(100);
-            productRepo.aktualizujProdukt(produkt);
+            produkt.setCena(new BigDecimal("3.99"));
+            produkt.setIloscWmagazynie(100);
+            repo.aktualizujProdukt(produkt);
             System.out.println(">>> Zaktualizowano produkt.");
 
             // === 4. Pobranie po ID ===
-            Product znaleziony = productRepo.znajdzProduktPoId(produkt.getId());
+            Warehouse znaleziony = repo.znajdzProduktPoId(produkt.getId());
             System.out.println(">>> Produkt po ID: " + znaleziony);
 
             // === 5. Usunięcie produktu ===
-            productRepo.usunProdukt(znaleziony.getId());
+            repo.usunProdukt(znaleziony.getId());
             System.out.println(">>> Usunięto produkt.");
 
             // === 6. Lista po usunięciu ===
             System.out.println("\n>>> Lista produktów po usunięciu:");
-            wypiszProdukty(productRepo.pobierzWszystkieProdukty());
+            wypiszProdukty(repo.pobierzWszystkieProdukty());
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            productRepo.close();
+            repo.close();
         }
     }
 
@@ -59,17 +60,16 @@ public class TestProductRepository {
      *
      * @param produkty lista produktów
      */
-    private static void wypiszProdukty(List<Product> produkty) {
+    private static void wypiszProdukty(List<Warehouse> produkty) {
         if (produkty.isEmpty()) {
             System.out.println("(Brak produktów)");
         } else {
-            for (Product p : produkty) {
-                System.out.printf("ID: %-3d Nazwa: %-20s Kategoria: %-15s Cena: %-6.2f Ilość: %-4d%n",
+            for (Warehouse p : produkty) {
+                System.out.printf("ID: %-3d Nazwa: %-20s Cena: %-6.2f Ilość: %-4d%n",
                         p.getId(),
-                        p.getName(),
-                        p.getCategory(),
-                        p.getPrice(),
-                        p.getQuantity()
+                        p.getNazwa(),
+                        p.getCena(),
+                        p.getIloscWmagazynie()
                 );
             }
         }

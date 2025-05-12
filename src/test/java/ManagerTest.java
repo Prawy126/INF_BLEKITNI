@@ -1,10 +1,5 @@
 import org.example.sys.Address;
 import org.example.sys.Employee;
-import org.example.sys.Menager;
-import org.example.wyjatki.AgeException;
-import org.example.wyjatki.NameException;
-import org.example.wyjatki.PasswordException;
-import org.example.wyjatki.SalaryException;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -13,7 +8,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class MenagerTest {
+class ManagerTest {
 
     private Employee exampleEmployee() throws Exception {
         Address address = new Address();
@@ -22,22 +17,22 @@ class MenagerTest {
                 "jdoe", "pass12345", address, "Manager", new BigDecimal("5000"));
     }
 
-    private Menager exampleManager() throws Exception {
+    private EmployeeTest.Manager exampleManager() throws Exception {
         Address address = new Address();
         address.setMiasto("Kraków");
-        return new Menager("Anna", "Nowak", 40, address, "anowak", "strongpass", "Manager", new BigDecimal("8000"));
+        return new EmployeeTest.Manager("Anna", "Nowak", 40, address, "anowak", "strongpass", "Manager", new BigDecimal("8000"));
     }
 
     @Test
     void testConstructorInitialization() {
-        Menager menager = new Menager();
+        EmployeeTest.Manager menager = new EmployeeTest.Manager();
         assertNotNull(menager.getEmployees());
         assertTrue(menager.getEmployees().isEmpty());
     }
 
     @Test
     void testAddEmployee() throws Exception {
-        Menager menager = exampleManager();
+        EmployeeTest.Manager menager = exampleManager();
         Employee employee = exampleEmployee();
         menager.addEmployee(employee);
         assertEquals(1, menager.getEmployees().size());
@@ -46,14 +41,14 @@ class MenagerTest {
 
     @Test
     void testAddNullEmployee() throws Exception {
-        Menager menager = exampleManager();
+        EmployeeTest.Manager menager = exampleManager();
         menager.addEmployee(null);
         assertTrue(menager.getEmployees().isEmpty());
     }
 
     @Test
     void testRemoveEmployee() throws Exception {
-        Menager menager = exampleManager();
+        EmployeeTest.Manager menager = exampleManager();
         Employee employee = exampleEmployee();
         menager.addEmployee(employee);
         menager.removeEmployee(employee);
@@ -62,7 +57,7 @@ class MenagerTest {
 
     @Test
     void testRemoveNonExistentEmployee() throws Exception {
-        Menager menager = exampleManager();
+        EmployeeTest.Manager menager = exampleManager();
         Employee emp1 = exampleEmployee();
         Address address = new Address();
         address.setMiasto("Gdynia");
@@ -77,7 +72,7 @@ class MenagerTest {
 
     @Test
     void testSetEmployees() throws Exception {
-        Menager menager = exampleManager();
+        EmployeeTest.Manager menager = exampleManager();
         Employee employee = exampleEmployee();
         List<Employee> list = new ArrayList<>();
         list.add(employee);
@@ -87,7 +82,7 @@ class MenagerTest {
 
     @Test
     void testSetNullEmployees() throws Exception {
-        Menager menager = exampleManager();
+        EmployeeTest.Manager menager = exampleManager();
         menager.setEmployees(null);
         assertNotNull(menager.getEmployees());
         assertTrue(menager.getEmployees().isEmpty());
@@ -95,7 +90,7 @@ class MenagerTest {
 
     @Test
     void testUpdateName() throws Exception {
-        Menager menager = exampleManager();
+        EmployeeTest.Manager menager = exampleManager();
         Employee emp = exampleEmployee();
         menager.updateName(emp, "Michael");
         assertEquals("Michael", emp.getName());
@@ -103,7 +98,7 @@ class MenagerTest {
 
     @Test
     void testUpdateSurname() throws Exception {
-        Menager menager = exampleManager();
+        EmployeeTest.Manager menager = exampleManager();
         Employee emp = exampleEmployee();
         menager.updateSurname(emp, "Kowalski");
         assertEquals("Kowalski", emp.getSurname());
@@ -111,7 +106,7 @@ class MenagerTest {
 
     @Test
     void testUpdateAge() throws Exception {
-        Menager menager = exampleManager();
+        EmployeeTest.Manager menager = exampleManager();
         Employee emp = exampleEmployee();
         menager.updateAge(emp, 45);
         assertEquals(45, emp.getAge());
@@ -119,7 +114,7 @@ class MenagerTest {
 
     @Test
     void testUpdateAddress() throws Exception {
-        Menager menager = exampleManager();
+        EmployeeTest.Manager menager = exampleManager();
         Employee emp = exampleEmployee();
         Address newAddress = new Address();
         newAddress.setMiasto("Wrocław");
@@ -129,7 +124,7 @@ class MenagerTest {
 
     @Test
     void testUpdatePassword() throws Exception {
-        Menager menager = exampleManager();
+        EmployeeTest.Manager menager = exampleManager();
         Employee emp = exampleEmployee();
         menager.updatePassword(emp, "newStrongPass");
         assertEquals("newStrongPass", emp.getPassword());
@@ -144,7 +139,7 @@ class MenagerTest {
 
     @Test
     void testUpdateDepartment() throws Exception {
-        Menager menager = exampleManager();
+        EmployeeTest.Manager menager = exampleManager();
         Employee emp = exampleEmployee();
         menager.updateDepartment(emp, "Finance");
         assertEquals("Finance", emp.getStanowisko());
@@ -152,7 +147,7 @@ class MenagerTest {
 
     @Test
     void testUpdateSalary() throws Exception {
-        Menager menager = exampleManager();
+        EmployeeTest.Manager menager = exampleManager();
         Employee emp = exampleEmployee();
         menager.updateSalary(emp, new BigDecimal("9000.00"));
         assertEquals(new BigDecimal("9000.00"), emp.getZarobki());
@@ -160,7 +155,7 @@ class MenagerTest {
 
     @Test
     void testGetEmployee() throws Exception {
-        Menager menager = exampleManager();
+        EmployeeTest.Manager menager = exampleManager();
         Employee emp = exampleEmployee();
         menager.addEmployee(emp);
         assertEquals(emp, menager.getEmployee(emp));
@@ -168,7 +163,7 @@ class MenagerTest {
 
     @Test
     void testGetNonExistentEmployee() throws Exception {
-        Menager menager = exampleManager();
+        EmployeeTest.Manager menager = exampleManager();
         Employee emp1 = exampleEmployee();
         Address addr = new Address();
         addr.setMiasto("Sopot");

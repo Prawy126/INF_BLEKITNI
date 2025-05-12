@@ -60,6 +60,19 @@ public class AbsenceRequestRepository {
         }
     }
 
+    public void aktualizujWniosek(AbsenceRequest request) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.merge(request);
+            tx.commit();
+        } finally {
+            if (tx.isActive()) tx.rollback();
+            em.close();
+        }
+    }
+
     public void close() {
         if (emf.isOpen()) {
             emf.close();

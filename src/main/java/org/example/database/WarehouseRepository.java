@@ -1,19 +1,19 @@
 package org.example.database;
 
 import jakarta.persistence.*;
-import org.example.sys.Product;
+import org.example.sys.Warehouse;
 
 import java.util.List;
 
-public class ProductRepository {
+public class WarehouseRepository {
 
     private final EntityManagerFactory emf;
 
-    public ProductRepository() {
+    public WarehouseRepository() {
         this.emf = Persistence.createEntityManagerFactory("myPU");
     }
 
-    public void dodajProdukt(Product produkt) {
+    public void dodajProdukt(Warehouse produkt) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -26,19 +26,19 @@ public class ProductRepository {
         }
     }
 
-    public Product znajdzProduktPoId(int id) {
+    public Warehouse znajdzProduktPoId(int id) {
         EntityManager em = emf.createEntityManager();
         try {
-            return em.find(Product.class, id);
+            return em.find(Warehouse.class, id);
         } finally {
             em.close();
         }
     }
 
-    public List<Product> pobierzWszystkieProdukty() {
+    public List<Warehouse> pobierzWszystkieProdukty() {
         EntityManager em = emf.createEntityManager();
         try {
-            return em.createQuery("SELECT p FROM Product p", Product.class).getResultList();
+            return em.createQuery("SELECT w FROM Warehouse w", Warehouse.class).getResultList();
         } finally {
             em.close();
         }
@@ -49,7 +49,7 @@ public class ProductRepository {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            Product produkt = em.find(Product.class, id);
+            Warehouse produkt = em.find(Warehouse.class, id);
             if (produkt != null) {
                 em.remove(produkt);
             }
@@ -60,7 +60,7 @@ public class ProductRepository {
         }
     }
 
-    public void aktualizujProdukt(Product produkt) {
+    public void aktualizujProdukt(Warehouse produkt) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {

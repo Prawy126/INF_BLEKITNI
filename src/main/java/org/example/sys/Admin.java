@@ -1,24 +1,26 @@
 package org.example.sys;
 
+import jakarta.persistence.*;
 import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
 
 import java.math.BigDecimal;
 
 /**
- * Klasa Admin rozszerzająca Employee, reprezentuje użytkownika z uprawnieniami administratora.
+ * Encja Admin rozszerzająca Employee, reprezentująca administratora systemu.
  */
+@Entity
+@DiscriminatorValue("ADMIN")
 public class Admin extends Employee {
-
-    public Admin(String name, String surname, int age, String email,
-                 String login, String password, Address adres,
-                 String stanowisko, BigDecimal zarobki)
-            throws Exception {
-        super(name, surname, age, email, login, password, adres, stanowisko, zarobki);
-    }
 
     public Admin() {
         super();
+    }
+
+    public Admin(String name, String surname, int age, String email,
+                 String login, String password, Address adres,
+                 String stanowisko, BigDecimal zarobki) throws Exception {
+        super(name, surname, age, email, login, password, adres, stanowisko, zarobki);
     }
 
     public boolean isAdmin() {

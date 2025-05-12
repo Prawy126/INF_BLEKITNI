@@ -1,19 +1,11 @@
-/*
- * Classname: TestOrderRepository
- * Version information: 1.0
- * Date: 2025-05-12
- * Copyright notice: © BŁĘKITNI
- */
-
 package org.example.database;
 
 import org.example.sys.Order;
-import org.example.sys.Product;
 import org.example.sys.Employee;
+import org.example.sys.Warehouse;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,14 +15,14 @@ public class TestOrderRepository {
 
     public static void main(String[] args) {
         OrderRepository orderRepo = new OrderRepository();
-        ProductRepository productRepo = new ProductRepository();
+        WarehouseRepository productRepo = new WarehouseRepository();
         UserRepository userRepo = new UserRepository();
 
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
             // === 1. Dodanie produktu i pracownika testowego ===
-            Product produkt = new Product("Testowy produkt", "Spożywcze", 5.99, 100);
+            Warehouse produkt = new Warehouse("Testowy produkt", new BigDecimal("5.99"), 100);
             productRepo.dodajProdukt(produkt);
 
             Employee pracownik = userRepo.pobierzWszystkichPracownikow().get(0); // zakładamy, że już jest
@@ -82,9 +74,9 @@ public class TestOrderRepository {
             System.out.println("(Brak zamówień)");
         } else {
             for (Order z : zamowienia) {
-                System.out.printf("ID: %-3d | Produkt: %-15s | Ilość: %-3d | Cena: %-7.2f | Data: %s%n",
+                System.out.printf("ID: %-3d | Produkt: %-20s | Ilość: %-3d | Cena: %-7.2f | Data: %s%n",
                         z.getId(),
-                        z.getProdukt().getName(),
+                        z.getProdukt().getNazwa(), // poprawiono z getName()
                         z.getIlosc(),
                         z.getCena(),
                         z.getData().toString()

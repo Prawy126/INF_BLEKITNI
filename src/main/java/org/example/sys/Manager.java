@@ -8,23 +8,23 @@ import java.util.Date;
 import java.util.List;
 import org.example.sys.Address;
 
-public class Menager extends Employee {
+public class Manager extends Employee {
 
     private List<Employee> employees = new ArrayList<>();
 
-    public Menager(String name, String surname, int age, Address address,String login, String password,
-                    String department, BigDecimal salary) throws PasswordException, SalaryException {
+    public Manager(String name, String surname, int age, Address address,String login, String password,
+                   String department, BigDecimal salary) throws PasswordException, SalaryException {
         super(name, surname, age, address, login, password, department, salary);
     }
 
-    public Menager(String name, String surname, int age, Address address, String login, String password,
+    public Manager(String name, String surname, int age, Address address, String login, String password,
                    String department, BigDecimal salary,
                    List<Employee> employees) throws PasswordException, SalaryException {
         this(name, surname, age, address,login,  password, department, salary);
         this.employees = employees != null ? employees : new ArrayList<>();
     }
 
-    public Menager() {
+    public Manager() {
         super();
     }
 
