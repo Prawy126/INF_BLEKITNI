@@ -20,6 +20,7 @@ import org.example.pdflib.ConfigManager;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * Kontroler odpowiedzialny za obsługę logiki
@@ -571,11 +572,50 @@ public class AdminPanelController {
 
             File outputFile = new File(backupDir, fileName);
 
+            // Wykrywanie systemu operacyjnego
+            String os = System.getProperty("os.name").toLowerCase();
+            String mysqldumpPath;
+
+            if (os.contains("win")) {
+                // Ścieżka dla Windows
+                mysqldumpPath = "C:\\xampp\\mysql\\bin\\mysqldump.exe";
+            } else if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {
+                // Ścieżka dla Linux/Unix/Mac
+                File[] possiblePaths = {
+                        new File("/usr/bin/mysqldump"),
+                        new File("/usr/local/bin/mysqldump"),
+                        new File("/usr/local/mysql/bin/mysqldump"),
+                        new File("/opt/mysql/bin/mysqldump")
+                };
+
+                File foundPath = null;
+                for (File path : possiblePaths) {
+                    if (path.exists()) {
+                        foundPath = path;
+                        break;
+                    }
+                }
+
+                if (foundPath != null) {
+                    mysqldumpPath = foundPath.getAbsolutePath();
+                } else {
+                    mysqldumpPath = "mysqldump";
+                }
+            } else {
+                throw new UnsupportedOperationException("Nieobsługiwany system operacyjny: " + os);
+            }
+
             ProcessBuilder pb = new ProcessBuilder(
-                    "C:\\xampp\\mysql\\bin\\mysqldump.exe",
-                    "-u", "root",
-                    "--databases", "StonkaDB"
+                    mysqldumpPath,
+                    "-u", org.example.database.ILacz.MYSQL_USER,
+                    "--databases", org.example.database.ILacz.DB_NAME
             );
+
+            String password = org.example.database.ILacz.MYSQL_PASSWORD;
+            if (password != null && !password.isEmpty()) {
+                Map<String, String> env = pb.environment();
+                env.put("MYSQL_PWD", password);
+            }
 
             pb.redirectOutput(outputFile);
             pb.redirectError(ProcessBuilder.Redirect.INHERIT);
@@ -584,14 +624,17 @@ public class AdminPanelController {
             int exitCode = process.waitFor();
 
             if (exitCode == 0) {
-                showAlert(Alert.AlertType.INFORMATION, "Backup zakończony", "Plik zapisany:\n" + outputFile.getAbsolutePath());
+                showAlert(Alert.AlertType.INFORMATION, "Backup zakończony",
+                        "Plik zapisany:\n" + outputFile.getAbsolutePath());
             } else {
-                showAlert(Alert.AlertType.ERROR, "Błąd backupu", "Nie udało się wykonać kopii zapasowej.");
+                showAlert(Alert.AlertType.ERROR, "Błąd backupu",
+                        "Nie udało się wykonać kopii zapasowej. Kod wyjścia: " + exitCode);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Wyjątek", "Wystąpił błąd podczas backupu:\n" + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Wyjątek",
+                    "Wystąpił błąd podczas backupu:\n" + e.getMessage());
         }
     }
 
