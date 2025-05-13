@@ -5,6 +5,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.gui.*;
+import org.example.database.ILacz;
 import javax.mail.MessagingException;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -14,13 +15,13 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Login {
+public class Login implements ILacz {
 
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public static void attemptLogin(String username, String password, VBox root) {
         try (Connection conn = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/StonkaDB", "root", "")) {
+                ILacz.MYSQL_DB_URL, ILacz.MYSQL_USER, ILacz.MYSQL_PASSWORD)) {
 
             String query = "SELECT * FROM Pracownicy WHERE Login = ? AND Haslo = ?";
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
