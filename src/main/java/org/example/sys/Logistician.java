@@ -6,49 +6,81 @@ import org.example.wyjatki.SalaryException;
 
 import java.math.BigDecimal;
 
-public class Logistician extends Employee {
+/**
+ * Klasa reprezentująca rolę logistyka – logiczną "nakładkę" na encję Employee.
+ */
+public class Logistician {
 
-    private boolean logistician = true;
+    private final Employee employee;
 
-    public Logistician(String name, String surname, int age, String login,
-                       Address address, String password, String department, BigDecimal salary)
-            throws PasswordException, SalaryException, AgeException {
-        super(name, surname, age, address, login, password, department, salary);
+    /**
+     * Konstruktor przyjmujący istniejącego pracownika.
+     */
+    public Logistician(Employee employee) {
+        this.employee = employee;
     }
 
-    public boolean isLogistician() {
-        return logistician;
+    /**
+     * Zwraca referencję do powiązanego pracownika.
+     */
+    public Employee getEmployee() {
+        return employee;
     }
 
-    public void setLogistician(boolean logistician) {
-        this.logistician = logistician;
+    // === Metody operujące na danych pracownika ===
+
+    public void updateName(String newName) {
+        try {
+            employee.setName(newName);
+        } catch (Exception e) {
+            System.err.println("Błąd zmiany imienia: " + e.getMessage());
+        }
     }
 
-    public void updateName(Employee employee, String newName) {
-        employee.setName(newName);
+    public void updateSurname(String newSurname) {
+        try {
+            employee.setSurname(newSurname);
+        } catch (Exception e) {
+            System.err.println("Błąd zmiany nazwiska: " + e.getMessage());
+        }
     }
 
-    public void updateSurname(Employee employee, String newSurname) {
-        employee.setSurname(newSurname);
+    public void updateAge(int newAge) {
+        try {
+            employee.setAge(newAge);
+        } catch (AgeException e) {
+            System.err.println("Błąd zmiany wieku: " + e.getMessage());
+        }
     }
 
-    public void updateAge(Employee employee, int newAge) {
-        employee.setAge(newAge);
-    }
-
-    public void updateAddress(Employee employee, Address newAddress) {
+    public void updateAddress(Address newAddress) {
         employee.setAdres(newAddress);
     }
 
-    public void updatePassword(Employee employee, String newPassword) throws PasswordException {
-        employee.setPassword(newPassword);
+    public void updatePassword(String newPassword) {
+        try {
+            employee.setPassword(newPassword);
+        } catch (PasswordException e) {
+            System.err.println("Błąd zmiany hasła: " + e.getMessage());
+        }
     }
 
-    public void updateDepartment(Employee employee, String newDepartment) {
+    public void updateDepartment(String newDepartment) {
         employee.setStanowisko(newDepartment);
     }
 
-    public void updateSalary(Employee employee, BigDecimal newSalary) throws SalaryException {
-        employee.setZarobki(newSalary);
+    public void updateSalary(BigDecimal newSalary) {
+        try {
+            employee.setZarobki(newSalary);
+        } catch (SalaryException e) {
+            System.err.println("Błąd zmiany zarobków: " + e.getMessage());
+        }
+    }
+
+    // === Przykładowa metoda logistyczna ===
+
+    public void przydzielZamowienie(int orderId) {
+        // tutaj można dodać logikę przydziału zamówienia
+        System.out.println("Logistyk " + employee.getName() + " przydzielił zamówienie o ID: " + orderId);
     }
 }

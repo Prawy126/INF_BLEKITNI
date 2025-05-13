@@ -1,176 +1,117 @@
-import org.example.sys.Address;
 import org.example.sys.Employee;
+import org.example.sys.Manager;
+import org.example.sys.Address;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ManagerTest {
 
-    private Employee exampleEmployee() throws Exception {
+    private Employee employee;
+    private Manager manager;
+
+    @BeforeEach
+    void setUp() throws Exception {
         Address address = new Address();
         address.setMiasto("Warszawa");
-        return new Employee("John", "Doe", 30, "john@example.com",
-                "jdoe", "pass12345", address, "Manager", new BigDecimal("5000"));
-    }
-
-    private EmployeeTest.Manager exampleManager() throws Exception {
-        Address address = new Address();
-        address.setMiasto("Kraków");
-        return new EmployeeTest.Manager("Anna", "Nowak", 40, address, "anowak", "strongpass", "Manager", new BigDecimal("8000"));
+        employee = new Employee("Jan", "Kowalski", 35, "jan@example.com",
+                "jkowal", "bezpieczneHaslo", address, "Manager", new BigDecimal("6000"));
+        manager = new Manager(employee);
     }
 
     @Test
     void testConstructorInitialization() {
-        EmployeeTest.Manager menager = new EmployeeTest.Manager();
-        assertNotNull(menager.getEmployees());
-        assertTrue(menager.getEmployees().isEmpty());
+        assertEquals(employee, manager.getEmployee());
+        assertTrue(manager.getManagedEmployees().isEmpty());
     }
 
     @Test
     void testAddEmployee() throws Exception {
-        EmployeeTest.Manager menager = exampleManager();
-        Employee employee = exampleEmployee();
-        menager.addEmployee(employee);
-        assertEquals(1, menager.getEmployees().size());
-        assertTrue(menager.getEmployees().contains(employee));
+        Employee e = createOtherEmployee();
+        manager.addEmployee(e);
+        assertEquals(1, manager.getManagedEmployees().size());
+        assertTrue(manager.getManagedEmployees().contains(e));
     }
 
     @Test
-    void testAddNullEmployee() throws Exception {
-        EmployeeTest.Manager menager = exampleManager();
-        menager.addEmployee(null);
-        assertTrue(menager.getEmployees().isEmpty());
+    void testAddNullEmployee() {
+        manager.addEmployee(null);
+        assertTrue(manager.getManagedEmployees().isEmpty());
     }
 
     @Test
     void testRemoveEmployee() throws Exception {
-        EmployeeTest.Manager menager = exampleManager();
-        Employee employee = exampleEmployee();
-        menager.addEmployee(employee);
-        menager.removeEmployee(employee);
-        assertTrue(menager.getEmployees().isEmpty());
+        Employee e = createOtherEmployee();
+        manager.addEmployee(e);
+        manager.removeEmployee(e);
+        assertFalse(manager.getManagedEmployees().contains(e));
     }
 
     @Test
     void testRemoveNonExistentEmployee() throws Exception {
-        EmployeeTest.Manager menager = exampleManager();
-        Employee emp1 = exampleEmployee();
-        Address address = new Address();
-        address.setMiasto("Gdynia");
-        Employee emp2 = new Employee("Jane", "Doe", 25, "jane@example.com",
-                "jdoe2", "pass67890", address, "Developer", new BigDecimal("6000"));
-
-        menager.addEmployee(emp1);
-        menager.removeEmployee(emp2);
-        assertEquals(1, menager.getEmployees().size());
-        assertTrue(menager.getEmployees().contains(emp1));
+        Employee e = createOtherEmployee();
+        manager.removeEmployee(e); // nie dodano wcześniej
+        assertTrue(manager.getManagedEmployees().isEmpty());
     }
 
     @Test
-    void testSetEmployees() throws Exception {
-        EmployeeTest.Manager menager = exampleManager();
-        Employee employee = exampleEmployee();
-        List<Employee> list = new ArrayList<>();
-        list.add(employee);
-        menager.setEmployees(list);
-        assertEquals(1, menager.getEmployees().size());
+    void testUpdateName() {
+        manager.updateName("Tomasz");
+        assertEquals("Tomasz", manager.getEmployee().getName());
     }
 
     @Test
-    void testSetNullEmployees() throws Exception {
-        EmployeeTest.Manager menager = exampleManager();
-        menager.setEmployees(null);
-        assertNotNull(menager.getEmployees());
-        assertTrue(menager.getEmployees().isEmpty());
+    void testUpdateSurname() {
+        manager.updateSurname("Nowak");
+        assertEquals("Nowak", manager.getEmployee().getSurname());
     }
 
     @Test
-    void testUpdateName() throws Exception {
-        EmployeeTest.Manager menager = exampleManager();
-        Employee emp = exampleEmployee();
-        menager.updateName(emp, "Michael");
-        assertEquals("Michael", emp.getName());
+    void testUpdateAge() {
+        manager.updateAge(45);
+        assertEquals(45, manager.getEmployee().getAge());
     }
 
     @Test
-    void testUpdateSurname() throws Exception {
-        EmployeeTest.Manager menager = exampleManager();
-        Employee emp = exampleEmployee();
-        menager.updateSurname(emp, "Kowalski");
-        assertEquals("Kowalski", emp.getSurname());
-    }
-
-    @Test
-    void testUpdateAge() throws Exception {
-        EmployeeTest.Manager menager = exampleManager();
-        Employee emp = exampleEmployee();
-        menager.updateAge(emp, 45);
-        assertEquals(45, emp.getAge());
-    }
-
-    @Test
-    void testUpdateAddress() throws Exception {
-        EmployeeTest.Manager menager = exampleManager();
-        Employee emp = exampleEmployee();
+    void testUpdateAddress() {
         Address newAddress = new Address();
         newAddress.setMiasto("Wrocław");
-        menager.updateAddress(emp, newAddress);
-        assertEquals("Wrocław", emp.getAdres().getMiasto());
+        manager.updateAddress(newAddress);
+        assertEquals("Wrocław", manager.getEmployee().getAdres().getMiasto());
     }
 
     @Test
-    void testUpdatePassword() throws Exception {
-        EmployeeTest.Manager menager = exampleManager();
-        Employee emp = exampleEmployee();
-        menager.updatePassword(emp, "newStrongPass");
-        assertEquals("newStrongPass", emp.getPassword());
+    void testUpdatePassword() {
+        manager.updatePassword("newStrongPass");
+        assertEquals("newStrongPass", manager.getEmployee().getPassword());
     }
 
     @Test
-    void testUpdateEmail() throws Exception {
-        Employee emp = exampleEmployee();
-        emp.setEmail("updated@example.com");
-        assertEquals("updated@example.com", emp.getEmail());
+    void testUpdateDepartment() {
+        manager.updateDepartment("Logistyka");
+        assertEquals("Logistyka", manager.getEmployee().getStanowisko());
     }
 
     @Test
-    void testUpdateDepartment() throws Exception {
-        EmployeeTest.Manager menager = exampleManager();
-        Employee emp = exampleEmployee();
-        menager.updateDepartment(emp, "Finance");
-        assertEquals("Finance", emp.getStanowisko());
+    void testUpdateSalary() {
+        manager.updateSalary(new BigDecimal("9000.00"));
+        assertEquals(new BigDecimal("9000.00"), manager.getEmployee().getZarobki());
     }
 
     @Test
-    void testUpdateSalary() throws Exception {
-        EmployeeTest.Manager menager = exampleManager();
-        Employee emp = exampleEmployee();
-        menager.updateSalary(emp, new BigDecimal("9000.00"));
-        assertEquals(new BigDecimal("9000.00"), emp.getZarobki());
+    void testWygenerujRaportZespolu() {
+        manager.wygenerujRaportZespolu(); // tylko sprawdzamy, że się nie wywala, logika w konsoli
     }
 
-    @Test
-    void testGetEmployee() throws Exception {
-        EmployeeTest.Manager menager = exampleManager();
-        Employee emp = exampleEmployee();
-        menager.addEmployee(emp);
-        assertEquals(emp, menager.getEmployee(emp));
-    }
-
-    @Test
-    void testGetNonExistentEmployee() throws Exception {
-        EmployeeTest.Manager menager = exampleManager();
-        Employee emp1 = exampleEmployee();
-        Address addr = new Address();
-        addr.setMiasto("Sopot");
-        Employee emp2 = new Employee("Anna", "Zielinska", 26, "anna@example.com",
-                "aziel", "pass8765", addr, "Analyst", new BigDecimal("5000"));
-
-        menager.addEmployee(emp1);
-        assertNull(menager.getEmployee(emp2));
+    // Pomocnicza metoda
+    private Employee createOtherEmployee() throws Exception {
+        Address address = new Address();
+        address.setMiasto("Gdańsk");
+        return new Employee("Anna", "Zielińska", 28, "anna@example.com",
+                "aziel", "haslo1234", address, "Specjalista", new BigDecimal("4800"));
     }
 }
