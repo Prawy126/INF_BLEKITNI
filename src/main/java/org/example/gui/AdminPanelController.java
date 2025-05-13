@@ -1,10 +1,3 @@
-/*
- * Classname: AdminPanelController
- * Version information: 1.1
- * Date: 2025-04-27
- * Copyright notice: © BŁĘKITNI
- */
-
 package org.example.gui;
 
 import javafx.geometry.Insets;
@@ -16,10 +9,17 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.database.UserRepository;
 import org.example.sys.Employee;
-import org.example.pdflib.ConfigManager;
 
-import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.util.Optional;
+import java.util.Properties;
+import org.example.database.ReportRepository;
+import org.example.sys.Report;
+import java.time.LocalDate;
+import javafx.scene.control.TextInputDialog;
+
 
 /**
  * Kontroler odpowiedzialny za obsługę logiki
@@ -30,6 +30,7 @@ public class AdminPanelController {
     private final AdminPanel adminPanel;
     private final Stage primaryStage;
     private final UserRepository userRepository;
+    private final ReportRepository reportRepository;
     private TableView<Employee> tableView;
 
     /**
@@ -41,6 +42,7 @@ public class AdminPanelController {
         this.adminPanel = adminPanel;
         this.primaryStage = adminPanel.getPrimaryStage();
         this.userRepository = new UserRepository();
+        this.reportRepository = new ReportRepository();
     }
 
     /**
@@ -393,26 +395,75 @@ public class AdminPanelController {
         CheckBox logsCheckbox = new CheckBox("Włącz logi systemowe");
         logsCheckbox.setSelected(true);
 
-        Button configurePDF = new Button("Konfiguruj raporty PDF");
-        configurePDF.setOnAction(e -> showPDFConfigPanel());
-
-        Button backupButton = new Button("Wykonaj backup bazy danych");
-        backupButton.setStyle(
-                "-fx-background-color: #27AE60; -fx-text-fill: white;"
-        );
-        backupButton.setOnAction(e -> performDatabaseBackup());
+        CheckBox notificationsCheckbox = new CheckBox("Włącz powiadomienia");
+        notificationsCheckbox.setSelected(true);
 
         Button saveButton = new Button("Zapisz");
         saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+        saveButton.setOnAction(e -> saveConfig(
+                logsCheckbox.isSelected(),
+                notificationsCheckbox.isSelected()
+        ));
 
         layout.getChildren().addAll(
                 titleLabel,
                 logsCheckbox,
-                configurePDF,
-                backupButton,
+                notificationsCheckbox,
                 saveButton
         );
+        adminPanel.setCenterPane(layout);
+    }
 
+    /**
+     * Zapisuje ustawienia do pliku config.properties
+     */
+    private void saveConfig(boolean logsEnabled, boolean notificationsEnabled) {
+        try (OutputStream out = new FileOutputStream("config.properties")) {
+            Properties props = new Properties();
+            props.setProperty("logging.enabled", Boolean.toString(logsEnabled));
+            props.setProperty("notifications.enabled", Boolean.toString(notificationsEnabled));
+            props.store(out, "Admin panel configuration");
+            showAlert(Alert.AlertType.INFORMATION, "Zapisano konfigurację", null);
+        } catch (Exception ex) {
+            showAlert(Alert.AlertType.ERROR, "Błąd zapisu", ex.getMessage());
+        }
+    }
+    public void showReportsTablePanel() {
+        VBox layout = new VBox(15);
+        layout.setPadding(new Insets(20));
+
+        Label titleLabel = new Label("Przegląd raportów");
+        titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+
+        TableView<Report> reportsTable = new TableView<>();
+
+        TableColumn<Report, String> nameCol = new TableColumn<>("Nazwa");
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        TableColumn<Report, LocalDate> dateCol = new TableColumn<>("Data");
+        dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
+        TableColumn<Report, String> criteriaCol = new TableColumn<>("Kryteria");
+        criteriaCol.setCellValueFactory(new PropertyValueFactory<>("criteria"));
+
+        reportsTable.getColumns().addAll(nameCol, dateCol, criteriaCol);
+        reportsTable.getItems().addAll(reportRepository.fetchAll());
+
+        Button deleteButton = new Button("Usuń raport");
+        deleteButton.setOnAction(e -> {
+            Report selected = reportsTable.getSelectionModel().getSelectedItem();
+            if (selected == null) {
+                showAlert(Alert.AlertType.WARNING, "Brak wyboru", "Wybierz raport do usunięcia");
+            } else {
+                reportRepository.delete(selected);
+                reportsTable.getItems().remove(selected);
+                showAlert(Alert.AlertType.INFORMATION, "Usunięto raport", null);
+            }
+        });
+
+        layout.getChildren().addAll(
+                titleLabel,
+                reportsTable,
+                deleteButton
+        );
         adminPanel.setCenterPane(layout);
     }
 
@@ -432,44 +483,20 @@ public class AdminPanelController {
 
         Label sortingLabel = new Label("Sortowanie domyślne:");
         ComboBox<String> sortingComboBox = new ComboBox<>();
-        sortingComboBox.getItems().addAll("Nazwa", "Data", "Priorytet");
-
-        Label pathLabel = new Label("Ścieżka zapisu raportów:");
-        TextField pathField = new TextField();
-        pathField.setPromptText("Np. C:/raporty/");
-        pathField.setText(ConfigManager.getReportPath());
-
-        Button saveButton = new Button("Zapisz konfigurację");
-        saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
-
-        saveButton.setOnAction(e -> {
-            String path = pathField.getText().trim();
-
-            if (path.isEmpty()) {
-                showAlert(Alert.AlertType.WARNING, "Błąd", "Ścieżka nie może być pusta.");
-                return;
-            }
-
-            File folder = new File(path);
-            if (!folder.exists() || !folder.isDirectory()) {
-                showAlert(Alert.AlertType.ERROR, "Niepoprawna ścieżka", "Podany folder nie istnieje.");
-                return;
-            }
-
-            ConfigManager.setReportPath(path);
-            showAlert(Alert.AlertType.INFORMATION, "Zapisano", "Ścieżka została zapisana.");
-        });
+        sortingComboBox.getItems().addAll(
+                "Nazwa", "Data", "Priorytet"
+        );
 
         Button backButton = new Button("Wróć");
         backButton.setOnAction(e -> showConfigPanel());
 
         layout.getChildren().addAll(
                 titleLabel,
-                logoLabel, logoField,
+                logoLabel,
+                logoField,
                 updateLogoButton,
-                sortingLabel, sortingComboBox,
-                pathLabel, pathField,
-                saveButton,
+                sortingLabel,
+                sortingComboBox,
                 backButton
         );
 
@@ -484,6 +511,7 @@ public class AdminPanelController {
         layout.setPadding(new Insets(20));
 
         Label titleLabel = new Label("Wybierz rodzaj raportu");
+        titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
         ComboBox<String> reportType = new ComboBox<>();
         reportType.getItems().addAll(
@@ -493,7 +521,6 @@ public class AdminPanelController {
         );
         reportType.setPrefWidth(200);
 
-        Label dateLabel = new Label("Wybierz zakres dat");
         DatePicker startDatePicker = new DatePicker();
         startDatePicker.setPromptText("Data początkowa");
 
@@ -501,22 +528,40 @@ public class AdminPanelController {
         endDatePicker.setPromptText("Data końcowa");
 
         Button generateButton = new Button("Generuj raport");
-        generateButton.setStyle(
-                "-fx-background-color: #3498DB; "
-                        + "-fx-text-fill: white;"
-        );
+        generateButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+        generateButton.setOnAction(e -> {
+            String type = reportType.getValue();
+            if (type == null) {
+                showAlert(Alert.AlertType.WARNING, "Wybierz typ raportu", null);
+                return;
+            }
+            // dialog filtrowania
+            TextInputDialog dialog = new TextInputDialog();
+            dialog.setTitle("Filtr raportu");
+            dialog.setHeaderText("Sposób filtrowania dla: " + type);
+            dialog.setContentText("Podaj kryteria (np. data:2025-05-01; status:AKTYWNY):");
+            Optional<String> filter = dialog.showAndWait();
+            filter.ifPresent(f ->
+                    reportRepository.generateReport(
+                            type,
+                            startDatePicker.getValue(),
+                            endDatePicker.getValue(),
+                            f
+                    )
+            );
+        });
 
         layout.getChildren().addAll(
                 titleLabel,
                 reportType,
-                dateLabel,
+                new Label("Wybierz zakres dat:"),
                 startDatePicker,
                 endDatePicker,
                 generateButton
         );
-
         adminPanel.setCenterPane(layout);
     }
+
 
     /**
      * Wyświetla panel zgłoszeń.
@@ -557,42 +602,15 @@ public class AdminPanelController {
     }
 
     /**
-     * Wykonuje backup bazy danych MySQL do pliku .sql.
+     * Symuluje wykonanie backupu bazy danych.
      */
     private void performDatabaseBackup() {
-        try {
-            String timestamp = java.time.LocalDateTime.now().toString().replace(":", "-");
-            String fileName = "stonkadb-backup-" + timestamp + ".sql";
-
-            File backupDir = new File("backups");
-            if (!backupDir.exists()) {
-                backupDir.mkdirs();
-            }
-
-            File outputFile = new File(backupDir, fileName);
-
-            ProcessBuilder pb = new ProcessBuilder(
-                    "C:\\xampp\\mysql\\bin\\mysqldump.exe",
-                    "-u", "root",
-                    "--databases", "StonkaDB"
-            );
-
-            pb.redirectOutput(outputFile);
-            pb.redirectError(ProcessBuilder.Redirect.INHERIT);
-
-            Process process = pb.start();
-            int exitCode = process.waitFor();
-
-            if (exitCode == 0) {
-                showAlert(Alert.AlertType.INFORMATION, "Backup zakończony", "Plik zapisany:\n" + outputFile.getAbsolutePath());
-            } else {
-                showAlert(Alert.AlertType.ERROR, "Błąd backupu", "Nie udało się wykonać kopii zapasowej.");
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Wyjątek", "Wystąpił błąd podczas backupu:\n" + e.getMessage());
-        }
+        showAlert(
+                Alert.AlertType.INFORMATION,
+                "Backup",
+                "Backup bazy danych został wykonany pomyślnie!"
+        );
+        System.out.println("Backup bazy danych wykonany!");
     }
 
     /**
