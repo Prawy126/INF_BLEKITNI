@@ -26,4 +26,5 @@ module org.example.gui {
     exports org.example.hypermarket;
     exports org.example.pdflib;
     exports org.example.wyjatki;
+    opens org.example.pdflib to javafx.fxml;
 }

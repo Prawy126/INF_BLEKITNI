@@ -16,7 +16,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.database.UserRepository;
 import org.example.sys.Employee;
+import org.example.pdflib.ConfigManager;
 
+import java.io.File;
 import java.math.BigDecimal;
 
 /**
@@ -391,30 +393,21 @@ public class AdminPanelController {
         CheckBox logsCheckbox = new CheckBox("Włącz logi systemowe");
         logsCheckbox.setSelected(true);
 
-        CheckBox notificationsCheckbox =
-                new CheckBox("Włącz powiadomienia");
-        notificationsCheckbox.setSelected(true);
-
         Button configurePDF = new Button("Konfiguruj raporty PDF");
         configurePDF.setOnAction(e -> showPDFConfigPanel());
 
         Button backupButton = new Button("Wykonaj backup bazy danych");
         backupButton.setStyle(
-                "-fx-background-color: #27AE60; "
-                        + "-fx-text-fill: white;"
+                "-fx-background-color: #27AE60; -fx-text-fill: white;"
         );
         backupButton.setOnAction(e -> performDatabaseBackup());
 
         Button saveButton = new Button("Zapisz");
-        saveButton.setStyle(
-                "-fx-background-color: #3498DB; "
-                        + "-fx-text-fill: white;"
-        );
+        saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
 
         layout.getChildren().addAll(
                 titleLabel,
                 logsCheckbox,
-                notificationsCheckbox,
                 configurePDF,
                 backupButton,
                 saveButton
@@ -439,20 +432,44 @@ public class AdminPanelController {
 
         Label sortingLabel = new Label("Sortowanie domyślne:");
         ComboBox<String> sortingComboBox = new ComboBox<>();
-        sortingComboBox.getItems().addAll(
-                "Nazwa", "Data", "Priorytet"
-        );
+        sortingComboBox.getItems().addAll("Nazwa", "Data", "Priorytet");
+
+        Label pathLabel = new Label("Ścieżka zapisu raportów:");
+        TextField pathField = new TextField();
+        pathField.setPromptText("Np. C:/raporty/");
+        pathField.setText(ConfigManager.getReportPath());
+
+        Button saveButton = new Button("Zapisz konfigurację");
+        saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+
+        saveButton.setOnAction(e -> {
+            String path = pathField.getText().trim();
+
+            if (path.isEmpty()) {
+                showAlert(Alert.AlertType.WARNING, "Błąd", "Ścieżka nie może być pusta.");
+                return;
+            }
+
+            File folder = new File(path);
+            if (!folder.exists() || !folder.isDirectory()) {
+                showAlert(Alert.AlertType.ERROR, "Niepoprawna ścieżka", "Podany folder nie istnieje.");
+                return;
+            }
+
+            ConfigManager.setReportPath(path);
+            showAlert(Alert.AlertType.INFORMATION, "Zapisano", "Ścieżka została zapisana.");
+        });
 
         Button backButton = new Button("Wróć");
         backButton.setOnAction(e -> showConfigPanel());
 
         layout.getChildren().addAll(
                 titleLabel,
-                logoLabel,
-                logoField,
+                logoLabel, logoField,
                 updateLogoButton,
-                sortingLabel,
-                sortingComboBox,
+                sortingLabel, sortingComboBox,
+                pathLabel, pathField,
+                saveButton,
                 backButton
         );
 
@@ -540,15 +557,42 @@ public class AdminPanelController {
     }
 
     /**
-     * Symuluje wykonanie backupu bazy danych.
+     * Wykonuje backup bazy danych MySQL do pliku .sql.
      */
     private void performDatabaseBackup() {
-        showAlert(
-                Alert.AlertType.INFORMATION,
-                "Backup",
-                "Backup bazy danych został wykonany pomyślnie!"
-        );
-        System.out.println("Backup bazy danych wykonany!");
+        try {
+            String timestamp = java.time.LocalDateTime.now().toString().replace(":", "-");
+            String fileName = "stonkadb-backup-" + timestamp + ".sql";
+
+            File backupDir = new File("backups");
+            if (!backupDir.exists()) {
+                backupDir.mkdirs();
+            }
+
+            File outputFile = new File(backupDir, fileName);
+
+            ProcessBuilder pb = new ProcessBuilder(
+                    "C:\\xampp\\mysql\\bin\\mysqldump.exe",
+                    "-u", "root",
+                    "--databases", "StonkaDB"
+            );
+
+            pb.redirectOutput(outputFile);
+            pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+
+            Process process = pb.start();
+            int exitCode = process.waitFor();
+
+            if (exitCode == 0) {
+                showAlert(Alert.AlertType.INFORMATION, "Backup zakończony", "Plik zapisany:\n" + outputFile.getAbsolutePath());
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Błąd backupu", "Nie udało się wykonać kopii zapasowej.");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Wyjątek", "Wystąpił błąd podczas backupu:\n" + e.getMessage());
+        }
     }
 
     /**
