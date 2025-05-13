@@ -1,10 +1,3 @@
-/*
- * Classname: UserRepository
- * Version information: 1.0
- * Date: 2025-04-27
- * Copyright notice: © BŁĘKITNI
- */
-
 package org.example.database;
 
 import jakarta.persistence.EntityManager;
@@ -21,6 +14,9 @@ import java.util.List;
 public class UserRepository {
 
     private final EntityManagerFactory emf;
+
+    // Statyczna zmienna przechowująca ID zalogowanego użytkownika
+    private static int loggedInEmployeeId = -1;
 
     /**
      * Konstruktor inicjalizujący EntityManagerFactory.
@@ -76,6 +72,8 @@ public class UserRepository {
                             Employee.class
                     ).setParameter("login", login)
                     .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
         } finally {
             em.close();
         }
@@ -124,9 +122,6 @@ public class UserRepository {
     /**
      * Usuwa pracownika na podstawie identyfikatora.
      *
-     * TODO: Rozwiązać problem więzów integralności. Usunięcie pracownika
-     * nie powinno naruszać relacji z raportami.
-     *
      * @param pracownik pracownik do usunięcia
      */
     public void usunPracownika(Employee pracownik) {
@@ -149,6 +144,7 @@ public class UserRepository {
 
     /**
      * Wyszukuje pracownika po loginie i haśle.
+     * Jeśli pracownik zostanie znaleziony, jego ID jest zapisywane jako ID zalogowanego użytkownika.
      *
      * @param login login pracownika
      * @param haslo hasło pracownika
@@ -157,13 +153,19 @@ public class UserRepository {
     public Employee znajdzPoLoginieIHasle(String login, String haslo) {
         EntityManager em = emf.createEntityManager();
         try {
-            return em.createQuery(
+            Employee employee = em.createQuery(
                             "SELECT e FROM Employee e WHERE e.login = :login "
                                     + "AND e.password = :haslo",
                             Employee.class
                     ).setParameter("login", login)
                     .setParameter("haslo", haslo)
                     .getSingleResult();
+
+            if (employee != null) {
+                setLoggedInEmployee(employee.getId());
+            }
+
+            return employee;
         } catch (NoResultException e) {
             return null;
         } finally {
@@ -172,10 +174,67 @@ public class UserRepository {
     }
 
     /**
+     * Wyszukuje pracownika po identyfikatorze.
+     *
+     * @param id identyfikator pracownika
+     * @return znaleziony pracownik lub null, jeśli brak
+     */
+    public Employee znajdzPoId(int id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Employee.class, id);
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Ustawia ID zalogowanego pracownika.
+     *
+     * @param employeeId ID pracownika
+     */
+    public static void setLoggedInEmployee(int employeeId) {
+        loggedInEmployeeId = employeeId;
+    }
+
+    /**
+     * Zwraca ID aktualnie zalogowanego pracownika.
+     *
+     * @return ID zalogowanego pracownika lub -1 jeśli nikt nie jest zalogowany
+     */
+    public static int getLoggedInEmployeeId() {
+        return loggedInEmployeeId;
+    }
+
+    public Employee getCurrentEmployee() {
+        if (loggedInEmployeeId == -1) {
+            return null;
+        }
+
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.find(Employee.class, loggedInEmployeeId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Resetuje ID zalogowanego pracownika.
+     * Używane podczas wylogowywania.
+     */
+    public static void resetCurrentEmployee() {
+        loggedInEmployeeId = -1;
+    }
+
+    /**
      * Zamknięcie EntityManagerFactory.
      */
     public void close() {
-        if (emf.isOpen()) {
+        if (emf != null && emf.isOpen()) {
             emf.close();
         }
     }

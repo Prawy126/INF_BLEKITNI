@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.example.database.UserRepository;
 import org.example.gui.*;
 import org.example.database.ILacz;
 import javax.mail.MessagingException;
@@ -30,6 +31,9 @@ public class Login implements ILacz {
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
+                        int employeeId = rs.getInt("Id");
+                        UserRepository.setLoggedInEmployee(employeeId);
+
                         String stanowisko = rs.getString("Stanowisko");
 
                         HelloApplication.showAlert(
