@@ -56,9 +56,10 @@ CREATE TABLE IF NOT EXISTS Wnioski_o_nieobecnosc (
 CREATE TABLE IF NOT EXISTS Produkty (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Nazwa VARCHAR(100),
+    Kategoria VARCHAR(100),
     Cena DECIMAL(10,2),
     IloscWmagazynie INT
-);
+    );
 
 -- Tabela Zamowienia
 CREATE TABLE IF NOT EXISTS Zamowienia (
@@ -138,18 +139,18 @@ VALUES
         ('Magda', 'Szymańska', 36, 10, 'mszym', 'magda654', 'magda.s@example.com', 4300.00, 'Logistyk', FALSE, NULL),
         ('Janusz', 'Kowalik', 35, 1, 'admin2', 'admin2', 'janusz.kowalik@example.com', 4500.00, 'Admin', FALSE, NULL);
 
-INSERT INTO Produkty (Nazwa, Cena, IloscWmagazynie)
-VALUES 
-('Mleko', 2.99, 150),
-('Chleb', 3.49, 200),
-('Masło', 5.79, 80),
-('Jajka', 6.99, 100),
-('Ser', 4.59, 90),
-('Jogurt', 1.99, 120),
-('Sok pomarańczowy', 3.99, 110),
-('Makaron', 2.49, 140),
-('Ryż', 2.89, 160),
-('Olej', 5.99, 70);
+INSERT INTO Produkty (Nazwa, Kategoria, Cena, IloscWmagazynie)
+VALUES
+    ('Mleko', 'Nabiał', 2.99, 150),
+    ('Chleb', 'Pieczywo', 3.49, 200),
+    ('Masło', 'Nabiał', 5.79, 80),
+    ('Jajka', 'Nabiał', 6.99, 100),
+    ('Ser', 'Nabiał', 4.59, 90),
+    ('Jogurt', 'Nabiał', 1.99, 120),
+    ('Sok pomarańczowy', 'Napoje', 3.99, 110),
+    ('Makaron', 'Produkty zbożowe', 2.49, 140),
+    ('Ryż', 'Produkty zbożowe', 2.89, 160),
+    ('Olej', 'Tłuszcze', 5.99, 70);
 
 INSERT INTO Zadania (Nazwa, Data, Status, Opis)
 VALUES 

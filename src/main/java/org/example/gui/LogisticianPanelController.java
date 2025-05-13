@@ -18,6 +18,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.database.ProductRepository;
 import sys.Product; //IMPORT KLASY PRODUCT Z BIBLIOTEKI , NIE Z GŁÓWNEGO PROJEKTU!
 import pdf.WarehouseRaport;
 
@@ -25,6 +26,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Kontroler obsługujący logikę interfejsu użytkownika
@@ -35,6 +37,7 @@ public class LogisticianPanelController {
     private final LogisticianPanel logisticianPanel;
     private final Stage primaryStage;
     private static final Logger logger = LogManager.getLogger(LogisticianPanelController.class);
+    private final ProductRepository productRepository = new ProductRepository();
 
     /**
      * Konstruktor przypisujący panel logistyka.
@@ -103,10 +106,39 @@ public class LogisticianPanelController {
         addOrderButton.setOnAction(e -> showAddOrderForm());
 
         Button filterButton = new Button("Filtruj");
-        filterButton.setOnAction(e -> showFilterDialog(tableView));
+        filterButton.setOnAction(e -> showFilterOrderDialog(tableView));
 
         layout.getChildren().addAll(titleLabel, tableView, addOrderButton, filterButton);
         logisticianPanel.setCenterPane(layout);
+    }
+
+    private void showFilterOrderDialog(TableView<Order> tableView) {
+        Stage stage = new Stage();
+        stage.setTitle("Filtrowanie zamówień");
+
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(20));
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        Label idLabel = new Label("Id zamówienia:");
+        TextField idField = new TextField();
+
+        Label productIdLabel = new Label("Id produktu:");
+        TextField productIdField = new TextField();
+
+        Button filterButton = new Button("Filtruj");
+        filterButton.setOnAction(e -> {
+            // Logika filtrowania zamówień
+            stage.close();
+        });
+
+        grid.add(idLabel, 0, 0); grid.add(idField, 1, 0);
+        grid.add(productIdLabel, 0, 1); grid.add(productIdField, 1, 1);
+        grid.add(filterButton, 1, 2);
+
+        stage.setScene(new Scene(grid, 300, 200));
+        stage.show();
     }
 
     /**
@@ -119,19 +151,13 @@ public class LogisticianPanelController {
         Label titleLabel = new Label("Raporty magazynowe");
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
-        TableView<?> tableView = new TableView<>();
-        tableView.setMinHeight(200);
-
         Button generateButton = new Button("Generuj raport");
         generateButton.setOnAction(e -> showReportDialog());
 
-        layout.getChildren().addAll(titleLabel, tableView, generateButton);
+        layout.getChildren().addAll(titleLabel, generateButton);
         logisticianPanel.setCenterPane(layout);
     }
 
-    /**
-     * Okno dialogowe do wyboru formatu i zakresu dat raportu.
-     */
     private void showReportDialog() {
         Stage stage = new Stage();
         stage.setTitle("Generuj raport magazynowy");
@@ -144,8 +170,25 @@ public class LogisticianPanelController {
         // Elementy formularza
         Label categoriesLabel = new Label("Wybierz kategorie:");
         ListView<String> categoriesList = new ListView<>();
-        categoriesList.getItems().addAll(getAllCategories());
+
+        // Pobieranie kategorii z bazy danych
+        try {
+            List<org.example.sys.Product> products = productRepository.pobierzWszystkieProdukty();
+            List<String> categories = products.stream()
+                    .map(org.example.sys.Product::getCategory)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            categoriesList.getItems().addAll(categories);
+        } catch (Exception e) {
+            logger.error("Błąd podczas pobierania kategorii", e);
+            categoriesList.getItems().addAll("Nabiał", "Pieczywo", "Napoje", "Produkty zbożowe", "Tłuszcze");
+        }
+
         categoriesList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        Label thresholdLabel = new Label("Próg niskiego stanu magazynowego:");
+        Spinner<Integer> thresholdSpinner = new Spinner<>(1, 100, 5);
 
         Label outputLabel = new Label("Ścieżka zapisu:");
         TextField outputPath = new TextField();
@@ -154,20 +197,22 @@ public class LogisticianPanelController {
         browseButton.setOnAction(e -> handleBrowseButton(stage, outputPath));
 
         Button generate = new Button("Generuj");
-        generate.setOnAction(e -> handleGenerateButton(outputPath, categoriesList, stage));
+        generate.setOnAction(e -> {
+            List<String> selectedCategories = new ArrayList<>(categoriesList.getSelectionModel().getSelectedItems());
+            int lowStockThreshold = thresholdSpinner.getValue();
+
+            handleGenerateButton(outputPath, selectedCategories, lowStockThreshold, stage);
+        });
 
         // Rozmieszczenie elementów
         grid.add(categoriesLabel, 0, 0);
         grid.add(categoriesList, 1, 0);
-        grid.add(outputLabel, 0, 1);
-        grid.add(outputPath, 1, 1);
-        grid.add(browseButton, 2, 1);
-        grid.add(generate, 1, 2);
-
-        // Dodatkowy przycisk testowy
-        Button testButton = new Button("Testuj bibliotekę");
-        testButton.setOnAction(e -> runLibraryTest());
-        grid.add(testButton, 1, 3);
+        grid.add(thresholdLabel, 0, 1);
+        grid.add(thresholdSpinner, 1, 1);
+        grid.add(outputLabel, 0, 2);
+        grid.add(outputPath, 1, 2);
+        grid.add(browseButton, 2, 2);
+        grid.add(generate, 1, 3);
 
         stage.setScene(new Scene(grid, 500, 350));
         stage.show();
@@ -183,16 +228,36 @@ public class LogisticianPanelController {
         }
     }
 
-    private void handleGenerateButton(TextField outputPath, ListView<String> categoriesList, Stage stage) {
+    private void handleGenerateButton(TextField outputPath, List<String> selectedCategories, int lowStockThreshold, Stage stage) {
+        if (outputPath.getText().isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Uwaga", "Wybierz ścieżkę zapisu raportu.");
+            return;
+        }
+
         try {
+            // Pobieranie produktów z bazy danych
+            List<org.example.sys.Product> productsFromDb = productRepository.pobierzWszystkieProdukty();
+
+            // Konwersja produktów do formatu używanego przez bibliotekę raportów
+            List<sys.Product> pdfProducts = new ArrayList<>();
+            for (org.example.sys.Product product : productsFromDb) {
+                pdfProducts.add(new sys.Product(
+                        product.getName(),
+                        product.getCategory(),
+                        product.getPrice(),
+                        product.getQuantity()
+                ));
+            }
+
+            // Generowanie raportu
             WarehouseRaport generator = new WarehouseRaport();
             generator.setLogoPath("src/main/resources/logo.png");
-            generator.setLowStockThreshold(5);
+            generator.setLowStockThreshold(lowStockThreshold);
 
             generator.generateReport(
                     outputPath.getText(),
-                    (List<sys.Product>) (List<?>) getSampleProducts(),
-                    new ArrayList<>(categoriesList.getSelectionModel().getSelectedItems())
+                    pdfProducts,
+                    selectedCategories
             );
 
             showAlert(Alert.AlertType.INFORMATION, "Sukces", "Raport wygenerowany pomyślnie!");
@@ -202,6 +267,8 @@ public class LogisticianPanelController {
             showAlert(Alert.AlertType.ERROR, "Błąd", "Błąd generowania raportu: " + ex.getMessage());
         }
     }
+
+
 
     private void runLibraryTest() {
         try {
@@ -301,42 +368,133 @@ public class LogisticianPanelController {
     /**
      * Okno filtrowania zamówień.
      */
-    private void showFilterDialog(TableView<Order> table) {
+    /**
+     * Wyświetla okno formularza filtrowania produktów.
+     *
+     * @param tableView tabela produktów do filtrowania
+     */
+    private void showFilterProductDialog(TableView<org.example.sys.Product> tableView) {
         Stage stage = new Stage();
-        stage.setTitle("Filtrowanie zamówień");
+        stage.setTitle("Filtrowanie produktów");
 
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
-        grid.setVgap(10);
         grid.setHgap(10);
+        grid.setVgap(10);
 
-        Label productIdLabel = new Label("Id produktu:");
-        Label employeeIdLabel = new Label("Id pracownika:");
-        Label minQtyLabel = new Label("Min. ilość:");
+        Label nameLabel = new Label("Nazwa zawiera:");
+        TextField nameField = new TextField();
 
-        TextField productIdField = new TextField();
-        TextField employeeIdField = new TextField();
-        TextField minQtyField = new TextField();
+        Label categoryLabel = new Label("Kategoria:");
+        ComboBox<String> categoryComboBox = new ComboBox<>();
 
-        Button filterBtn = new Button("Filtruj");
-        filterBtn.setOnAction(e -> {
-            table.setItems(getSampleOrders().filtered(order ->
-                    (productIdField.getText().isEmpty() || String.valueOf(order.getProductId()).equals(productIdField.getText())) &&
-                            (employeeIdField.getText().isEmpty() || String.valueOf(order.getEmployeeId()).equals(employeeIdField.getText())) &&
-                            (minQtyField.getText().isEmpty() || order.getQuantity() >= Integer.parseInt(minQtyField.getText()))
-            ));
-            stage.close();
+        // Pobieranie kategorii z bazy danych
+        try {
+            List<org.example.sys.Product> products = productRepository.pobierzWszystkieProdukty();
+            List<String> categories = products.stream()
+                    .map(org.example.sys.Product::getCategory)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            categoryComboBox.getItems().add("Wszystkie kategorie");
+            categoryComboBox.getItems().addAll(categories);
+            categoryComboBox.setValue("Wszystkie kategorie");
+        } catch (Exception e) {
+            logger.error("Błąd podczas pobierania kategorii", e);
+            categoryComboBox.getItems().add("Wszystkie kategorie");
+            categoryComboBox.setValue("Wszystkie kategorie");
+        }
+
+        Label minPriceLabel = new Label("Min. cena:");
+        TextField minPriceField = new TextField();
+
+        Label maxPriceLabel = new Label("Max. cena:");
+        TextField maxPriceField = new TextField();
+
+        Label minStockLabel = new Label("Min. ilość w magazynie:");
+        TextField minStockField = new TextField();
+
+        Button filterButton = new Button("Filtruj");
+        filterButton.setOnAction(e -> {
+            try {
+                // Pobieranie wszystkich produktów
+                List<org.example.sys.Product> allProducts = productRepository.pobierzWszystkieProdukty();
+
+                // Filtrowanie produktów
+                List<org.example.sys.Product> filteredProducts = allProducts.stream()
+                        .filter(product -> {
+                            // Filtrowanie po nazwie
+                            if (!nameField.getText().isEmpty() &&
+                                    !product.getName().toLowerCase().contains(nameField.getText().toLowerCase())) {
+                                return false;
+                            }
+
+                            // Filtrowanie po kategorii
+                            String selectedCategory = categoryComboBox.getValue();
+                            if (!"Wszystkie kategorie".equals(selectedCategory) &&
+                                    !product.getCategory().equals(selectedCategory)) {
+                                return false;
+                            }
+
+                            // Filtrowanie po minimalnej cenie
+                            if (!minPriceField.getText().isEmpty()) {
+                                try {
+                                    double minPrice = Double.parseDouble(minPriceField.getText().replace(",", "."));
+                                    if (product.getPrice() < minPrice) {
+                                        return false;
+                                    }
+                                } catch (NumberFormatException ex) {
+                                    // Ignorowanie nieprawidłowego formatu
+                                }
+                            }
+
+                            // Filtrowanie po maksymalnej cenie
+                            if (!maxPriceField.getText().isEmpty()) {
+                                try {
+                                    double maxPrice = Double.parseDouble(maxPriceField.getText().replace(",", "."));
+                                    if (product.getPrice() > maxPrice) {
+                                        return false;
+                                    }
+                                } catch (NumberFormatException ex) {
+                                    // Ignorowanie nieprawidłowego formatu
+                                }
+                            }
+
+                            // Filtrowanie po minimalnej ilości w magazynie
+                            if (!minStockField.getText().isEmpty()) {
+                                try {
+                                    int minStock = Integer.parseInt(minStockField.getText());
+                                    if (product.getQuantity() < minStock) {
+                                        return false;
+                                    }
+                                } catch (NumberFormatException ex) {
+                                    // Ignorowanie nieprawidłowego formatu
+                                }
+                            }
+
+                            return true;
+                        })
+                        .collect(Collectors.toList());
+
+                // Aktualizacja tabeli
+                tableView.setItems(FXCollections.observableArrayList(filteredProducts));
+                stage.close();
+            } catch (Exception ex) {
+                logger.error("Błąd podczas filtrowania produktów", ex);
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Nie udało się filtrować produktów: " + ex.getMessage());
+            }
         });
 
-        grid.add(productIdLabel, 0, 0);
-        grid.add(productIdField, 1, 0);
-        grid.add(employeeIdLabel, 0, 1);
-        grid.add(employeeIdField, 1, 1);
-        grid.add(minQtyLabel, 0, 2);
-        grid.add(minQtyField, 1, 2);
-        grid.add(filterBtn, 1, 3);
+        // Ustawienie pól w siatce
+        grid.add(nameLabel, 0, 0);       grid.add(nameField, 1, 0);
+        grid.add(categoryLabel, 0, 1);   grid.add(categoryComboBox, 1, 1);
+        grid.add(minPriceLabel, 0, 2);   grid.add(minPriceField, 1, 2);
+        grid.add(maxPriceLabel, 0, 3);   grid.add(maxPriceField, 1, 3);
+        grid.add(minStockLabel, 0, 4);   grid.add(minStockField, 1, 4);
+        grid.add(filterButton, 1, 5);
 
-        stage.setScene(new Scene(grid, 320, 250));
+        Scene scene = new Scene(grid, 400, 250);
+        stage.setScene(scene);
         stage.show();
     }
 
@@ -463,6 +621,9 @@ public class LogisticianPanelController {
         public String getDate() { return date; }
     }
 
+    /**
+     * Wyświetla alert z podanym typem, tytułem i treścią.
+     */
     private void showAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
