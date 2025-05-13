@@ -59,14 +59,11 @@ public class Employee extends Person {
 
     public Employee(String name, String surname, int age, Address adres,
                     String login, String password, String stanowisko, BigDecimal zarobki)
-            throws SalaryException {
-        super();
-        this.setName(name);
-        this.setSurname(surname);
-        this.setAge(age);
+            throws NameException, AgeException, SalaryException, PasswordException {
+        super(name, surname, age, null);
         this.adres = adres;
-        this.login = login;
-        this.password = password;
+        setLogin(login);
+        setPassword(password);
         this.stanowisko = stanowisko;
         setZarobki(zarobki);
         this.onSickLeave = false;

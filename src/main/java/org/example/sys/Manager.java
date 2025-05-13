@@ -5,29 +5,39 @@ import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Klasa reprezentująca rolę logistyka – logiczną "nakładkę" na encję Employee.
+ * Klasa reprezentująca rolę menedżera – logiczną nakładkę na encję Employee.
  */
-public class Logistician {
+public class Manager {
 
     private final Employee employee;
+    private final List<Employee> managedEmployees;
 
-    /**
-     * Konstruktor przyjmujący istniejącego pracownika.
-     */
-    public Logistician(Employee employee) {
+    public Manager(Employee employee) {
         this.employee = employee;
+        this.managedEmployees = new ArrayList<>();
     }
 
-    /**
-     * Zwraca referencję do powiązanego pracownika.
-     */
     public Employee getEmployee() {
         return employee;
     }
 
-    // === Metody operujące na danych pracownika ===
+    public void addEmployee(Employee e) {
+        if (e != null && !managedEmployees.contains(e)) {
+            managedEmployees.add(e);
+        }
+    }
+
+    public void removeEmployee(Employee e) {
+        managedEmployees.remove(e);
+    }
+
+    public List<Employee> getManagedEmployees() {
+        return managedEmployees;
+    }
 
     public void updateName(String newName) {
         try {
@@ -73,14 +83,11 @@ public class Logistician {
         try {
             employee.setZarobki(newSalary);
         } catch (SalaryException e) {
-            System.err.println("Błąd zmiany zarobków: " + e.getMessage());
+            System.err.println("Błąd zmiany wynagrodzenia: " + e.getMessage());
         }
     }
 
-    // === Przykładowa metoda logistyczna ===
-
-    public void przydzielZamowienie(int orderId) {
-        // tutaj można dodać logikę przydziału zamówienia
-        System.out.println("Logistyk " + employee.getName() + " przydzielił zamówienie o ID: " + orderId);
+    public void wygenerujRaportZespolu() {
+        System.out.println("Menedżer " + employee.getName() + " generuje raport dla " + managedEmployees.size() + " pracowników.");
     }
 }

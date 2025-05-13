@@ -12,7 +12,13 @@ import javafx.scene.layout.*;
 import javafx.stage.*;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import org.example.database.AbsenceRequestRepository;
+import org.example.sys.AbsenceRequest;
+import org.example.sys.Employee;
+import org.example.database.UserRepository;
+
 import java.time.LocalDate;
+import java.util.Date;
 
 public class CashierPanelController {
 
@@ -167,7 +173,6 @@ public class CashierPanelController {
         );
     }
 
-    // 2. Cell factory for the "Podgląd" button column
     private Callback<TableColumn<SalesReport, Void>, TableCell<SalesReport, Void>> getViewButtonCellFactory() {
         return new Callback<>() {
             @Override
@@ -193,7 +198,6 @@ public class CashierPanelController {
         };
     }
 
-    // 3. Method to show report details (helper method)
     private void showReportDetails(SalesReport report) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Szczegóły raportu");
@@ -247,7 +251,24 @@ public class CashierPanelController {
         grid.setVgap(10);
         grid.setHgap(10);
 
-        Label reasonLabel = new Label("Powód:");
+        // Utworzenie repozytorium użytkowników
+        UserRepository userRepository = new UserRepository();
+
+        // Pobranie bieżącego pracownika
+        Employee currentEmployee = userRepository.getCurrentEmployee();
+
+        if (currentEmployee == null) {
+            showNotification("Błąd", "Nie jesteś zalogowany. Zaloguj się ponownie.");
+            userRepository.close();
+            return;
+        }
+
+        // Wyświetlenie informacji o zalogowanym pracowniku
+        Label employeeInfoLabel = new Label("Pracownik: " + currentEmployee.getName() + " " +
+                currentEmployee.getSurname() + " (ID: " + currentEmployee.getId() + ")");
+        employeeInfoLabel.setStyle("-fx-font-weight: bold;");
+
+        Label reasonLabel = new Label("Opis:");
         TextField reasonField = new TextField();
 
         Label fromDateLabel = new Label("Data od:");
@@ -256,28 +277,69 @@ public class CashierPanelController {
         Label toDateLabel = new Label("Data do:");
         DatePicker toDatePicker = new DatePicker();
 
+        // Dodanie pola wyboru typu wniosku
+        Label typeLabel = new Label("Typ wniosku:");
+        ComboBox<String> typeComboBox = new ComboBox<>();
+        typeComboBox.getItems().addAll("Urlop wypoczynkowy", "Urlop na żądanie", "Zwolnienie lekarskie", "Inne");
+        typeComboBox.setValue("Urlop wypoczynkowy");
+
         Button submitButton = cashierPanel.createStyledButton("Wyślij wniosek", "#27AE60");
         submitButton.setOnAction(e -> {
             if (validateAbsenceForm(reasonField.getText(), fromDatePicker.getValue(), toDatePicker.getValue())) {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Sukces");
-                alert.setHeaderText("Wniosek został wysłany");
-                alert.setContentText("Oczekuj potwierdzenia od kierownika");
-                alert.showAndWait();
-                stage.close();
+                try {
+                    // Utworzenie repozytorium wniosków
+                    AbsenceRequestRepository absenceRepository = new AbsenceRequestRepository();
+
+                    // Konwersja LocalDate na java.util.Date
+                    Date fromDate = java.sql.Date.valueOf(fromDatePicker.getValue());
+                    Date toDate = java.sql.Date.valueOf(toDatePicker.getValue());
+
+                    // Utworzenie obiektu wniosku z bieżącym pracownikiem
+                    AbsenceRequest request = new AbsenceRequest(
+                            typeComboBox.getValue(),
+                            fromDate,
+                            toDate,
+                            reasonField.getText(),
+                            currentEmployee
+                    );
+
+                    // Zapisanie wniosku w bazie danych
+                    absenceRepository.dodajWniosek(request);
+
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Sukces");
+                    alert.setHeaderText("Wniosek został wysłany");
+                    alert.setContentText("Oczekuj potwierdzenia od kierownika");
+                    alert.showAndWait();
+
+                    // Zamknięcie repozytorium
+                    absenceRepository.close();
+
+                    // Zamknięcie okna
+                    stage.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    showNotification("Błąd", "Wystąpił problem podczas zapisywania wniosku: " + ex.getMessage());
+                }
             }
         });
 
-        grid.add(reasonLabel, 0, 0);
-        grid.add(reasonField, 1, 0);
-        grid.add(fromDateLabel, 0, 1);
-        grid.add(fromDatePicker, 1, 1);
-        grid.add(toDateLabel, 0, 2);
-        grid.add(toDatePicker, 1, 2);
-        grid.add(submitButton, 1, 3);
+        grid.add(employeeInfoLabel, 0, 0, 2, 1);
+        grid.add(typeLabel, 0, 1);
+        grid.add(typeComboBox, 1, 1);
+        grid.add(reasonLabel, 0, 2);
+        grid.add(reasonField, 1, 2);
+        grid.add(fromDateLabel, 0, 3);
+        grid.add(fromDatePicker, 1, 3);
+        grid.add(toDateLabel, 0, 4);
+        grid.add(toDatePicker, 1, 4);
+        grid.add(submitButton, 1, 5);
 
-        Scene scene = new Scene(grid, 400, 250);
+        Scene scene = new Scene(grid, 400, 350);
         stage.setScene(scene);
+
+        stage.setOnHidden(event -> userRepository.close());
+
         stage.show();
     }
 
@@ -399,8 +461,6 @@ public class CashierPanelController {
         alert.showAndWait();
     }
 
-    // Pozostałe metody z oryginalnej implementacji...
-
     // Wewnętrzne klasy danych
     public static class Product {
         private final String name;
@@ -431,7 +491,16 @@ public class CashierPanelController {
         public String getType() { return type; }
     }
 
+    /**
+     * Wylogowuje użytkownika i uruchamia okno logowania.
+     */
+    /**
+     * Wylogowuje użytkownika i uruchamia okno logowania.
+     */
     public void logout() {
+        // Reset the current user
+        UserRepository.resetCurrentEmployee();
+
         Stage primaryStage = cashierPanel.getPrimaryStage();
         primaryStage.close();
         HelloApplication.showLoginScreen(primaryStage);
