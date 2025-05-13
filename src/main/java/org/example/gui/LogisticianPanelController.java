@@ -10,14 +10,21 @@ package org.example.gui;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import sys.Product; //IMPORT KLASY PRODUCT Z BIBLIOTEKI , NIE Z GŁÓWNEGO PROJEKTU!
+import pdf.WarehouseRaport;
 
-import java.time.LocalDate;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Kontroler obsługujący logikę interfejsu użytkownika
@@ -27,6 +34,7 @@ public class LogisticianPanelController {
 
     private final LogisticianPanel logisticianPanel;
     private final Stage primaryStage;
+    private static final Logger logger = LogManager.getLogger(LogisticianPanelController.class);
 
     /**
      * Konstruktor przypisujący panel logistyka.
@@ -126,47 +134,117 @@ public class LogisticianPanelController {
      */
     private void showReportDialog() {
         Stage stage = new Stage();
-        stage.setTitle("Generuj raport");
+        stage.setTitle("Generuj raport magazynowy");
 
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setVgap(10);
         grid.setHgap(10);
 
-        Label startDateLabel = new Label("Data od:");
-        Label endDateLabel = new Label("Data do:");
-        Label formatLabel = new Label("Format:");
+        // Elementy formularza
+        Label categoriesLabel = new Label("Wybierz kategorie:");
+        ListView<String> categoriesList = new ListView<>();
+        categoriesList.getItems().addAll(getAllCategories());
+        categoriesList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        DatePicker startDate = new DatePicker();
-        DatePicker endDate = new DatePicker();
+        Label outputLabel = new Label("Ścieżka zapisu:");
+        TextField outputPath = new TextField();
 
-        ComboBox<String> formatBox = new ComboBox<>();
-        formatBox.getItems().addAll("PDF", "CSV");
+        Button browseButton = new Button("Przeglądaj");
+        browseButton.setOnAction(e -> handleBrowseButton(stage, outputPath));
 
         Button generate = new Button("Generuj");
-        generate.setOnAction(e -> {
-            if (startDate.getValue() != null && endDate.getValue() != null && formatBox.getValue() != null) {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                        "Wygenerowano raport od " + startDate.getValue() +
-                                " do " + endDate.getValue() +
-                                " w formacie: " + formatBox.getValue());
-                alert.showAndWait();
-                stage.close();
-            } else {
-                new Alert(Alert.AlertType.WARNING, "Uzupełnij wszystkie pola.").showAndWait();
-            }
-        });
+        generate.setOnAction(e -> handleGenerateButton(outputPath, categoriesList, stage));
 
-        grid.add(startDateLabel, 0, 0);
-        grid.add(startDate, 1, 0);
-        grid.add(endDateLabel, 0, 1);
-        grid.add(endDate, 1, 1);
-        grid.add(formatLabel, 0, 2);
-        grid.add(formatBox, 1, 2);
-        grid.add(generate, 1, 3);
+        // Rozmieszczenie elementów
+        grid.add(categoriesLabel, 0, 0);
+        grid.add(categoriesList, 1, 0);
+        grid.add(outputLabel, 0, 1);
+        grid.add(outputPath, 1, 1);
+        grid.add(browseButton, 2, 1);
+        grid.add(generate, 1, 2);
 
-        stage.setScene(new Scene(grid, 320, 250));
+        // Dodatkowy przycisk testowy
+        Button testButton = new Button("Testuj bibliotekę");
+        testButton.setOnAction(e -> runLibraryTest());
+        grid.add(testButton, 1, 3);
+
+        stage.setScene(new Scene(grid, 500, 350));
         stage.show();
+    }
+
+    private void handleBrowseButton(Stage stage, TextField outputPath) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        File file = fileChooser.showSaveDialog(stage);
+        if (file != null) {
+            outputPath.setText(file.getAbsolutePath());
+        }
+    }
+
+    private void handleGenerateButton(TextField outputPath, ListView<String> categoriesList, Stage stage) {
+        try {
+            WarehouseRaport generator = new WarehouseRaport();
+            generator.setLogoPath("src/main/resources/logo.png");
+            generator.setLowStockThreshold(5);
+
+            generator.generateReport(
+                    outputPath.getText(),
+                    (List<sys.Product>) (List<?>) getSampleProducts(),
+                    new ArrayList<>(categoriesList.getSelectionModel().getSelectedItems())
+            );
+
+            showAlert(Alert.AlertType.INFORMATION, "Sukces", "Raport wygenerowany pomyślnie!");
+            stage.close();
+        } catch (Exception ex) {
+            logger.error("Błąd generowania raportu", ex);
+            showAlert(Alert.AlertType.ERROR, "Błąd", "Błąd generowania raportu: " + ex.getMessage());
+        }
+    }
+
+    private void runLibraryTest() {
+        try {
+            WarehouseRaport generator = new WarehouseRaport();
+            generator.setLogoPath("src/main/resources/logo.png");
+            generator.setLowStockThreshold(3);
+
+            String testPath = System.getProperty("user.dir") + "/test_report.pdf";
+            generator.generateReport(
+                    testPath,
+                    (List<sys.Product>) (List<?>) getSampleProducts(),
+                    Arrays.asList("Elektronika", "Żywność")
+            );
+
+            showAlert(Alert.AlertType.INFORMATION,
+                    "Test powiódł się",
+                    "Wygenerowano testowy raport:\n" + testPath);
+        } catch (Exception ex) {
+            showAlert(Alert.AlertType.ERROR,
+                    "Test nie powiódł się",
+                    "Błąd: " + ex.getMessage());
+        }
+    }
+
+    // Metody pomocnicze
+    private List<String> getAllCategories() {
+        return Arrays.asList(
+                "Elektronika",
+                "Odzież",
+                "Akcesoria",
+                "Żywność"
+        );
+    }
+
+    private List<Product> getSampleProducts() {
+        return Arrays.asList(
+                new Product("Laptop HP Pavilion", "Elektronika", 8, 3499),
+                new Product("Mysz Logitech MX", "Elektronika", 2, 299),
+                new Product("Kurtka zimowa", "Odzież", 15, 199),
+                new Product("Powerbank Xiaomi", "Akcesoria", 4, 89),
+                new Product("Kawa Arabica 1kg", "Żywność", 1, 39),
+                new Product("Słuchawki Sony", "Elektronika", 6, 599)
+        );
     }
 
     /**
@@ -383,6 +461,14 @@ public class LogisticianPanelController {
         public int getQuantity() { return quantity; }
         public double getPrice() { return price; }
         public String getDate() { return date; }
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     /**
