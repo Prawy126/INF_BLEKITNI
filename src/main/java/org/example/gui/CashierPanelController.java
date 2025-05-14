@@ -13,9 +13,11 @@ import javafx.stage.*;
 import javafx.util.Callback;
 import javafx.util.Duration;
 import org.example.database.AbsenceRequestRepository;
+import org.example.database.TechnicalIssueRepository;
 import org.example.sys.AbsenceRequest;
 import org.example.sys.Employee;
 import org.example.database.UserRepository;
+import org.example.sys.TechnicalIssue;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -132,19 +134,50 @@ public class CashierPanelController {
     }
 
     // Zgłoszenie problemu
+    // Panel zgłoszeń technicznych
     public void showIssueReportPanel() {
         Stage dialog = createStyledDialog("Zgłoszenie problemu");
-
         ComboBox<String> typeBox = createStyledComboBox("Awaria sprzętu", "Błąd oprogramowania", "Inne");
         TextArea description = createStyledTextArea("Opisz problem...");
-
         Button sendButton = cashierPanel.createStyledButton("Wyślij", "#27AE60");
         Button cancelButton = cashierPanel.createStyledButton("Anuluj", "#E74C3C");
 
+        // Obsługa zdarzenia wysyłania zgłoszenia
         sendButton.setOnAction(e -> {
             if (validateReport(typeBox.getValue(), description.getText())) {
-                showNotification("Sukces", "Zgłoszenie wysłane");
-                dialog.close();
+                UserRepository userRepository = new UserRepository();
+                TechnicalIssueRepository issueRepo = new TechnicalIssueRepository();
+                try {
+                    // Pobranie aktualnego pracownika
+                    Employee currentEmployee = userRepository.getCurrentEmployee();
+                    if (currentEmployee == null) {
+                        showNotification("Błąd", "Nie jesteś zalogowany. Zaloguj się ponownie.");
+                        return;
+                    }
+
+                    // Utworzenie nowego zgłoszenia
+                    TechnicalIssue issue = new TechnicalIssue(
+                            typeBox.getValue(),
+                            description.getText(),
+                            LocalDate.now(),
+                            currentEmployee,
+                            "Nowe"
+                    );
+
+                    // Zapisanie zgłoszenia do bazy danych
+                    issueRepo.dodajZgloszenie(issue);
+
+                    // Potwierdzenie i zamknięcie okna
+                    showNotification("Sukces", "Zgłoszenie wysłane");
+                    dialog.close();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    showNotification("Błąd", "Wystąpił problem podczas zapisywania zgłoszenia: " + ex.getMessage());
+                } finally {
+                    // Zamykanie repozytoriów
+                    userRepository.close();
+                    issueRepo.close();
+                }
             }
         });
 
@@ -163,8 +196,7 @@ public class CashierPanelController {
 
         setupDialog(dialog, root);
     }
-
-
+    
     private ObservableList<SalesReport> getSampleReports() {
         return FXCollections.observableArrayList(
                 new SalesReport("1", "2024-04-01", "Dzienny"),
@@ -491,9 +523,6 @@ public class CashierPanelController {
         public String getType() { return type; }
     }
 
-    /**
-     * Wylogowuje użytkownika i uruchamia okno logowania.
-     */
     /**
      * Wylogowuje użytkownika i uruchamia okno logowania.
      */

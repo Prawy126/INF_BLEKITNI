@@ -14,12 +14,15 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.example.database.TechnicalIssueRepository;
 import org.example.database.UserRepository;
 import org.example.sys.Employee;
 import org.example.pdflib.ConfigManager;
+import org.example.sys.TechnicalIssue;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Map;
 
 /**
@@ -32,6 +35,8 @@ public class AdminPanelController {
     private final Stage primaryStage;
     private final UserRepository userRepository;
     private TableView<Employee> tableView;
+    private final TechnicalIssueRepository technicalIssueRepository;
+    private TableView<TechnicalIssue> issuesTableView;
 
     /**
      * Konstruktor klasy kontrolera.
@@ -42,6 +47,7 @@ public class AdminPanelController {
         this.adminPanel = adminPanel;
         this.primaryStage = adminPanel.getPrimaryStage();
         this.userRepository = new UserRepository();
+        this.technicalIssueRepository = new TechnicalIssueRepository();
     }
 
     /**
@@ -520,35 +526,96 @@ public class AdminPanelController {
     }
 
     /**
-     * Wyświetla panel zgłoszeń.
+     * Wyświetla panel zgłoszeń technicznych.
      */
     public void showIssuesPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
-
-        Label titleLabel = new Label("Lista zgłoszeń");
+        Label titleLabel = new Label("Lista zgłoszeń technicznych");
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
-        TableView<String> tableView = new TableView<>();
-        tableView.setMinHeight(200);
+        // Tabela zgłoszeń
+        TableView<TechnicalIssue> issuesTableView = new TableView<>();
+        issuesTableView.setMinHeight(200);
 
-        Button detailsButton = new Button("Szczegóły zgłoszenia");
+        TableColumn<TechnicalIssue, Integer> idCol = new TableColumn<>("ID");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-        layout.getChildren().addAll(
-                titleLabel,
-                tableView,
-                detailsButton
-        );
+        TableColumn<TechnicalIssue, String> typeCol = new TableColumn<>("Typ");
+        typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
 
+        TableColumn<TechnicalIssue, LocalDate> dateCol = new TableColumn<>("Data zgłoszenia");
+        dateCol.setCellValueFactory(new PropertyValueFactory<>("dateSubmitted"));
+
+        TableColumn<TechnicalIssue, String> statusCol = new TableColumn<>("Status");
+        statusCol.setCellFactory(col -> new TableCell<>() {
+            private final ComboBox<String> comboBox = new ComboBox<>();
+            {
+                comboBox.getItems().addAll("Nowe", "W trakcie", "Rozwiązane");
+                comboBox.setOnAction(e -> {
+                    TechnicalIssue issue = getTableView().getItems().get(getIndex());
+                    issue.setStatus(comboBox.getValue());
+                    technicalIssueRepository.aktualizujZgloszenie(issue); // Zapisz zmianę w bazie
+                    refreshIssuesTable(issuesTableView); // Odśwież widok
+                });
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    comboBox.setValue(getTableRow().getItem().getStatus());
+                    setGraphic(comboBox);
+                }
+            }
+        });
+
+        issuesTableView.getColumns().addAll(idCol, typeCol, dateCol, statusCol);
+        refreshIssuesTable(issuesTableView);
+
+        layout.getChildren().addAll(titleLabel, issuesTableView);
         adminPanel.setCenterPane(layout);
     }
 
     /**
+     * Odświeża listę zgłoszeń technicznych.
+     */
+    private void refreshIssuesTable(TableView<TechnicalIssue> tableView) {
+        tableView.getItems().clear();
+        tableView.getItems().addAll(technicalIssueRepository.pobierzWszystkieZgloszenia());
+    }
+
+    /**
+     * Wyświetla szczegóły wybranego zgłoszenia.
+     */
+    private void showIssueDetails() {
+        TechnicalIssue selected = issuesTableView.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert(Alert.AlertType.WARNING, "Brak wyboru", "Wybierz zgłoszenie do wyświetlenia.");
+            return;
+        }
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Szczegóły zgłoszenia");
+        alert.setHeaderText("Zgłoszenie ID: " + selected.getId());
+        alert.setContentText(
+                "Typ: " + selected.getType() + "\n" +
+                        "Opis: " + selected.getDescription() + "\n" +
+                        "Data zgłoszenia: " + selected.getDateSubmitted() + "\n" +
+                        "Pracownik ID: " + selected.getEmployee().getId() + "\n" +
+                        "Status: " + selected.getStatus()
+        );
+        alert.showAndWait();
+    }
+    /**
      * Wylogowuje użytkownika i uruchamia okno logowania.
      */
     public void logout() {
+        technicalIssueRepository.close();
+        userRepository.close();
         primaryStage.close();
-
         Stage loginStage = new Stage();
         try {
             new HelloApplication().start(loginStage);

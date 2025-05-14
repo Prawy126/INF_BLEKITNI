@@ -30,6 +30,17 @@ CREATE TABLE IF NOT EXISTS Pracownicy (
     FOREIGN KEY (Id_adresu) REFERENCES Adresy(Id)
     );
 
+  -- Tabela Zgłoszenia_techniczne
+  CREATE TABLE IF NOT EXISTS Zgłoszenia_techniczne (
+      Id INT PRIMARY KEY AUTO_INCREMENT,
+      Typ VARCHAR(100),
+      Opis TEXT,
+      Data_zgłoszenia DATE DEFAULT (CURRENT_DATE),
+      Id_pracownika INT,
+      Status VARCHAR(50) DEFAULT 'Nowe',
+      FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id)
+  );
+
 
 
 -- Tabela Zadania
@@ -209,3 +220,9 @@ VALUES
 ('Sprzedaż dzienna', '2025-04-10', '2025-04-10', 3, 'sprzedaz_10kwietnia.pdf'),
 ('Wnioski o nieobecność', '2025-04-01', '2025-04-30', 4, 'wnioski_kwiecien.pdf'),
 ('Zamówienia i dostawy', '2025-04-01', '2025-04-20', 5, 'zamowienia_dostawy.pdf');
+
+INSERT INTO Zgłoszenia_techniczne (Typ, Opis, Id_pracownika)
+VALUES
+('Awaria sprzętu', 'Nie działa drukarka fiskalna przy kasie nr 1', 2),
+('Błąd oprogramowania', 'Błąd przy finalizacji sprzedaży - aplikacja się zamyka', 5),
+('Inne', 'Proszę o aktualizację systemu do najnowszej wersji', 1);
