@@ -214,7 +214,9 @@ public class LogisticianPanelController {
         grid.add(browseButton, 2, 2);
         grid.add(generate, 1, 3);
 
-        stage.setScene(new Scene(grid, 500, 350));
+        GridPane.setHgrow(outputPath, Priority.ALWAYS);
+
+        stage.setScene(new Scene(grid, 600, 350));
         stage.show();
     }
 
