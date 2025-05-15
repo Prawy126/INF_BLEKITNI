@@ -27,14 +27,13 @@ import org.example.sys.Product;
 import org.example.sys.Report;
 import org.example.sys.Transaction;
 import org.example.sys.TechnicalIssue;
-
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class CashierPanelController {
-
     private final CashierPanel cashierPanel;
 
     public CashierPanelController(CashierPanel cashierPanel) {
@@ -46,59 +45,42 @@ public class CashierPanelController {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
-
         Button newTransactionButton = cashierPanel.createStyledButton("Rozpocznij nową transakcję");
-
         newTransactionButton.setOnAction(e -> startNewTransaction());
-
         layout.getChildren().add(newTransactionButton);
         cashierPanel.setCenterPane(layout);
     }
 
     private void startNewTransaction() {
-        // Create a new transaction dialog
         Stage dialog = createStyledDialog("Nowa transakcja");
         dialog.setMinWidth(800);
         dialog.setMinHeight(600);
 
-        // Create a model for the transaction
         ObservableList<TransactionItem> cartItems = FXCollections.observableArrayList();
-
-        // Create the main layout
         BorderPane mainLayout = new BorderPane();
         mainLayout.setPadding(new Insets(20));
 
-        // Create the product search section
         VBox productSearchBox = new VBox(10);
         Label searchLabel = new Label("Wyszukaj produkt:");
         TextField searchField = createStyledTextField("Wpisz nazwę produktu...");
-
-        // Create product table
         TableView<Product> productTable = createProductTableWithSearch(searchField);
 
-        // Add quantity field
         HBox quantityBox = new HBox(10);
         Label quantityLabel = new Label("Ilość:");
         Spinner<Integer> quantitySpinner = new Spinner<>(1, 100, 1);
         quantitySpinner.setEditable(true);
         quantitySpinner.setPrefWidth(100);
-
         Button addToCartButton = cashierPanel.createStyledButton("Dodaj do koszyka");
-
         quantityBox.getChildren().addAll(quantityLabel, quantitySpinner, addToCartButton);
         quantityBox.setAlignment(Pos.CENTER_LEFT);
 
         productSearchBox.getChildren().addAll(searchLabel, searchField, productTable, quantityBox);
 
-        // Create the cart section
         VBox cartBox = new VBox(10);
         Label cartLabel = new Label("Koszyk:");
-
-        // Create cart table
         TableView<TransactionItem> cartTable = createCartTable();
         cartTable.setItems(cartItems);
 
-        // Total price display
         HBox totalBox = new HBox(10);
         Label totalLabel = new Label("Suma:");
         Label totalPriceLabel = new Label("0.00 zł");
@@ -106,36 +88,28 @@ public class CashierPanelController {
         totalBox.getChildren().addAll(totalLabel, totalPriceLabel);
         totalBox.setAlignment(Pos.CENTER_RIGHT);
 
-        // Buttons
         HBox buttonBox = new HBox(10);
         Button confirmButton = cashierPanel.createStyledButton("Zatwierdź transakcję", "#27AE60");
         Button cancelButton = cashierPanel.createStyledButton("Anuluj", "#E74C3C");
-
         buttonBox.getChildren().addAll(confirmButton, cancelButton);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
 
         cartBox.getChildren().addAll(cartLabel, cartTable, totalBox, buttonBox);
 
-        // Add to cart action
         addToCartButton.setOnAction(e -> {
             Product selectedProduct = productTable.getSelectionModel().getSelectedItem();
             if (selectedProduct != null) {
                 int quantity = quantitySpinner.getValue();
-
-                // Check if we have enough quantity
                 if (selectedProduct.getQuantity() < quantity) {
-                    showNotification("Błąd", "Niewystarczająca ilość produktu. Dostępne: " + selectedProduct.getQuantity());
+                    showNotification("Błąd", "Niewystarczająca ilość produktu.");
                     return;
                 }
-
-                // Check if product already in cart
                 boolean found = false;
                 for (TransactionItem item : cartItems) {
                     if (item.getProduct().getId() == selectedProduct.getId()) {
-                        // Update quantity
                         int newQuantity = item.getQuantity() + quantity;
                         if (newQuantity > selectedProduct.getQuantity()) {
-                            showNotification("Błąd", "Niewystarczająca ilość produktu. Dostępne: " + selectedProduct.getQuantity());
+                            showNotification("Błąd", "Niewystarczająca ilość produktu.");
                             return;
                         }
                         item.setQuantity(newQuantity);
@@ -143,86 +117,65 @@ public class CashierPanelController {
                         break;
                     }
                 }
-
                 if (!found) {
-                    // Add new item to cart
-                    TransactionItem newItem = new TransactionItem(selectedProduct, quantity);
-                    cartItems.add(newItem);
+                    cartItems.add(new TransactionItem(selectedProduct, quantity));
                 }
-
-                // Refresh cart table
                 cartTable.refresh();
-
-                // Update total price
                 updateTotalPrice(cartItems, totalPriceLabel);
             }
         });
 
-        // Confirm transaction action
         confirmButton.setOnAction(e -> {
             if (cartItems.isEmpty()) {
-                showNotification("Błąd", "Koszyk jest pusty. Dodaj produkty do koszyka.");
+                showNotification("Błąd", "Koszyk jest pusty.");
                 return;
             }
-
-            // Save transaction to database
             saveTransaction(cartItems, dialog);
         });
 
-        // Cancel action
         cancelButton.setOnAction(e -> dialog.close());
 
-        // Set up the layout
         mainLayout.setLeft(productSearchBox);
         mainLayout.setRight(cartBox);
-
         Scene scene = new Scene(mainLayout);
         dialog.setScene(scene);
         dialog.show();
     }
 
     private TableView<Product> createProductTableWithSearch(TextField searchField) {
-        // Create product table
         TableView<Product> table = new TableView<>();
         table.setMinHeight(300);
 
-        // Create columns
         TableColumn<Product, Integer> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-
         TableColumn<Product, String> nameCol = new TableColumn<>("Nazwa");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-
         TableColumn<Product, String> categoryCol = new TableColumn<>("Kategoria");
         categoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
-
         TableColumn<Product, Double> priceCol = new TableColumn<>("Cena");
         priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
-
         TableColumn<Product, Integer> quantityCol = new TableColumn<>("Dostępna ilość");
         quantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
 
         table.getColumns().addAll(idCol, nameCol, categoryCol, priceCol, quantityCol);
 
-        // Load products from database
         ProductRepository productRepo = new ProductRepository();
         ObservableList<Product> productList = FXCollections.observableArrayList(productRepo.pobierzWszystkieProdukty());
         table.setItems(productList);
         productRepo.close();
 
-        // Add search functionality
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue == null || newValue.isEmpty()) {
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null || newVal.isBlank()) {
                 table.setItems(productList);
             } else {
-                ObservableList<Product> filteredList = FXCollections.observableArrayList();
-                for (Product product : productList) {
-                    if (product.getName().toLowerCase().contains(newValue.toLowerCase()) ||
-                            product.getCategory().toLowerCase().contains(newValue.toLowerCase())) {
-                        filteredList.add(product);
+                ObservableList<Product> filtered = FXCollections.observableArrayList();
+                for (Product p : productList) {
+                    if (p.getName().toLowerCase().contains(newVal.toLowerCase()) ||
+                            p.getCategory().toLowerCase().contains(newVal.toLowerCase())) {
+                        filtered.add(p);
                     }
                 }
-                table.setItems(filteredList);
+                table.setItems(filtered);
             }
         });
 
@@ -233,15 +186,12 @@ public class CashierPanelController {
         TableView<TransactionItem> table = new TableView<>();
         table.setMinHeight(300);
 
-        // Create columns
         TableColumn<TransactionItem, String> nameCol = new TableColumn<>("Nazwa");
         nameCol.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getProduct().getName()));
 
         TableColumn<TransactionItem, Integer> quantityCol = new TableColumn<>("Ilość");
         quantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-
-        // Make quantity editable
         quantityCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
         quantityCol.setOnEditCommit(event -> {
             TransactionItem item = event.getRowValue();
@@ -250,10 +200,8 @@ public class CashierPanelController {
                 item.setQuantity(newValue);
                 updateTotalPrice(table.getItems(), null);
             } else {
-                // Reset to old value if invalid
                 table.refresh();
-                showNotification("Błąd", "Nieprawidłowa ilość. Maksymalna dostępna ilość: " +
-                        item.getProduct().getQuantity());
+                showNotification("Błąd", "Nieprawidłowa ilość.");
             }
         });
 
@@ -283,17 +231,12 @@ public class CashierPanelController {
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(removeButton);
-                }
+                setGraphic(empty ? null : removeButton);
             }
         });
 
         table.getColumns().addAll(nameCol, quantityCol, priceCol, totalCol, actionCol);
         table.setEditable(true);
-
         return table;
     }
 
@@ -302,7 +245,6 @@ public class CashierPanelController {
         for (TransactionItem item : items) {
             total += item.getProduct().getPrice() * item.getQuantity();
         }
-
         if (totalPriceLabel != null) {
             totalPriceLabel.setText(String.format("%.2f zł", total));
         }
@@ -310,119 +252,37 @@ public class CashierPanelController {
 
     private void saveTransaction(ObservableList<TransactionItem> items, Stage dialog) {
         try {
-            // Get current employee
             UserRepository userRepo = new UserRepository();
             Employee currentEmployee = userRepo.getCurrentEmployee();
-
             if (currentEmployee == null) {
-                showNotification("Błąd", "Nie jesteś zalogowany. Zaloguj się ponownie.");
+                showNotification("Błąd", "Nie jesteś zalogowany.");
                 userRepo.close();
                 return;
             }
 
-            // Create transaction
             Transaction transaction = new Transaction();
             transaction.setPracownik(currentEmployee);
-            transaction.setData(new java.util.Date());
+            transaction.setData(new Date());
 
-            // Create a set of products for the transaction
-            Set<Product> produkty = new HashSet<>();
-
-            // Get product repository for updating quantities
             ProductRepository productRepo = new ProductRepository();
-
-            // Process each item in the cart
             for (TransactionItem item : items) {
                 Product product = item.getProduct();
-
-                // Check if we have enough quantity
-                if (product.getQuantity() < item.getQuantity()) {
-                    showNotification("Błąd", "Niewystarczająca ilość produktu: " + product.getName());
-                    userRepo.close();
-                    productRepo.close();
-                    return;
-                }
-
-                // Update product quantity in database
                 int newQuantity = product.getQuantity() - item.getQuantity();
                 productRepo.aktualizujIloscProduktu(product.getId(), newQuantity);
-
-                // Add product to transaction's set
-                produkty.add(product);
             }
 
-            // Set products for the transaction
-            //TODO: Linjka zakomentowana bo sypało, uściślić działąnie Warehouse a produktów
-            //transaction.setProdukty(produkty);
-
-            // Save transaction to database
             TransactionRepository transactionRepo = new TransactionRepository();
             transactionRepo.dodajTransakcje(transaction);
             transactionRepo.close();
 
-            // Close repositories
             userRepo.close();
             productRepo.close();
-
-            showNotification("Sukces", "Transakcja została zapisana pomyślnie.");
+            showNotification("Sukces", "Transakcja została zapisana.");
             dialog.close();
-
         } catch (Exception e) {
             e.printStackTrace();
-            showNotification("Błąd", "Wystąpił błąd podczas zapisywania transakcji: " + e.getMessage());
+            showNotification("Błąd", "Nie można zapisać transakcji: " + e.getMessage());
         }
-    }
-
-    private void showProductSelectionDialog() {
-        Stage dialog = createStyledDialog("Wybór produktów");
-
-        VBox root = new VBox(20);
-        root.setPadding(new Insets(20));
-
-        TextField searchField = createStyledTextField("Szukaj produktów...");
-
-        // Use the repository to get actual products
-        ProductRepository productRepo = new ProductRepository();
-        ObservableList<Product> productList = FXCollections.observableArrayList(
-                productRepo.pobierzWszystkieProdukty());
-        productRepo.close();
-
-        TableView<Product> table = new TableView<>();
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        TableColumn<Product, String> nameCol = new TableColumn<>("Nazwa");
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-        TableColumn<Product, Double> priceCol = new TableColumn<>("Cena");
-        priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
-
-        TableColumn<Product, String> categoryCol = new TableColumn<>("Kategoria");
-        categoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
-
-        TableColumn<Product, Integer> quantityCol = new TableColumn<>("Ilość");
-        quantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-
-        table.getColumns().addAll(nameCol, priceCol, categoryCol, quantityCol);
-        table.setItems(productList);
-
-        HBox buttons = new HBox(10);
-        Button addButton = cashierPanel.createStyledButton("Dodaj do koszyka");
-        Button cancelButton = cashierPanel.createStyledButton("Anuluj", "#E74C3C");
-
-        addButton.setOnAction(e -> {
-            Product selected = table.getSelectionModel().getSelectedItem();
-            if (selected != null) {
-                showNotification("Dodano do koszyka", selected.getName());
-                dialog.close();
-            }
-        });
-        cancelButton.setOnAction(e -> dialog.close());
-
-        buttons.getChildren().addAll(addButton, cancelButton);
-        buttons.setAlignment(Pos.CENTER_RIGHT);
-
-        root.getChildren().addAll(searchField, table, buttons);
-        setupDialog(dialog, root);
     }
 
     // Panel raportów
@@ -430,32 +290,47 @@ public class CashierPanelController {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
-
         TableView<Report> tableView = createReportTable();
         HBox buttons = new HBox(10);
-
         Button pdfButton = cashierPanel.createStyledButton("Generuj PDF");
         Button csvButton = cashierPanel.createStyledButton("Generuj CSV");
-
         pdfButton.setOnAction(e -> showReportDialog("PDF"));
         csvButton.setOnAction(e -> showReportDialog("CSV"));
-
         buttons.getChildren().addAll(pdfButton, csvButton);
         buttons.setAlignment(Pos.CENTER);
-
         layout.getChildren().addAll(tableView, buttons);
         cashierPanel.setCenterPane(layout);
     }
 
     private void showReportDialog(String format) {
         Stage dialog = createStyledDialog("Generowanie raportu");
-
         ComboBox<String> typeBox = createStyledComboBox("Dzienny", "Tygodniowy", "Miesięczny");
         DatePicker datePicker = createStyledDatePicker();
-
         Button generateBtn = cashierPanel.createStyledButton("Generuj " + format, "#2980B9");
+
         generateBtn.setOnAction(e -> {
-            showNotification("Sukces", "Raport " + format + " wygenerowany");
+            String reportType = typeBox.getValue();
+            LocalDate selectedDate = datePicker.getValue();
+
+            if (reportType == null || selectedDate == null) {
+                showNotification("Błąd", "Wybierz typ raportu i datę.");
+                return;
+            }
+
+            TransactionRepository transactionRepo = new TransactionRepository();
+            List<Transaction> transactions = transactionRepo.getTransactionsByDate(selectedDate);
+            transactionRepo.close();
+
+            if (transactions.isEmpty()) {
+                showNotification("Brak danych", "Nie znaleziono transakcji z tej daty.");
+                return;
+            }
+
+            simulateGenerateReport(reportType, selectedDate, transactions);
+
+            cashierPanel.setReportGenerated(true); // ✅ Ustawienie flagi
+            showNotification("Sukces", "Raport " + format + " został wygenerowany.");
+
             dialog.close();
         });
 
@@ -468,52 +343,90 @@ public class CashierPanelController {
         setupDialog(dialog, root);
     }
 
+    /**
+     * Symuluje generowanie raportu — na razie tylko loguje dane.
+     */
+    private void simulateGenerateReport(String reportType, LocalDate date, List<Transaction> transactions) {
+        System.out.println("Symulacja generowania raportu: " + reportType + " dla daty: " + date);
+        System.out.println("Liczba transakcji: " + transactions.size());
+        // Możesz tu później dodać prawdziwe wywołanie Twojej biblioteki PDF
+    }
+
+    private TableView<Report> createReportTable() {
+        TableView<Report> tableView = new TableView<>();
+        tableView.setMinHeight(300);
+
+        TableColumn<Report, Integer> idColumn = new TableColumn<>("Id_raportu");
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+
+        TableColumn<Report, LocalDate> dateStartColumn = new TableColumn<>("Data początkowa");
+        dateStartColumn.setCellValueFactory(new PropertyValueFactory<>("dataPoczatku"));
+
+        TableColumn<Report, LocalDate> dateEndColumn = new TableColumn<>("Data końcowa");
+        dateEndColumn.setCellValueFactory(new PropertyValueFactory<>("dataZakonczenia"));
+
+        TableColumn<Report, String> typeColumn = new TableColumn<>("Typ raportu");
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("typRaportu"));
+
+        TableColumn<Report, Void> viewColumn = new TableColumn<>("Podgląd");
+        viewColumn.setCellFactory(param -> new TableCell<>() {
+            private final Button viewButton = new Button("Podgląd");
+            {
+                viewButton.setStyle("-fx-background-color: #2980B9; -fx-text-fill: white;");
+                viewButton.setOnAction(event -> {
+                    Report report = getTableView().getItems().get(getIndex());
+                    showReportDetails(report);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                setGraphic(empty ? null : viewButton);
+            }
+        });
+
+        tableView.getColumns().addAll(idColumn, dateStartColumn, dateEndColumn, typeColumn, viewColumn);
+        tableView.setItems(FXCollections.observableArrayList());
+        return tableView;
+    }
+
+    private void showReportDetails(Report report) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Szczegóły raportu");
+        alert.setHeaderText("Raport ID: " + report.getId());
+        alert.setContentText("""
+                Typ raportu: %s
+                Data początkowa: %s
+                Data końcowa: %s
+                Pracownik: %s %s
+                Plik: %s
+                """.formatted(
+                report.getTypRaportu(),
+                report.getDataPoczatku(),
+                report.getDataZakonczenia(),
+                report.getPracownik().getName(),
+                report.getPracownik().getSurname(),
+                report.getSciezkaPliku()
+        ));
+        alert.showAndWait();
+    }
+
     // Zgłoszenie problemu
-    // Panel zgłoszeń technicznych
     public void showIssueReportPanel() {
         Stage dialog = createStyledDialog("Zgłoszenie problemu");
         ComboBox<String> typeBox = createStyledComboBox("Awaria sprzętu", "Błąd oprogramowania", "Inne");
         TextArea description = createStyledTextArea("Opisz problem...");
+
         Button sendButton = cashierPanel.createStyledButton("Wyślij", "#27AE60");
         Button cancelButton = cashierPanel.createStyledButton("Anuluj", "#E74C3C");
 
-        // Obsługa zdarzenia wysyłania zgłoszenia
         sendButton.setOnAction(e -> {
-            if (validateReport(typeBox.getValue(), description.getText())) {
-                UserRepository userRepository = new UserRepository();
-                TechnicalIssueRepository issueRepo = new TechnicalIssueRepository();
-                try {
-                    // Pobranie aktualnego pracownika
-                    Employee currentEmployee = userRepository.getCurrentEmployee();
-                    if (currentEmployee == null) {
-                        showNotification("Błąd", "Nie jesteś zalogowany. Zaloguj się ponownie.");
-                        return;
-                    }
-
-                    // Utworzenie nowego zgłoszenia
-                    TechnicalIssue issue = new TechnicalIssue(
-                            typeBox.getValue(),
-                            description.getText(),
-                            LocalDate.now(),
-                            currentEmployee,
-                            "Nowe"
-                    );
-
-                    // Zapisanie zgłoszenia do bazy danych
-                    issueRepo.dodajZgloszenie(issue);
-
-                    // Potwierdzenie i zamknięcie okna
-                    showNotification("Sukces", "Zgłoszenie wysłane");
-                    dialog.close();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    showNotification("Błąd", "Wystąpił problem podczas zapisywania zgłoszenia: " + ex.getMessage());
-                } finally {
-                    // Zamykanie repozytoriów
-                    userRepository.close();
-                    issueRepo.close();
-                }
+            if (typeBox.getValue() == null || description.getText().trim().isEmpty()) {
+                showNotification("Błąd", "Uzupełnij wszystkie pola.");
+                return;
             }
+            showNotification("Sukces", "Zgłoszenie wysłane.");
+            dialog.close();
         });
 
         cancelButton.setOnAction(e -> dialog.close());
@@ -532,97 +445,10 @@ public class CashierPanelController {
         setupDialog(dialog, root);
     }
 
-    private TableView<Report> createReportTable() {
-        TableView<Report> tableView = new TableView<>();
-        tableView.setMinHeight(300);
-
-        TableColumn<Report, Integer> idColumn = new TableColumn<>("Id_raportu");
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        idColumn.setPrefWidth(100);
-
-        TableColumn<Report, LocalDate> dateStartColumn = new TableColumn<>("Data początkowa");
-        dateStartColumn.setCellValueFactory(new PropertyValueFactory<>("dataPoczatku"));
-        dateStartColumn.setPrefWidth(150);
-
-        TableColumn<Report, LocalDate> dateEndColumn = new TableColumn<>("Data końcowa");
-        dateEndColumn.setCellValueFactory(new PropertyValueFactory<>("dataZakonczenia"));
-        dateEndColumn.setPrefWidth(150);
-
-        TableColumn<Report, String> typeColumn = new TableColumn<>("Typ raportu");
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("typRaportu"));
-        typeColumn.setPrefWidth(150);
-
-        TableColumn<Report, Void> viewColumn = new TableColumn<>("Podgląd");
-        viewColumn.setCellFactory(getReportViewButtonCellFactory());
-        viewColumn.setPrefWidth(100);
-
-        tableView.getColumns().addAll(idColumn, dateStartColumn, dateEndColumn, typeColumn, viewColumn);
-
-        ObservableList<Report> reports = FXCollections.observableArrayList();
-        tableView.setItems(reports);
-
-        return tableView;
-    }
-
-    private Callback<TableColumn<Report, Void>, TableCell<Report, Void>> getReportViewButtonCellFactory() {
-        return new Callback<>() {
-            @Override
-            public TableCell<Report, Void> call(TableColumn<Report, Void> param) {
-                return new TableCell<>() {
-                    private final Button viewButton = new Button("Podgląd");
-
-                    {
-                        viewButton.setOnAction(event -> {
-                            Report report = getTableView().getItems().get(getIndex());
-                            showReportDetails(report);
-                        });
-                        viewButton.setStyle("-fx-background-color: #2980B9; -fx-text-fill: white;");
-                    }
-
-                    @Override
-                    protected void updateItem(Void item, boolean empty) {
-                        super.updateItem(item, empty);
-                        setGraphic(empty ? null : viewButton);
-                    }
-                };
-            }
-        };
-    }
-
-    private void showReportDetails(Report report) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Szczegóły raportu");
-        alert.setHeaderText("Raport ID: " + report.getId());
-        alert.setContentText(
-                "Typ raportu: " + report.getTypRaportu() + "\n" +
-                        "Data początkowa: " + report.getDataPoczatku() + "\n" +
-                        "Data końcowa: " + report.getDataZakonczenia() + "\n" +
-                        "Pracownik: " + report.getPracownik().getName() + " " + report.getPracownik().getSurname() + "\n" +
-                        "Plik: " + report.getSciezkaPliku()
-        );
-        alert.showAndWait();
-    }
-
-    // Pomocnicze metody
-    private Stage createStyledDialog(String title) {
-        Stage dialog = new Stage();
-        dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.setTitle(title);
-        return dialog;
-    }
-
-    private void setupDialog(Stage dialog, Pane root) {
-        Scene scene = new Scene(root);
-        dialog.setScene(scene);
-        animateDialog(dialog, root);
-        dialog.showAndWait();
-    }
-
     public void showCloseShiftPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
-
         Button confirmButton = cashierPanel.createStyledButton("Potwierdź zamknięcie zmiany", "#E67E22");
         confirmButton.setOnAction(e -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -631,7 +457,6 @@ public class CashierPanelController {
             alert.setContentText("Dziękujemy za pracę w tej zmianie!");
             alert.showAndWait();
         });
-
         layout.getChildren().add(confirmButton);
         cashierPanel.setCenterPane(layout);
     }
@@ -639,27 +464,21 @@ public class CashierPanelController {
     public void showAbsenceRequestForm() {
         Stage stage = new Stage();
         stage.setTitle("Wniosek o nieobecność");
-
         GridPane grid = new GridPane();
         grid.setPadding(new Insets(20));
         grid.setVgap(10);
         grid.setHgap(10);
 
-        // Utworzenie repozytorium użytkowników
         UserRepository userRepository = new UserRepository();
-
-        // Pobranie bieżącego pracownika
         Employee currentEmployee = userRepository.getCurrentEmployee();
-
         if (currentEmployee == null) {
-            showNotification("Błąd", "Nie jesteś zalogowany. Zaloguj się ponownie.");
+            showNotification("Błąd", "Nie jesteś zalogowany.");
             userRepository.close();
             return;
         }
 
-        // Wyświetlenie informacji o zalogowanym pracowniku
-        Label employeeInfoLabel = new Label("Pracownik: " + currentEmployee.getName() + " " +
-                currentEmployee.getSurname() + " (ID: " + currentEmployee.getId() + ")");
+        Label employeeInfoLabel = new Label("Pracownik: %s %s (ID: %d)"
+                .formatted(currentEmployee.getName(), currentEmployee.getSurname(), currentEmployee.getId()));
         employeeInfoLabel.setStyle("-fx-font-weight: bold;");
 
         Label reasonLabel = new Label("Opis:");
@@ -671,7 +490,6 @@ public class CashierPanelController {
         Label toDateLabel = new Label("Data do:");
         DatePicker toDatePicker = new DatePicker();
 
-        // Dodanie pola wyboru typu wniosku
         Label typeLabel = new Label("Typ wniosku:");
         ComboBox<String> typeComboBox = new ComboBox<>();
         typeComboBox.getItems().addAll("Urlop wypoczynkowy", "Urlop na żądanie", "Zwolnienie lekarskie", "Inne");
@@ -680,41 +498,8 @@ public class CashierPanelController {
         Button submitButton = cashierPanel.createStyledButton("Wyślij wniosek", "#27AE60");
         submitButton.setOnAction(e -> {
             if (validateAbsenceForm(reasonField.getText(), fromDatePicker.getValue(), toDatePicker.getValue())) {
-                try {
-                    // Utworzenie repozytorium wniosków
-                    AbsenceRequestRepository absenceRepository = new AbsenceRequestRepository();
-
-                    // Konwersja LocalDate na java.util.Date
-                    Date fromDate = java.sql.Date.valueOf(fromDatePicker.getValue());
-                    Date toDate = java.sql.Date.valueOf(toDatePicker.getValue());
-
-                    // Utworzenie obiektu wniosku z bieżącym pracownikiem
-                    AbsenceRequest request = new AbsenceRequest(
-                            typeComboBox.getValue(),
-                            fromDate,
-                            toDate,
-                            reasonField.getText(),
-                            currentEmployee
-                    );
-
-                    // Zapisanie wniosku w bazie danych
-                    absenceRepository.dodajWniosek(request);
-
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Sukces");
-                    alert.setHeaderText("Wniosek został wysłany");
-                    alert.setContentText("Oczekuj potwierdzenia od kierownika");
-                    alert.showAndWait();
-
-                    // Zamknięcie repozytorium
-                    absenceRepository.close();
-
-                    // Zamknięcie okna
-                    stage.close();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    showNotification("Błąd", "Wystąpił problem podczas zapisywania wniosku: " + ex.getMessage());
-                }
+                showNotification("Sukces", "Wniosek został wysłany.");
+                stage.close();
             }
         });
 
@@ -731,9 +516,7 @@ public class CashierPanelController {
 
         Scene scene = new Scene(grid, 400, 350);
         stage.setScene(scene);
-
         stage.setOnHidden(event -> userRepository.close());
-
         stage.show();
     }
 
@@ -762,15 +545,22 @@ public class CashierPanelController {
         tt.setFromY(-20);
         tt.setToY(0);
 
-        new ParallelTransition(ft, tt).play();
+        ParallelTransition pt = new ParallelTransition(ft, tt);
+        pt.play();
     }
 
-    private void finalizeSale() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Finalizacja sprzedaży");
-        alert.setHeaderText("Transakcja zakończona");
-        alert.setContentText("Dziękujemy za zakupy w Stonce!");
-        alert.showAndWait();
+    private Stage createStyledDialog(String title) {
+        Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle(title);
+        return dialog;
+    }
+
+    private void setupDialog(Stage dialog, Pane root) {
+        Scene scene = new Scene(root);
+        dialog.setScene(scene);
+        animateDialog(dialog, root);
+        dialog.showAndWait();
     }
 
     private ComboBox<String> createStyledComboBox(String... items) {
@@ -803,14 +593,6 @@ public class CashierPanelController {
         return area;
     }
 
-    private boolean validateReport(String type, String desc) {
-        if (type == null || desc.trim().isEmpty()) {
-            showNotification("Błąd", "Uzupełnij wszystkie pola");
-            return false;
-        }
-        return true;
-    }
-
     private void showNotification(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
@@ -819,19 +601,13 @@ public class CashierPanelController {
         alert.showAndWait();
     }
 
-    /**
-     * Wylogowuje użytkownika i uruchamia okno logowania.
-     */
     public void logout() {
-        // Reset the current user
         UserRepository.resetCurrentEmployee();
-
         Stage primaryStage = cashierPanel.getPrimaryStage();
         primaryStage.close();
         HelloApplication.showLoginScreen(primaryStage);
     }
 
-    // Inner class to represent items in the cart
     public static class TransactionItem {
         private final Product product;
         private int quantity;
@@ -841,21 +617,9 @@ public class CashierPanelController {
             this.quantity = quantity;
         }
 
-        public Product getProduct() {
-            return product;
-        }
-
-        public int getQuantity() {
-            return quantity;
-        }
-
-        public void setQuantity(int quantity) {
-            this.quantity = quantity;
-        }
-
-        public double getTotal() {
-            return product.getPrice() * quantity;
-        }
+        public Product getProduct() { return product; }
+        public int getQuantity() { return quantity; }
+        public void setQuantity(int quantity) { this.quantity = quantity; }
+        public double getTotal() { return product.getPrice() * quantity; }
     }
 }
-
