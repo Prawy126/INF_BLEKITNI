@@ -14,10 +14,16 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.example.database.TechnicalIssueRepository;
 import org.example.database.UserRepository;
 import org.example.sys.Employee;
+import org.example.pdflib.ConfigManager;
+import org.example.sys.TechnicalIssue;
 
+import java.io.File;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Map;
 
 /**
  * Kontroler odpowiedzialny za obsługę logiki
@@ -29,6 +35,8 @@ public class AdminPanelController {
     private final Stage primaryStage;
     private final UserRepository userRepository;
     private TableView<Employee> tableView;
+    private final TechnicalIssueRepository technicalIssueRepository;
+    private TableView<TechnicalIssue> issuesTableView;
 
     /**
      * Konstruktor klasy kontrolera.
@@ -39,6 +47,7 @@ public class AdminPanelController {
         this.adminPanel = adminPanel;
         this.primaryStage = adminPanel.getPrimaryStage();
         this.userRepository = new UserRepository();
+        this.technicalIssueRepository = new TechnicalIssueRepository();
     }
 
     /**
@@ -391,30 +400,21 @@ public class AdminPanelController {
         CheckBox logsCheckbox = new CheckBox("Włącz logi systemowe");
         logsCheckbox.setSelected(true);
 
-        CheckBox notificationsCheckbox =
-                new CheckBox("Włącz powiadomienia");
-        notificationsCheckbox.setSelected(true);
-
         Button configurePDF = new Button("Konfiguruj raporty PDF");
         configurePDF.setOnAction(e -> showPDFConfigPanel());
 
         Button backupButton = new Button("Wykonaj backup bazy danych");
         backupButton.setStyle(
-                "-fx-background-color: #27AE60; "
-                        + "-fx-text-fill: white;"
+                "-fx-background-color: #27AE60; -fx-text-fill: white;"
         );
         backupButton.setOnAction(e -> performDatabaseBackup());
 
         Button saveButton = new Button("Zapisz");
-        saveButton.setStyle(
-                "-fx-background-color: #3498DB; "
-                        + "-fx-text-fill: white;"
-        );
+        saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
 
         layout.getChildren().addAll(
                 titleLabel,
                 logsCheckbox,
-                notificationsCheckbox,
                 configurePDF,
                 backupButton,
                 saveButton
@@ -439,20 +439,44 @@ public class AdminPanelController {
 
         Label sortingLabel = new Label("Sortowanie domyślne:");
         ComboBox<String> sortingComboBox = new ComboBox<>();
-        sortingComboBox.getItems().addAll(
-                "Nazwa", "Data", "Priorytet"
-        );
+        sortingComboBox.getItems().addAll("Nazwa", "Data", "Priorytet");
+
+        Label pathLabel = new Label("Ścieżka zapisu raportów:");
+        TextField pathField = new TextField();
+        pathField.setPromptText("Np. C:/raporty/");
+        pathField.setText(ConfigManager.getReportPath());
+
+        Button saveButton = new Button("Zapisz konfigurację");
+        saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+
+        saveButton.setOnAction(e -> {
+            String path = pathField.getText().trim();
+
+            if (path.isEmpty()) {
+                showAlert(Alert.AlertType.WARNING, "Błąd", "Ścieżka nie może być pusta.");
+                return;
+            }
+
+            File folder = new File(path);
+            if (!folder.exists() || !folder.isDirectory()) {
+                showAlert(Alert.AlertType.ERROR, "Niepoprawna ścieżka", "Podany folder nie istnieje.");
+                return;
+            }
+
+            ConfigManager.setReportPath(path);
+            showAlert(Alert.AlertType.INFORMATION, "Zapisano", "Ścieżka została zapisana.");
+        });
 
         Button backButton = new Button("Wróć");
         backButton.setOnAction(e -> showConfigPanel());
 
         layout.getChildren().addAll(
                 titleLabel,
-                logoLabel,
-                logoField,
+                logoLabel, logoField,
                 updateLogoButton,
-                sortingLabel,
-                sortingComboBox,
+                sortingLabel, sortingComboBox,
+                pathLabel, pathField,
+                saveButton,
                 backButton
         );
 
@@ -502,35 +526,96 @@ public class AdminPanelController {
     }
 
     /**
-     * Wyświetla panel zgłoszeń.
+     * Wyświetla panel zgłoszeń technicznych.
      */
     public void showIssuesPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
-
-        Label titleLabel = new Label("Lista zgłoszeń");
+        Label titleLabel = new Label("Lista zgłoszeń technicznych");
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
-        TableView<String> tableView = new TableView<>();
-        tableView.setMinHeight(200);
+        // Tabela zgłoszeń
+        TableView<TechnicalIssue> issuesTableView = new TableView<>();
+        issuesTableView.setMinHeight(200);
 
-        Button detailsButton = new Button("Szczegóły zgłoszenia");
+        TableColumn<TechnicalIssue, Integer> idCol = new TableColumn<>("ID");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-        layout.getChildren().addAll(
-                titleLabel,
-                tableView,
-                detailsButton
-        );
+        TableColumn<TechnicalIssue, String> typeCol = new TableColumn<>("Typ");
+        typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
 
+        TableColumn<TechnicalIssue, LocalDate> dateCol = new TableColumn<>("Data zgłoszenia");
+        dateCol.setCellValueFactory(new PropertyValueFactory<>("dateSubmitted"));
+
+        TableColumn<TechnicalIssue, String> statusCol = new TableColumn<>("Status");
+        statusCol.setCellFactory(col -> new TableCell<>() {
+            private final ComboBox<String> comboBox = new ComboBox<>();
+            {
+                comboBox.getItems().addAll("Nowe", "W trakcie", "Rozwiązane");
+                comboBox.setOnAction(e -> {
+                    TechnicalIssue issue = getTableView().getItems().get(getIndex());
+                    issue.setStatus(comboBox.getValue());
+                    technicalIssueRepository.aktualizujZgloszenie(issue); // Zapisz zmianę w bazie
+                    refreshIssuesTable(issuesTableView); // Odśwież widok
+                });
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    comboBox.setValue(getTableRow().getItem().getStatus());
+                    setGraphic(comboBox);
+                }
+            }
+        });
+
+        issuesTableView.getColumns().addAll(idCol, typeCol, dateCol, statusCol);
+        refreshIssuesTable(issuesTableView);
+
+        layout.getChildren().addAll(titleLabel, issuesTableView);
         adminPanel.setCenterPane(layout);
     }
 
     /**
+     * Odświeża listę zgłoszeń technicznych.
+     */
+    private void refreshIssuesTable(TableView<TechnicalIssue> tableView) {
+        tableView.getItems().clear();
+        tableView.getItems().addAll(technicalIssueRepository.pobierzWszystkieZgloszenia());
+    }
+
+    /**
+     * Wyświetla szczegóły wybranego zgłoszenia.
+     */
+    private void showIssueDetails() {
+        TechnicalIssue selected = issuesTableView.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert(Alert.AlertType.WARNING, "Brak wyboru", "Wybierz zgłoszenie do wyświetlenia.");
+            return;
+        }
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Szczegóły zgłoszenia");
+        alert.setHeaderText("Zgłoszenie ID: " + selected.getId());
+        alert.setContentText(
+                "Typ: " + selected.getType() + "\n" +
+                        "Opis: " + selected.getDescription() + "\n" +
+                        "Data zgłoszenia: " + selected.getDateSubmitted() + "\n" +
+                        "Pracownik ID: " + selected.getEmployee().getId() + "\n" +
+                        "Status: " + selected.getStatus()
+        );
+        alert.showAndWait();
+    }
+    /**
      * Wylogowuje użytkownika i uruchamia okno logowania.
      */
     public void logout() {
+        technicalIssueRepository.close();
+        userRepository.close();
         primaryStage.close();
-
         Stage loginStage = new Stage();
         try {
             new HelloApplication().start(loginStage);
@@ -540,15 +625,84 @@ public class AdminPanelController {
     }
 
     /**
-     * Symuluje wykonanie backupu bazy danych.
+     * Wykonuje backup bazy danych MySQL do pliku .sql.
      */
     private void performDatabaseBackup() {
-        showAlert(
-                Alert.AlertType.INFORMATION,
-                "Backup",
-                "Backup bazy danych został wykonany pomyślnie!"
-        );
-        System.out.println("Backup bazy danych wykonany!");
+        try {
+            String timestamp = java.time.LocalDateTime.now().toString().replace(":", "-");
+            String fileName = "stonkadb-backup-" + timestamp + ".sql";
+
+            File backupDir = new File("backups");
+            if (!backupDir.exists()) {
+                backupDir.mkdirs();
+            }
+
+            File outputFile = new File(backupDir, fileName);
+
+            // Wykrywanie systemu operacyjnego
+            String os = System.getProperty("os.name").toLowerCase();
+            String mysqldumpPath;
+
+            if (os.contains("win")) {
+                // Ścieżka dla Windows
+                mysqldumpPath = "C:\\xampp\\mysql\\bin\\mysqldump.exe";
+            } else if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {
+                // Ścieżka dla Linux/Unix/Mac
+                File[] possiblePaths = {
+                        new File("/usr/bin/mysqldump"),
+                        new File("/usr/local/bin/mysqldump"),
+                        new File("/usr/local/mysql/bin/mysqldump"),
+                        new File("/opt/mysql/bin/mysqldump")
+                };
+
+                File foundPath = null;
+                for (File path : possiblePaths) {
+                    if (path.exists()) {
+                        foundPath = path;
+                        break;
+                    }
+                }
+
+                if (foundPath != null) {
+                    mysqldumpPath = foundPath.getAbsolutePath();
+                } else {
+                    mysqldumpPath = "mysqldump";
+                }
+            } else {
+                throw new UnsupportedOperationException("Nieobsługiwany system operacyjny: " + os);
+            }
+
+            ProcessBuilder pb = new ProcessBuilder(
+                    mysqldumpPath,
+                    "-u", org.example.database.ILacz.MYSQL_USER,
+                    "--databases", org.example.database.ILacz.DB_NAME
+            );
+
+            String password = org.example.database.ILacz.MYSQL_PASSWORD;
+            if (password != null && !password.isEmpty()) {
+                Map<String, String> env = pb.environment();
+                env.put("MYSQL_PWD", password);
+            }
+
+            pb.redirectOutput(outputFile);
+            pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+
+            Process process = pb.start();
+            int exitCode = process.waitFor();
+
+            if (exitCode == 0) {
+                showAlert(Alert.AlertType.INFORMATION, "Backup zakończony",
+                        "Plik zapisany:\n" + outputFile.getAbsolutePath());
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Błąd backupu",
+                        "Nie udało się wykonać kopii zapasowej. Kod wyjścia: " + exitCode);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Wyjątek",
+                    "Wystąpił błąd podczas backupu:\n" + e.getMessage());
+        }
     }
 
     /**

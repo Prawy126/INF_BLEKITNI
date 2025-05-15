@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS Adresy (
     Numer_mieszkania VARCHAR(10),
     Kod_pocztowy VARCHAR(10),
     Miasto VARCHAR(100)
-);
+    );
 
 -- Tabela Pracownicy
 CREATE TABLE IF NOT EXISTS Pracownicy (
@@ -27,10 +27,20 @@ CREATE TABLE IF NOT EXISTS Pracownicy (
     Stanowisko VARCHAR(100),
     onSickLeave BOOLEAN DEFAULT FALSE,
     sickLeaveStartDate DATE,
+    usuniety BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (Id_adresu) REFERENCES Adresy(Id)
     );
 
-
+-- Tabela Zgłoszenia_techniczne (kaskadowe usuwanie)
+CREATE TABLE IF NOT EXISTS Zgłoszenia_techniczne (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Typ VARCHAR(100),
+    Opis TEXT,
+    Data_zgłoszenia DATE DEFAULT (CURRENT_DATE),
+    Id_pracownika INT,
+    Status VARCHAR(50) DEFAULT 'Nowe',
+    FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id) ON DELETE CASCADE
+    );
 
 -- Tabela Zadania
 CREATE TABLE IF NOT EXISTS Zadania (
@@ -39,9 +49,9 @@ CREATE TABLE IF NOT EXISTS Zadania (
     Data DATE,
     Status VARCHAR(50),
     Opis TEXT
-);
+    );
 
--- Tabela Wnioski o nieobecnosc
+-- Tabela Wnioski_o_nieobecnosc (kaskadowe usuwanie)
 CREATE TABLE IF NOT EXISTS Wnioski_o_nieobecnosc (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Typ_wniosku VARCHAR(100),
@@ -49,18 +59,19 @@ CREATE TABLE IF NOT EXISTS Wnioski_o_nieobecnosc (
     Data_zakonczenia DATE,
     Opis TEXT,
     Id_pracownika INT,
-    FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id)
-);
+    FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id) ON DELETE CASCADE
+    );
 
 -- Tabela Produkty
 CREATE TABLE IF NOT EXISTS Produkty (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Nazwa VARCHAR(100),
+    Kategoria VARCHAR(100),
     Cena DECIMAL(10,2),
     IloscWmagazynie INT
-);
+    );
 
--- Tabela Zamowienia
+-- Tabela Zamowienia (nie usuwane kaskadowo)
 CREATE TABLE IF NOT EXISTS Zamowienia (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Id_produktu INT,
@@ -70,15 +81,15 @@ CREATE TABLE IF NOT EXISTS Zamowienia (
     Data DATE,
     FOREIGN KEY (Id_produktu) REFERENCES Produkty(Id),
     FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id)
-);
+    );
 
--- Tabela Transakcje
+-- Tabela Transakcje (nie usuwane kaskadowo)
 CREATE TABLE IF NOT EXISTS Transakcje (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Id_pracownika INT,
     Data DATE,
     FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id)
-);
+    );
 
 -- Tabela relacji Transakcje <-> Produkty
 CREATE TABLE IF NOT EXISTS Transakcje_Produkty (
@@ -87,9 +98,9 @@ CREATE TABLE IF NOT EXISTS Transakcje_Produkty (
     PRIMARY KEY (Id_transakcji, Id_produktu),
     FOREIGN KEY (Id_transakcji) REFERENCES Transakcje(Id),
     FOREIGN KEY (Id_produktu) REFERENCES Produkty(Id)
-);
+    );
 
--- Tabela Raporty
+-- Tabela Raporty (nie usuwane kaskadowo)
 CREATE TABLE IF NOT EXISTS Raporty (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Typ_raportu VARCHAR(100),
@@ -98,16 +109,16 @@ CREATE TABLE IF NOT EXISTS Raporty (
     Id_pracownika INT,
     Plik TEXT,
     FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id)
-);
+    );
 
--- Tabela relacji wiele-do-wielu dla zadań i pracowników
+-- Tabela relacji wiele-do-wielu dla zadań i pracowników (kaskadowe usuwanie)
 CREATE TABLE IF NOT EXISTS Zadania_Pracownicy (
     Id_pracownika INT,
     Id_zadania INT,
     PRIMARY KEY (Id_pracownika, Id_zadania),
-    FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id),
+    FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id) ON DELETE CASCADE,
     FOREIGN KEY (Id_zadania) REFERENCES Zadania(Id)
-);
+    );
 
 -- === Wstawianie danych ===
 INSERT INTO Adresy (Miejscowosc, Numer_domu, Numer_mieszkania, Kod_pocztowy, Miasto)
@@ -138,18 +149,18 @@ VALUES
         ('Magda', 'Szymańska', 36, 10, 'mszym', 'magda654', 'magda.s@example.com', 4300.00, 'Logistyk', FALSE, NULL),
         ('Janusz', 'Kowalik', 35, 1, 'admin2', 'admin2', 'janusz.kowalik@example.com', 4500.00, 'Admin', FALSE, NULL);
 
-INSERT INTO Produkty (Nazwa, Cena, IloscWmagazynie)
-VALUES 
-('Mleko', 2.99, 150),
-('Chleb', 3.49, 200),
-('Masło', 5.79, 80),
-('Jajka', 6.99, 100),
-('Ser', 4.59, 90),
-('Jogurt', 1.99, 120),
-('Sok pomarańczowy', 3.99, 110),
-('Makaron', 2.49, 140),
-('Ryż', 2.89, 160),
-('Olej', 5.99, 70);
+INSERT INTO Produkty (Nazwa, Kategoria, Cena, IloscWmagazynie)
+VALUES
+    ('Mleko', 'Nabiał', 2.99, 150),
+    ('Chleb', 'Pieczywo', 3.49, 200),
+    ('Masło', 'Nabiał', 5.79, 80),
+    ('Jajka', 'Nabiał', 6.99, 100),
+    ('Ser', 'Nabiał', 4.59, 90),
+    ('Jogurt', 'Nabiał', 1.99, 120),
+    ('Sok pomarańczowy', 'Napoje', 3.99, 110),
+    ('Makaron', 'Produkty zbożowe', 2.49, 140),
+    ('Ryż', 'Produkty zbożowe', 2.89, 160),
+    ('Olej', 'Tłuszcze', 5.99, 70);
 
 INSERT INTO Zadania (Nazwa, Data, Status, Opis)
 VALUES 
@@ -208,3 +219,9 @@ VALUES
 ('Sprzedaż dzienna', '2025-04-10', '2025-04-10', 3, 'sprzedaz_10kwietnia.pdf'),
 ('Wnioski o nieobecność', '2025-04-01', '2025-04-30', 4, 'wnioski_kwiecien.pdf'),
 ('Zamówienia i dostawy', '2025-04-01', '2025-04-20', 5, 'zamowienia_dostawy.pdf');
+
+INSERT INTO Zgłoszenia_techniczne (Typ, Opis, Id_pracownika)
+VALUES
+('Awaria sprzętu', 'Nie działa drukarka fiskalna przy kasie nr 1', 2),
+('Błąd oprogramowania', 'Błąd przy finalizacji sprzedaży - aplikacja się zamyka', 5),
+('Inne', 'Proszę o aktualizację systemu do najnowszej wersji', 1);

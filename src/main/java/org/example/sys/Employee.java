@@ -9,6 +9,9 @@ import org.example.wyjatki.AgeException;
 import java.math.BigDecimal;
 import java.util.Date;
 
+/**
+ * Klasa reprezentująca pracownika w systemie.
+ */
 @Entity
 @Table(name = "Pracownicy")
 @Access(AccessType.FIELD)
@@ -42,6 +45,10 @@ public class Employee extends Person {
     @Temporal(TemporalType.DATE)
     private Date sickLeaveStartDate;
 
+    // Dodane pole do usuwania miękkiego
+    @Column(name = "usuniety", nullable = false)
+    private boolean usuniety = false;
+
     public Employee() {}
 
     public Employee(String name, String surname, int age, String email,
@@ -68,6 +75,15 @@ public class Employee extends Person {
         setZarobki(zarobki);
         this.onSickLeave = false;
         this.sickLeaveStartDate = null;
+    }
+
+    // Getter i setter dla pola 'usuniety'
+    public boolean isUsuniety() {
+        return usuniety;
+    }
+
+    public void setUsuniety(boolean usuniety) {
+        this.usuniety = usuniety;
     }
 
     public int getId() {
