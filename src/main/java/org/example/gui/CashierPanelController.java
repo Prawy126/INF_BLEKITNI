@@ -1,6 +1,8 @@
 package org.example.gui;
 
 import javafx.animation.*;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -8,19 +10,28 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.*;
 import javafx.stage.*;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import javafx.util.converter.IntegerStringConverter;
 import org.example.database.AbsenceRequestRepository;
+import org.example.database.ProductRepository;
+import org.example.database.TransactionRepository;
 import org.example.database.TechnicalIssueRepository;
 import org.example.sys.AbsenceRequest;
 import org.example.sys.Employee;
 import org.example.database.UserRepository;
+import org.example.sys.Product;
+import org.example.sys.Report;
+import org.example.sys.Transaction;
 import org.example.sys.TechnicalIssue;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CashierPanelController {
 
@@ -36,14 +47,330 @@ public class CashierPanelController {
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
 
-        Button addToCartButton = cashierPanel.createStyledButton("Dodaj do koszyka");
-        Button finalizeSaleButton = cashierPanel.createStyledButton("Finalizuj sprzedaż");
+        Button newTransactionButton = cashierPanel.createStyledButton("Rozpocznij nową transakcję");
 
-        addToCartButton.setOnAction(e -> showProductSelectionDialog());
-        finalizeSaleButton.setOnAction(e -> finalizeSale());
+        newTransactionButton.setOnAction(e -> startNewTransaction());
 
-        layout.getChildren().addAll(addToCartButton, finalizeSaleButton);
+        layout.getChildren().add(newTransactionButton);
         cashierPanel.setCenterPane(layout);
+    }
+
+    private void startNewTransaction() {
+        // Create a new transaction dialog
+        Stage dialog = createStyledDialog("Nowa transakcja");
+        dialog.setMinWidth(800);
+        dialog.setMinHeight(600);
+
+        // Create a model for the transaction
+        ObservableList<TransactionItem> cartItems = FXCollections.observableArrayList();
+
+        // Create the main layout
+        BorderPane mainLayout = new BorderPane();
+        mainLayout.setPadding(new Insets(20));
+
+        // Create the product search section
+        VBox productSearchBox = new VBox(10);
+        Label searchLabel = new Label("Wyszukaj produkt:");
+        TextField searchField = createStyledTextField("Wpisz nazwę produktu...");
+
+        // Create product table
+        TableView<Product> productTable = createProductTableWithSearch(searchField);
+
+        // Add quantity field
+        HBox quantityBox = new HBox(10);
+        Label quantityLabel = new Label("Ilość:");
+        Spinner<Integer> quantitySpinner = new Spinner<>(1, 100, 1);
+        quantitySpinner.setEditable(true);
+        quantitySpinner.setPrefWidth(100);
+
+        Button addToCartButton = cashierPanel.createStyledButton("Dodaj do koszyka");
+
+        quantityBox.getChildren().addAll(quantityLabel, quantitySpinner, addToCartButton);
+        quantityBox.setAlignment(Pos.CENTER_LEFT);
+
+        productSearchBox.getChildren().addAll(searchLabel, searchField, productTable, quantityBox);
+
+        // Create the cart section
+        VBox cartBox = new VBox(10);
+        Label cartLabel = new Label("Koszyk:");
+
+        // Create cart table
+        TableView<TransactionItem> cartTable = createCartTable();
+        cartTable.setItems(cartItems);
+
+        // Total price display
+        HBox totalBox = new HBox(10);
+        Label totalLabel = new Label("Suma:");
+        Label totalPriceLabel = new Label("0.00 zł");
+        totalPriceLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        totalBox.getChildren().addAll(totalLabel, totalPriceLabel);
+        totalBox.setAlignment(Pos.CENTER_RIGHT);
+
+        // Buttons
+        HBox buttonBox = new HBox(10);
+        Button confirmButton = cashierPanel.createStyledButton("Zatwierdź transakcję", "#27AE60");
+        Button cancelButton = cashierPanel.createStyledButton("Anuluj", "#E74C3C");
+
+        buttonBox.getChildren().addAll(confirmButton, cancelButton);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+
+        cartBox.getChildren().addAll(cartLabel, cartTable, totalBox, buttonBox);
+
+        // Add to cart action
+        addToCartButton.setOnAction(e -> {
+            Product selectedProduct = productTable.getSelectionModel().getSelectedItem();
+            if (selectedProduct != null) {
+                int quantity = quantitySpinner.getValue();
+
+                // Check if we have enough quantity
+                if (selectedProduct.getQuantity() < quantity) {
+                    showNotification("Błąd", "Niewystarczająca ilość produktu. Dostępne: " + selectedProduct.getQuantity());
+                    return;
+                }
+
+                // Check if product already in cart
+                boolean found = false;
+                for (TransactionItem item : cartItems) {
+                    if (item.getProduct().getId() == selectedProduct.getId()) {
+                        // Update quantity
+                        int newQuantity = item.getQuantity() + quantity;
+                        if (newQuantity > selectedProduct.getQuantity()) {
+                            showNotification("Błąd", "Niewystarczająca ilość produktu. Dostępne: " + selectedProduct.getQuantity());
+                            return;
+                        }
+                        item.setQuantity(newQuantity);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    // Add new item to cart
+                    TransactionItem newItem = new TransactionItem(selectedProduct, quantity);
+                    cartItems.add(newItem);
+                }
+
+                // Refresh cart table
+                cartTable.refresh();
+
+                // Update total price
+                updateTotalPrice(cartItems, totalPriceLabel);
+            }
+        });
+
+        // Confirm transaction action
+        confirmButton.setOnAction(e -> {
+            if (cartItems.isEmpty()) {
+                showNotification("Błąd", "Koszyk jest pusty. Dodaj produkty do koszyka.");
+                return;
+            }
+
+            // Save transaction to database
+            saveTransaction(cartItems, dialog);
+        });
+
+        // Cancel action
+        cancelButton.setOnAction(e -> dialog.close());
+
+        // Set up the layout
+        mainLayout.setLeft(productSearchBox);
+        mainLayout.setRight(cartBox);
+
+        Scene scene = new Scene(mainLayout);
+        dialog.setScene(scene);
+        dialog.show();
+    }
+
+    private TableView<Product> createProductTableWithSearch(TextField searchField) {
+        // Create product table
+        TableView<Product> table = new TableView<>();
+        table.setMinHeight(300);
+
+        // Create columns
+        TableColumn<Product, Integer> idCol = new TableColumn<>("ID");
+        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+
+        TableColumn<Product, String> nameCol = new TableColumn<>("Nazwa");
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        TableColumn<Product, String> categoryCol = new TableColumn<>("Kategoria");
+        categoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
+
+        TableColumn<Product, Double> priceCol = new TableColumn<>("Cena");
+        priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+
+        TableColumn<Product, Integer> quantityCol = new TableColumn<>("Dostępna ilość");
+        quantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+
+        table.getColumns().addAll(idCol, nameCol, categoryCol, priceCol, quantityCol);
+
+        // Load products from database
+        ProductRepository productRepo = new ProductRepository();
+        ObservableList<Product> productList = FXCollections.observableArrayList(productRepo.pobierzWszystkieProdukty());
+        table.setItems(productList);
+        productRepo.close();
+
+        // Add search functionality
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null || newValue.isEmpty()) {
+                table.setItems(productList);
+            } else {
+                ObservableList<Product> filteredList = FXCollections.observableArrayList();
+                for (Product product : productList) {
+                    if (product.getName().toLowerCase().contains(newValue.toLowerCase()) ||
+                            product.getCategory().toLowerCase().contains(newValue.toLowerCase())) {
+                        filteredList.add(product);
+                    }
+                }
+                table.setItems(filteredList);
+            }
+        });
+
+        return table;
+    }
+
+    private TableView<TransactionItem> createCartTable() {
+        TableView<TransactionItem> table = new TableView<>();
+        table.setMinHeight(300);
+
+        // Create columns
+        TableColumn<TransactionItem, String> nameCol = new TableColumn<>("Nazwa");
+        nameCol.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getProduct().getName()));
+
+        TableColumn<TransactionItem, Integer> quantityCol = new TableColumn<>("Ilość");
+        quantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+
+        // Make quantity editable
+        quantityCol.setCellFactory(TextFieldTableCell.forTableColumn(new IntegerStringConverter()));
+        quantityCol.setOnEditCommit(event -> {
+            TransactionItem item = event.getRowValue();
+            int newValue = event.getNewValue();
+            if (newValue > 0 && newValue <= item.getProduct().getQuantity()) {
+                item.setQuantity(newValue);
+                updateTotalPrice(table.getItems(), null);
+            } else {
+                // Reset to old value if invalid
+                table.refresh();
+                showNotification("Błąd", "Nieprawidłowa ilość. Maksymalna dostępna ilość: " +
+                        item.getProduct().getQuantity());
+            }
+        });
+
+        TableColumn<TransactionItem, Double> priceCol = new TableColumn<>("Cena jedn.");
+        priceCol.setCellValueFactory(cellData ->
+                new SimpleDoubleProperty(cellData.getValue().getProduct().getPrice()).asObject());
+
+        TableColumn<TransactionItem, Double> totalCol = new TableColumn<>("Suma");
+        totalCol.setCellValueFactory(cellData ->
+                new SimpleDoubleProperty(
+                        cellData.getValue().getProduct().getPrice() * cellData.getValue().getQuantity()
+                ).asObject());
+
+        TableColumn<TransactionItem, Void> actionCol = new TableColumn<>("Akcje");
+        actionCol.setCellFactory(param -> new TableCell<>() {
+            private final Button removeButton = new Button("Usuń");
+
+            {
+                removeButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
+                removeButton.setOnAction(event -> {
+                    TransactionItem item = getTableView().getItems().get(getIndex());
+                    getTableView().getItems().remove(item);
+                    updateTotalPrice(getTableView().getItems(), null);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(removeButton);
+                }
+            }
+        });
+
+        table.getColumns().addAll(nameCol, quantityCol, priceCol, totalCol, actionCol);
+        table.setEditable(true);
+
+        return table;
+    }
+
+    private void updateTotalPrice(ObservableList<TransactionItem> items, Label totalPriceLabel) {
+        double total = 0;
+        for (TransactionItem item : items) {
+            total += item.getProduct().getPrice() * item.getQuantity();
+        }
+
+        if (totalPriceLabel != null) {
+            totalPriceLabel.setText(String.format("%.2f zł", total));
+        }
+    }
+
+    private void saveTransaction(ObservableList<TransactionItem> items, Stage dialog) {
+        try {
+            // Get current employee
+            UserRepository userRepo = new UserRepository();
+            Employee currentEmployee = userRepo.getCurrentEmployee();
+
+            if (currentEmployee == null) {
+                showNotification("Błąd", "Nie jesteś zalogowany. Zaloguj się ponownie.");
+                userRepo.close();
+                return;
+            }
+
+            // Create transaction
+            Transaction transaction = new Transaction();
+            transaction.setPracownik(currentEmployee);
+            transaction.setData(new java.util.Date());
+
+            // Create a set of products for the transaction
+            Set<Product> produkty = new HashSet<>();
+
+            // Get product repository for updating quantities
+            ProductRepository productRepo = new ProductRepository();
+
+            // Process each item in the cart
+            for (TransactionItem item : items) {
+                Product product = item.getProduct();
+
+                // Check if we have enough quantity
+                if (product.getQuantity() < item.getQuantity()) {
+                    showNotification("Błąd", "Niewystarczająca ilość produktu: " + product.getName());
+                    userRepo.close();
+                    productRepo.close();
+                    return;
+                }
+
+                // Update product quantity in database
+                int newQuantity = product.getQuantity() - item.getQuantity();
+                productRepo.aktualizujIloscProduktu(product.getId(), newQuantity);
+
+                // Add product to transaction's set
+                produkty.add(product);
+            }
+
+            // Set products for the transaction
+            //TODO: Linjka zakomentowana bo sypało, uściślić działąnie Warehouse a produktów
+            //transaction.setProdukty(produkty);
+
+            // Save transaction to database
+            TransactionRepository transactionRepo = new TransactionRepository();
+            transactionRepo.dodajTransakcje(transaction);
+            transactionRepo.close();
+
+            // Close repositories
+            userRepo.close();
+            productRepo.close();
+
+            showNotification("Sukces", "Transakcja została zapisana pomyślnie.");
+            dialog.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showNotification("Błąd", "Wystąpił błąd podczas zapisywania transakcji: " + e.getMessage());
+        }
     }
 
     private void showProductSelectionDialog() {
@@ -53,7 +380,30 @@ public class CashierPanelController {
         root.setPadding(new Insets(20));
 
         TextField searchField = createStyledTextField("Szukaj produktów...");
-        TableView<Product> table = createProductTable();
+
+        // Use the repository to get actual products
+        ProductRepository productRepo = new ProductRepository();
+        ObservableList<Product> productList = FXCollections.observableArrayList(
+                productRepo.pobierzWszystkieProdukty());
+        productRepo.close();
+
+        TableView<Product> table = new TableView<>();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<Product, String> nameCol = new TableColumn<>("Nazwa");
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        TableColumn<Product, Double> priceCol = new TableColumn<>("Cena");
+        priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+
+        TableColumn<Product, String> categoryCol = new TableColumn<>("Kategoria");
+        categoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
+
+        TableColumn<Product, Integer> quantityCol = new TableColumn<>("Ilość");
+        quantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+
+        table.getColumns().addAll(nameCol, priceCol, categoryCol, quantityCol);
+        table.setItems(productList);
 
         HBox buttons = new HBox(10);
         Button addButton = cashierPanel.createStyledButton("Dodaj do koszyka");
@@ -75,28 +425,13 @@ public class CashierPanelController {
         setupDialog(dialog, root);
     }
 
-    private TableView<Product> createProductTable() {
-        TableView<Product> table = new TableView<>();
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        TableColumn<Product, String> nameCol = new TableColumn<>("Nazwa");
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-
-        TableColumn<Product, Double> priceCol = new TableColumn<>("Cena");
-        priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
-
-        table.getColumns().addAll(nameCol, priceCol);
-        table.setItems(getSampleProducts());
-        return table;
-    }
-
     // Panel raportów
     public void showSalesReportsPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
 
-        TableView<SalesReport> tableView = createReportTable();
+        TableView<Report> tableView = createReportTable();
         HBox buttons = new HBox(10);
 
         Button pdfButton = cashierPanel.createStyledButton("Generuj PDF");
@@ -196,25 +531,49 @@ public class CashierPanelController {
 
         setupDialog(dialog, root);
     }
-    
-    private ObservableList<SalesReport> getSampleReports() {
-        return FXCollections.observableArrayList(
-                new SalesReport("1", "2024-04-01", "Dzienny"),
-                new SalesReport("2", "2024-04-02", "Tygodniowy"),
-                new SalesReport("3", "2024-04-03", "Miesięczny")
-        );
+
+    private TableView<Report> createReportTable() {
+        TableView<Report> tableView = new TableView<>();
+        tableView.setMinHeight(300);
+
+        TableColumn<Report, Integer> idColumn = new TableColumn<>("Id_raportu");
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idColumn.setPrefWidth(100);
+
+        TableColumn<Report, LocalDate> dateStartColumn = new TableColumn<>("Data początkowa");
+        dateStartColumn.setCellValueFactory(new PropertyValueFactory<>("dataPoczatku"));
+        dateStartColumn.setPrefWidth(150);
+
+        TableColumn<Report, LocalDate> dateEndColumn = new TableColumn<>("Data końcowa");
+        dateEndColumn.setCellValueFactory(new PropertyValueFactory<>("dataZakonczenia"));
+        dateEndColumn.setPrefWidth(150);
+
+        TableColumn<Report, String> typeColumn = new TableColumn<>("Typ raportu");
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("typRaportu"));
+        typeColumn.setPrefWidth(150);
+
+        TableColumn<Report, Void> viewColumn = new TableColumn<>("Podgląd");
+        viewColumn.setCellFactory(getReportViewButtonCellFactory());
+        viewColumn.setPrefWidth(100);
+
+        tableView.getColumns().addAll(idColumn, dateStartColumn, dateEndColumn, typeColumn, viewColumn);
+
+        ObservableList<Report> reports = FXCollections.observableArrayList();
+        tableView.setItems(reports);
+
+        return tableView;
     }
 
-    private Callback<TableColumn<SalesReport, Void>, TableCell<SalesReport, Void>> getViewButtonCellFactory() {
+    private Callback<TableColumn<Report, Void>, TableCell<Report, Void>> getReportViewButtonCellFactory() {
         return new Callback<>() {
             @Override
-            public TableCell<SalesReport, Void> call(TableColumn<SalesReport, Void> param) {
+            public TableCell<Report, Void> call(TableColumn<Report, Void> param) {
                 return new TableCell<>() {
                     private final Button viewButton = new Button("Podgląd");
 
                     {
                         viewButton.setOnAction(event -> {
-                            SalesReport report = getTableView().getItems().get(getIndex());
+                            Report report = getTableView().getItems().get(getIndex());
                             showReportDetails(report);
                         });
                         viewButton.setStyle("-fx-background-color: #2980B9; -fx-text-fill: white;");
@@ -230,13 +589,16 @@ public class CashierPanelController {
         };
     }
 
-    private void showReportDetails(SalesReport report) {
+    private void showReportDetails(Report report) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Szczegóły raportu");
         alert.setHeaderText("Raport ID: " + report.getId());
         alert.setContentText(
-                "Data utworzenia: " + report.getDate() + "\n" +
-                        "Typ raportu: " + report.getType()
+                "Typ raportu: " + report.getTypRaportu() + "\n" +
+                        "Data początkowa: " + report.getDataPoczatku() + "\n" +
+                        "Data końcowa: " + report.getDataZakonczenia() + "\n" +
+                        "Pracownik: " + report.getPracownik().getName() + " " + report.getPracownik().getSurname() + "\n" +
+                        "Plik: " + report.getSciezkaPliku()
         );
         alert.showAndWait();
     }
@@ -411,42 +773,6 @@ public class CashierPanelController {
         alert.showAndWait();
     }
 
-    private ObservableList<Product> getSampleProducts() {
-        return FXCollections.observableArrayList(
-                new Product("Mleko", 3.50),
-                new Product("Chleb", 4.20),
-                new Product("Jajka", 8.99),
-                new Product("Masło", 6.50),
-                new Product("Ser", 12.99)
-        );
-    }
-
-    private TableView<SalesReport> createReportTable() {
-        TableView<SalesReport> tableView = new TableView<>();
-        tableView.setMinHeight(300);
-
-        TableColumn<SalesReport, String> idColumn = new TableColumn<>("Id_raportu");
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        idColumn.setPrefWidth(100);
-
-        TableColumn<SalesReport, String> dateColumn = new TableColumn<>("Data utworzenia");
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
-        dateColumn.setPrefWidth(150);
-
-        TableColumn<SalesReport, String> typeColumn = new TableColumn<>("Typ raportu");
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
-        typeColumn.setPrefWidth(150);
-
-        TableColumn<SalesReport, Void> viewColumn = new TableColumn<>("Podgląd");
-        viewColumn.setCellFactory(getViewButtonCellFactory());
-        viewColumn.setPrefWidth(100);
-
-        tableView.getColumns().addAll(idColumn, dateColumn, typeColumn, viewColumn);
-        tableView.setItems(getSampleReports());
-
-        return tableView;
-    }
-
     private ComboBox<String> createStyledComboBox(String... items) {
         ComboBox<String> combo = new ComboBox<>();
         combo.getItems().addAll(items);
@@ -493,36 +819,6 @@ public class CashierPanelController {
         alert.showAndWait();
     }
 
-    // Wewnętrzne klasy danych
-    public static class Product {
-        private final String name;
-        private final double price;
-
-        public Product(String name, double price) {
-            this.name = name;
-            this.price = price;
-        }
-
-        public String getName() { return name; }
-        public double getPrice() { return price; }
-    }
-
-    public static class SalesReport {
-        private final String id;
-        private final String date;
-        private final String type;
-
-        public SalesReport(String id, String date, String type) {
-            this.id = id;
-            this.date = date;
-            this.type = type;
-        }
-
-        public String getId() { return id; }
-        public String getDate() { return date; }
-        public String getType() { return type; }
-    }
-
     /**
      * Wylogowuje użytkownika i uruchamia okno logowania.
      */
@@ -534,4 +830,32 @@ public class CashierPanelController {
         primaryStage.close();
         HelloApplication.showLoginScreen(primaryStage);
     }
+
+    // Inner class to represent items in the cart
+    public static class TransactionItem {
+        private final Product product;
+        private int quantity;
+
+        public TransactionItem(Product product, int quantity) {
+            this.product = product;
+            this.quantity = quantity;
+        }
+
+        public Product getProduct() {
+            return product;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(int quantity) {
+            this.quantity = quantity;
+        }
+
+        public double getTotal() {
+            return product.getPrice() * quantity;
+        }
+    }
 }
+

@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS Adresy (
     Numer_mieszkania VARCHAR(10),
     Kod_pocztowy VARCHAR(10),
     Miasto VARCHAR(100)
-);
+    );
 
 -- Tabela Pracownicy
 CREATE TABLE IF NOT EXISTS Pracownicy (
@@ -27,21 +27,20 @@ CREATE TABLE IF NOT EXISTS Pracownicy (
     Stanowisko VARCHAR(100),
     onSickLeave BOOLEAN DEFAULT FALSE,
     sickLeaveStartDate DATE,
+    usuniety BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (Id_adresu) REFERENCES Adresy(Id)
     );
 
-  -- Tabela Zgłoszenia_techniczne
-  CREATE TABLE IF NOT EXISTS Zgłoszenia_techniczne (
-      Id INT PRIMARY KEY AUTO_INCREMENT,
-      Typ VARCHAR(100),
-      Opis TEXT,
-      Data_zgłoszenia DATE DEFAULT (CURRENT_DATE),
-      Id_pracownika INT,
-      Status VARCHAR(50) DEFAULT 'Nowe',
-      FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id)
-  );
-
-
+-- Tabela Zgłoszenia_techniczne (kaskadowe usuwanie)
+CREATE TABLE IF NOT EXISTS Zgłoszenia_techniczne (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Typ VARCHAR(100),
+    Opis TEXT,
+    Data_zgłoszenia DATE DEFAULT (CURRENT_DATE),
+    Id_pracownika INT,
+    Status VARCHAR(50) DEFAULT 'Nowe',
+    FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id) ON DELETE CASCADE
+    );
 
 -- Tabela Zadania
 CREATE TABLE IF NOT EXISTS Zadania (
@@ -50,9 +49,9 @@ CREATE TABLE IF NOT EXISTS Zadania (
     Data DATE,
     Status VARCHAR(50),
     Opis TEXT
-);
+    );
 
--- Tabela Wnioski o nieobecnosc
+-- Tabela Wnioski_o_nieobecnosc (kaskadowe usuwanie)
 CREATE TABLE IF NOT EXISTS Wnioski_o_nieobecnosc (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Typ_wniosku VARCHAR(100),
@@ -60,8 +59,8 @@ CREATE TABLE IF NOT EXISTS Wnioski_o_nieobecnosc (
     Data_zakonczenia DATE,
     Opis TEXT,
     Id_pracownika INT,
-    FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id)
-);
+    FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id) ON DELETE CASCADE
+    );
 
 -- Tabela Produkty
 CREATE TABLE IF NOT EXISTS Produkty (
@@ -72,7 +71,7 @@ CREATE TABLE IF NOT EXISTS Produkty (
     IloscWmagazynie INT
     );
 
--- Tabela Zamowienia
+-- Tabela Zamowienia (nie usuwane kaskadowo)
 CREATE TABLE IF NOT EXISTS Zamowienia (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Id_produktu INT,
@@ -82,15 +81,15 @@ CREATE TABLE IF NOT EXISTS Zamowienia (
     Data DATE,
     FOREIGN KEY (Id_produktu) REFERENCES Produkty(Id),
     FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id)
-);
+    );
 
--- Tabela Transakcje
+-- Tabela Transakcje (nie usuwane kaskadowo)
 CREATE TABLE IF NOT EXISTS Transakcje (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Id_pracownika INT,
     Data DATE,
     FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id)
-);
+    );
 
 -- Tabela relacji Transakcje <-> Produkty
 CREATE TABLE IF NOT EXISTS Transakcje_Produkty (
@@ -99,9 +98,9 @@ CREATE TABLE IF NOT EXISTS Transakcje_Produkty (
     PRIMARY KEY (Id_transakcji, Id_produktu),
     FOREIGN KEY (Id_transakcji) REFERENCES Transakcje(Id),
     FOREIGN KEY (Id_produktu) REFERENCES Produkty(Id)
-);
+    );
 
--- Tabela Raporty
+-- Tabela Raporty (nie usuwane kaskadowo)
 CREATE TABLE IF NOT EXISTS Raporty (
     Id INT PRIMARY KEY AUTO_INCREMENT,
     Typ_raportu VARCHAR(100),
@@ -110,16 +109,16 @@ CREATE TABLE IF NOT EXISTS Raporty (
     Id_pracownika INT,
     Plik TEXT,
     FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id)
-);
+    );
 
--- Tabela relacji wiele-do-wielu dla zadań i pracowników
+-- Tabela relacji wiele-do-wielu dla zadań i pracowników (kaskadowe usuwanie)
 CREATE TABLE IF NOT EXISTS Zadania_Pracownicy (
     Id_pracownika INT,
     Id_zadania INT,
     PRIMARY KEY (Id_pracownika, Id_zadania),
-    FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id),
+    FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id) ON DELETE CASCADE,
     FOREIGN KEY (Id_zadania) REFERENCES Zadania(Id)
-);
+    );
 
 -- === Wstawianie danych ===
 INSERT INTO Adresy (Miejscowosc, Numer_domu, Numer_mieszkania, Kod_pocztowy, Miasto)

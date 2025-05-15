@@ -11,7 +11,6 @@ import javax.mail.MessagingException;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.*;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,65 +18,57 @@ import java.util.concurrent.Executors;
 public class Login implements ILacz {
 
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private static final UserRepository userRepository = new UserRepository();
 
     public static void attemptLogin(String username, String password, VBox root) {
-        try (Connection conn = DriverManager.getConnection(
-                ILacz.MYSQL_DB_URL, ILacz.MYSQL_USER, ILacz.MYSQL_PASSWORD)) {
+        try {
+            Employee employee = userRepository.znajdzPoLoginieIHasle(username, password);
 
-            String query = "SELECT * FROM Pracownicy WHERE Login = ? AND Haslo = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setString(1, username);
-                stmt.setString(2, password);
+            if (employee != null) {
+                UserRepository.setLoggedInEmployee(employee.getId());
 
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        int employeeId = rs.getInt("Id");
-                        UserRepository.setLoggedInEmployee(employeeId);
+                String stanowisko = employee.getStanowisko();
 
-                        String stanowisko = rs.getString("Stanowisko");
+                HelloApplication.showAlert(
+                        Alert.AlertType.INFORMATION,
+                        "Sukces",
+                        "Zalogowano pomyślnie!",
+                        "Witaj, " + employee.getName() + "!"
+                );
 
+                Stage currentStage = (Stage) root.getScene().getWindow();
+                currentStage.close();
+                Stage nextStage = new Stage();
+
+                switch (stanowisko.toLowerCase()) {
+                    case "admin":
+                        new AdminPanel(nextStage);
+                        break;
+                    case "kierownik":
+                        new ManagerPanel(nextStage);
+                        break;
+                    case "kasjer":
+                        new CashierPanel(nextStage);
+                        break;
+                    case "logistyk":
+                        new LogisticianPanel(nextStage);
+                        break;
+                    default:
                         HelloApplication.showAlert(
-                                Alert.AlertType.INFORMATION,
-                                "Sukces",
-                                "Zalogowano pomyślnie!",
-                                "Witaj, " + rs.getString("Imie") + "!"
+                                Alert.AlertType.WARNING,
+                                "Brak panelu",
+                                "Nieznana rola użytkownika",
+                                "Stanowisko: " + stanowisko
                         );
-
-                        Stage currentStage = (Stage) root.getScene().getWindow();
-                        currentStage.close();
-                        Stage nextStage = new Stage();
-
-                        switch (stanowisko.toLowerCase()) {
-                            case "admin":
-                                new AdminPanel(nextStage);
-                                break;
-                            case "kierownik":
-                                new ManagerPanel(nextStage);
-                                break;
-                            case "kasjer":
-                                new CashierPanel(nextStage);
-                                break;
-                            case "logistyk":
-                                new LogisticianPanel(nextStage);
-                                break;
-                            default:
-                                HelloApplication.showAlert(
-                                        Alert.AlertType.WARNING,
-                                        "Brak panelu",
-                                        "Nieznana rola użytkownika",
-                                        "Stanowisko: " + stanowisko
-                                );
-                                break;
-                        }
-                    } else {
-                        HelloApplication.showAlert(
-                                Alert.AlertType.ERROR,
-                                "Błąd",
-                                "Nieprawidłowe dane logowania!",
-                                "Spróbuj ponownie."
-                        );
-                    }
+                        break;
                 }
+            } else {
+                HelloApplication.showAlert(
+                        Alert.AlertType.ERROR,
+                        "Błąd",
+                        "Nieprawidłowe dane logowania!",
+                        "Spróbuj ponownie."
+                );
             }
 
         } catch (Exception e) {
@@ -124,7 +115,6 @@ public class Login implements ILacz {
             }
         });
     }
-
 
     /**
      * Wysyła e-mail do wskazanego odbiorcy, używając danych logowania z pliku PASS.txt.
