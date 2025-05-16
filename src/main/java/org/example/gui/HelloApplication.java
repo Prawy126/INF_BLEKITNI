@@ -22,6 +22,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.example.sys.ConfigPdf;
 import org.example.sys.Login;
 
 import java.io.File;
@@ -61,6 +62,7 @@ HelloApplication extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        ConfigPdf configPdf = new ConfigPdf();
         VBox root = new VBox(20);
         root.setAlignment(Pos.CENTER);
         root.setStyle("-fx-background-color: lightblue; -fx-padding: 30;");

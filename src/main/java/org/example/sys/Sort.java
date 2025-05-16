@@ -9,19 +9,29 @@
 package org.example.sys;
 
 public enum Sort {
-    NAME("Nazwa"),
-    DATE("Data"),
-    PRIORITY("Priorytet"),
-    DEFAULT("Domyślny");
+    DEFAULT("Domyślne", "DEFAULT"),
+    NAME("Nazwa", "NAME"),
+    DATE("Data", "DATE"),
+    PRIORITY("Priorytet", "PRIORITY");
 
-    private String name;
-    public String getName() {
-        return name;
+    private final String displayName;
+    private final String value;
+
+    Sort(String displayName, String value) {
+        this.displayName = displayName;
+        this.value = value;
     }
-    public void setName(String name) {
-        this.name = name;
+
+    public String getDisplayName() {
+        return displayName;
     }
-    Sort(String name) {
-        this.name = name;
+
+    public static Sort fromDisplayName(String displayName) {
+        for (Sort sort : values()) {
+            if (sort.displayName.equalsIgnoreCase(displayName)) {
+                return sort;
+            }
+        }
+        return DEFAULT;
     }
 }

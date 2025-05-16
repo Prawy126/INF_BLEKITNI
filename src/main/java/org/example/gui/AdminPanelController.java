@@ -16,12 +16,16 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.database.TechnicalIssueRepository;
 import org.example.database.UserRepository;
+import org.example.sys.ConfigPdf;
 import org.example.sys.Employee;
 import org.example.pdflib.ConfigManager;
+import org.example.sys.Sort;
 import org.example.sys.TechnicalIssue;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Map;
 
@@ -429,43 +433,55 @@ public class AdminPanelController {
     public void showPDFConfigPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
-
         Label titleLabel = new Label("Aktualizacja loga hipermarketu");
 
         Label logoLabel = new Label("Logo:");
         TextField logoField = new TextField();
+        logoField.setText(ConfigPdf.getPathLogo());
+        ConfigPdf.setPathLogo(logoField.getText());
 
         Button updateLogoButton = new Button("Aktualizuj logo");
 
         Label sortingLabel = new Label("Sortowanie domyślne:");
         ComboBox<String> sortingComboBox = new ComboBox<>();
-        sortingComboBox.getItems().addAll("Nazwa", "Data", "Priorytet");
+        sortingComboBox.getItems().addAll(
+                Sort.NAME.getDisplayName(),
+                Sort.DATE.getDisplayName(),
+                Sort.PRIORITY.getDisplayName()
+        );
+        // Ustaw aktualną wartość
+        sortingComboBox.getSelectionModel().select(ConfigPdf.getSort().getDisplayName());
+
+        // Automatyczna aktualizacja przy zmianie
+        sortingComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            ConfigPdf.setSort(Sort.fromDisplayName(newVal));
+        });
 
         Label pathLabel = new Label("Ścieżka zapisu raportów:");
         TextField pathField = new TextField();
         pathField.setPromptText("Np. C:/raporty/");
-        pathField.setText(ConfigManager.getReportPath());
+        pathField.setText(ConfigPdf.getPathPdf());
+        ConfigPdf.setPathPdf(pathField.getText());
 
         Button saveButton = new Button("Zapisz konfigurację");
         saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+        System.out.println("Ścieżka zapisu raportów: " + ConfigPdf.getPathLogo() + " " + ConfigPdf.getPathPdf() + " " + ConfigPdf.getSort());
 
         saveButton.setOnAction(e -> {
+            // Walidacja ścieżki
             String path = pathField.getText().trim();
-
-            if (path.isEmpty()) {
-                showAlert(Alert.AlertType.WARNING, "Błąd", "Ścieżka nie może być pusta.");
+            if (!isValidPath(path)) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowa ścieżka");
                 return;
             }
 
-            File folder = new File(path);
-            if (!folder.exists() || !folder.isDirectory()) {
-                showAlert(Alert.AlertType.ERROR, "Niepoprawna ścieżka", "Podany folder nie istnieje.");
-                return;
-            }
+            // Aktualizacja wszystkich ustawień
+            ConfigPdf.setPathPdf(path);
+            ConfigPdf.setPathLogo(logoField.getText());
 
-            ConfigManager.setReportPath(path);
-            showAlert(Alert.AlertType.INFORMATION, "Zapisano", "Ścieżka została zapisana.");
+            showAlert(Alert.AlertType.INFORMATION, "Sukces", "Konfiguracja zapisana");
         });
+
 
         Button backButton = new Button("Wróć");
         backButton.setOnAction(e -> showConfigPanel());
@@ -481,6 +497,21 @@ public class AdminPanelController {
         );
 
         adminPanel.setCenterPane(layout);
+    }
+
+    /**
+     * Sprawdza, czy podana ścieżka jest poprawna.
+     *
+     * @param path ścieżka do sprawdzenia
+     * @return true, jeśli ścieżka jest poprawna, false w przeciwnym razie
+     */
+    private boolean isValidPath(String path) {
+        try {
+            Paths.get(path);
+            return true;
+        } catch (InvalidPathException ex) {
+            return false;
+        }
     }
 
     /**

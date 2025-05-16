@@ -23,22 +23,22 @@ public class ConfigPdf {
         ConfigPdf.sort = sort;
     }
 
-    public String getPathLogo() {
+    public static String getPathLogo() {
         return ConfigPdf.pathLogo;
     }
-    public void setPathLogo(String pathLogo) {
+    public static void setPathLogo(String pathLogo) {
         ConfigPdf.pathLogo = pathLogo;
     }
-    public String getPathPdf() {
-        return pathPdf;
+    public static String getPathPdf() {
+        return ConfigPdf.pathPdf;
     }
-    public void setPathPdf(String pathPdf) {
+    public static void setPathPdf(String pathPdf) {
         ConfigPdf.pathPdf = pathPdf;
     }
-    public Sort getSort() {
-        return sort;
+    public static Sort getSort() {
+        return ConfigPdf.sort;
     }
-    public void setSort(Sort sort) {
+    public static void setSort(Sort sort) {
         ConfigPdf.sort = sort;
     }
 
