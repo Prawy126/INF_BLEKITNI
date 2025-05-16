@@ -23,6 +23,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.util.Objects;
+
 /**
  * Panel kierownika, zawiera menu boczne oraz centralny panel widoku.
  * Pozwala nawigować po funkcjach przypisanych do roli kierownika.
@@ -32,6 +34,7 @@ public class ManagerPanel {
     private BorderPane root;
     private Stage primaryStage;
     private ManagerPanelController controller;
+    private Image logoImage;
 
     /**
      * Konstruktor panelu kierownika.
@@ -41,6 +44,11 @@ public class ManagerPanel {
     public ManagerPanel(Stage stage) {
         this.primaryStage = stage;
         this.controller = new ManagerPanelController(this);
+
+        logoImage = new Image(Objects.requireNonNull(
+                getClass().getResourceAsStream("/logo.png")
+        ));
+        primaryStage.getIcons().add(logoImage);
 
         primaryStage.setTitle("Panel kierownika");
         primaryStage.setMinWidth(700);

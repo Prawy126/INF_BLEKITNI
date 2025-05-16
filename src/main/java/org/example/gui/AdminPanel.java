@@ -33,6 +33,7 @@ public class AdminPanel {
     private BorderPane root;
     private Stage primaryStage;
     private AdminPanelController controller;
+    private Image logoImage;
 
     /**
      * Tworzy nową instancję panelu administratora.
@@ -44,6 +45,11 @@ public class AdminPanel {
         primaryStage.setMinWidth(700);
         primaryStage.setMinHeight(450);
         this.controller = new AdminPanelController(this);
+
+        logoImage = new Image(Objects.requireNonNull(
+                getClass().getResourceAsStream("/logo.png")
+        ));
+        primaryStage.getIcons().add(logoImage);
 
         primaryStage.setTitle("Panel administratora");
 

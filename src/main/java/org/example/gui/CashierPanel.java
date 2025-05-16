@@ -14,6 +14,8 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.util.Objects;
+
 /**
  * Klasa reprezentująca graficzny interfejs kasjera.
  * Zawiera przyciski nawigacyjne i animacje wejścia.
@@ -24,7 +26,7 @@ public class CashierPanel {
     private Stage primaryStage;
     private CashierPanelController controller;
     private boolean reportGenerated = false; // Flaga informująca, czy raport został wygenerowany
-
+    private Image logoImage;
     /**
      * Tworzy nowy panel kasjera i wyświetla domyślny widok sprzedaży.
      *
@@ -35,6 +37,11 @@ public class CashierPanel {
         primaryStage.setMinWidth(700);
         primaryStage.setMinHeight(450);
         this.controller = new CashierPanelController(this);
+
+        logoImage = new Image(Objects.requireNonNull(
+                getClass().getResourceAsStream("/logo.png")
+        ));
+        primaryStage.getIcons().add(logoImage);
         primaryStage.setTitle("Panel kasjera");
 
         // Główna struktura układu
