@@ -18,6 +18,9 @@ public class AddressRepository {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
+
+
+
             em.persist(address);
             tx.commit();
         } finally {
