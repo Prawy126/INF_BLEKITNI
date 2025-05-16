@@ -14,6 +14,8 @@ module org.example.gui {
     requires java.mail;
     requires jakarta.persistence;
     requires org.hibernate.orm.core;
+    requires kernel;
+    requires layout;
 
     opens org.example.gui to javafx.fxml;
     opens org.example.sys to javafx.base, javafx.fxml, org.hibernate.orm.core, jakarta.persistence;
