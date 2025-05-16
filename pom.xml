@@ -139,7 +139,7 @@
             <version>6.5.2.Final</version>
         </dependency>
         <dependency>
-            <groupId>com.stonka</groupId> <!-- nazwa dowolna -->
+            <groupId>com.stonka</groupId>
             <artifactId>StonkaPdfLib</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>system</scope>
@@ -153,7 +153,8 @@
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itext7-core</artifactId>
-            <version>7.2.5</version>
+            <version>8.0.2</version>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>jakarta.enterprise</groupId>

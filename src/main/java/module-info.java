@@ -18,9 +18,12 @@ module org.example.gui {
     requires org.apache.logging.log4j;
     requires jakarta.transaction;
     requires jakarta.cdi;
+    requires kernel;
+    requires layout;
 
     opens org.example.gui to javafx.fxml;
     opens org.example.sys to javafx.base, javafx.fxml, org.hibernate.orm.core, jakarta.persistence;
+    opens org.example.pdflib to javafx.fxml;
 
     exports org.example.gui;
     exports org.example.sys;
@@ -28,5 +31,4 @@ module org.example.gui {
     exports org.example.hypermarket;
     exports org.example.pdflib;
     exports org.example.wyjatki;
-    opens org.example.pdflib to javafx.fxml;
 }
