@@ -1,20 +1,20 @@
 package org.example.database;
 
 import jakarta.persistence.*;
-import org.example.sys.Report;
+import org.example.sys.Raport;
 
 import java.io.File;
 import java.util.List;
 
-public class ReportRepository {
+public class RaportRepository {
 
     private final EntityManagerFactory emf;
 
-    public ReportRepository() {
+    public RaportRepository() {
         this.emf = Persistence.createEntityManagerFactory("myPU");
     }
 
-    public void dodajRaport(Report raport) {
+    public void dodajRaport(Raport raport) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -27,21 +27,33 @@ public class ReportRepository {
         }
     }
 
-    public Report znajdzRaportPoId(int id) {
+    public Raport znajdzRaportPoId(int id) {
         EntityManager em = emf.createEntityManager();
         try {
-            return em.find(Report.class, id);
+            return em.find(Raport.class, id);
         } finally {
             em.close();
         }
     }
 
-    public List<Report> pobierzWszystkieRaporty() {
+    public List<Raport> pobierzWszystkieRaporty() {
         EntityManager em = emf.createEntityManager();
         try {
-            return em.createQuery("SELECT r FROM Report r", Report.class)
-                    .getResultList();
+            return em.createQuery("SELECT r FROM Raport r", Raport.class).getResultList();
         } finally {
+            em.close();
+        }
+    }
+
+    public void aktualizujRaport(Raport raport) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.merge(raport);
+            tx.commit();
+        } finally {
+            if (tx.isActive()) tx.rollback();
             em.close();
         }
     }
@@ -51,30 +63,15 @@ public class ReportRepository {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-
-            Report managed = em.find(Report.class, id);
-            if (managed != null) {
-                File file = new File(managed.getSciezkaPliku());
+            Raport raport = em.find(Raport.class, id);
+            if (raport != null) {
+                // Spróbuj usunąć plik z dysku jeśli istnieje
+                File file = new File(raport.getSciezkaPliku());
                 if (file.exists() && file.isFile()) {
                     file.delete();
                 }
-
-                em.remove(managed);
+                em.remove(raport);
             }
-
-            tx.commit();
-        } finally {
-            if (tx.isActive()) tx.rollback();
-            em.close();
-        }
-    }
-
-    public void aktualizujRaport(Report raport) {
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            em.merge(raport);
             tx.commit();
         } finally {
             if (tx.isActive()) tx.rollback();

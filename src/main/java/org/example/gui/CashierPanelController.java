@@ -13,25 +13,19 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.*;
 import javafx.stage.*;
-import javafx.util.Callback;
 import javafx.util.Duration;
 import javafx.util.converter.IntegerStringConverter;
-import org.example.database.AbsenceRequestRepository;
 import org.example.database.ProductRepository;
 import org.example.database.TransactionRepository;
-import org.example.database.TechnicalIssueRepository;
-import org.example.sys.AbsenceRequest;
 import org.example.sys.Employee;
 import org.example.database.UserRepository;
 import org.example.sys.Product;
-import org.example.sys.Report;
+import org.example.sys.Raport;
 import org.example.sys.Transaction;
-import org.example.sys.TechnicalIssue;
+
 import java.time.LocalDate;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class CashierPanelController {
     private final CashierPanel cashierPanel;
@@ -290,7 +284,7 @@ public class CashierPanelController {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
-        TableView<Report> tableView = createReportTable();
+        TableView<Raport> tableView = createReportTable();
         HBox buttons = new HBox(10);
         Button pdfButton = cashierPanel.createStyledButton("Generuj PDF");
         Button csvButton = cashierPanel.createStyledButton("Generuj CSV");
@@ -352,30 +346,30 @@ public class CashierPanelController {
         // Możesz tu później dodać prawdziwe wywołanie Twojej biblioteki PDF
     }
 
-    private TableView<Report> createReportTable() {
-        TableView<Report> tableView = new TableView<>();
+    private TableView<Raport> createReportTable() {
+        TableView<Raport> tableView = new TableView<>();
         tableView.setMinHeight(300);
 
-        TableColumn<Report, Integer> idColumn = new TableColumn<>("Id_raportu");
+        TableColumn<Raport, Integer> idColumn = new TableColumn<>("Id_raportu");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-        TableColumn<Report, LocalDate> dateStartColumn = new TableColumn<>("Data początkowa");
+        TableColumn<Raport, LocalDate> dateStartColumn = new TableColumn<>("Data początkowa");
         dateStartColumn.setCellValueFactory(new PropertyValueFactory<>("dataPoczatku"));
 
-        TableColumn<Report, LocalDate> dateEndColumn = new TableColumn<>("Data końcowa");
+        TableColumn<Raport, LocalDate> dateEndColumn = new TableColumn<>("Data końcowa");
         dateEndColumn.setCellValueFactory(new PropertyValueFactory<>("dataZakonczenia"));
 
-        TableColumn<Report, String> typeColumn = new TableColumn<>("Typ raportu");
+        TableColumn<Raport, String> typeColumn = new TableColumn<>("Typ raportu");
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("typRaportu"));
 
-        TableColumn<Report, Void> viewColumn = new TableColumn<>("Podgląd");
+        TableColumn<Raport, Void> viewColumn = new TableColumn<>("Podgląd");
         viewColumn.setCellFactory(param -> new TableCell<>() {
             private final Button viewButton = new Button("Podgląd");
             {
                 viewButton.setStyle("-fx-background-color: #2980B9; -fx-text-fill: white;");
                 viewButton.setOnAction(event -> {
-                    Report report = getTableView().getItems().get(getIndex());
-                    showReportDetails(report);
+                    Raport raport = getTableView().getItems().get(getIndex());
+                    showReportDetails(raport);
                 });
             }
 
@@ -390,7 +384,7 @@ public class CashierPanelController {
         return tableView;
     }
 
-    private void showReportDetails(Report report) {
+    private void showReportDetails(Raport report) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Szczegóły raportu");
         alert.setHeaderText("Raport ID: " + report.getId());
