@@ -220,8 +220,6 @@ public class UserRepository {
         }
     }
 
-
-
     /**
      * Resetuje ID zalogowanego pracownika.
      * Używane podczas wylogowywania.
