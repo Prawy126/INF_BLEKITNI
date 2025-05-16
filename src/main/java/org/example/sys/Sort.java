@@ -11,7 +11,8 @@ package org.example.sys;
 public enum Sort {
     NAME("Nazwa"),
     DATE("Data"),
-    PRIORITY("Priorytet");
+    PRIORITY("Priorytet"),
+    DEFAULT("Domyślny");
 
     private String name;
     public String getName() {

@@ -13,33 +13,33 @@ package org.example.sys;
  */
 
 public class ConfigPdf {
-    private String pathLogo;
-    private String pathPdf;
-    private Sort sort;
+    private static String pathLogo = "src/main/resources/logo.png";
+    private static String pathPdf = "src/main/resources/raport.pdf";
+    private static Sort sort = Sort.DEFAULT;
 
-    public ConfigPdf(String pathLogo, String pathPdf, Sort sort) {
-        this.pathLogo = pathLogo;
-        this.pathPdf = pathPdf;
-        this.sort = sort;
+    public void setAll(String pathLogo, String pathPdf, Sort sort) {
+        ConfigPdf.pathLogo = pathLogo;
+        ConfigPdf.pathPdf = pathPdf;
+        ConfigPdf.sort = sort;
     }
 
     public String getPathLogo() {
-        return pathLogo;
+        return ConfigPdf.pathLogo;
     }
     public void setPathLogo(String pathLogo) {
-        this.pathLogo = pathLogo;
+        ConfigPdf.pathLogo = pathLogo;
     }
     public String getPathPdf() {
         return pathPdf;
     }
     public void setPathPdf(String pathPdf) {
-        this.pathPdf = pathPdf;
+        ConfigPdf.pathPdf = pathPdf;
     }
     public Sort getSort() {
         return sort;
     }
     public void setSort(Sort sort) {
-        this.sort = sort;
+        ConfigPdf.sort = sort;
     }
 
 }
