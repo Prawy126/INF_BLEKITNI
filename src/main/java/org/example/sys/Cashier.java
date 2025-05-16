@@ -1,3 +1,11 @@
+/*
+ * Classname: Cashier
+ * Version information: 1.0
+ * Date: 2025-05-16
+ * Copyright notice: © BŁĘKITNI
+ */
+
+
 package org.example.sys;
 
 import org.example.wyjatki.PasswordException;
