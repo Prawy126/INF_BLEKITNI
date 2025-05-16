@@ -15,6 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.database.UserRepository;
+import org.example.pdflib.ConfigManager;
 import org.example.pdflib.ReportGenerator;
 import org.example.sys.Employee;
 import javafx.scene.layout.GridPane;
@@ -395,11 +396,10 @@ public class AdminPanelController {
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
         CheckBox logsCheckbox = new CheckBox("Włącz logi systemowe");
-        logsCheckbox.setSelected(true);
+        logsCheckbox.setSelected(ConfigManager.isLoggingEnabled());
 
-        CheckBox notificationsCheckbox =
-                new CheckBox("Włącz powiadomienia");
-        notificationsCheckbox.setSelected(true);
+        CheckBox notificationsCheckbox = new CheckBox("Włącz powiadomienia");
+        notificationsCheckbox.setSelected(ConfigManager.isNotificationsEnabled());
 
         Button configurePDF = new Button("Konfiguruj raporty PDF");
         configurePDF.setOnAction(e -> showPDFConfigPanel());
@@ -412,10 +412,17 @@ public class AdminPanelController {
         backupButton.setOnAction(e -> performDatabaseBackup());
 
         Button saveButton = new Button("Zapisz");
-        saveButton.setStyle(
-                "-fx-background-color: #3498DB; "
-                        + "-fx-text-fill: white;"
-        );
+        saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+        saveButton.setOnAction(e -> {
+            // zapis do ConfigManager i pliku app.properties
+            ConfigManager.setLoggingEnabled(logsCheckbox.isSelected());
+            ConfigManager.setNotificationsEnabled(notificationsCheckbox.isSelected());
+            showAlert(
+                    Alert.AlertType.INFORMATION,
+                    "Zapisano",
+                    "Ustawienia zostały zachowane."
+            );
+        });
 
         layout.getChildren().addAll(
                 titleLabel,
