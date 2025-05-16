@@ -77,6 +77,12 @@ public class ManagerPanelController {
         HBox taskButtons = new HBox(10);
         taskButtons.setAlignment(Pos.CENTER);
 
+        Button addTaskButton = new Button("Dodaj zadanie");
+        addTaskButton.setOnAction(e -> showAddTaskPanel());
+
+        Button assignEmployeeButton = new Button("Przypisz pracownika");
+        assignEmployeeButton.setOnAction(e -> showAssignEmployeeDialog());
+
         Button editButton = new Button("Edytuj zadanie");
         Button deleteButton = new Button("Usuń zadanie");
 
@@ -85,8 +91,7 @@ public class ManagerPanelController {
             if (selectedTask != null) {
                 showEditTaskDialog(selectedTask);
             } else {
-                showAlert(Alert.AlertType.WARNING, "Błąd",
-                        "Wybierz zadanie do edycji.");
+                showAlert(Alert.AlertType.WARNING, "Błąd", "Wybierz zadanie do edycji.");
             }
         });
 
@@ -97,12 +102,16 @@ public class ManagerPanelController {
                 showAlert(Alert.AlertType.INFORMATION, "Sukces", "Usunięto zadanie.");
                 showTaskPanel();
             } else {
-                showAlert(Alert.AlertType.WARNING, "Błąd",
-                        "Wybierz zadanie do usunięcia.");
+                showAlert(Alert.AlertType.WARNING, "Błąd", "Wybierz zadanie do usunięcia.");
             }
         });
 
-        taskButtons.getChildren().addAll(editButton, deleteButton);
+        taskButtons.getChildren().addAll(
+                addTaskButton,
+                assignEmployeeButton,
+                editButton,
+                deleteButton
+        );
 
         Label recruitLabel = new Label("Panel rekrutacji");
         ListView<String> recruitmentList = new ListView<>();
