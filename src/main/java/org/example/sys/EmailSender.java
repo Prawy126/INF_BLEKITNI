@@ -55,4 +55,7 @@ public class EmailSender {
         // Wysłanie wiadomości
         Transport.send(email);
     }
+
+    public static void sendResetEmail(String email, String resetCode) {
+    }
 }
