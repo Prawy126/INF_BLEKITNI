@@ -44,6 +44,10 @@ public class Admin {
     }
 
     public void removeEmployee(Employee e) {
+        if (e != null && "root".equalsIgnoreCase(e.getStanowisko())) {
+            System.err.println("Próba usunięcia użytkownika z rolą root została zablokowana");
+            return;
+        }
         allEmployees.remove(e);
     }
 

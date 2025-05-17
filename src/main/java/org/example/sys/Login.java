@@ -1,11 +1,10 @@
 /*
  * Classname: Login
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.1
+ * Date: 2025-05-17
  * Copyright notice: © BŁĘKITNI
  */
 
-// src/main/java/org/example/sys/Login.java
 package org.example.sys;
 
 import javafx.application.Platform;
@@ -43,18 +42,37 @@ public class Login implements ILacz {
         return new Task<>() {
             @Override
             protected Employee call() throws Exception {
-                Employee optionalEmployee = userRepository.znajdzPoLoginieIHasle(username, password);
-                return optionalEmployee;
+                return userRepository.znajdzPoLoginieIHasle(username, password);
             }
         };
     }
 
     private static void setupTaskHandlers(Task<Employee> task, VBox root) {
-        task.setOnSucceeded(e -> handleLoginSuccess(task.getValue(), root));
+        task.setOnSucceeded(e -> {
+            Employee employee = task.getValue();
+            if (employee != null) {
+                handleLoginSuccess(employee, root);
+            } else {
+                // Obsługa przypadku, gdy nie znaleziono użytkownika
+                Platform.runLater(() ->
+                        showAlert(Alert.AlertType.ERROR, "Błąd logowania",
+                                "Nieprawidłowy login lub hasło. Spróbuj ponownie.")
+                );
+            }
+        });
         task.setOnFailed(e -> handleLoginFailure(task.getException()));
     }
 
     private static void handleLoginSuccess(Employee employee, VBox root) {
+        // Dodatkowe zabezpieczenie przed null
+        if (employee == null) {
+            Platform.runLater(() ->
+                    showAlert(Alert.AlertType.ERROR, "Błąd logowania",
+                            "Wystąpił błąd podczas logowania. Spróbuj ponownie.")
+            );
+            return;
+        }
+
         Platform.runLater(() -> {
             UserRepository.setLoggedInEmployee(employee.getId());
             showSuccessAlert(employee);
@@ -77,12 +95,16 @@ public class Login implements ILacz {
             currentStage.close();
 
             Stage nextStage = new Stage();
-            switch (position) {
-                case "admin" -> new AdminPanel(nextStage);
-                case "kierownik" -> new ManagerPanel(nextStage);
-                case "kasjer" -> new CashierPanel(nextStage);
-                case "logistyk" -> new LogisticianPanel(nextStage);
-                default -> showUnknownPositionAlert(position);
+            if ("root".equalsIgnoreCase(position)) {
+                new AdminPanel(nextStage);
+            } else {
+                switch (position.toLowerCase()) {
+                    case "admin" -> new AdminPanel(nextStage);
+                    case "kierownik" -> new ManagerPanel(nextStage);
+                    case "kasjer" -> new CashierPanel(nextStage);
+                    case "logistyk" -> new LogisticianPanel(nextStage);
+                    default -> showUnknownPositionAlert(position);
+                }
             }
         });
     }

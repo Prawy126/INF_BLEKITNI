@@ -147,7 +147,8 @@ VALUES
         ('Barbara', 'Kaczmarek', 27, 8, 'bkacz', 'barbara987', 'b.kaczmarek@example.com', 3400.00, 'Kasjer', TRUE, '2025-04-18'),
         ('Piotr', 'Zieliński', 38, 9, 'pziel', 'piotr111', 'piotr.z@example.com', 4100.00, 'Pracownik', FALSE, NULL),
         ('Magda', 'Szymańska', 36, 10, 'mszym', 'magda654', 'magda.s@example.com', 4300.00, 'Logistyk', FALSE, NULL),
-        ('Janusz', 'Kowalik', 35, 1, 'admin2', 'admin2', 'janusz.kowalik@example.com', 4500.00, 'Admin', FALSE, NULL);
+        ('Janusz', 'Kowalik', 35, 1, 'admin2', 'admin2', 'janusz.kowalik@example.com', 4500.00, 'Admin', FALSE, NULL),
+        ('root', 'root', 35, 1, 'root', 'root', 'root.root@example.com', 4500.00, 'root', FALSE, NULL);
 
 INSERT INTO Produkty (Nazwa, Kategoria, Cena, IloscWmagazynie)
 VALUES

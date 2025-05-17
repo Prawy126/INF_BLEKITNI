@@ -156,6 +156,15 @@ public class Employee extends Person {
         this.onSickLeave = true;
     }
 
+    /**
+     * Sprawdza, czy pracownik ma rolę "root".
+     *
+     * @return true jeśli pracownik ma rolę "root", false w przeciwnym przypadku
+     */
+    public boolean isRoot() {
+        return "root".equalsIgnoreCase(this.stanowisko);
+    }
+
     public Date getSickLeaveStartDate() {
         return sickLeaveStartDate;
     }

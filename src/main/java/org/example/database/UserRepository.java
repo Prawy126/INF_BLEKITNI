@@ -130,16 +130,27 @@ public class UserRepository {
 
     /**
      * Oznacza pracownika jako usuniętego.
+     * Zabezpiecza przed usunięciem użytkownika z rolą "root".
      *
      * @param pracownik pracownik do usunięcia
+     * @throws SecurityException jeśli próbuje się usunąć użytkownika z rolą "root"
      */
-    public void usunPracownika(Employee pracownik) {
+    public void usunPracownika(Employee pracownik) throws SecurityException {
+        // Sprawdź, czy pracownik ma rolę "root"
+        if (pracownik != null && "root".equalsIgnoreCase(pracownik.getStanowisko())) {
+            throw new SecurityException("Nie można usunąć użytkownika z rolą root");
+        }
+
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             Employee managed = em.find(Employee.class, pracownik.getId());
             if (managed != null) {
+                // Dodatkowe sprawdzenie na poziomie bazy danych
+                if ("root".equalsIgnoreCase(managed.getStanowisko())) {
+                    throw new SecurityException("Nie można usunąć użytkownika z rolą root");
+                }
                 managed.setUsuniety(true);
                 em.merge(managed);
             }
@@ -162,22 +173,23 @@ public class UserRepository {
     public Employee znajdzPoLoginieIHasle(String login, String haslo) {
         EntityManager em = emf.createEntityManager();
         try {
-            Employee employee = em.createQuery(
-                            "SELECT e FROM Employee e WHERE e.login = :login AND e.password = :haslo",
-                            Employee.class
-                    ).setParameter("login", login)
-                    .setParameter("haslo", haslo)
-                    .getSingleResult();
+            try {
+                Employee employee = em.createQuery(
+                                "SELECT e FROM Employee e WHERE e.login = :login AND e.password = :haslo",
+                                Employee.class
+                        ).setParameter("login", login)
+                        .setParameter("haslo", haslo)
+                        .getSingleResult();
 
-            // Dodatkowe sprawdzenie flagi 'usuniety'
-            if (employee != null && !employee.isUsuniety()) {
-                setLoggedInEmployee(employee.getId());
-                return employee;
+                // Dodatkowe sprawdzenie flagi 'usuniety'
+                if (employee != null && !employee.isUsuniety()) {
+                    setLoggedInEmployee(employee.getId());
+                    return employee;
+                }
+                return null;
+            } catch (NoResultException e) {
+                return null;
             }
-
-            return null;
-        } catch (NoResultException e) {
-            return null;
         } finally {
             em.close();
         }
