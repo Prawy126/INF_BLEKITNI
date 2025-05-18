@@ -8,6 +8,7 @@
 package org.example.gui;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -215,11 +216,9 @@ public class AdminPanelController {
     private void edytujWybranegoUzytkownika() {
         Employee selected = tableView.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            showAlert(
-                    Alert.AlertType.WARNING,
+            showAlert(Alert.AlertType.WARNING,
                     "Brak wyboru",
-                    "Wybierz użytkownika do edycji."
-            );
+                    "Wybierz użytkownika do edycji.");
             return;
         }
 
@@ -230,38 +229,59 @@ public class AdminPanelController {
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
         TextField nameField = new TextField(selected.getName());
+        nameField.setPromptText("Imię");
+
         TextField surnameField = new TextField(selected.getSurname());
+        surnameField.setPromptText("Nazwisko");
+
         TextField loginField = new TextField(selected.getLogin());
-        TextField emailField = new TextField(selected.getEmail());
+        loginField.setPromptText("Login");
 
         PasswordField passwordField = new PasswordField();
-        passwordField.setPromptText(
-                "Nowe hasło (pozostaw puste, aby nie zmieniać)"
-        );
+        passwordField.setPromptText("Nowe hasło (pozostaw puste, aby nie zmieniać)");
+
+        TextField emailField = new TextField(selected.getEmail());
+        emailField.setPromptText("Email");
+
+        // Adres
+        Label addressLabel = new Label("Adres:");
+        AddressRepository addressRepository = new AddressRepository();
+        ComboBox<Address> adresComboBox = new ComboBox<>();
+        adresComboBox.getItems().addAll(addressRepository.pobierzWszystkieAdresy());
+        adresComboBox.setValue(selected.getAdres()); // ustawiamy istniejący
+        adresComboBox.setPromptText("Wybierz adres");
+
+        Button dodajNowyAdresBtn = new Button("Dodaj nowy adres");
+        dodajNowyAdresBtn.setOnAction(e -> otworzOknoNowegoAdresu(adresComboBox));
 
         ComboBox<String> stanowiskoBox = new ComboBox<>();
-        stanowiskoBox.getItems().addAll(
-                "Kasjer", "Kierownik", "Admin", "Logistyk"
-        );
+        stanowiskoBox.getItems().addAll("Kasjer", "Kierownik", "Admin", "Logistyk");
         stanowiskoBox.setValue(selected.getStanowisko());
 
-        TextField ageField = new TextField(
-                String.valueOf(selected.getAge())
-        );
-        TextField salaryField = new TextField(
-                String.valueOf(selected.getZarobki())
-        );
+        TextField ageField = new TextField(String.valueOf(selected.getAge()));
+        ageField.setPromptText("Wiek");
+
+        TextField salaryField = new TextField(selected.getZarobki().toString());
+        salaryField.setPromptText("Zarobki (PLN)");
 
         Button saveButton = new Button("Zapisz zmiany");
         Button cancelButton = new Button("Anuluj");
-
         HBox buttons = new HBox(10, saveButton, cancelButton);
         buttons.setAlignment(Pos.CENTER);
 
         formLayout.getChildren().addAll(
-                titleLabel, nameField, surnameField,
-                loginField, passwordField, emailField,
-                stanowiskoBox, ageField, salaryField, buttons
+                titleLabel,
+                nameField,
+                surnameField,
+                loginField,
+                passwordField,
+                emailField,
+                addressLabel,
+                new HBox(10, adresComboBox, dodajNowyAdresBtn),
+                stanowiskoBox,
+                ageField,
+                salaryField,
+                buttons
         );
 
         adminPanel.setCenterPane(formLayout);
@@ -272,50 +292,50 @@ public class AdminPanelController {
                         || surnameField.getText().isEmpty()
                         || loginField.getText().isEmpty()
                         || emailField.getText().isEmpty()
+                        || adresComboBox.getValue() == null
                         || stanowiskoBox.getValue() == null
                         || ageField.getText().isEmpty()
                         || salaryField.getText().isEmpty()) {
-                    showAlert(
-                            Alert.AlertType.WARNING,
+
+                    showAlert(Alert.AlertType.WARNING,
                             "Brak danych",
-                            "Uzupełnij wszystkie pola (poza hasłem)."
-                    );
+                            "Uzupełnij wszystkie pola (poza hasłem).");
                     return;
                 }
 
                 showLoadingIndicator();
 
-                final Employee employeeToUpdate = selected;
-                employeeToUpdate.setName(nameField.getText());
-                employeeToUpdate.setSurname(surnameField.getText());
-                employeeToUpdate.setLogin(loginField.getText());
-                employeeToUpdate.setEmail(emailField.getText());
-
+                selected.setName(nameField.getText());
+                selected.setSurname(surnameField.getText());
+                selected.setLogin(loginField.getText());
+                selected.setEmail(emailField.getText());
+                selected.setAdres(adresComboBox.getValue());
                 if (!passwordField.getText().isEmpty()) {
-                    employeeToUpdate.setPassword(passwordField.getText()); // PasswordException
+                    selected.setPassword(passwordField.getText());
                 }
-
-                employeeToUpdate.setStanowisko(stanowiskoBox.getValue());
-                employeeToUpdate.setAge(Integer.parseInt(ageField.getText()));
-                employeeToUpdate.setZarobki(new BigDecimal(salaryField.getText())); // SalaryException
+                selected.setStanowisko(stanowiskoBox.getValue());
+                selected.setAge(Integer.parseInt(ageField.getText()));
+                selected.setZarobki(new BigDecimal(salaryField.getText()));
 
                 Task<Void> updateTask = new Task<>() {
                     @Override
                     protected Void call() throws Exception {
-                        userRepository.aktualizujPracownika(employeeToUpdate);
+                        userRepository.aktualizujPracownika(selected);
                         return null;
                     }
                 };
 
                 updateTask.setOnSucceeded(evt -> {
-                    showAlert(Alert.AlertType.INFORMATION, "Sukces",
+                    showAlert(Alert.AlertType.INFORMATION,
+                            "Sukces",
                             "Dane użytkownika zostały zaktualizowane.");
                     showUserManagement();
                 });
 
                 updateTask.setOnFailed(evt -> {
                     updateTask.getException().printStackTrace();
-                    showAlert(Alert.AlertType.ERROR, "Błąd",
+                    showAlert(Alert.AlertType.ERROR,
+                            "Błąd",
                             "Wystąpił błąd podczas zapisywania zmian: "
                                     + updateTask.getException().getMessage());
                     showUserManagement();
@@ -324,15 +344,18 @@ public class AdminPanelController {
                 executor.execute(updateTask);
 
             } catch (NumberFormatException ex) {
-                showAlert(Alert.AlertType.ERROR, "Błąd",
+                showAlert(Alert.AlertType.ERROR,
+                        "Błąd",
                         "Nieprawidłowy format wieku lub zarobków!");
                 showUserManagement();
             } catch (PasswordException ex) {
-                showAlert(Alert.AlertType.ERROR, "Nieprawidłowe hasło",
+                showAlert(Alert.AlertType.ERROR,
+                        "Nieprawidłowe hasło",
                         ex.getMessage());
                 showUserManagement();
             } catch (SalaryException ex) {
-                showAlert(Alert.AlertType.ERROR, "Nieprawidłowe zarobki",
+                showAlert(Alert.AlertType.ERROR,
+                        "Nieprawidłowe zarobki",
                         ex.getMessage());
                 showUserManagement();
             }
@@ -340,6 +363,7 @@ public class AdminPanelController {
 
         cancelButton.setOnAction(e -> showUserManagement());
     }
+
 
     /**
      * Pobiera dane z bazy i ładuje do tabeli asynchronicznie.
@@ -394,6 +418,16 @@ public class AdminPanelController {
         TextField emailField = new TextField();
         emailField.setPromptText("Email");
 
+        // Adres
+        Label addressLabel = new Label("Adres:");
+        AddressRepository addressRepository = new AddressRepository();
+        ComboBox<Address> adresComboBox = new ComboBox<>();
+        adresComboBox.getItems().addAll(addressRepository.pobierzWszystkieAdresy());
+        adresComboBox.setPromptText("Wybierz istniejący adres");
+
+        Button dodajNowyAdresBtn = new Button("Dodaj nowy adres");
+        dodajNowyAdresBtn.setOnAction(e -> otworzOknoNowegoAdresu(adresComboBox));
+
         ComboBox<String> stanowiskoBox = new ComboBox<>();
         stanowiskoBox.getItems().addAll("Kasjer", "Kierownik", "Admin", "Logistyk");
         stanowiskoBox.setPromptText("Stanowisko");
@@ -404,36 +438,42 @@ public class AdminPanelController {
         TextField salaryField = new TextField();
         salaryField.setPromptText("Zarobki (PLN)");
 
-        // Adres
-        AddressRepository addressRepository = new AddressRepository();
-        ComboBox<Address> adresComboBox = new ComboBox<>();
-        adresComboBox.getItems().addAll(addressRepository.pobierzWszystkieAdresy());
-        adresComboBox.setPromptText("Wybierz istniejący adres");
-
-        Button dodajNowyAdresBtn = new Button("Dodaj nowy adres");
-        dodajNowyAdresBtn.setOnAction(e -> otworzOknoNowegoAdresu(adresComboBox));
-
         Button saveButton = new Button("Zapisz");
         Button cancelButton = new Button("Anuluj");
 
         HBox buttons = new HBox(10, saveButton, cancelButton);
         buttons.setAlignment(Pos.CENTER);
 
+        // składamy wszystko w formLayout
         formLayout.getChildren().addAll(
-                titleLabel, nameField, surnameField,
-                loginField, passwordField, emailField,
-                stanowiskoBox, ageField, salaryField, buttons
+                titleLabel,
+                nameField,
+                surnameField,
+                loginField,
+                passwordField,
+                emailField,
+                addressLabel,
+                new HBox(10, adresComboBox, dodajNowyAdresBtn),
+                stanowiskoBox,
+                ageField,
+                salaryField,
+                buttons
         );
 
         adminPanel.setCenterPane(formLayout);
 
         saveButton.setOnAction(e -> {
             try {
-                if (nameField.getText().isEmpty() || surnameField.getText().isEmpty() ||
-                        loginField.getText().isEmpty() || passwordField.getText().isEmpty() ||
-                        emailField.getText().isEmpty() || stanowiskoBox.getValue() == null ||
-                        ageField.getText().isEmpty() || salaryField.getText().isEmpty() ||
-                        adresComboBox.getValue() == null) {
+                // sprawdzamy, czy nie ma pustych pól
+                if (nameField.getText().isEmpty()
+                        || surnameField.getText().isEmpty()
+                        || loginField.getText().isEmpty()
+                        || passwordField.getText().isEmpty()
+                        || emailField.getText().isEmpty()
+                        || adresComboBox.getValue() == null
+                        || stanowiskoBox.getValue() == null
+                        || ageField.getText().isEmpty()
+                        || salaryField.getText().isEmpty()) {
 
                     showAlert(Alert.AlertType.WARNING, "Brak danych", "Uzupełnij wszystkie pola!");
                     return;
@@ -448,10 +488,10 @@ public class AdminPanelController {
                 nowy.setLogin(loginField.getText());
                 nowy.setPassword(passwordField.getText());
                 nowy.setEmail(emailField.getText());
+                nowy.setAdres(adresComboBox.getValue());
                 nowy.setStanowisko(stanowiskoBox.getValue());
                 nowy.setAge(wiek);
                 nowy.setZarobki(zarobki);
-                nowy.setAdres(adresComboBox.getValue());
 
                 Task<Void> addTask = new Task<>() {
                     @Override
@@ -462,38 +502,34 @@ public class AdminPanelController {
                 };
 
                 addTask.setOnSucceeded(evt -> {
-                    showAlert(Alert.AlertType.INFORMATION, "Sukces",
-                            "Dodano nowego użytkownika!");
+                    showAlert(Alert.AlertType.INFORMATION, "Sukces", "Dodano nowego użytkownika!");
                     showUserManagement();
                 });
 
                 addTask.setOnFailed(evt -> {
                     addTask.getException().printStackTrace();
                     showAlert(Alert.AlertType.ERROR, "Błąd",
-                            "Nie udało się dodać użytkownika: "
-                                    + addTask.getException().getMessage());
-                    showUserManagement();   // usuwa ekran ładowania
+                            "Nie udało się dodać użytkownika: " + addTask.getException().getMessage());
+                    showUserManagement();
                 });
 
                 executor.execute(addTask);
 
             } catch (NumberFormatException ex) {
-                showAlert(Alert.AlertType.ERROR, "Błąd",
-                        "Nieprawidłowy format wieku lub zarobków!");
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowy format wieku lub zarobków!");
                 showUserManagement();
             } catch (PasswordException ex) {
-                showAlert(Alert.AlertType.ERROR, "Nieprawidłowe hasło",
-                        ex.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Nieprawidłowe hasło", ex.getMessage());
                 showUserManagement();
             } catch (SalaryException ex) {
-                showAlert(Alert.AlertType.ERROR, "Nieprawidłowe zarobki",
-                        ex.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Nieprawidłowe zarobki", ex.getMessage());
                 showUserManagement();
             }
         });
 
         cancelButton.setOnAction(e -> showUserManagement());
     }
+
 
     /**
      * Usuwa zaznaczonego użytkownika asynchronicznie.
@@ -613,6 +649,8 @@ public class AdminPanelController {
         );
 
         adminPanel.setCenterPane(layout);
+
+        return layout;
     }
 
     /**
@@ -742,37 +780,52 @@ public class AdminPanelController {
      */
     public void showIssuesPanel() {
         if (issuesPanelView == null) {
-            // Pokaż wskaźnik ładowania
             showLoadingIndicator();
-
-            // Utwórz widok asynchronicznie
             Task<VBox> task = new Task<>() {
                 @Override
-                protected VBox call() throws Exception {
+                protected VBox call() {
                     return createIssuesPanelView();
                 }
             };
-
             task.setOnSucceeded(e -> {
                 issuesPanelView = task.getValue();
-                adminPanel.setCenterPane(issuesPanelView);
-                // Załaduj dane zgłoszeń asynchronicznie
-                refreshIssuesTable((TableView<TechnicalIssue>) issuesPanelView.lookup("#issuesTableView"));
+                // Na FX-thread ustawiamy widok i odświeżamy dane
+                Platform.runLater(() -> {
+                    adminPanel.setCenterPane(issuesPanelView);
+                    @SuppressWarnings("unchecked")
+                    TableView<TechnicalIssue> tbl =
+                            (TableView<TechnicalIssue>) issuesPanelView.lookup("#issuesTableView");
+                    refreshIssuesTable(tbl);
+                });
             });
-
             task.setOnFailed(e -> {
                 task.getException().printStackTrace();
-                showAlert(Alert.AlertType.ERROR, "Błąd", "Nie udało się załadować panelu zgłoszeń");
+                Platform.runLater(() ->
+                        showAlert(Alert.AlertType.ERROR, "Błąd", "Nie udało się załadować panelu zgłoszeń")
+                );
             });
-
             executor.execute(task);
         } else {
-            // Jeśli widok już istnieje, po prostu go pokaż
-            adminPanel.setCenterPane(issuesPanelView);
-            // Odśwież dane zgłoszeń
-            refreshIssuesTable((TableView<TechnicalIssue>) issuesPanelView.lookup("#issuesTableView"));
+            Platform.runLater(() -> {
+                adminPanel.setCenterPane(issuesPanelView);
+                @SuppressWarnings("unchecked")
+                TableView<TechnicalIssue> tbl =
+                        (TableView<TechnicalIssue>) issuesPanelView.lookup("#issuesTableView");
+                refreshIssuesTable(tbl);
+            });
         }
     }
+
+    // w dowolnym miejscu klasy AdminPanelController (np. po metodzie showReportsPanel)
+    private void showFilterDialogForReport(String reportType, LocalDate from, LocalDate to) {
+        // TODO: tutaj wyświetl dialog wyboru dodatkowych filtrów
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Filtruj raport");
+        alert.setHeaderText("Typ: " + reportType
+                + "\nOkres: " + from + " – " + to);
+        alert.showAndWait();
+    }
+
 
     /**
      * Tworzy widok panelu zgłoszeń.
@@ -780,15 +833,17 @@ public class AdminPanelController {
      * @return VBox zawierający kompletny widok
      */
     private VBox createIssuesPanelView() {
-        VBox layout = new VBox(15);
+        VBox layout = new VBox(10);
         layout.setPadding(new Insets(20));
-        Label titleLabel = new Label("Lista zgłoszeń technicznych");
-        titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
-        // Tabela zgłoszeń
-        TableView<TechnicalIssue> issuesTableView = new TableView<>();
-        issuesTableView.setMinHeight(200);
+        Label title = new Label("Lista zgłoszeń technicznych");
+        title.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
+        TableView<TechnicalIssue> tbl = new TableView<TechnicalIssue>();
+        tbl.setId("issuesTableView");
+        tbl.setMinHeight(200);
+
+        // kolumny
         TableColumn<TechnicalIssue, Integer> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
 
@@ -800,65 +855,92 @@ public class AdminPanelController {
 
         TableColumn<TechnicalIssue, String> statusCol = new TableColumn<>("Status");
         statusCol.setCellFactory(col -> new TableCell<>() {
-            private final ComboBox<String> comboBox = new ComboBox<>();
+            private final ComboBox<String> cb = new ComboBox<>(
+                    FXCollections.observableArrayList("Nowe", "W trakcie", "Rozwiązane")
+            );
             {
-                comboBox.getItems().addAll("Nowe", "W trakcie", "Rozwiązane");
-                comboBox.setOnAction(e -> {
-                    TechnicalIssue issue = getTableView().getItems().get(getIndex());
-                    issue.setStatus(comboBox.getValue());
-                    technicalIssueRepository.aktualizujZgloszenie(issue); // Zapisz zmianę w bazie
-                    refreshIssuesTable(issuesTableView); // Odśwież widok
+                cb.setOnAction(e -> {
+                    TechnicalIssue issue = getTableRow().getItem();
+                    if (issue != null) {
+                        issue.setStatus(cb.getValue());
+                        executor.execute(new Task<>() {
+                            @Override protected Void call() {
+                                technicalIssueRepository.aktualizujZgloszenie(issue);
+                                return null;
+                            }
+                        });
+                    }
                 });
             }
-
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
+                if (empty || getTableRow().getItem() == null) {
                     setGraphic(null);
                 } else {
-                    comboBox.setValue(getTableRow().getItem().getStatus());
-                    setGraphic(comboBox);
+                    cb.setValue(getTableRow().getItem().getStatus());
+                    setGraphic(cb);
                 }
             }
         });
 
-        issuesTableView.getColumns().addAll(idCol, typeCol, dateCol, statusCol);
-        refreshIssuesTable(issuesTableView);
+        tbl.getColumns().addAll(idCol, typeCol, dateCol, statusCol);
 
-        layout.getChildren().addAll(titleLabel, issuesTableView);
-        adminPanel.setCenterPane(layout);
+        // --- przyciski poniżej tabeli ---
+        Button details = new Button("Pokaż szczegóły");
+        details.setOnAction(e -> showIssueDetails(tbl));
+
+        Button refresh = new Button("Odśwież listę");
+        refresh.setOnAction(e -> refreshIssuesTable(tbl));
+
+        HBox btnBox = new HBox(10, details, refresh);
+        btnBox.setAlignment(Pos.CENTER);
+
+        layout.getChildren().addAll(title, tbl, btnBox);
+        return layout;
     }
 
     /**
      * Odświeża listę zgłoszeń technicznych.
      */
-    private void refreshIssuesTable(TableView<TechnicalIssue> tableView) {
-        tableView.getItems().clear();
-        tableView.getItems().addAll(technicalIssueRepository.pobierzWszystkieZgloszenia());
+    private void refreshIssuesTable(TableView<TechnicalIssue> tbl) {
+        Task<List<TechnicalIssue>> task = new Task<>() {
+            @Override protected List<TechnicalIssue> call() {
+                return technicalIssueRepository.pobierzWszystkieZgloszenia();
+            }
+        };
+        task.setOnSucceeded(e -> {
+            tbl.getItems().setAll(task.getValue());
+        });
+        task.setOnFailed(e -> {
+            task.getException().printStackTrace();
+            Platform.runLater(() ->
+                    showAlert(Alert.AlertType.ERROR, "Błąd", "Nie udało się pobrać zgłoszeń")
+            );
+        });
+        executor.execute(task);
     }
 
     /**
      * Wyświetla szczegóły wybranego zgłoszenia.
      */
-    private void showIssueDetails() {
-        TechnicalIssue selected = issuesTableView.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showAlert(Alert.AlertType.WARNING, "Brak wyboru", "Wybierz zgłoszenie do wyświetlenia.");
+    private void showIssueDetails(TableView<TechnicalIssue> tbl) {
+        TechnicalIssue sel = tbl.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            showAlert(Alert.AlertType.WARNING, "Brak wyboru", "Wybierz zgłoszenie!");
             return;
         }
-
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Szczegóły zgłoszenia");
-        alert.setHeaderText("Zgłoszenie ID: " + selected.getId());
-        alert.setContentText(
-                "Typ: " + selected.getType() + "\n" +
-                        "Opis: " + selected.getDescription() + "\n" +
-                        "Data zgłoszenia: " + selected.getDateSubmitted() + "\n" +
-                        "Pracownik ID: " + selected.getEmployee().getId() + "\n" +
-                        "Status: " + selected.getStatus()
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setTitle("Szczegóły zgłoszenia");
+        a.setHeaderText("Zgłoszenie ID: " + sel.getId());
+        a.setContentText(
+                "Typ: " + sel.getType() + "\n" +
+                        "Opis: " + sel.getDescription() + "\n" +
+                        "Data: " + sel.getDateSubmitted() + "\n" +
+                        "Pracownik ID: " + sel.getEmployee().getId() + "\n" +
+                        "Status: " + sel.getStatus()
         );
-        alert.showAndWait();
+        a.showAndWait();
     }
     /**
      * Wylogowuje użytkownika i uruchamia okno logowania.

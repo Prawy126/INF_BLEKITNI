@@ -2,35 +2,35 @@
 package org.example.database;
 
 import jakarta.persistence.*;
-import org.example.sys.Report;
+import org.example.sys.Raport;
 
 import java.io.File;
 import java.util.List;
 
-public class ReportRepository {
+public class RaportRepository {
 
     private final EntityManagerFactory emf = Persistence.createEntityManagerFactory("myPU");
 
-    public void dodajRaport(Report report) {
+    public void dodajRaport(Raport report) {
         executeInsideTx(em -> em.persist(report));
     }
 
-    public Report znajdzRaportPoId(int id) {
-        return runReturning(em -> em.find(Report.class, id));
+    public Raport znajdzRaportPoId(int id) {
+        return runReturning(em -> em.find(Raport.class, id));
     }
 
-    public List<Report> pobierzWszystkieRaporty() {
+    public List<Raport> pobierzWszystkieRaporty() {
         return runReturning(em ->
-                em.createQuery("SELECT r FROM Report r", Report.class).getResultList());
+                em.createQuery("SELECT r FROM Raport r", Raport.class).getResultList());
     }
 
-    public void aktualizujRaport(Report report) {
+    public void aktualizujRaport(Raport report) {
         executeInsideTx(em -> em.merge(report));
     }
 
     public void usunRaport(int id) {
         executeInsideTx(em -> {
-            Report r = em.find(Report.class, id);
+            Raport r = em.find(Raport.class, id);
             if (r != null) {
                 File f = new File(r.getSciezkaPliku());
                 if (f.exists()) f.delete();

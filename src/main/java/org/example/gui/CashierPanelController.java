@@ -17,15 +17,14 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.*;
 import javafx.stage.*;
-import javafx.util.Callback;
 import javafx.util.Duration;
 import javafx.util.converter.IntegerStringConverter;
 import org.example.database.*;
 import org.example.sys.*;
-import pdf.SalesReportGenerator;
-import org.example.database.ReportRepository;
-import org.example.sys.Report;
+import org.example.database.RaportRepository;
+import org.example.sys.Raport;
 import org.example.sys.PeriodType;
+import org.example.pdflib.ReportGenerator;
 
 
 import java.awt.*;
@@ -33,18 +32,13 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Date;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class CashierPanelController {
 
     private final CashierPanel cashierPanel;
-    private final ReportRepository reportRepository;
+    private final RaportRepository reportRepository;
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
 
@@ -54,7 +48,7 @@ public class CashierPanelController {
 
     public CashierPanelController(CashierPanel cashierPanel) {
         this.cashierPanel = cashierPanel;
-        this.reportRepository = new ReportRepository();
+        this.reportRepository = new RaportRepository();
         this.transactionRepository = new TransactionRepository();
         this.userRepository = new UserRepository();
 
@@ -184,7 +178,7 @@ public class CashierPanelController {
         titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
         // Tabela raportów
-        TableView<Report> tableView = createReportTable();
+        TableView<Raport> tableView = createReportTable();
 
         // Przyciski akcji
         HBox buttons = new HBox(10);
@@ -204,8 +198,8 @@ public class CashierPanelController {
         refreshReportTable(tableView);
     }
 
-    private void refreshReportTable(TableView<Report> tableView) {
-        List<Report> reports = reportRepository.pobierzWszystkieRaporty();
+    private void refreshReportTable(TableView<Raport> tableView) {
+        List<Raport> reports = reportRepository.pobierzWszystkieRaporty();
         tableView.setItems(FXCollections.observableArrayList(reports));
     }
 
@@ -354,7 +348,6 @@ public class CashierPanelController {
         return salesRecords;
     }*/
 
-    // NOWA METODA
     private void saveReportInfo(PeriodType periodType, LocalDate selectedDate, String reportPath) {
         // Pobranie zalogowanego pracownika
         Employee currentEmployee = userRepository.getCurrentEmployee();
@@ -383,7 +376,7 @@ public class CashierPanelController {
         }
 
         // Utworzenie obiektu raportu
-        Report report = new Report();
+        Raport report = new Raport();
         report.setPracownik(currentEmployee);
         report.setDataPoczatku(startDate);
         report.setDataZakonczenia(endDate);
@@ -395,38 +388,38 @@ public class CashierPanelController {
         reportRepository.dodajRaport(report);
     }
 
-    private TableView<Report> createReportTable() {
-        TableView<Report> tableView = new TableView<>();
+    private TableView<Raport> createReportTable() {
+        TableView<Raport> tableView = new TableView<>();
         tableView.setMinHeight(300);
 
-        TableColumn<Report, Integer> idColumn = new TableColumn<>("ID");
+        TableColumn<Raport, Integer> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         idColumn.setPrefWidth(50);
 
-        TableColumn<Report, String> typeColumn = new TableColumn<>("Typ raportu");
+        TableColumn<Raport, String> typeColumn = new TableColumn<>("Typ raportu");
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("typRaportu"));
         typeColumn.setPrefWidth(120);
 
-        TableColumn<Report, LocalDate> dateStartColumn = new TableColumn<>("Od");
+        TableColumn<Raport, LocalDate> dateStartColumn = new TableColumn<>("Od");
         dateStartColumn.setCellValueFactory(new PropertyValueFactory<>("dataPoczatku"));
         dateStartColumn.setPrefWidth(100);
 
-        TableColumn<Report, LocalDate> dateEndColumn = new TableColumn<>("Do");
+        TableColumn<Raport, LocalDate> dateEndColumn = new TableColumn<>("Do");
         dateEndColumn.setCellValueFactory(new PropertyValueFactory<>("dataZakonczenia"));
         dateEndColumn.setPrefWidth(100);
 
-        TableColumn<Report, LocalDate> genDateColumn = new TableColumn<>("Data wygenerowania");
+        TableColumn<Raport, LocalDate> genDateColumn = new TableColumn<>("Data wygenerowania");
         genDateColumn.setCellValueFactory(new PropertyValueFactory<>("dataWygenerowania"));
         genDateColumn.setPrefWidth(150);
 
-        TableColumn<Report, String> employeeColumn = new TableColumn<>("Wygenerował");
+        TableColumn<Raport, String> employeeColumn = new TableColumn<>("Wygenerował");
         employeeColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getPracownik().getName() + " " +
                         cellData.getValue().getPracownik().getSurname()));
         employeeColumn.setPrefWidth(150);
 
         // Kolumna z przyciskami akcji
-        TableColumn<Report, Void> actionsColumn = new TableColumn<>("Akcje");
+        TableColumn<Raport, Void> actionsColumn = new TableColumn<>("Akcje");
         actionsColumn.setPrefWidth(200);
         actionsColumn.setCellFactory(param -> new TableCell<>() {
             private final Button viewButton = new Button("Podgląd");
@@ -440,17 +433,17 @@ public class CashierPanelController {
                 deleteButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
 
                 viewButton.setOnAction(event -> {
-                    Report report = getTableView().getItems().get(getIndex());
+                    Raport report = getTableView().getItems().get(getIndex());
                     showReportDetails(report);
                 });
 
                 openButton.setOnAction(event -> {
-                    Report report = getTableView().getItems().get(getIndex());
+                    Raport report = getTableView().getItems().get(getIndex());
                     openReportFile(report.getSciezkaPliku());
                 });
 
                 deleteButton.setOnAction(event -> {
-                    Report report = getTableView().getItems().get(getIndex());
+                    Raport report = getTableView().getItems().get(getIndex());
                     confirmAndDeleteReport(report, getTableView());
                 });
             }
@@ -481,7 +474,7 @@ public class CashierPanelController {
         }
     }
 
-    private void confirmAndDeleteReport(Report report, TableView<Report> tableView) {
+    private void confirmAndDeleteReport(Raport report, TableView<Raport> tableView) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Potwierdzenie usunięcia");
         alert.setHeaderText("Czy na pewno chcesz usunąć ten raport?");
@@ -500,7 +493,7 @@ public class CashierPanelController {
         }
     }
 
-    private void showReportDetails(Report report) {
+    private void showReportDetails(Raport report) {
         Stage dialog = createStyledDialog("Szczegóły raportu");
 
         VBox content = new VBox(10);
@@ -923,6 +916,13 @@ public class CashierPanelController {
         dialog.setScene(scene);
         animateDialog(dialog, root);
         dialog.showAndWait();
+    }
+
+    public void logout() {
+        UserRepository.resetCurrentEmployee();
+        Stage primaryStage = cashierPanel.getPrimaryStage();
+        primaryStage.close();
+        HelloApplication.showLoginScreen(primaryStage);
     }
 
 

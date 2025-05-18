@@ -14,7 +14,7 @@ import org.example.sys.Employee;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "Zgłoszenia_techniczne")
+@Table(name = "Zgloszenia_techniczne")
 public class TechnicalIssue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

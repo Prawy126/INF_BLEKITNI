@@ -25,7 +25,7 @@ public class Product {
     @Column(name = "Kategoria", nullable = false, length = 100)
     private String category;
 
-    @Column(name = "Cena", nullable = false, precision = 10, scale = 2)
+    @Column(name = "Cena", nullable = false)
     private double price;
 
     public Product() {

@@ -12,9 +12,9 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "Raporty")          // nazwa tabeli w DB może pozostać PL
+@Table(name = "Raporty")
 @Access(AccessType.FIELD)
-public class Report {
+public class Raport {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
@@ -35,9 +35,9 @@ public class Report {
     @Column(name = "Plik", nullable = false)
     private String sciezkaPliku;
 
-    public Report() {}
+    public Raport() {}
 
-    public Report(String typRaportu, LocalDate dataPoczatku,
+    public Raport(String typRaportu, LocalDate dataPoczatku,
                   LocalDate dataZakonczenia, Employee pracownik, String sciezkaPliku) {
         this.typRaportu = typRaportu;
         this.dataPoczatku = dataPoczatku;

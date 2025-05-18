@@ -12,6 +12,9 @@ import jakarta.persistence.*;
 import org.example.sys.Transaction;
 import pdf.SalesReportGenerator;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 public class TransactionRepository {
