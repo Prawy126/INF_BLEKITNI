@@ -19,6 +19,8 @@ import org.example.database.UserRepository;
 import org.example.sys.Employee;
 import org.example.pdflib.ConfigManager;
 import org.example.sys.TechnicalIssue;
+import org.example.database.AddressRepository;
+import org.example.sys.Address;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -267,9 +269,7 @@ public class AdminPanelController {
         emailField.setPromptText("Email");
 
         ComboBox<String> stanowiskoBox = new ComboBox<>();
-        stanowiskoBox.getItems().addAll(
-                "Kasjer", "Kierownik", "Admin", "Logistyk"
-        );
+        stanowiskoBox.getItems().addAll("Kasjer", "Kierownik", "Admin", "Logistyk");
         stanowiskoBox.setPromptText("Stanowisko");
 
         TextField ageField = new TextField();
@@ -277,6 +277,15 @@ public class AdminPanelController {
 
         TextField salaryField = new TextField();
         salaryField.setPromptText("Zarobki (PLN)");
+
+        // Adres
+        AddressRepository addressRepository = new AddressRepository();
+        ComboBox<Address> adresComboBox = new ComboBox<>();
+        adresComboBox.getItems().addAll(addressRepository.pobierzWszystkieAdresy());
+        adresComboBox.setPromptText("Wybierz istniejący adres");
+
+        Button dodajNowyAdresBtn = new Button("Dodaj nowy adres");
+        dodajNowyAdresBtn.setOnAction(e -> otworzOknoNowegoAdresu(adresComboBox));
 
         Button saveButton = new Button("Zapisz");
         Button cancelButton = new Button("Anuluj");
@@ -287,33 +296,27 @@ public class AdminPanelController {
         formLayout.getChildren().addAll(
                 titleLabel, nameField, surnameField,
                 loginField, passwordField, emailField,
-                stanowiskoBox, ageField, salaryField, buttons
+                stanowiskoBox, ageField, salaryField,
+                new Label("Adres:"), adresComboBox, dodajNowyAdresBtn,
+                buttons
         );
 
         adminPanel.setCenterPane(formLayout);
 
         saveButton.setOnAction(e -> {
             try {
-                if (nameField.getText().isEmpty()
-                        || surnameField.getText().isEmpty()
-                        || loginField.getText().isEmpty()
-                        || passwordField.getText().isEmpty()
-                        || emailField.getText().isEmpty()
-                        || stanowiskoBox.getValue() == null
-                        || ageField.getText().isEmpty()
-                        || salaryField.getText().isEmpty()) {
-                    showAlert(
-                            Alert.AlertType.WARNING,
-                            "Brak danych",
-                            "Uzupełnij wszystkie pola!"
-                    );
+                if (nameField.getText().isEmpty() || surnameField.getText().isEmpty() ||
+                        loginField.getText().isEmpty() || passwordField.getText().isEmpty() ||
+                        emailField.getText().isEmpty() || stanowiskoBox.getValue() == null ||
+                        ageField.getText().isEmpty() || salaryField.getText().isEmpty() ||
+                        adresComboBox.getValue() == null) {
+
+                    showAlert(Alert.AlertType.WARNING, "Brak danych", "Uzupełnij wszystkie pola!");
                     return;
                 }
 
                 int wiek = Integer.parseInt(ageField.getText());
-                BigDecimal zarobki = new BigDecimal(
-                        salaryField.getText()
-                );
+                BigDecimal zarobki = new BigDecimal(salaryField.getText());
 
                 Employee nowy = new Employee();
                 nowy.setName(nameField.getText());
@@ -324,67 +327,65 @@ public class AdminPanelController {
                 nowy.setStanowisko(stanowiskoBox.getValue());
                 nowy.setAge(wiek);
                 nowy.setZarobki(zarobki);
+                nowy.setAdres(adresComboBox.getValue());
 
                 userRepository.dodajPracownika(nowy);
 
-                showAlert(
-                        Alert.AlertType.INFORMATION,
-                        "Sukces",
-                        "Dodano nowego użytkownika!"
-                );
+                showAlert(Alert.AlertType.INFORMATION, "Sukces", "Dodano nowego użytkownika!");
                 showUserManagement();
 
             } catch (NumberFormatException ex) {
-                showAlert(
-                        Alert.AlertType.ERROR,
-                        "Błąd",
-                        "Nieprawidłowy format wieku lub zarobków!"
-                );
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowy format wieku lub zarobków!");
             } catch (Exception ex) {
                 ex.printStackTrace();
-                showAlert(
-                        Alert.AlertType.ERROR,
-                        "Błąd",
-                        "Nie udało się dodać użytkownika: "
-                                + ex.getMessage()
-                );
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Nie udało się dodać użytkownika: " + ex.getMessage());
             }
         });
 
         cancelButton.setOnAction(e -> showUserManagement());
     }
 
+
     /**
-     * Usuwa zaznaczonego użytkownika.
+     * Usuwa zaznaczonego użytkownika (soft-delete) i odświeża tabelę.
      */
     private void usunWybranegoUzytkownika() {
-        Employee selected = tableView.getSelectionModel()
-                .getSelectedItem();
-        if (selected != null) {
-            try {
-                userRepository.usunPracownika(selected);
-                odswiezListePracownikow();
-                showAlert(
-                        Alert.AlertType.INFORMATION,
-                        "Sukces",
-                        "Usunięto użytkownika!"
-                );
-            } catch (Exception e) {
-                showAlert(
-                        Alert.AlertType.ERROR,
-                        "Błąd",
-                        "Nie udało się usunąć użytkownika: "
-                                + e.getMessage()
-                );
-                e.printStackTrace();
-            }
-        } else {
+        Employee selected = tableView.getSelectionModel().getSelectedItem();
+
+        if (selected == null) {
             showAlert(
                     Alert.AlertType.WARNING,
                     "Brak wyboru",
                     "Wybierz użytkownika do usunięcia."
             );
+            return;
         }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Potwierdzenie usunięcia");
+        confirm.setHeaderText("Czy na pewno chcesz usunąć użytkownika?");
+        confirm.setContentText(selected.getName() + " " + selected.getSurname());
+
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    userRepository.usunPracownika(selected);
+                    odswiezListePracownikow(); // ponowne załadowanie aktywnych
+                    showAlert(
+                            Alert.AlertType.INFORMATION,
+                            "Sukces",
+                            "Użytkownik został oznaczony jako usunięty."
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    showAlert(
+                            Alert.AlertType.ERROR,
+                            "Błąd",
+                            "Nie udało się usunąć użytkownika: " + e.getMessage()
+                    );
+                }
+            }
+        });
     }
 
     /**
@@ -723,4 +724,72 @@ public class AdminPanelController {
         alert.setContentText(null);
         alert.showAndWait();
     }
+
+    private void otworzOknoNowegoAdresu(ComboBox<Address> adresComboBox) {
+        Stage stage = new Stage();
+        stage.setTitle("Dodaj nowy adres");
+        VBox layout = new VBox(10);
+        layout.setPadding(new Insets(20));
+
+        TextField miejscowosc = new TextField();
+        miejscowosc.setPromptText("Miejscowość");
+
+        TextField numerDomu = new TextField();
+        numerDomu.setPromptText("Numer domu");
+
+        TextField numerMieszkania = new TextField();
+        numerMieszkania.setPromptText("Numer mieszkania (opcjonalnie)");
+
+        TextField kodPocztowy = new TextField();
+        kodPocztowy.setPromptText("Kod pocztowy");
+
+        TextField miasto = new TextField();
+        miasto.setPromptText("Miasto");
+
+        Button zapiszBtn = new Button("Zapisz adres");
+
+        zapiszBtn.setOnAction(e -> {
+            // WALIDACJA
+            if (miejscowosc.getText().isEmpty()
+                    || numerDomu.getText().isEmpty()
+                    || kodPocztowy.getText().isEmpty()
+                    || miasto.getText().isEmpty()) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Wszystkie pola (poza numerem mieszkania) muszą być wypełnione.");
+                return;
+            }
+
+            if (!kodPocztowy.getText().matches("\\d{2}-\\d{3}")) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowy format kodu pocztowego. Poprawny to np. 00-001.");
+                return;
+            }
+
+            // ZAPIS
+            AddressRepository repo = new AddressRepository();
+            Address nowy = new Address();
+            nowy.setMiejscowosc(miejscowosc.getText());
+            nowy.setNumerDomu(numerDomu.getText());
+            nowy.setNumerMieszkania(numerMieszkania.getText().isEmpty() ? null : numerMieszkania.getText());
+            nowy.setKodPocztowy(kodPocztowy.getText());
+            nowy.setMiasto(miasto.getText());
+
+            repo.dodajAdres(nowy);
+
+            // Odśwież listę i wybierz nowy adres
+            adresComboBox.getItems().clear();
+            adresComboBox.getItems().addAll(repo.pobierzWszystkieAdresy());
+            adresComboBox.setValue(nowy);
+
+            stage.close();
+        });
+
+        layout.getChildren().addAll(
+                new Label("Nowy adres:"),
+                miejscowosc, numerDomu, numerMieszkania,
+                kodPocztowy, miasto, zapiszBtn
+        );
+
+        stage.setScene(new javafx.scene.Scene(layout));
+        stage.show();
+    }
+
 }

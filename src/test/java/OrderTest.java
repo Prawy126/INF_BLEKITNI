@@ -1,6 +1,6 @@
 import org.example.sys.Order;
 import org.example.sys.Employee;
-import org.example.sys.Warehouse;
+import org.example.sys.Product;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -12,8 +12,9 @@ class OrderTest {
 
     @Test
     void testConstructorAndGetters() {
-        Warehouse produkt = new Warehouse("Laptop", new BigDecimal("2500.00"), 50);
+        Product produkt = new Product("Laptop", "Elektronika", 2500.00);
         Employee pracownik = new Employee();
+        pracownik.setLogin("test_user");
         Date data = new Date();
 
         Order order = new Order(produkt, pracownik, 10, new BigDecimal("25000.00"), data);
@@ -29,8 +30,9 @@ class OrderTest {
     void testSettersAndToString() {
         Order order = new Order();
 
-        Warehouse produkt = new Warehouse("Tablet", new BigDecimal("1000.00"), 20);
+        Product produkt = new Product("Tablet", "Elektronika", 1000.00);
         Employee pracownik = new Employee();
+        pracownik.setLogin("admin");
         Date data = new Date();
 
         order.setProdukt(produkt);
@@ -47,5 +49,6 @@ class OrderTest {
 
         assertTrue(order.toString().contains("Tablet"));
         assertTrue(order.toString().contains("5000.00"));
+        assertTrue(order.toString().contains("admin"));
     }
 }

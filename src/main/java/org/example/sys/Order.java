@@ -17,7 +17,7 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "Id_produktu", nullable = false)
-    private Warehouse produkt;
+    private Product produkt;
 
     @ManyToOne
     @JoinColumn(name = "Id_pracownika", nullable = false)
@@ -36,7 +36,7 @@ public class Order {
     public Order() {
     }
 
-    public Order(Warehouse produkt, Employee pracownik, int ilosc, BigDecimal cena, Date data) {
+    public Order(Product produkt, Employee pracownik, int ilosc, BigDecimal cena, Date data) {
         this.produkt = produkt;
         this.pracownik = pracownik;
         this.ilosc = ilosc;
@@ -50,11 +50,11 @@ public class Order {
         return id;
     }
 
-    public Warehouse getProdukt() {
+    public Product getProdukt() {
         return produkt;
     }
 
-    public void setProdukt(Warehouse produkt) {
+    public void setProdukt(Product produkt) {
         this.produkt = produkt;
     }
 
@@ -94,7 +94,7 @@ public class Order {
     public String toString() {
         return "Order{" +
                 "id=" + id +
-                ", produkt=" + (produkt != null ? produkt.getNazwa() : "null") +
+                ", produkt=" + (produkt != null ? produkt.getName() : "null") +
                 ", pracownik=" + (pracownik != null ? pracownik.getLogin() : "null") +
                 ", ilosc=" + ilosc +
                 ", cena=" + cena +

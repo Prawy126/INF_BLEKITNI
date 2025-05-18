@@ -111,28 +111,6 @@ public class ProductRepository {
     }
 
     /**
-     * Aktualizuje ilość produktu o podanym identyfikatorze
-     * @param id Identyfikator produktu
-     * @param nowaIlosc Nowa ilość produktu
-     */
-    public void aktualizujIloscProduktu(int id, int nowaIlosc) {
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            Product produkt = em.find(Product.class, id);
-            if (produkt != null && nowaIlosc >= 0) {
-                produkt.setQuantity(nowaIlosc);
-                em.merge(produkt);
-            }
-            tx.commit();
-        } finally {
-            if (tx.isActive()) tx.rollback();
-            em.close();
-        }
-    }
-
-    /**
      * Aktualizuje cenę produktu o podanym identyfikatorze
      * @param id Identyfikator produktu
      * @param nowaCena Nowa cena produktu
@@ -150,22 +128,6 @@ public class ProductRepository {
             tx.commit();
         } finally {
             if (tx.isActive()) tx.rollback();
-            em.close();
-        }
-    }
-
-    /**
-     * Pobiera produkty, których ilość jest mniejsza od podanej wartości
-     * @param ilosc Wartość graniczna ilości
-     * @return Lista produktów z ilością mniejszą od podanej
-     */
-    public List<Product> pobierzProduktyPonizejIlosci(int ilosc) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            return em.createQuery("SELECT p FROM Product p WHERE p.quantity < :ilosc", Product.class)
-                    .setParameter("ilosc", ilosc)
-                    .getResultList();
-        } finally {
             em.close();
         }
     }

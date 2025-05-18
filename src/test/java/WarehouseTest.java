@@ -1,7 +1,6 @@
+import org.example.sys.Product;
 import org.example.sys.Warehouse;
 import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -9,49 +8,52 @@ class WarehouseTest {
 
     @Test
     void testParameterizedConstructor() {
-        Warehouse warehouse = new Warehouse("Laptop", new BigDecimal("1500.00"), 10);
+        Product produkt = new Product("Laptop", "Elektronika", 1500.00);
+        Warehouse warehouse = new Warehouse(produkt, 10);
 
-        assertEquals("Laptop", warehouse.getNazwa());
-        assertEquals(new BigDecimal("1500.00"), warehouse.getCena());
-        assertEquals(10, warehouse.getIloscWmagazynie());
+        assertEquals(produkt, warehouse.getProdukt());
+        assertEquals("Laptop", warehouse.getProdukt().getName());
+        assertEquals(1500.00, warehouse.getProdukt().getPrice());
+        assertEquals(10, warehouse.getIlosc());
     }
 
     @Test
     void testSettersAndGetters() {
+        Product produkt = new Product("Monitor", "Elektronika", 799.99);
         Warehouse warehouse = new Warehouse();
-        warehouse.setNazwa("Monitor");
-        warehouse.setCena(new BigDecimal("799.99"));
-        warehouse.setIloscWmagazynie(25);
+        warehouse.setProdukt(produkt);
+        warehouse.setIlosc(25);
 
-        assertEquals("Monitor", warehouse.getNazwa());
-        assertEquals(new BigDecimal("799.99"), warehouse.getCena());
-        assertEquals(25, warehouse.getIloscWmagazynie());
+        assertEquals("Monitor", warehouse.getProdukt().getName());
+        assertEquals(799.99, warehouse.getProdukt().getPrice());
+        assertEquals(25, warehouse.getIlosc());
     }
 
     @Test
     void testToString() {
-        Warehouse warehouse = new Warehouse("Biurko", new BigDecimal("300.00"), 5);
-        String expected = "Warehouse{id=0, nazwa='Biurko', cena=300.00, iloscWmagazynie=5}";
-        assertEquals(expected, warehouse.toString());
+        Product produkt = new Product("Biurko", "Meble", 300.00);
+        Warehouse warehouse = new Warehouse(produkt, 5);
+        String result = warehouse.toString();
+
+        assertTrue(result.contains("Biurko"));
+        assertTrue(result.contains("5"));
     }
 
     @Test
-    void testZeroPriceAndQuantity() {
-        Warehouse warehouse = new Warehouse("Długopis", new BigDecimal("0.00"), 0);
+    void testZeroQuantity() {
+        Product produkt = new Product("Długopis", "Biuro", 0.00);
+        Warehouse warehouse = new Warehouse(produkt, 0);
 
-        assertEquals(new BigDecimal("0.00"), warehouse.getCena());
-        assertEquals(0, warehouse.getIloscWmagazynie());
+        assertEquals(0.00, warehouse.getProdukt().getPrice());
+        assertEquals(0, warehouse.getIlosc());
     }
 
     @Test
-    void testNegativeValuesHandling() {
-        Warehouse warehouse = new Warehouse();
-        warehouse.setNazwa("Krzesło");
+    void testNegativeValuesAccepted() {
+        Product produkt = new Product("Krzesło", "Meble", -50.00); // brak walidacji w Product
+        Warehouse warehouse = new Warehouse(produkt, -10);
 
-        warehouse.setCena(new BigDecimal("-50.00"));
-        warehouse.setIloscWmagazynie(-10);
-
-        assertEquals(new BigDecimal("-50.00"), warehouse.getCena()); // brak walidacji, więc akceptuje
-        assertEquals(-10, warehouse.getIloscWmagazynie());
+        assertEquals(-50.00, warehouse.getProdukt().getPrice());
+        assertEquals(-10, warehouse.getIlosc());
     }
 }

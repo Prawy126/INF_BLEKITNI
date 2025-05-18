@@ -13,12 +13,12 @@ public class WarehouseRepository {
         this.emf = Persistence.createEntityManagerFactory("myPU");
     }
 
-    public void dodajProdukt(Warehouse produkt) {
+    public void dodajStanMagazynowy(Warehouse stan) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            em.persist(produkt);
+            em.persist(stan);
             tx.commit();
         } finally {
             if (tx.isActive()) tx.rollback();
@@ -26,16 +26,16 @@ public class WarehouseRepository {
         }
     }
 
-    public Warehouse znajdzProduktPoId(int id) {
+    public Warehouse znajdzStanPoIdProduktu(int idProduktu) {
         EntityManager em = emf.createEntityManager();
         try {
-            return em.find(Warehouse.class, id);
+            return em.find(Warehouse.class, idProduktu);
         } finally {
             em.close();
         }
     }
 
-    public List<Warehouse> pobierzWszystkieProdukty() {
+    public List<Warehouse> pobierzWszystkieStany() {
         EntityManager em = emf.createEntityManager();
         try {
             return em.createQuery("SELECT w FROM Warehouse w", Warehouse.class).getResultList();
@@ -44,14 +44,14 @@ public class WarehouseRepository {
         }
     }
 
-    public void usunProdukt(int id) {
+    public void usunStan(int idProduktu) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            Warehouse produkt = em.find(Warehouse.class, id);
-            if (produkt != null) {
-                em.remove(produkt);
+            Warehouse stan = em.find(Warehouse.class, idProduktu);
+            if (stan != null) {
+                em.remove(stan);
             }
             tx.commit();
         } finally {
@@ -60,12 +60,12 @@ public class WarehouseRepository {
         }
     }
 
-    public void aktualizujProdukt(Warehouse produkt) {
+    public void aktualizujStan(Warehouse stan) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            em.merge(produkt);
+            em.merge(stan);
             tx.commit();
         } finally {
             if (tx.isActive()) tx.rollback();

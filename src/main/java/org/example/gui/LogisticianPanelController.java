@@ -244,8 +244,7 @@ public class LogisticianPanelController {
                 pdfProducts.add(new sys.Product(
                         product.getName(),
                         product.getCategory(),
-                        product.getPrice(),
-                        product.getQuantity()
+                        product.getPrice()
                 ));
             }
 
@@ -453,18 +452,6 @@ public class LogisticianPanelController {
                                 try {
                                     double maxPrice = Double.parseDouble(maxPriceField.getText().replace(",", "."));
                                     if (product.getPrice() > maxPrice) {
-                                        return false;
-                                    }
-                                } catch (NumberFormatException ex) {
-                                    // Ignorowanie nieprawidłowego formatu
-                                }
-                            }
-
-                            // Filtrowanie po minimalnej ilości w magazynie
-                            if (!minStockField.getText().isEmpty()) {
-                                try {
-                                    int minStock = Integer.parseInt(minStockField.getText());
-                                    if (product.getQuantity() < minStock) {
                                         return false;
                                     }
                                 } catch (NumberFormatException ex) {

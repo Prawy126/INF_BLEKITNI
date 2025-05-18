@@ -6,14 +6,14 @@ import javafx.geometry.Insets;
 
 import java.time.LocalDate;
 
-public class ReportsPanel extends VBox {
+public class RaportsPanel extends VBox {
 
     private ComboBox<ReportType> reportTypeCombo;
     private DatePicker startDatePicker;
     private DatePicker endDatePicker;
     private TextArea reportOutput;
 
-    public ReportsPanel() {
+    public RaportsPanel() {
         setSpacing(10);
         setPadding(new Insets(10));
 

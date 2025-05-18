@@ -1,72 +1,64 @@
 package org.example.sys;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 
 @Entity
-@Table(name = "Produkty")
+@Table(name = "StanyMagazynowe")
 @Access(AccessType.FIELD)
 public class Warehouse {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Id")
-    private int id;
+    @Column(name = "Id_produktu")
+    private int idProduktu;
 
-    @Column(name = "Nazwa", nullable = false, length = 100)
-    private String nazwa;
+    @OneToOne
+    @JoinColumn(name = "Id_produktu", insertable = false, updatable = false)
+    private Product produkt;
 
-    @Column(name = "Cena", precision = 10, scale = 2, nullable = false)
-    private BigDecimal cena;
+    @Column(name = "Ilosc", nullable = false)
+    private int ilosc;
 
-    @Column(name = "IloscWmagazynie", nullable = false)
-    private int iloscWmagazynie;
+    public Warehouse() {
+    }
 
-    public Warehouse() {}
-
-    public Warehouse(String nazwa, BigDecimal cena, int iloscWmagazynie) {
-        this.nazwa = nazwa;
-        this.cena = cena;
-        this.iloscWmagazynie = iloscWmagazynie;
+    public Warehouse(Product produkt, int ilosc) {
+        this.produkt = produkt;
+        this.idProduktu = produkt.getId(); // synchronizacja z kluczem głównym
+        this.ilosc = ilosc;
     }
 
     // === Gettery i settery ===
 
-    public int getId() {
-        return id;
+    public int getIdProduktu() {
+        return idProduktu;
     }
 
-    public String getNazwa() {
-        return nazwa;
+    public void setIdProduktu(int idProduktu) {
+        this.idProduktu = idProduktu;
     }
 
-    public void setNazwa(String nazwa) {
-        this.nazwa = nazwa;
+    public Product getProdukt() {
+        return produkt;
     }
 
-    public BigDecimal getCena() {
-        return cena;
+    public void setProdukt(Product produkt) {
+        this.produkt = produkt;
+        this.idProduktu = produkt.getId();
     }
 
-    public void setCena(BigDecimal cena) {
-        this.cena = cena;
+    public int getIlosc() {
+        return ilosc;
     }
 
-    public int getIloscWmagazynie() {
-        return iloscWmagazynie;
-    }
-
-    public void setIloscWmagazynie(int iloscWmagazynie) {
-        this.iloscWmagazynie = iloscWmagazynie;
+    public void setIlosc(int ilosc) {
+        this.ilosc = ilosc;
     }
 
     @Override
     public String toString() {
         return "Warehouse{" +
-                "id=" + id +
-                ", nazwa='" + nazwa + '\'' +
-                ", cena=" + cena +
-                ", iloscWmagazynie=" + iloscWmagazynie +
+                "produkt=" + (produkt != null ? produkt.getName() : "null") +
+                ", ilosc=" + ilosc +
                 '}';
     }
 }
