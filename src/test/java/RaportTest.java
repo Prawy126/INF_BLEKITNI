@@ -1,6 +1,6 @@
 import org.example.sys.Address;
 import org.example.sys.Employee;
-import org.example.sys.Report;
+import org.example.sys.Raport;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ReportTest {
+class RaportTest {
 
     @Test
     void testConstructorInitialization() {
@@ -33,7 +33,7 @@ class ReportTest {
         LocalDate start = LocalDate.of(2025, 5, 1);
         LocalDate end = LocalDate.of(2025, 5, 31);
 
-        Report report = new Report("Miesięczny", start, end, employee, "plik.pdf");
+        Raport report = new Raport("Miesięczny", start, end, employee, "plik.pdf");
 
         assertEquals("Miesięczny", report.getTypRaportu());
         assertEquals(start, report.getDataPoczatku());
@@ -44,7 +44,7 @@ class ReportTest {
 
     @Test
     void testSettersAndGetters() {
-        Report report = new Report();
+        Raport report = new Raport();
 
         LocalDate startDate = LocalDate.of(2025, 6, 1);
         LocalDate endDate = LocalDate.of(2025, 6, 10);
@@ -67,7 +67,7 @@ class ReportTest {
 
     @Test
     void testDefaultConstructorValues() {
-        Report report = new Report();
+        Raport report = new Raport();
 
         assertNull(report.getTypRaportu());
         assertNull(report.getDataPoczatku());

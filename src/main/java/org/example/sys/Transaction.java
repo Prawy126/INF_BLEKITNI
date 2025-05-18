@@ -35,7 +35,7 @@ public class Transaction {
             joinColumns = @JoinColumn(name = "Id_transakcji"),
             inverseJoinColumns = @JoinColumn(name = "Id_produktu")
     )
-    private Set<Warehouse> produkty = new HashSet<>();
+    private Set<Product> produkty = new HashSet<>();
 
     // === Gettery i settery ===
 
@@ -59,11 +59,11 @@ public class Transaction {
         this.data = data;
     }
 
-    public Set<Warehouse> getProdukty() {
+    public Set<Product> getProdukty() {
         return produkty;
     }
 
-    public void setProdukty(Set<Warehouse> produkty) {
+    public void setProdukty(Set<Product> produkty) {
         this.produkty = produkty;
     }
 }

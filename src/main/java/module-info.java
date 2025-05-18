@@ -24,6 +24,7 @@ module org.example.gui {
 
     opens org.example.gui to javafx.fxml;
     opens org.example.sys to javafx.base, javafx.fxml, org.hibernate.orm.core, jakarta.persistence;
+    opens org.example.pdflib to javafx.fxml;
 
     exports org.example.gui;
     exports org.example.sys;

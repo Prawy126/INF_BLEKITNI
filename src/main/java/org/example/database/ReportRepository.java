@@ -1,10 +1,4 @@
-/*
- * Classname: ReportRepository
- * Version information: 1.0
- * Date: 2025-05-16
- * Copyright notice: © BŁĘKITNI
- */
-
+// src/main/java/org/example/database/ReportRepository.java
 package org.example.database;
 
 import jakarta.persistence.*;
@@ -15,83 +9,53 @@ import java.util.List;
 
 public class ReportRepository {
 
-    private final EntityManagerFactory emf;
+    private final EntityManagerFactory emf = Persistence.createEntityManagerFactory("myPU");
 
-    public ReportRepository() {
-        this.emf = Persistence.createEntityManagerFactory("myPU");
-    }
-
-    public void dodajRaport(Report raport) {
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            em.persist(raport);
-            tx.commit();
-        } finally {
-            if (tx.isActive()) tx.rollback();
-            em.close();
-        }
+    public void dodajRaport(Report report) {
+        executeInsideTx(em -> em.persist(report));
     }
 
     public Report znajdzRaportPoId(int id) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            return em.find(Report.class, id);
-        } finally {
-            em.close();
-        }
+        return runReturning(em -> em.find(Report.class, id));
     }
 
     public List<Report> pobierzWszystkieRaporty() {
-        EntityManager em = emf.createEntityManager();
-        try {
-            return em.createQuery("SELECT r FROM Report r", Report.class)
-                    .getResultList();
-        } finally {
-            em.close();
-        }
+        return runReturning(em ->
+                em.createQuery("SELECT r FROM Report r", Report.class).getResultList());
+    }
+
+    public void aktualizujRaport(Report report) {
+        executeInsideTx(em -> em.merge(report));
     }
 
     public void usunRaport(int id) {
-        EntityManager em = emf.createEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-
-            Report managed = em.find(Report.class, id);
-            if (managed != null) {
-                File file = new File(managed.getSciezkaPliku());
-                if (file.exists() && file.isFile()) {
-                    file.delete();
-                }
-
-                em.remove(managed);
+        executeInsideTx(em -> {
+            Report r = em.find(Report.class, id);
+            if (r != null) {
+                File f = new File(r.getSciezkaPliku());
+                if (f.exists()) f.delete();
+                em.remove(r);
             }
-
-            tx.commit();
-        } finally {
-            if (tx.isActive()) tx.rollback();
-            em.close();
-        }
+        });
     }
 
-    public void aktualizujRaport(Report raport) {
+    public void close() { if (emf.isOpen()) emf.close(); }
+
+    /* ===== pomocnicze ===== */
+    private void executeInsideTx(java.util.function.Consumer<EntityManager> action) {
+        runReturning(em -> { action.accept(em); return null; });
+    }
+    private <T> T runReturning(java.util.function.Function<EntityManager,T> func) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            em.merge(raport);
+            T res = func.apply(em);
             tx.commit();
+            return res;
         } finally {
             if (tx.isActive()) tx.rollback();
             em.close();
-        }
-    }
-
-    public void close() {
-        if (emf.isOpen()) {
-            emf.close();
         }
     }
 }

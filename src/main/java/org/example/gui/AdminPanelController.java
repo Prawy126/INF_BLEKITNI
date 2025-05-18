@@ -32,6 +32,12 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.example.pdflib.ConfigManager;
+import org.example.sys.TechnicalIssue;
+import org.example.database.AddressRepository;
+import org.example.sys.Address;
+
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -40,7 +46,6 @@ import java.util.concurrent.Executors;
 /**
  * Kontroler odpowiedzialny za obsługę logiki
  * interfejsu administratora w aplikacji GUI.
- * Zoptymalizowana wersja z asynchronicznym ładowaniem danych.
  */
 public class AdminPanelController {
 
@@ -168,7 +173,9 @@ public class AdminPanelController {
                 loginCol, emailCol, stanowiskoCol, zarobkiCol
         );
 
-        // Przyciski
+        odswiezListePracownikow();
+
+        // === Przyciski ===
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER);
 
@@ -261,7 +268,6 @@ public class AdminPanelController {
 
         saveButton.setOnAction(e -> {
             try {
-                /* walidacja pustych pól – jak wcześniej */
                 if (nameField.getText().isEmpty()
                         || surnameField.getText().isEmpty()
                         || loginField.getText().isEmpty()
@@ -269,8 +275,11 @@ public class AdminPanelController {
                         || stanowiskoBox.getValue() == null
                         || ageField.getText().isEmpty()
                         || salaryField.getText().isEmpty()) {
-                    showAlert(Alert.AlertType.WARNING, "Brak danych",
-                            "Uzupełnij wszystkie pola (poza hasłem).");
+                    showAlert(
+                            Alert.AlertType.WARNING,
+                            "Brak danych",
+                            "Uzupełnij wszystkie pola (poza hasłem)."
+                    );
                     return;
                 }
 
@@ -386,9 +395,7 @@ public class AdminPanelController {
         emailField.setPromptText("Email");
 
         ComboBox<String> stanowiskoBox = new ComboBox<>();
-        stanowiskoBox.getItems().addAll(
-                "Kasjer", "Kierownik", "Admin", "Logistyk"
-        );
+        stanowiskoBox.getItems().addAll("Kasjer", "Kierownik", "Admin", "Logistyk");
         stanowiskoBox.setPromptText("Stanowisko");
 
         TextField ageField = new TextField();
@@ -396,6 +403,15 @@ public class AdminPanelController {
 
         TextField salaryField = new TextField();
         salaryField.setPromptText("Zarobki (PLN)");
+
+        // Adres
+        AddressRepository addressRepository = new AddressRepository();
+        ComboBox<Address> adresComboBox = new ComboBox<>();
+        adresComboBox.getItems().addAll(addressRepository.pobierzWszystkieAdresy());
+        adresComboBox.setPromptText("Wybierz istniejący adres");
+
+        Button dodajNowyAdresBtn = new Button("Dodaj nowy adres");
+        dodajNowyAdresBtn.setOnAction(e -> otworzOknoNowegoAdresu(adresComboBox));
 
         Button saveButton = new Button("Zapisz");
         Button cancelButton = new Button("Anuluj");
@@ -413,35 +429,29 @@ public class AdminPanelController {
 
         saveButton.setOnAction(e -> {
             try {
-                /* walidacja pustych pól – jak wcześniej */
-                if (nameField.getText().isEmpty()
-                        || surnameField.getText().isEmpty()
-                        || loginField.getText().isEmpty()
-                        || passwordField.getText().isEmpty()
-                        || emailField.getText().isEmpty()
-                        || stanowiskoBox.getValue() == null
-                        || ageField.getText().isEmpty()
-                        || salaryField.getText().isEmpty()) {
-                    showAlert(Alert.AlertType.WARNING, "Brak danych",
-                            "Uzupełnij wszystkie pola!");
+                if (nameField.getText().isEmpty() || surnameField.getText().isEmpty() ||
+                        loginField.getText().isEmpty() || passwordField.getText().isEmpty() ||
+                        emailField.getText().isEmpty() || stanowiskoBox.getValue() == null ||
+                        ageField.getText().isEmpty() || salaryField.getText().isEmpty() ||
+                        adresComboBox.getValue() == null) {
+
+                    showAlert(Alert.AlertType.WARNING, "Brak danych", "Uzupełnij wszystkie pola!");
                     return;
                 }
 
-                showLoadingIndicator();
-
-                int         wiek     = Integer.parseInt(ageField.getText());
-                BigDecimal  zarobki  = new BigDecimal(salaryField.getText());
+                int wiek = Integer.parseInt(ageField.getText());
+                BigDecimal zarobki = new BigDecimal(salaryField.getText());
 
                 Employee nowy = new Employee();
                 nowy.setName(nameField.getText());
                 nowy.setSurname(surnameField.getText());
                 nowy.setLogin(loginField.getText());
-                /* --- tu mogły wylecieć wyjątki --- */
-                nowy.setPassword(passwordField.getText());   // PasswordException
+                nowy.setPassword(passwordField.getText());
                 nowy.setEmail(emailField.getText());
                 nowy.setStanowisko(stanowiskoBox.getValue());
                 nowy.setAge(wiek);
-                nowy.setZarobki(zarobki);                    // SalaryException
+                nowy.setZarobki(zarobki);
+                nowy.setAdres(adresComboBox.getValue());
 
                 Task<Void> addTask = new Task<>() {
                     @Override
@@ -491,79 +501,45 @@ public class AdminPanelController {
     /**
      * Usuwa zaznaczonego użytkownika asynchronicznie.
      * Zabezpiecza przed usunięciem użytkownika z rolą "root".
+     * Usuwa zaznaczonego użytkownika (soft-delete) i odświeża tabelę.
      */
     private void usunWybranegoUzytkownika() {
         Employee selected = tableView.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            // Sprawdź, czy pracownik ma rolę "root"
-            if ("root".equalsIgnoreCase(selected.getStanowisko())) {
-                showAlert(
-                        Alert.AlertType.ERROR,
-                        "Operacja niedozwolona",
-                        "Nie można usunąć użytkownika z rolą root"
-                );
-                return;
-            }
 
-            // Pokaż potwierdzenie
-            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-            confirmAlert.setTitle("Potwierdzenie");
-            confirmAlert.setHeaderText("Czy na pewno chcesz usunąć tego użytkownika?");
-            confirmAlert.setContentText("Ta operacja jest nieodwracalna.");
-
-            confirmAlert.showAndWait().ifPresent(response -> {
-                if (response == ButtonType.OK) {
-                    // Pokaż wskaźnik ładowania
-                    showLoadingIndicator();
-
-                    // Usuń asynchronicznie
-                    final Employee employeeToDelete = selected;
-                    Task<Void> deleteTask = new Task<>() {
-                        @Override
-                        protected Void call() throws Exception {
-                            userRepository.usunPracownika(employeeToDelete);
-                            return null;
-                        }
-                    };
-
-                    deleteTask.setOnSucceeded(e -> {
-                        showAlert(
-                                Alert.AlertType.INFORMATION,
-                                "Sukces",
-                                "Usunięto użytkownika!"
-                        );
-                        showUserManagement();
-                    });
-
-                    deleteTask.setOnFailed(e -> {
-                        Throwable exception = deleteTask.getException();
-                        if (exception instanceof SecurityException) {
-                            Platform.runLater(() -> showAlert(
-                                    Alert.AlertType.ERROR,
-                                    "Operacja niedozwolona",
-                                    exception.getMessage()
-                            ));
-                        } else {
-                            exception.printStackTrace();
-                            Platform.runLater(() -> showAlert(
-                                    Alert.AlertType.ERROR,
-                                    "Błąd",
-                                    "Nie udało się usunąć użytkownika: " + exception.getMessage()
-                            ));
-                        }
-                        showUserManagement();
-                    });
-
-                    executor.execute(deleteTask);
-                }
-            });
-        } else {
+        if (selected == null) {
             showAlert(
                     Alert.AlertType.WARNING,
                     "Brak wyboru",
                     "Wybierz użytkownika do usunięcia."
             );
+            return;
         }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Potwierdzenie usunięcia");
+        confirm.setHeaderText("Czy na pewno chcesz usunąć użytkownika?");
+        confirm.setContentText(selected.getName() + " " + selected.getSurname());
+
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                try {
+                    userRepository.usunPracownika(selected);
+                    odswiezListePracownikow(); // ponowne załadowanie aktywnych
+                    showAlert(
+                            Alert.AlertType.INFORMATION,
+                            "Sukces",
+                            "Użytkownik został oznaczony jako usunięty."
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    showAlert(
+                            Alert.AlertType.ERROR,
+                            "Błąd",
+                            "Nie udało się usunąć użytkownika: " + e.getMessage()
+                    );
+                }
+            }
+        });
     }
 
     /**
@@ -636,7 +612,7 @@ public class AdminPanelController {
                 saveButton
         );
 
-        return layout;
+        adminPanel.setCenterPane(layout);
     }
 
     /**
@@ -655,20 +631,44 @@ public class AdminPanelController {
 
         Label sortingLabel = new Label("Sortowanie domyślne:");
         ComboBox<String> sortingComboBox = new ComboBox<>();
-        sortingComboBox.getItems().addAll(
-                "Nazwa", "Data", "Priorytet"
-        );
+        sortingComboBox.getItems().addAll("Nazwa", "Data", "Priorytet");
+
+        Label pathLabel = new Label("Ścieżka zapisu raportów:");
+        TextField pathField = new TextField();
+        pathField.setPromptText("Np. C:/raporty/");
+        pathField.setText(ConfigManager.getReportPath());
+
+        Button saveButton = new Button("Zapisz konfigurację");
+        saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+
+        saveButton.setOnAction(e -> {
+            String path = pathField.getText().trim();
+
+            if (path.isEmpty()) {
+                showAlert(Alert.AlertType.WARNING, "Błąd", "Ścieżka nie może być pusta.");
+                return;
+            }
+
+            File folder = new File(path);
+            if (!folder.exists() || !folder.isDirectory()) {
+                showAlert(Alert.AlertType.ERROR, "Niepoprawna ścieżka", "Podany folder nie istnieje.");
+                return;
+            }
+
+            ConfigManager.setReportPath(path);
+            showAlert(Alert.AlertType.INFORMATION, "Zapisano", "Ścieżka została zapisana.");
+        });
 
         Button backButton = new Button("Wróć");
         backButton.setOnAction(e -> showConfigPanel());
 
         layout.getChildren().addAll(
                 titleLabel,
-                logoLabel,
-                logoField,
+                logoLabel, logoField,
                 updateLogoButton,
-                sortingLabel,
-                sortingComboBox,
+                sortingLabel, sortingComboBox,
+                pathLabel, pathField,
+                saveButton,
                 backButton
         );
 
@@ -700,8 +700,9 @@ public class AdminPanelController {
                 "Raport pracowników",
                 "Raport zgłoszeń"
         );
-        reportType.setPrefWidth(250);
+        reportType.setPrefWidth(200);
 
+        Label dateLabel = new Label("Wybierz zakres dat");
         DatePicker startDatePicker = new DatePicker();
         startDatePicker.setPromptText("Data początkowa");
 
@@ -726,8 +727,9 @@ public class AdminPanelController {
         layout.getChildren().addAll(
                 titleLabel,
                 reportType,
-                new Label("Data od:"), startDatePicker,
-                new Label("Data do:"), endDatePicker,
+                dateLabel,
+                startDatePicker,
+                endDatePicker,
                 generateButton
         );
 
@@ -785,13 +787,7 @@ public class AdminPanelController {
 
         // Tabela zgłoszeń
         TableView<TechnicalIssue> issuesTableView = new TableView<>();
-        issuesTableView.setId("issuesTableView"); // ID do późniejszego wyszukiwania
         issuesTableView.setMinHeight(200);
-
-        // Optymalizacja tabeli
-        issuesTableView.setFixedCellSize(25);
-        issuesTableView.setCache(true);
-        issuesTableView.setCacheHint(CacheHint.SPEED);
 
         TableColumn<TechnicalIssue, Integer> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -808,29 +804,17 @@ public class AdminPanelController {
             {
                 comboBox.getItems().addAll("Nowe", "W trakcie", "Rozwiązane");
                 comboBox.setOnAction(e -> {
-                    if (getTableRow() != null && getTableRow().getItem() != null) {
-                        TechnicalIssue issue = getTableRow().getItem();
-                        String newStatus = comboBox.getValue();
-
-                        // Aktualizuj status asynchronicznie
-                        Task<Void> updateTask = new Task<>() {
-                            @Override
-                            protected Void call() throws Exception {
-                                issue.setStatus(newStatus);
-                                technicalIssueRepository.aktualizujZgloszenie(issue);
-                                return null;
-                            }
-                        };
-
-                        executor.execute(updateTask);
-                    }
+                    TechnicalIssue issue = getTableView().getItems().get(getIndex());
+                    issue.setStatus(comboBox.getValue());
+                    technicalIssueRepository.aktualizujZgloszenie(issue); // Zapisz zmianę w bazie
+                    refreshIssuesTable(issuesTableView); // Odśwież widok
                 });
             }
 
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                if (empty) {
                     setGraphic(null);
                 } else {
                     comboBox.setValue(getTableRow().getItem().getStatus());
@@ -840,55 +824,25 @@ public class AdminPanelController {
         });
 
         issuesTableView.getColumns().addAll(idCol, typeCol, dateCol, statusCol);
+        refreshIssuesTable(issuesTableView);
 
-        // Dodaj przycisk do wyświetlania szczegółów
-        Button detailsButton = new Button("Pokaż szczegóły");
-        detailsButton.setOnAction(e -> showIssueDetails(issuesTableView));
-
-        // Dodaj przycisk do odświeżania listy
-        Button refreshButton = new Button("Odśwież listę");
-        refreshButton.setOnAction(e -> refreshIssuesTable(issuesTableView));
-
-        HBox buttonBox = new HBox(10, detailsButton, refreshButton);
-        buttonBox.setAlignment(Pos.CENTER);
-
-        layout.getChildren().addAll(titleLabel, issuesTableView, buttonBox);
-        return layout;
+        layout.getChildren().addAll(titleLabel, issuesTableView);
+        adminPanel.setCenterPane(layout);
     }
 
     /**
-     * Odświeża listę zgłoszeń technicznych asynchronicznie.
+     * Odświeża listę zgłoszeń technicznych.
      */
     private void refreshIssuesTable(TableView<TechnicalIssue> tableView) {
-        Task<List<TechnicalIssue>> task = new Task<>() {
-            @Override
-            protected List<TechnicalIssue> call() throws Exception {
-                return technicalIssueRepository.pobierzWszystkieZgloszenia();
-            }
-        };
-
-        task.setOnSucceeded(e -> {
-            tableView.getItems().clear();
-            tableView.getItems().addAll(task.getValue());
-        });
-
-        task.setOnFailed(e -> {
-            task.getException().printStackTrace();
-            Platform.runLater(() -> showAlert(
-                    Alert.AlertType.ERROR,
-                    "Błąd",
-                    "Nie udało się pobrać listy zgłoszeń"
-            ));
-        });
-
-        executor.execute(task);
+        tableView.getItems().clear();
+        tableView.getItems().addAll(technicalIssueRepository.pobierzWszystkieZgloszenia());
     }
 
     /**
      * Wyświetla szczegóły wybranego zgłoszenia.
      */
-    private void showIssueDetails(TableView<TechnicalIssue> tableView) {
-        TechnicalIssue selected = tableView.getSelectionModel().getSelectedItem();
+    private void showIssueDetails() {
+        TechnicalIssue selected = issuesTableView.getSelectionModel().getSelectedItem();
         if (selected == null) {
             showAlert(Alert.AlertType.WARNING, "Brak wyboru", "Wybierz zgłoszenie do wyświetlenia.");
             return;
@@ -906,7 +860,6 @@ public class AdminPanelController {
         );
         alert.showAndWait();
     }
-
     /**
      * Wylogowuje użytkownika i uruchamia okno logowania.
      */
@@ -935,104 +888,84 @@ public class AdminPanelController {
     }
 
     /**
-     * Symuluje wykonanie backupu bazy danych.
+     * Wykonuje backup bazy danych MySQL do pliku .sql.
      */
     private void performDatabaseBackup() {
-        // Pokaż wskaźnik ładowania
-        showLoadingIndicator();
+        try {
+            String timestamp = java.time.LocalDateTime.now().toString().replace(":", "-");
+            String fileName = "stonkadb-backup-" + timestamp + ".sql";
 
-        Task<String> backupTask = new Task<>() {
-            @Override
-            protected String call() throws Exception {
-                String timestamp = java.time.LocalDateTime.now().toString().replace(":", "-");
-                String fileName = "stonkadb-backup-" + timestamp + ".sql";
-
-                File backupDir = new File("backups");
-                if (!backupDir.exists()) {
-                    backupDir.mkdirs();
-                }
-
-                File outputFile = new File(backupDir, fileName);
-
-                // Wykrywanie systemu operacyjnego
-                String os = System.getProperty("os.name").toLowerCase();
-                String mysqldumpPath;
-
-                if (os.contains("win")) {
-                    // Ścieżka dla Windows
-                    mysqldumpPath = "C:\\xampp\\mysql\\bin\\mysqldump.exe";
-                } else if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {
-                    // Ścieżka dla Linux/Unix/Mac
-                    File[] possiblePaths = {
-                            new File("/usr/bin/mysqldump"),
-                            new File("/usr/local/bin/mysqldump"),
-                            new File("/usr/local/mysql/bin/mysqldump"),
-                            new File("/opt/mysql/bin/mysqldump")
-                    };
-
-                    File foundPath = null;
-                    for (File path : possiblePaths) {
-                        if (path.exists()) {
-                            foundPath = path;
-                            break;
-                        }
-                    }
-
-                    if (foundPath != null) {
-                        mysqldumpPath = foundPath.getAbsolutePath();
-                    } else {
-                        mysqldumpPath = "mysqldump";
-                    }
-                } else {
-                    throw new UnsupportedOperationException("Nieobsługiwany system operacyjny: " + os);
-                }
-
-                ProcessBuilder pb = new ProcessBuilder(
-                        mysqldumpPath,
-                        "-u", org.example.database.ILacz.MYSQL_USER,
-                        "--databases", org.example.database.ILacz.DB_NAME
-                );
-
-                String password = org.example.database.ILacz.MYSQL_PASSWORD;
-                if (password != null && !password.isEmpty()) {
-                    Map<String, String> env = pb.environment();
-                    env.put("MYSQL_PWD", password);
-                }
-
-                pb.redirectOutput(outputFile);
-                pb.redirectError(ProcessBuilder.Redirect.INHERIT);
-
-                Process process = pb.start();
-                int exitCode = process.waitFor();
-
-                if (exitCode == 0) {
-                    return outputFile.getAbsolutePath();
-                } else {
-                    throw new RuntimeException("Nie udało się wykonać kopii zapasowej. Kod wyjścia: " + exitCode);
-                }
+            File backupDir = new File("backups");
+            if (!backupDir.exists()) {
+                backupDir.mkdirs();
             }
-        };
 
-        backupTask.setOnSucceeded(e -> {
-            showAlert(
-                    Alert.AlertType.INFORMATION,
-                    "Backup zakończony",
-                    "Plik zapisany:\n" + backupTask.getValue()
+            File outputFile = new File(backupDir, fileName);
+
+            // Wykrywanie systemu operacyjnego
+            String os = System.getProperty("os.name").toLowerCase();
+            String mysqldumpPath;
+
+            if (os.contains("win")) {
+                // Ścieżka dla Windows
+                mysqldumpPath = "C:\\xampp\\mysql\\bin\\mysqldump.exe";
+            } else if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {
+                // Ścieżka dla Linux/Unix/Mac
+                File[] possiblePaths = {
+                        new File("/usr/bin/mysqldump"),
+                        new File("/usr/local/bin/mysqldump"),
+                        new File("/usr/local/mysql/bin/mysqldump"),
+                        new File("/opt/mysql/bin/mysqldump")
+                };
+
+                File foundPath = null;
+                for (File path : possiblePaths) {
+                    if (path.exists()) {
+                        foundPath = path;
+                        break;
+                    }
+                }
+
+                if (foundPath != null) {
+                    mysqldumpPath = foundPath.getAbsolutePath();
+                } else {
+                    mysqldumpPath = "mysqldump";
+                }
+            } else {
+                throw new UnsupportedOperationException("Nieobsługiwany system operacyjny: " + os);
+            }
+
+            ProcessBuilder pb = new ProcessBuilder(
+                    mysqldumpPath,
+                    "-u", org.example.database.ILacz.MYSQL_USER,
+                    "--databases", org.example.database.ILacz.DB_NAME
             );
-            showConfigPanel();
-        });
 
-        backupTask.setOnFailed(e -> {
-            backupTask.getException().printStackTrace();
-            showAlert(
-                    Alert.AlertType.ERROR,
-                    "Błąd backupu",
-                    "Wystąpił błąd podczas backupu:\n" + backupTask.getException().getMessage()
-            );
-            showConfigPanel();
-        });
+            String password = org.example.database.ILacz.MYSQL_PASSWORD;
+            if (password != null && !password.isEmpty()) {
+                Map<String, String> env = pb.environment();
+                env.put("MYSQL_PWD", password);
+            }
 
-        executor.execute(backupTask);
+            pb.redirectOutput(outputFile);
+            pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+
+            Process process = pb.start();
+            int exitCode = process.waitFor();
+
+            if (exitCode == 0) {
+                showAlert(Alert.AlertType.INFORMATION, "Backup zakończony",
+                        "Plik zapisany:\n" + outputFile.getAbsolutePath());
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Błąd backupu",
+                        "Nie udało się wykonać kopii zapasowej. Kod wyjścia: " + exitCode);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Wyjątek",
+                    "Wystąpił błąd podczas backupu:\n" + e.getMessage());
+        }
     }
 
     /**
@@ -1051,91 +984,72 @@ public class AdminPanelController {
             alert.showAndWait();
         });
     }
-    /**
-     * Pokazuje dialog z dodatkowymi filtrami zależnie od raportu.
-     */
-    private void showFilterDialogForReport(String reportName, LocalDate from, LocalDate to) {
-        Dialog<Map<String, String>> dialog = new Dialog<>();
-        dialog.setTitle("Filtruj: " + reportName);
-        dialog.setHeaderText("Podaj dodatkowe parametry");
 
-        ButtonType genType = new ButtonType("Generuj", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(genType, ButtonType.CANCEL);
+    private void otworzOknoNowegoAdresu(ComboBox<Address> adresComboBox) {
+        Stage stage = new Stage();
+        stage.setTitle("Dodaj nowy adres");
+        VBox layout = new VBox(10);
+        layout.setPadding(new Insets(20));
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20));
+        TextField miejscowosc = new TextField();
+        miejscowosc.setPromptText("Miejscowość");
 
-        // domyślne filtry datami
-        Map<String, String> filters = new HashMap<>();
-        filters.put("from", from.toString());
-        filters.put("to",   to.toString());
+        TextField numerDomu = new TextField();
+        numerDomu.setPromptText("Numer domu");
 
-        int row = 0;
-        switch (reportName) {
-            case "Raport sprzedaży":
-                TextField category = new TextField();
-                category.setPromptText("Kategoria produktu");
-                grid.add(new Label("Kategoria:"), 0, row);
-                grid.add(category, 1, row++);
-                dialog.setResultConverter(btn -> {
-                    if (btn == genType) {
-                        filters.put("category", category.getText());
-                        return filters;
-                    }
-                    return null;
-                });
-                break;
+        TextField numerMieszkania = new TextField();
+        numerMieszkania.setPromptText("Numer mieszkania (opcjonalnie)");
 
-            case "Raport pracowników":
-                TextField role = new TextField();
-                role.setPromptText("Stanowisko");
-                grid.add(new Label("Stanowisko:"), 0, row);
-                grid.add(role, 1, row++);
-                dialog.setResultConverter(btn -> {
-                    if (btn == genType) {
-                        filters.put("role", role.getText());
-                        return filters;
-                    }
-                    return null;
-                });
-                break;
+        TextField kodPocztowy = new TextField();
+        kodPocztowy.setPromptText("Kod pocztowy");
 
-            case "Raport zgłoszeń":
-                ComboBox<String> statusBox = new ComboBox<>();
-                statusBox.getItems().addAll("Nowe", "W trakcie", "Rozwiązane");
-                statusBox.setPromptText("Status zgłoszenia");
-                grid.add(new Label("Status:"), 0, row);
-                grid.add(statusBox, 1, row++);
-                dialog.setResultConverter(btn -> {
-                    if (btn == genType) {
-                        filters.put("status", statusBox.getValue());
-                        return filters;
-                    }
-                    return null;
-                });
-                break;
+        TextField miasto = new TextField();
+        miasto.setPromptText("Miasto");
 
-            default:
-                dialog.setResultConverter(btn -> btn == genType ? filters : null);
-        }
+        Button zapiszBtn = new Button("Zapisz adres");
 
-        dialog.getDialogPane().setContent(grid);
-
-        Optional<Map<String, String>> result = dialog.showAndWait();
-        result.ifPresent(flt -> {
-            try {
-                File output = ReportGenerator.generate(reportName, flt);
-                showAlert(Alert.AlertType.INFORMATION,
-                        "Gotowe",
-                        "Raport wygenerowany:\n" + output.getAbsolutePath());
-            } catch (Exception ex) {
-                showAlert(Alert.AlertType.ERROR,
-                        "Błąd",
-                        "Nie udało się wygenerować raportu:\n" + ex.getMessage());
+        zapiszBtn.setOnAction(e -> {
+            // WALIDACJA
+            if (miejscowosc.getText().isEmpty()
+                    || numerDomu.getText().isEmpty()
+                    || kodPocztowy.getText().isEmpty()
+                    || miasto.getText().isEmpty()) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Wszystkie pola (poza numerem mieszkania) muszą być wypełnione.");
+                return;
             }
+
+            if (!kodPocztowy.getText().matches("\\d{2}-\\d{3}")) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowy format kodu pocztowego. Poprawny to np. 00-001.");
+                return;
+            }
+
+            // ZAPIS
+            AddressRepository repo = new AddressRepository();
+            Address nowy = new Address();
+            nowy.setMiejscowosc(miejscowosc.getText());
+            nowy.setNumerDomu(numerDomu.getText());
+            nowy.setNumerMieszkania(numerMieszkania.getText().isEmpty() ? null : numerMieszkania.getText());
+            nowy.setKodPocztowy(kodPocztowy.getText());
+            nowy.setMiasto(miasto.getText());
+
+            repo.dodajAdres(nowy);
+
+            // Odśwież listę i wybierz nowy adres
+            adresComboBox.getItems().clear();
+            adresComboBox.getItems().addAll(repo.pobierzWszystkieAdresy());
+            adresComboBox.setValue(nowy);
+
+            stage.close();
         });
+
+        layout.getChildren().addAll(
+                new Label("Nowy adres:"),
+                miejscowosc, numerDomu, numerMieszkania,
+                kodPocztowy, miasto, zapiszBtn
+        );
+
+        stage.setScene(new javafx.scene.Scene(layout));
+        stage.show();
     }
 
 }

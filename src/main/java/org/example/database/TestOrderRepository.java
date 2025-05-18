@@ -2,7 +2,7 @@ package org.example.database;
 
 import org.example.sys.Order;
 import org.example.sys.Employee;
-import org.example.sys.Warehouse;
+import org.example.sys.Product;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -15,14 +15,14 @@ public class TestOrderRepository {
 
     public static void main(String[] args) {
         OrderRepository orderRepo = new OrderRepository();
-        WarehouseRepository productRepo = new WarehouseRepository();
+        ProductRepository productRepo = new ProductRepository(); // zamieniono z WarehouseRepository
         UserRepository userRepo = new UserRepository();
 
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
             // === 1. Dodanie produktu i pracownika testowego ===
-            Warehouse produkt = new Warehouse("Testowy produkt", new BigDecimal("5.99"), 100);
+            Product produkt = new Product("Testowy produkt", "Testowa kategoria", 5.99);
             productRepo.dodajProdukt(produkt);
 
             Employee pracownik = userRepo.pobierzWszystkichPracownikow().get(0); // zakładamy, że już jest
@@ -76,7 +76,7 @@ public class TestOrderRepository {
             for (Order z : zamowienia) {
                 System.out.printf("ID: %-3d | Produkt: %-20s | Ilość: %-3d | Cena: %-7.2f | Data: %s%n",
                         z.getId(),
-                        z.getProdukt().getNazwa(), // poprawiono z getName()
+                        z.getProdukt().getName(), // poprawiono z getNazwa()
                         z.getIlosc(),
                         z.getCena(),
                         z.getData().toString()

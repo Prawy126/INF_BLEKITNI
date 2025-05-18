@@ -18,7 +18,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import org.example.sys.Employee;
 import org.example.sys.Order;
-import org.example.sys.Warehouse;
+import org.example.sys.Product;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -56,7 +56,7 @@ public class OrderPanel extends VBox {
 
         TableColumn<Order, String> productCol = new TableColumn<>("Produkt");
         productCol.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getProdukt().getNazwa()));
+                new SimpleStringProperty(cellData.getValue().getProdukt().getName()));
         productCol.setPrefWidth(150);
 
         TableColumn<Order, Integer> quantityCol = new TableColumn<>("Ilość");
@@ -72,11 +72,11 @@ public class OrderPanel extends VBox {
         dateCol.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getData().toString()));
 
-        TableColumn<Order, String> cenaCol = new TableColumn<>("Cena");
-        cenaCol.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getCena().toPlainString()));
+        TableColumn<Order, String> priceCol = new TableColumn<>("Cena");
+        priceCol.setCellValueFactory(cellData ->
+                new SimpleStringProperty(String.format("%.2f zł", cellData.getValue().getCena())));
 
-        ordersTable.getColumns().addAll(idCol, productCol, quantityCol, supplierCol, dateCol, cenaCol);
+        ordersTable.getColumns().addAll(idCol, productCol, quantityCol, supplierCol, dateCol, priceCol);
 
         Button newOrderButton = new Button("Nowe zamówienie");
         newOrderButton.setOnAction(e -> showNewOrderDialog());
@@ -99,16 +99,16 @@ public class OrderPanel extends VBox {
      * Załadowanie przykładowych danych do tabeli.
      */
     private void loadSampleData() {
-        Warehouse p1 = new Warehouse("Mleko 1L", new BigDecimal("2.99"), 100);
-        Warehouse p2 = new Warehouse("Chleb pszenny", new BigDecimal("3.49"), 80);
-        Warehouse p3 = new Warehouse("Jajka L", new BigDecimal("5.99"), 60);
+        Product p1 = new Product("Mleko 1L", "Nabiał", 2.99);
+        Product p2 = new Product("Chleb pszenny", "Pieczywo", 3.49);
+        Product p3 = new Product("Jajka L", "Nabiał", 5.99);
 
         Employee emp = new Employee();
         emp.setLogin("admin");
 
-        Order o1 = new Order(p1, emp, 50, p1.getCena().multiply(new BigDecimal(50)), new Date());
-        Order o2 = new Order(p2, emp, 100, p2.getCena().multiply(new BigDecimal(100)), new Date());
-        Order o3 = new Order(p3, emp, 30, p3.getCena().multiply(new BigDecimal(30)), new Date());
+        Order o1 = new Order(p1, emp, 50, BigDecimal.valueOf(p1.getPrice() * 50), new Date());
+        Order o2 = new Order(p2, emp, 100, BigDecimal.valueOf(p2.getPrice() * 100), new Date());
+        Order o3 = new Order(p3, emp, 30, BigDecimal.valueOf(p3.getPrice() * 30), new Date());
 
         ordersData = FXCollections.observableArrayList(o1, o2, o3);
         ordersTable.setItems(ordersData);

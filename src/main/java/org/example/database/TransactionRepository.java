@@ -12,9 +12,6 @@ import jakarta.persistence.*;
 import org.example.sys.Transaction;
 import pdf.SalesReportGenerator;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 
 public class TransactionRepository {
@@ -34,22 +31,6 @@ public class TransactionRepository {
             tx.commit();
         } finally {
             if (tx.isActive()) tx.rollback();
-            em.close();
-        }
-    }
-
-    public List<Transaction> getTransactionsByDate(LocalDate date) {
-        EntityManager em = emf.createEntityManager();
-        try {
-            // Konwersja LocalDate na Date (bez godziny - początek dnia i koniec dnia)
-            Date startDate = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            Date endDate = Date.from(date.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
-
-            return em.createQuery("SELECT t FROM Transaction t WHERE t.data >= :startDate AND t.data < :endDate", Transaction.class)
-                    .setParameter("startDate", startDate)
-                    .setParameter("endDate", endDate)
-                    .getResultList();
-        } finally {
             em.close();
         }
     }

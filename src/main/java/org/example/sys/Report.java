@@ -5,19 +5,18 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-
+// src/main/java/org/example/sys/Report.java
 package org.example.sys;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "Raporty")
+@Table(name = "Raporty")          // nazwa tabeli w DB może pozostać PL
 @Access(AccessType.FIELD)
 public class Report {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
     private int id;
 
@@ -30,8 +29,7 @@ public class Report {
     @Column(name = "Data_zakonczenia", nullable = false)
     private LocalDate dataZakonczenia;
 
-    @ManyToOne
-    @JoinColumn(name = "Id_pracownika", nullable = false)
+    @ManyToOne @JoinColumn(name = "Id_pracownika", nullable = false)
     private Employee pracownik;
 
     @Column(name = "Plik", nullable = false)
@@ -39,7 +37,8 @@ public class Report {
 
     public Report() {}
 
-    public Report(String typRaportu, LocalDate dataPoczatku, LocalDate dataZakonczenia, Employee pracownik, String sciezkaPliku) {
+    public Report(String typRaportu, LocalDate dataPoczatku,
+                  LocalDate dataZakonczenia, Employee pracownik, String sciezkaPliku) {
         this.typRaportu = typRaportu;
         this.dataPoczatku = dataPoczatku;
         this.dataZakonczenia = dataZakonczenia;
@@ -47,47 +46,17 @@ public class Report {
         this.sciezkaPliku = sciezkaPliku;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getTypRaportu() {
-        return typRaportu;
-    }
-
-    public void setTypRaportu(String typRaportu) {
-        this.typRaportu = typRaportu;
-    }
-
-    public LocalDate getDataPoczatku() {
-        return dataPoczatku;
-    }
-
-    public void setDataPoczatku(LocalDate dataPoczatku) {
-        this.dataPoczatku = dataPoczatku;
-    }
-
-    public LocalDate getDataZakonczenia() {
-        return dataZakonczenia;
-    }
-
-    public void setDataZakonczenia(LocalDate dataZakonczenia) {
-        this.dataZakonczenia = dataZakonczenia;
-    }
-
-    public Employee getPracownik() {
-        return pracownik;
-    }
-
-    public void setPracownik(Employee pracownik) {
-        this.pracownik = pracownik;
-    }
-
-    public String getSciezkaPliku() {
-        return sciezkaPliku;
-    }
-
-    public void setSciezkaPliku(String sciezkaPliku) {
-        this.sciezkaPliku = sciezkaPliku;
-    }
+    /* --- gettery / settery --- */
+    public int getId()                         { return id; }
+    public String     getTypRaportu()          { return typRaportu; }
+    public void       setTypRaportu(String t)  { this.typRaportu = t; }
+    public LocalDate  getDataPoczatku()        { return dataPoczatku; }
+    public void       setDataPoczatku(LocalDate d){ this.dataPoczatku = d; }
+    public LocalDate  getDataZakonczenia()     { return dataZakonczenia; }
+    public void       setDataZakonczenia(LocalDate d){ this.dataZakonczenia = d; }
+    public Employee   getPracownik()           { return pracownik; }
+    public void       setPracownik(Employee p) { this.pracownik = p; }
+    public String     getSciezkaPliku()        { return sciezkaPliku; }
+    public void       setSciezkaPliku(String p){ this.sciezkaPliku = p; }
 }
+
