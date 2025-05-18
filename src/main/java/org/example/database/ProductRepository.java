@@ -218,6 +218,23 @@ public class ProductRepository {
     }
 
     /**
+     * Pobiera wszystkie dostępne kategorie produktów.
+     *
+     * @return lista kategorii produktów
+     */
+    public List<String> pobierzKategorie() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT DISTINCT p.category FROM Product p ORDER BY p.category",
+                            String.class)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
      * Zamyka fabrykę EntityManager
      */
     public void close() {

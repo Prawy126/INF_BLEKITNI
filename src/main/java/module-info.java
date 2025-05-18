@@ -18,6 +18,7 @@ module org.example.gui {
     requires org.apache.logging.log4j;
     requires jakarta.transaction;
     requires jakarta.cdi;
+    requires java.desktop;
 
     opens org.example.gui to javafx.fxml;
     opens org.example.sys to javafx.base, javafx.fxml, org.hibernate.orm.core, jakarta.persistence;

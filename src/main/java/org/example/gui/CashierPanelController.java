@@ -1,10 +1,9 @@
 /*
  * Classname: CashierPanelController
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.1
+ * Date: 2025-05-17
  * Copyright notice: © BŁĘKITNI
  */
-
 
 package org.example.gui;
 
@@ -26,26 +25,47 @@ import javafx.util.Duration;
 import javafx.util.converter.IntegerStringConverter;
 import org.example.database.AbsenceRequestRepository;
 import org.example.database.ProductRepository;
+import org.example.database.ReportRepository;
 import org.example.database.TransactionRepository;
 import org.example.database.TechnicalIssueRepository;
-import org.example.sys.AbsenceRequest;
-import org.example.sys.Employee;
 import org.example.database.UserRepository;
-import org.example.sys.Product;
-import org.example.sys.Report;
-import org.example.sys.Transaction;
-import org.example.sys.TechnicalIssue;
+import org.example.sys.*;
+import pdf.SalesReportGenerator;
+import pdf.SalesReportGenerator.PeriodType;
+import pdf.SalesReportGenerator.SalesRecord;
+
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CashierPanelController {
     private final CashierPanel cashierPanel;
+    private final ReportRepository reportRepository;
+    private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
+
+    // Ścieżka do katalogu z raportami
+    private static final String REPORTS_DIRECTORY = "reports";
 
     public CashierPanelController(CashierPanel cashierPanel) {
         this.cashierPanel = cashierPanel;
+        this.reportRepository = new ReportRepository();
+        this.transactionRepository = new TransactionRepository();
+        this.userRepository = new UserRepository();
+
+        // Utworzenie katalogu na raporty, jeśli nie istnieje
+        File reportsDir = new File(REPORTS_DIRECTORY);
+        if (!reportsDir.exists()) {
+            reportsDir.mkdirs();
+        }
     }
 
     // Ekran sprzedaży
@@ -148,6 +168,420 @@ public class CashierPanelController {
         Scene scene = new Scene(mainLayout);
         dialog.setScene(scene);
         dialog.show();
+    }
+
+    public void showSalesReportsPanel() {
+        VBox layout = new VBox(15);
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
+
+        // Nagłówek
+        Label titleLabel = new Label("Raporty sprzedaży");
+        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        // Tabela raportów
+        TableView<Report> tableView = createReportTable();
+
+        // Przyciski akcji
+        HBox buttons = new HBox(10);
+        Button newReportButton = cashierPanel.createStyledButton("Nowy raport", "#27AE60");
+        Button refreshButton = cashierPanel.createStyledButton("Odśwież", "#3498DB");
+
+        newReportButton.setOnAction(e -> showReportDialog());
+        refreshButton.setOnAction(e -> refreshReportTable(tableView));
+
+        buttons.getChildren().addAll(newReportButton, refreshButton);
+        buttons.setAlignment(Pos.CENTER);
+
+        layout.getChildren().addAll(titleLabel, tableView, buttons);
+        cashierPanel.setCenterPane(layout);
+
+        // Załadowanie danych do tabeli
+        refreshReportTable(tableView);
+    }
+
+    private void refreshReportTable(TableView<Report> tableView) {
+        List<Report> reports = reportRepository.pobierzWszystkieRaporty();
+        tableView.setItems(FXCollections.observableArrayList(reports));
+    }
+
+    private void showReportDialog() {
+        Stage dialog = createStyledDialog("Generowanie raportu sprzedaży");
+
+        // Wybór typu raportu
+        Label typeLabel = new Label("Typ raportu:");
+        ComboBox<String> typeBox = createStyledComboBox(
+                PeriodType.DAILY.getDisplayName(),
+                PeriodType.MONTHLY.getDisplayName(),
+                PeriodType.YEARLY.getDisplayName()
+        );
+
+        // Wybór daty
+        Label dateLabel = new Label("Data raportu:");
+        DatePicker datePicker = createStyledDatePicker();
+        datePicker.setValue(LocalDate.now());
+
+        // Wybór kategorii (opcjonalnie)
+        Label categoryLabel = new Label("Kategorie produktów (opcjonalnie):");
+        ListView<String> categoryListView = new ListView<>();
+        categoryListView.setPrefHeight(150);
+        categoryListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        // Pobranie dostępnych kategorii
+        ProductRepository productRepo = new ProductRepository();
+        List<String> categories = productRepo.pobierzKategorie();
+        categoryListView.setItems(FXCollections.observableArrayList(categories));
+        productRepo.close();
+
+        // Przyciski
+        Button generateBtn = cashierPanel.createStyledButton("Generuj raport", "#2980B9");
+        Button cancelBtn = cashierPanel.createStyledButton("Anuluj", "#E74C3C");
+
+        HBox buttonBox = new HBox(10, generateBtn, cancelBtn);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+
+        generateBtn.setOnAction(e -> {
+            String reportTypeStr = typeBox.getValue();
+            LocalDate selectedDate = datePicker.getValue();
+            List<String> selectedCategories = new ArrayList<>(categoryListView.getSelectionModel().getSelectedItems());
+
+            if (selectedDate == null) {
+                showNotification("Błąd", "Wybierz datę raportu.");
+                return;
+            }
+
+            try {
+                // Generowanie raportu
+                PeriodType periodType = getPeriodTypeFromString(reportTypeStr);
+                //String reportPath = generateSalesReport(periodType, selectedDate, selectedCategories);
+
+                // Zapisanie informacji o raporcie w bazie danych
+                //saveReportInfo(periodType, selectedDate, reportPath);
+
+                showNotification("Sukces", "Raport został wygenerowany.");
+                dialog.close();
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                showNotification("Błąd", "Nie udało się wygenerować raportu: " + ex.getMessage());
+            }
+        });
+
+        cancelBtn.setOnAction(e -> dialog.close());
+
+        VBox root = new VBox(10);
+        root.setPadding(new Insets(20));
+        root.getChildren().addAll(
+                typeLabel, typeBox,
+                dateLabel, datePicker,
+                categoryLabel, categoryListView,
+                new Separator(),
+                buttonBox
+        );
+
+        setupDialog(dialog, root);
+    }
+
+    private PeriodType getPeriodTypeFromString(String typeStr) {
+        if (typeStr.equals(PeriodType.DAILY.getDisplayName())) {
+            return PeriodType.DAILY;
+        } else if (typeStr.equals(PeriodType.MONTHLY.getDisplayName())) {
+            return PeriodType.MONTHLY;
+        } else if (typeStr.equals(PeriodType.YEARLY.getDisplayName())) {
+            return PeriodType.YEARLY;
+        }
+        return PeriodType.DAILY; // domyślnie
+    }
+
+    /*private String generateSalesReport(PeriodType periodType, LocalDate selectedDate, List<String> categories) throws Exception {
+        // Pobranie danych transakcji
+        List<SalesRecord> salesData = getSalesDataForReport(periodType, selectedDate);
+
+        if (salesData.isEmpty()) {
+            throw new Exception("Brak danych transakcji dla wybranego okresu.");
+        }
+
+        // Utworzenie generatora raportów
+        SalesReportGenerator reportGenerator = new SalesReportGenerator();
+        reportGenerator.setSalesData(salesData);
+
+        // Ustalenie nazwy pliku
+        String periodName = switch (periodType) {
+            case DAILY -> "dzienny";
+            case MONTHLY -> "miesięczny";
+            case YEARLY -> "roczny";
+        };
+
+        String fileName = String.format("raport_%s_%s.pdf", periodName, selectedDate.format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE));
+        String outputPath = REPORTS_DIRECTORY + File.separator + fileName;
+
+        // Generowanie raportu
+        reportGenerator.generateReport(outputPath, periodType, categories);
+
+        return outputPath;
+    }*/
+
+    /*private List<SalesRecord> getSalesDataForReport(PeriodType periodType, LocalDate selectedDate) {
+        // Pobranie transakcji z bazy danych
+        List<Transaction> transactions = transactionRepository.getTransactionsByPeriod(selectedDate, periodType);
+
+        // Konwersja danych transakcji do formatu wymaganego przez generator raportów
+        List<SalesRecord> salesRecords = new ArrayList<>();
+
+        for (Transaction transaction : transactions) {
+            // Dla każdego produktu w transakcji tworzymy rekord sprzedaży
+            for (Warehouse product : transaction.getProdukty()) {
+                // Zakładamy, że Warehouse zawiera informacje o produkcie i ilości
+                // W rzeczywistej implementacji należy dostosować to do struktury danych
+
+                LocalDateTime transactionDateTime = transaction.getData()
+                        .toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime();
+
+                // Tworzenie rekordu sprzedaży
+                SalesRecord salesRecord = new SalesRecord(
+                        transaction.getId(),
+                        transactionDateTime,
+                        product.getNazwa(),
+                        product.getKategoria(),
+                        product.getIlosc(),
+                        product.getCena() * product.getIlosc()
+                );
+
+                salesRecords.add(salesRecord);
+            }
+        }
+
+        return salesRecords;
+    }*/
+
+    // NOWA METODA
+    private void saveReportInfo(PeriodType periodType, LocalDate selectedDate, String reportPath) {
+        // Pobranie zalogowanego pracownika
+        Employee currentEmployee = userRepository.getCurrentEmployee();
+        if (currentEmployee == null) {
+            throw new IllegalStateException("Nie jesteś zalogowany.");
+        }
+
+        // Ustalenie dat raportu
+        LocalDate startDate, endDate;
+
+        switch (periodType) {
+            case DAILY:
+                startDate = selectedDate;
+                endDate = selectedDate;
+                break;
+            case MONTHLY:
+                startDate = selectedDate.withDayOfMonth(1);
+                endDate = startDate.plusMonths(1).minusDays(1);
+                break;
+            case YEARLY:
+                startDate = selectedDate.withDayOfYear(1);
+                endDate = startDate.plusYears(1).minusDays(1);
+                break;
+            default:
+                throw new IllegalArgumentException("Nieprawidłowy typ okresu");
+        }
+
+        // Utworzenie obiektu raportu
+        Report report = new Report();
+        report.setPracownik(currentEmployee);
+        report.setDataPoczatku(startDate);
+        report.setDataZakonczenia(endDate);
+        report.setTypRaportu(periodType.getDisplayName());
+        report.setSciezkaPliku(reportPath);
+        //report.setDataWygenerowania(LocalDate.now());
+
+        // Zapisanie raportu w bazie danych
+        reportRepository.dodajRaport(report);
+    }
+
+    private TableView<Report> createReportTable() {
+        TableView<Report> tableView = new TableView<>();
+        tableView.setMinHeight(300);
+
+        TableColumn<Report, Integer> idColumn = new TableColumn<>("ID");
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        idColumn.setPrefWidth(50);
+
+        TableColumn<Report, String> typeColumn = new TableColumn<>("Typ raportu");
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("typRaportu"));
+        typeColumn.setPrefWidth(120);
+
+        TableColumn<Report, LocalDate> dateStartColumn = new TableColumn<>("Od");
+        dateStartColumn.setCellValueFactory(new PropertyValueFactory<>("dataPoczatku"));
+        dateStartColumn.setPrefWidth(100);
+
+        TableColumn<Report, LocalDate> dateEndColumn = new TableColumn<>("Do");
+        dateEndColumn.setCellValueFactory(new PropertyValueFactory<>("dataZakonczenia"));
+        dateEndColumn.setPrefWidth(100);
+
+        TableColumn<Report, LocalDate> genDateColumn = new TableColumn<>("Data wygenerowania");
+        genDateColumn.setCellValueFactory(new PropertyValueFactory<>("dataWygenerowania"));
+        genDateColumn.setPrefWidth(150);
+
+        TableColumn<Report, String> employeeColumn = new TableColumn<>("Wygenerował");
+        employeeColumn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getPracownik().getName() + " " +
+                        cellData.getValue().getPracownik().getSurname()));
+        employeeColumn.setPrefWidth(150);
+
+        // Kolumna z przyciskami akcji
+        TableColumn<Report, Void> actionsColumn = new TableColumn<>("Akcje");
+        actionsColumn.setPrefWidth(200);
+        actionsColumn.setCellFactory(param -> new TableCell<>() {
+            private final Button viewButton = new Button("Podgląd");
+            private final Button openButton = new Button("Otwórz");
+            private final Button deleteButton = new Button("Usuń");
+            private final HBox pane = new HBox(5, viewButton, openButton, deleteButton);
+
+            {
+                viewButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+                openButton.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white;");
+                deleteButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
+
+                viewButton.setOnAction(event -> {
+                    Report report = getTableView().getItems().get(getIndex());
+                    showReportDetails(report);
+                });
+
+                openButton.setOnAction(event -> {
+                    Report report = getTableView().getItems().get(getIndex());
+                    openReportFile(report.getSciezkaPliku());
+                });
+
+                deleteButton.setOnAction(event -> {
+                    Report report = getTableView().getItems().get(getIndex());
+                    confirmAndDeleteReport(report, getTableView());
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : pane);
+            }
+        });
+
+        tableView.getColumns().addAll(idColumn, typeColumn, dateStartColumn, dateEndColumn,
+                genDateColumn, employeeColumn, actionsColumn);
+        return tableView;
+    }
+
+    private void openReportFile(String filePath) {
+        try {
+            File file = new File(filePath);
+            if (file.exists()) {
+                Desktop.getDesktop().open(file);
+            } else {
+                showNotification("Błąd", "Plik nie istnieje: " + filePath);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            showNotification("Błąd", "Nie można otworzyć pliku: " + e.getMessage());
+        }
+    }
+
+    private void confirmAndDeleteReport(Report report, TableView<Report> tableView) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Potwierdzenie usunięcia");
+        alert.setHeaderText("Czy na pewno chcesz usunąć ten raport?");
+        alert.setContentText("Ta operacja jest nieodwracalna.");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                reportRepository.usunRaport(report.getId());
+                refreshReportTable(tableView);
+                showNotification("Sukces", "Raport został usunięty.");
+            } catch (Exception e) {
+                e.printStackTrace();
+                showNotification("Błąd", "Nie udało się usunąć raportu: " + e.getMessage());
+            }
+        }
+    }
+
+    private void showReportDetails(Report report) {
+        Stage dialog = createStyledDialog("Szczegóły raportu");
+
+        VBox content = new VBox(10);
+        content.setPadding(new Insets(20));
+
+        // Informacje o raporcie
+        Label titleLabel = new Label("Raport ID: " + report.getId());
+        titleLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+
+        GridPane infoGrid = new GridPane();
+        infoGrid.setHgap(10);
+        infoGrid.setVgap(10);
+        infoGrid.setPadding(new Insets(10));
+
+        int row = 0;
+        infoGrid.add(new Label("Typ raportu:"), 0, row);
+        infoGrid.add(new Label(report.getTypRaportu()), 1, row++);
+
+        infoGrid.add(new Label("Okres:"), 0, row);
+        infoGrid.add(new Label(report.getDataPoczatku() + " - " + report.getDataZakonczenia()), 1, row++);
+
+        infoGrid.add(new Label("Data wygenerowania:"), 0, row);
+        //infoGrid.add(new Label(report.getDataWygenerowania().toString()), 1, row++);
+
+        infoGrid.add(new Label("Wygenerował:"), 0, row);
+        infoGrid.add(new Label(report.getPracownik().getName() + " " + report.getPracownik().getSurname()), 1, row++);
+
+        infoGrid.add(new Label("Ścieżka pliku:"), 0, row);
+        infoGrid.add(new Label(report.getSciezkaPliku()), 1, row++);
+
+        // Przyciski akcji
+        HBox buttonBox = new HBox(10);
+        Button openButton = cashierPanel.createStyledButton("Otwórz plik", "#27AE60");
+        Button closeButton = cashierPanel.createStyledButton("Zamknij", "#7F8C8D");
+
+        openButton.setOnAction(e -> {
+            openReportFile(report.getSciezkaPliku());
+        });
+
+        closeButton.setOnAction(e -> dialog.close());
+
+        buttonBox.getChildren().addAll(openButton, closeButton);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+
+        content.getChildren().addAll(titleLabel, infoGrid, new Separator(), buttonBox);
+
+        Scene scene = new Scene(content);
+        dialog.setScene(scene);
+        dialog.showAndWait();
+    }
+
+    private void simulateGenerateReport(String reportType, LocalDate date, List<Transaction> transactions) {
+        try {
+            // Konwersja typu raportu
+            PeriodType periodType;
+            switch (reportType) {
+                case "Dzienny":
+                    periodType = PeriodType.DAILY;
+                    break;
+                case "Tygodniowy":
+                case "Miesięczny":
+                    periodType = PeriodType.MONTHLY;
+                    break;
+                default:
+                    periodType = PeriodType.YEARLY;
+                    break;
+            }
+
+            // Generowanie raportu
+            //List<SalesRecord> salesData = getSalesDataForReport(periodType, date);
+            //String reportPath = generateSalesReport(periodType, date, null);
+
+            // Zapisanie informacji o raporcie
+            //saveReportInfo(periodType, date, reportPath);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showNotification("Błąd", "Nie udało się wygenerować raportu: " + e.getMessage());
+        }
     }
 
     private TableView<Product> createProductTableWithSearch(TextField searchField) {
@@ -291,132 +725,6 @@ public class CashierPanelController {
             e.printStackTrace();
             showNotification("Błąd", "Nie można zapisać transakcji: " + e.getMessage());
         }
-    }
-
-    // Panel raportów
-    public void showSalesReportsPanel() {
-        VBox layout = new VBox(15);
-        layout.setPadding(new Insets(20));
-        layout.setAlignment(Pos.CENTER);
-        TableView<Report> tableView = createReportTable();
-        HBox buttons = new HBox(10);
-        Button pdfButton = cashierPanel.createStyledButton("Generuj PDF");
-        Button csvButton = cashierPanel.createStyledButton("Generuj CSV");
-        pdfButton.setOnAction(e -> showReportDialog("PDF"));
-        csvButton.setOnAction(e -> showReportDialog("CSV"));
-        buttons.getChildren().addAll(pdfButton, csvButton);
-        buttons.setAlignment(Pos.CENTER);
-        layout.getChildren().addAll(tableView, buttons);
-        cashierPanel.setCenterPane(layout);
-    }
-
-    private void showReportDialog(String format) {
-        Stage dialog = createStyledDialog("Generowanie raportu");
-        ComboBox<String> typeBox = createStyledComboBox("Dzienny", "Tygodniowy", "Miesięczny");
-        DatePicker datePicker = createStyledDatePicker();
-        Button generateBtn = cashierPanel.createStyledButton("Generuj " + format, "#2980B9");
-
-        generateBtn.setOnAction(e -> {
-            String reportType = typeBox.getValue();
-            LocalDate selectedDate = datePicker.getValue();
-
-            if (reportType == null || selectedDate == null) {
-                showNotification("Błąd", "Wybierz typ raportu i datę.");
-                return;
-            }
-
-            TransactionRepository transactionRepo = new TransactionRepository();
-            List<Transaction> transactions = transactionRepo.getTransactionsByDate(selectedDate);
-            transactionRepo.close();
-
-            if (transactions.isEmpty()) {
-                showNotification("Brak danych", "Nie znaleziono transakcji z tej daty.");
-                return;
-            }
-
-            simulateGenerateReport(reportType, selectedDate, transactions);
-
-            cashierPanel.setReportGenerated(true); // ✅ Ustawienie flagi
-            showNotification("Sukces", "Raport " + format + " został wygenerowany.");
-
-            dialog.close();
-        });
-
-        VBox root = new VBox(20);
-        root.getChildren().addAll(
-                new Label("Typ raportu:"), typeBox,
-                new Label("Data:"), datePicker,
-                generateBtn
-        );
-        setupDialog(dialog, root);
-    }
-
-    /**
-     * Symuluje generowanie raportu — na razie tylko loguje dane.
-     */
-    private void simulateGenerateReport(String reportType, LocalDate date, List<Transaction> transactions) {
-        System.out.println("Symulacja generowania raportu: " + reportType + " dla daty: " + date);
-        System.out.println("Liczba transakcji: " + transactions.size());
-        // Możesz tu później dodać prawdziwe wywołanie Twojej biblioteki PDF
-    }
-
-    private TableView<Report> createReportTable() {
-        TableView<Report> tableView = new TableView<>();
-        tableView.setMinHeight(300);
-
-        TableColumn<Report, Integer> idColumn = new TableColumn<>("Id_raportu");
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-
-        TableColumn<Report, LocalDate> dateStartColumn = new TableColumn<>("Data początkowa");
-        dateStartColumn.setCellValueFactory(new PropertyValueFactory<>("dataPoczatku"));
-
-        TableColumn<Report, LocalDate> dateEndColumn = new TableColumn<>("Data końcowa");
-        dateEndColumn.setCellValueFactory(new PropertyValueFactory<>("dataZakonczenia"));
-
-        TableColumn<Report, String> typeColumn = new TableColumn<>("Typ raportu");
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("typRaportu"));
-
-        TableColumn<Report, Void> viewColumn = new TableColumn<>("Podgląd");
-        viewColumn.setCellFactory(param -> new TableCell<>() {
-            private final Button viewButton = new Button("Podgląd");
-            {
-                viewButton.setStyle("-fx-background-color: #2980B9; -fx-text-fill: white;");
-                viewButton.setOnAction(event -> {
-                    Report report = getTableView().getItems().get(getIndex());
-                    showReportDetails(report);
-                });
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                setGraphic(empty ? null : viewButton);
-            }
-        });
-
-        tableView.getColumns().addAll(idColumn, dateStartColumn, dateEndColumn, typeColumn, viewColumn);
-        tableView.setItems(FXCollections.observableArrayList());
-        return tableView;
-    }
-
-    private void showReportDetails(Report report) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Szczegóły raportu");
-        alert.setHeaderText("Raport ID: " + report.getId());
-        alert.setContentText("""
-                Typ raportu: %s
-                Data początkowa: %s
-                Data końcowa: %s
-                Pracownik: %s %s
-                Plik: %s
-                """.formatted(
-                report.getTypRaportu(),
-                report.getDataPoczatku(),
-                report.getDataZakonczenia(),
-                report.getPracownik().getName(),
-                report.getPracownik().getSurname(),
-                report.getSciezkaPliku()
-        ));
-        alert.showAndWait();
     }
 
     // Zgłoszenie problemu
@@ -631,3 +939,4 @@ public class CashierPanelController {
         public double getTotal() { return product.getPrice() * quantity; }
     }
 }
+

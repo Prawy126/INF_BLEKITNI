@@ -10,6 +10,7 @@ package org.example.database;
 
 import jakarta.persistence.*;
 import org.example.sys.Transaction;
+import pdf.SalesReportGenerator;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -96,6 +97,50 @@ public class TransactionRepository {
             tx.commit();
         } finally {
             if (tx.isActive()) tx.rollback();
+            em.close();
+        }
+    }
+
+    /**
+     * Pobiera transakcje z określonego okresu.
+     *
+     * @param date data dla której pobieramy transakcje
+     * @param periodType typ okresu (dzienny, miesięczny, roczny)
+     * @return lista transakcji z danego okresu
+     */
+    public List<Transaction> getTransactionsByPeriod(LocalDate date, SalesReportGenerator.PeriodType periodType) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            LocalDate startDate, endDate;
+
+            switch (periodType) {
+                case DAILY:
+                    startDate = date;
+                    endDate = date;
+                    break;
+                case MONTHLY:
+                    startDate = date.withDayOfMonth(1);
+                    endDate = startDate.plusMonths(1).minusDays(1);
+                    break;
+                case YEARLY:
+                    startDate = date.withDayOfYear(1);
+                    endDate = startDate.plusYears(1).minusDays(1);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Nieprawidłowy typ okresu");
+            }
+
+            // Konwersja LocalDate na Date
+            Date startDateUtil = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date endDateUtil = Date.from(endDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).minusSeconds(1).toInstant());
+
+            return em.createQuery(
+                            "SELECT t FROM Transaction t WHERE t.data >= :startDate AND t.data <= :endDate",
+                            Transaction.class)
+                    .setParameter("startDate", startDateUtil)
+                    .setParameter("endDate", endDateUtil)
+                    .getResultList();
+        } finally {
             em.close();
         }
     }
