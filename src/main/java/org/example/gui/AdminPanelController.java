@@ -1,7 +1,7 @@
 /*
  * Classname: AdminPanelController
- * Version information: 1.2
- * Date: 2025-05-17
+ * Version information: 1.3
+ * Date: 2025-05-18
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -19,11 +19,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.database.TechnicalIssueRepository;
 import org.example.database.UserRepository;
-import org.example.sys.ConfigPdf;
 import org.example.pdflib.ConfigManager;
 import org.example.pdflib.ReportGenerator;
 import org.example.sys.Employee;
-import org.example.sys.Sort;
 import org.example.sys.TechnicalIssue;
 import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
@@ -34,13 +32,8 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.io.File;
 import java.math.BigDecimal;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -268,6 +261,7 @@ public class AdminPanelController {
 
         saveButton.setOnAction(e -> {
             try {
+                /* walidacja pustych pól – jak wcześniej */
                 if (nameField.getText().isEmpty()
                         || surnameField.getText().isEmpty()
                         || loginField.getText().isEmpty()
@@ -275,18 +269,13 @@ public class AdminPanelController {
                         || stanowiskoBox.getValue() == null
                         || ageField.getText().isEmpty()
                         || salaryField.getText().isEmpty()) {
-                    showAlert(
-                            Alert.AlertType.WARNING,
-                            "Brak danych",
-                            "Uzupełnij wszystkie pola (poza hasłem)."
-                    );
+                    showAlert(Alert.AlertType.WARNING, "Brak danych",
+                            "Uzupełnij wszystkie pola (poza hasłem).");
                     return;
                 }
 
-                // Pokaż wskaźnik ładowania
                 showLoadingIndicator();
 
-                // Przygotuj dane
                 final Employee employeeToUpdate = selected;
                 employeeToUpdate.setName(nameField.getText());
                 employeeToUpdate.setSurname(surnameField.getText());
@@ -294,18 +283,13 @@ public class AdminPanelController {
                 employeeToUpdate.setEmail(emailField.getText());
 
                 if (!passwordField.getText().isEmpty()) {
-                    employeeToUpdate.setPassword(passwordField.getText());
+                    employeeToUpdate.setPassword(passwordField.getText()); // PasswordException
                 }
 
                 employeeToUpdate.setStanowisko(stanowiskoBox.getValue());
-                employeeToUpdate.setAge(
-                        Integer.parseInt(ageField.getText())
-                );
-                employeeToUpdate.setZarobki(
-                        new BigDecimal(salaryField.getText())
-                );
+                employeeToUpdate.setAge(Integer.parseInt(ageField.getText()));
+                employeeToUpdate.setZarobki(new BigDecimal(salaryField.getText())); // SalaryException
 
-                // Aktualizuj asynchronicznie
                 Task<Void> updateTask = new Task<>() {
                     @Override
                     protected Void call() throws Exception {
@@ -314,37 +298,34 @@ public class AdminPanelController {
                     }
                 };
 
-                updateTask.setOnSucceeded(event -> {
-                    showAlert(
-                            Alert.AlertType.INFORMATION,
-                            "Sukces",
-                            "Dane użytkownika zostały zaktualizowane."
-                    );
+                updateTask.setOnSucceeded(evt -> {
+                    showAlert(Alert.AlertType.INFORMATION, "Sukces",
+                            "Dane użytkownika zostały zaktualizowane.");
                     showUserManagement();
                 });
 
-                updateTask.setOnFailed(event -> {
+                updateTask.setOnFailed(evt -> {
                     updateTask.getException().printStackTrace();
-                    showAlert(
-                            Alert.AlertType.ERROR,
-                            "Błąd",
+                    showAlert(Alert.AlertType.ERROR, "Błąd",
                             "Wystąpił błąd podczas zapisywania zmian: "
-                                    + updateTask.getException().getMessage()
-                    );
+                                    + updateTask.getException().getMessage());
+                    showUserManagement();
                 });
 
                 executor.execute(updateTask);
 
             } catch (NumberFormatException ex) {
-                showAlert(
-                        Alert.AlertType.ERROR,
-                        "Błąd",
-                        "Nieprawidłowy format wieku lub zarobków!"
-                );
+                showAlert(Alert.AlertType.ERROR, "Błąd",
+                        "Nieprawidłowy format wieku lub zarobków!");
+                showUserManagement();
             } catch (PasswordException ex) {
-                throw new RuntimeException(ex);
+                showAlert(Alert.AlertType.ERROR, "Nieprawidłowe hasło",
+                        ex.getMessage());
+                showUserManagement();
             } catch (SalaryException ex) {
-                throw new RuntimeException(ex);
+                showAlert(Alert.AlertType.ERROR, "Nieprawidłowe zarobki",
+                        ex.getMessage());
+                showUserManagement();
             }
         });
 
@@ -432,6 +413,7 @@ public class AdminPanelController {
 
         saveButton.setOnAction(e -> {
             try {
+                /* walidacja pustych pól – jak wcześniej */
                 if (nameField.getText().isEmpty()
                         || surnameField.getText().isEmpty()
                         || loginField.getText().isEmpty()
@@ -440,32 +422,27 @@ public class AdminPanelController {
                         || stanowiskoBox.getValue() == null
                         || ageField.getText().isEmpty()
                         || salaryField.getText().isEmpty()) {
-                    showAlert(
-                            Alert.AlertType.WARNING,
-                            "Brak danych",
-                            "Uzupełnij wszystkie pola!"
-                    );
+                    showAlert(Alert.AlertType.WARNING, "Brak danych",
+                            "Uzupełnij wszystkie pola!");
                     return;
                 }
 
-                // Pokaż wskaźnik ładowania
                 showLoadingIndicator();
 
-                // Przygotuj dane
-                final int wiek = Integer.parseInt(ageField.getText());
-                final BigDecimal zarobki = new BigDecimal(salaryField.getText());
+                int         wiek     = Integer.parseInt(ageField.getText());
+                BigDecimal  zarobki  = new BigDecimal(salaryField.getText());
 
-                final Employee nowy = new Employee();
+                Employee nowy = new Employee();
                 nowy.setName(nameField.getText());
                 nowy.setSurname(surnameField.getText());
                 nowy.setLogin(loginField.getText());
-                nowy.setPassword(passwordField.getText());
+                /* --- tu mogły wylecieć wyjątki --- */
+                nowy.setPassword(passwordField.getText());   // PasswordException
                 nowy.setEmail(emailField.getText());
                 nowy.setStanowisko(stanowiskoBox.getValue());
                 nowy.setAge(wiek);
-                nowy.setZarobki(zarobki);
+                nowy.setZarobki(zarobki);                    // SalaryException
 
-                // Dodaj asynchronicznie
                 Task<Void> addTask = new Task<>() {
                     @Override
                     protected Void call() throws Exception {
@@ -474,37 +451,34 @@ public class AdminPanelController {
                     }
                 };
 
-                addTask.setOnSucceeded(event -> {
-                    showAlert(
-                            Alert.AlertType.INFORMATION,
-                            "Sukces",
-                            "Dodano nowego użytkownika!"
-                    );
+                addTask.setOnSucceeded(evt -> {
+                    showAlert(Alert.AlertType.INFORMATION, "Sukces",
+                            "Dodano nowego użytkownika!");
                     showUserManagement();
                 });
 
-                addTask.setOnFailed(event -> {
+                addTask.setOnFailed(evt -> {
                     addTask.getException().printStackTrace();
-                    showAlert(
-                            Alert.AlertType.ERROR,
-                            "Błąd",
+                    showAlert(Alert.AlertType.ERROR, "Błąd",
                             "Nie udało się dodać użytkownika: "
-                                    + addTask.getException().getMessage()
-                    );
+                                    + addTask.getException().getMessage());
+                    showUserManagement();   // usuwa ekran ładowania
                 });
 
                 executor.execute(addTask);
 
             } catch (NumberFormatException ex) {
-                showAlert(
-                        Alert.AlertType.ERROR,
-                        "Błąd",
-                        "Nieprawidłowy format wieku lub zarobków!"
-                );
+                showAlert(Alert.AlertType.ERROR, "Błąd",
+                        "Nieprawidłowy format wieku lub zarobków!");
+                showUserManagement();
             } catch (PasswordException ex) {
-                throw new RuntimeException(ex);
+                showAlert(Alert.AlertType.ERROR, "Nieprawidłowe hasło",
+                        ex.getMessage());
+                showUserManagement();
             } catch (SalaryException ex) {
-                throw new RuntimeException(ex);
+                showAlert(Alert.AlertType.ERROR, "Nieprawidłowe zarobki",
+                        ex.getMessage());
+                showUserManagement();
             }
         });
 
@@ -594,41 +568,23 @@ public class AdminPanelController {
 
     /**
      * Wyświetla panel ustawień konfiguracyjnych systemu.
+     * Tworzenie węzłów odbywa się na wątku JavaFX – brak konfliktów z toolkitem.
      */
     public void showConfigPanel() {
         if (configPanelView == null) {
-            // Pokaż wskaźnik ładowania
-            showLoadingIndicator();
-
-            // Utwórz widok asynchronicznie
-            Task<VBox> task = new Task<>() {
-                @Override
-                protected VBox call() throws Exception {
-                    return createConfigPanelView();
-                }
-            };
-
-            task.setOnSucceeded(e -> {
-                configPanelView = task.getValue();
-                adminPanel.setCenterPane(configPanelView);
-            });
-
-            task.setOnFailed(e -> {
-                task.getException().printStackTrace();
-                showAlert(Alert.AlertType.ERROR, "Błąd", "Nie udało się załadować panelu konfiguracji");
-            });
-
-            executor.execute(task);
-        } else {
-            // Jeśli widok już istnieje, po prostu go pokaż
-            adminPanel.setCenterPane(configPanelView);
+            // bez asynchronicznego Task – budowa UI jest lekka
+            configPanelView = createConfigPanelView();
         }
+        adminPanel.setCenterPane(configPanelView);
     }
 
     /**
      * Tworzy widok panelu konfiguracji.
      *
      * @return VBox zawierający kompletny widok
+     */
+    /**
+     * Buduje widok panelu konfiguracji.
      */
     private VBox createConfigPanelView() {
         VBox layout = new VBox(15);
@@ -637,33 +593,38 @@ public class AdminPanelController {
         Label titleLabel = new Label("Opcje konfiguracyjne");
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
+        // bezpieczne pobieranie wartości z ConfigManager
+        boolean loggingEnabled;
+        boolean notificationsEnabled;
+        try {
+            loggingEnabled       = ConfigManager.isLoggingEnabled();
+            notificationsEnabled = ConfigManager.isNotificationsEnabled();
+        } catch (Exception ex) {
+            // gdyby plik properties był uszkodzony
+            loggingEnabled = false;
+            notificationsEnabled = false;
+        }
+
         CheckBox logsCheckbox = new CheckBox("Włącz logi systemowe");
-        logsCheckbox.setSelected(ConfigManager.isLoggingEnabled());
+        logsCheckbox.setSelected(loggingEnabled);
 
         CheckBox notificationsCheckbox = new CheckBox("Włącz powiadomienia");
-        notificationsCheckbox.setSelected(ConfigManager.isNotificationsEnabled());
+        notificationsCheckbox.setSelected(notificationsEnabled);
 
         Button configurePDF = new Button("Konfiguruj raporty PDF");
         configurePDF.setOnAction(e -> showPDFConfigPanel());
 
         Button backupButton = new Button("Wykonaj backup bazy danych");
-        backupButton.setStyle(
-                "-fx-background-color: #27AE60; "
-                        + "-fx-text-fill: white;"
-        );
+        backupButton.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white;");
         backupButton.setOnAction(e -> performDatabaseBackup());
 
         Button saveButton = new Button("Zapisz");
         saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
         saveButton.setOnAction(e -> {
-            // zapis do ConfigManager i pliku app.properties
             ConfigManager.setLoggingEnabled(logsCheckbox.isSelected());
             ConfigManager.setNotificationsEnabled(notificationsCheckbox.isSelected());
-            showAlert(
-                    Alert.AlertType.INFORMATION,
-                    "Zapisano",
-                    "Ustawienia zostały zachowane."
-            );
+            showAlert(Alert.AlertType.INFORMATION, "Zapisano",
+                    "Ustawienia zostały zachowane.");
         });
 
         layout.getChildren().addAll(
@@ -674,8 +635,6 @@ public class AdminPanelController {
                 backupButton,
                 saveButton
         );
-
-        adminPanel.setCenterPane(layout);
 
         return layout;
     }
@@ -720,6 +679,16 @@ public class AdminPanelController {
      * Wyświetla panel generowania raportów.
      */
     public void showReportsPanel() {
+        if (reportsPanelView == null) {
+            reportsPanelView = createReportsPanelView();
+        }
+        adminPanel.setCenterPane(reportsPanelView);
+    }
+
+    /**
+     * Buduje (synchronnie) widok panelu raportów.
+     */
+    private VBox createReportsPanelView() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
 
@@ -743,14 +712,14 @@ public class AdminPanelController {
         generateButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
         generateButton.setOnAction(e -> {
             String selected = reportType.getValue();
-            LocalDate from = startDatePicker.getValue();
-            LocalDate to   = endDatePicker.getValue();
+            LocalDate from  = startDatePicker.getValue();
+            LocalDate to    = endDatePicker.getValue();
 
             if (selected == null || from == null || to == null) {
-                showAlert(Alert.AlertType.WARNING, "Brak danych", "Wybierz typ raportu oraz zakres dat.");
+                showAlert(Alert.AlertType.WARNING, "Brak danych",
+                        "Wybierz typ raportu oraz zakres dat.");
                 return;
             }
-
             showFilterDialogForReport(selected, from, to);
         });
 
@@ -761,6 +730,8 @@ public class AdminPanelController {
                 new Label("Data do:"), endDatePicker,
                 generateButton
         );
+
+        return layout;
     }
 
 
