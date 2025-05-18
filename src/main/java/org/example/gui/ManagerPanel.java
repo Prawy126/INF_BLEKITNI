@@ -79,42 +79,35 @@ public class ManagerPanel {
     private VBox createMenu() {
         VBox menu = new VBox(15);
         menu.setPadding(new Insets(20));
-        menu.setAlignment(Pos.TOP_CENTER);
         menu.setStyle(
                 "-fx-background-color: #E0E0E0; " +
                         "-fx-border-radius: 10; " +
                         "-fx-background-radius: 10;"
         );
+        menu.setAlignment(Pos.TOP_LEFT);
 
-        // Logo aplikacji
-        Image image = new Image(getClass().getResourceAsStream("/logo.png"));
+        Image image = new Image(
+                Objects.requireNonNull(getClass().getResourceAsStream("/logo.png"))
+        );
         ImageView logo = new ImageView(image);
         logo.setFitWidth(100);
         logo.setFitHeight(100);
         logo.setPreserveRatio(true);
 
-        // Przyciski menu
-        Button addTaskButton = createStyledButton("Dodaj zadanie");
-        addTaskButton.setOnAction(e -> controller.showAddTaskPanel());
+        VBox logoBox = new VBox(logo);
+        logoBox.setAlignment(Pos.CENTER);
 
-        Button assignEmployeeButton = createStyledButton(
-                "Przypisz pracownika do zadania"
-        );
-        assignEmployeeButton.setOnAction(
-                e -> controller.showAssignEmployeeDialog()
-        );
-
+        Button tasksButton = createStyledButton("Zadania dla pracowników");
         Button absenceButton = createStyledButton("Wnioski o nieobecność");
-        absenceButton.setOnAction(e -> controller.showAbsencePanel());
-
         Button logoutButton = createStyledButton("Wyloguj się", "#E74C3C");
+
+        tasksButton.setOnAction(e -> controller.showTaskPanel());
+        absenceButton.setOnAction(e -> controller.showAbsencePanel());
         logoutButton.setOnAction(e -> controller.logout());
 
-        // Ułożenie elementów w menu
-        menu.getChildren().add(logo);
         menu.getChildren().addAll(
-                addTaskButton,
-                assignEmployeeButton,
+                logoBox,
+                tasksButton,
                 absenceButton,
                 logoutButton
         );
