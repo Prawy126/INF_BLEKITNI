@@ -20,12 +20,20 @@ import javafx.stage.Stage;
 import org.example.database.TechnicalIssueRepository;
 import org.example.database.UserRepository;
 import org.example.sys.ConfigPdf;
+import org.example.pdflib.ConfigManager;
+import org.example.pdflib.ReportGenerator;
 import org.example.sys.Employee;
 import org.example.sys.Sort;
 import org.example.sys.TechnicalIssue;
 import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
 
+import java.io.File;
+import javafx.scene.layout.GridPane;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.io.File;
 import java.math.BigDecimal;
 import java.nio.file.InvalidPathException;
@@ -72,7 +80,7 @@ public class AdminPanelController {
     }
 
     /**
-     * Wyświetla panel zarządzania użytkownikami z asynchronicznym ładowaniem danych.
+     * Wyświetla panel zarządzania użytkownikami.
      */
     public void showUserManagement() {
         if (userManagementView == null) {
@@ -630,27 +638,44 @@ public class AdminPanelController {
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
         CheckBox logsCheckbox = new CheckBox("Włącz logi systemowe");
-        logsCheckbox.setSelected(true);
+        logsCheckbox.setSelected(ConfigManager.isLoggingEnabled());
+
+        CheckBox notificationsCheckbox = new CheckBox("Włącz powiadomienia");
+        notificationsCheckbox.setSelected(ConfigManager.isNotificationsEnabled());
 
         Button configurePDF = new Button("Konfiguruj raporty PDF");
         configurePDF.setOnAction(e -> showPDFConfigPanel());
 
         Button backupButton = new Button("Wykonaj backup bazy danych");
         backupButton.setStyle(
-                "-fx-background-color: #27AE60; -fx-text-fill: white;"
+                "-fx-background-color: #27AE60; "
+                        + "-fx-text-fill: white;"
         );
         backupButton.setOnAction(e -> performDatabaseBackup());
 
         Button saveButton = new Button("Zapisz");
         saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+        saveButton.setOnAction(e -> {
+            // zapis do ConfigManager i pliku app.properties
+            ConfigManager.setLoggingEnabled(logsCheckbox.isSelected());
+            ConfigManager.setNotificationsEnabled(notificationsCheckbox.isSelected());
+            showAlert(
+                    Alert.AlertType.INFORMATION,
+                    "Zapisano",
+                    "Ustawienia zostały zachowane."
+            );
+        });
 
         layout.getChildren().addAll(
                 titleLabel,
                 logsCheckbox,
+                notificationsCheckbox,
                 configurePDF,
                 backupButton,
                 saveButton
         );
+
+        adminPanel.setCenterPane(layout);
 
         return layout;
     }
@@ -659,155 +684,42 @@ public class AdminPanelController {
      * Wyświetla panel konfiguracji plików PDF.
      */
     public void showPDFConfigPanel() {
-        // Pokaż wskaźnik ładowania
-        showLoadingIndicator();
-
-        // Utwórz widok asynchronicznie
-        Task<VBox> task = new Task<>() {
-            @Override
-            protected VBox call() throws Exception {
-                return createPDFConfigPanelView();
-            }
-        };
-
-        task.setOnSucceeded(e -> {
-            adminPanel.setCenterPane(task.getValue());
-        });
-
-        task.setOnFailed(e -> {
-            task.getException().printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Błąd", "Nie udało się załadować panelu konfiguracji PDF");
-        });
-
-        executor.execute(task);
-    }
-
-    /**
-     * Tworzy widok panelu konfiguracji PDF.
-     *
-     * @return VBox zawierający kompletny widok
-     */
-    private VBox createPDFConfigPanelView() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
+
         Label titleLabel = new Label("Aktualizacja loga hipermarketu");
 
         Label logoLabel = new Label("Logo:");
         TextField logoField = new TextField();
-        logoField.setText(ConfigPdf.getPathLogo());
 
         Button updateLogoButton = new Button("Aktualizuj logo");
 
         Label sortingLabel = new Label("Sortowanie domyślne:");
         ComboBox<String> sortingComboBox = new ComboBox<>();
         sortingComboBox.getItems().addAll(
-                Sort.NAME.getDisplayName(),
-                Sort.DATE.getDisplayName(),
-                Sort.PRIORITY.getDisplayName()
+                "Nazwa", "Data", "Priorytet"
         );
-        // Ustaw aktualną wartość
-        sortingComboBox.getSelectionModel().select(ConfigPdf.getSort().getDisplayName());
-
-        // Automatyczna aktualizacja przy zmianie
-        sortingComboBox.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                ConfigPdf.setSort(Sort.fromDisplayName(newVal));
-            }
-        });
-
-        Label pathLabel = new Label("Ścieżka zapisu raportów:");
-        TextField pathField = new TextField();
-        pathField.setPromptText("Np. C:/raporty/");
-        pathField.setText(ConfigPdf.getPathPdf());
-
-        Button saveButton = new Button("Zapisz konfigurację");
-        saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
-
-        saveButton.setOnAction(e -> {
-            // Walidacja ścieżki
-            String path = pathField.getText().trim();
-            if (!isValidPath(path)) {
-                showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowa ścieżka");
-                return;
-            }
-
-            // Aktualizacja wszystkich ustawień
-            ConfigPdf.setPathPdf(path);
-            ConfigPdf.setPathLogo(logoField.getText());
-
-            showAlert(Alert.AlertType.INFORMATION, "Sukces", "Konfiguracja zapisana");
-        });
 
         Button backButton = new Button("Wróć");
         backButton.setOnAction(e -> showConfigPanel());
 
         layout.getChildren().addAll(
                 titleLabel,
-                logoLabel, logoField,
+                logoLabel,
+                logoField,
                 updateLogoButton,
-                sortingLabel, sortingComboBox,
-                pathLabel, pathField,
-                saveButton,
+                sortingLabel,
+                sortingComboBox,
                 backButton
         );
 
-        return layout;
-    }
-
-    /**
-     * Sprawdza, czy podana ścieżka jest poprawna.
-     *
-     * @param path ścieżka do sprawdzenia
-     * @return true, jeśli ścieżka jest poprawna, false w przeciwnym razie
-     */
-    private boolean isValidPath(String path) {
-        try {
-            Paths.get(path);
-            return true;
-        } catch (InvalidPathException ex) {
-            return false;
-        }
+        adminPanel.setCenterPane(layout);
     }
 
     /**
      * Wyświetla panel generowania raportów.
      */
     public void showReportsPanel() {
-        if (reportsPanelView == null) {
-            // Pokaż wskaźnik ładowania
-            showLoadingIndicator();
-
-            // Utwórz widok asynchronicznie
-            Task<VBox> task = new Task<>() {
-                @Override
-                protected VBox call() throws Exception {
-                    return createReportsPanelView();
-                }
-            };
-
-            task.setOnSucceeded(e -> {
-                reportsPanelView = task.getValue();
-                adminPanel.setCenterPane(reportsPanelView);
-            });
-
-            task.setOnFailed(e -> {
-                task.getException().printStackTrace();
-                showAlert(Alert.AlertType.ERROR, "Błąd", "Nie udało się załadować panelu raportów");
-            });
-
-            executor.execute(task);
-        } else {
-            // Jeśli widok już istnieje, po prostu go pokaż
-            adminPanel.setCenterPane(reportsPanelView);
-        }
-    }
-
-    /**
-     * Tworzy widok panelu raportów.
-     *
-     * @return VBox zawierający kompletny widok
-     */
-    private VBox createReportsPanelView() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
 
@@ -819,9 +731,8 @@ public class AdminPanelController {
                 "Raport pracowników",
                 "Raport zgłoszeń"
         );
-        reportType.setPrefWidth(200);
+        reportType.setPrefWidth(250);
 
-        Label dateLabel = new Label("Wybierz zakres dat");
         DatePicker startDatePicker = new DatePicker();
         startDatePicker.setPromptText("Data początkowa");
 
@@ -829,22 +740,29 @@ public class AdminPanelController {
         endDatePicker.setPromptText("Data końcowa");
 
         Button generateButton = new Button("Generuj raport");
-        generateButton.setStyle(
-                "-fx-background-color: #3498DB; "
-                        + "-fx-text-fill: white;"
-        );
+        generateButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+        generateButton.setOnAction(e -> {
+            String selected = reportType.getValue();
+            LocalDate from = startDatePicker.getValue();
+            LocalDate to   = endDatePicker.getValue();
+
+            if (selected == null || from == null || to == null) {
+                showAlert(Alert.AlertType.WARNING, "Brak danych", "Wybierz typ raportu oraz zakres dat.");
+                return;
+            }
+
+            showFilterDialogForReport(selected, from, to);
+        });
 
         layout.getChildren().addAll(
                 titleLabel,
                 reportType,
-                dateLabel,
-                startDatePicker,
-                endDatePicker,
+                new Label("Data od:"), startDatePicker,
+                new Label("Data do:"), endDatePicker,
                 generateButton
         );
-
-        return layout;
     }
+
 
     /**
      * Wyświetla panel zgłoszeń technicznych.
@@ -1046,7 +964,7 @@ public class AdminPanelController {
     }
 
     /**
-     * Wykonuje backup bazy danych MySQL do pliku .sql asynchronicznie.
+     * Symuluje wykonanie backupu bazy danych.
      */
     private void performDatabaseBackup() {
         // Pokaż wskaźnik ładowania
@@ -1162,4 +1080,91 @@ public class AdminPanelController {
             alert.showAndWait();
         });
     }
+    /**
+     * Pokazuje dialog z dodatkowymi filtrami zależnie od raportu.
+     */
+    private void showFilterDialogForReport(String reportName, LocalDate from, LocalDate to) {
+        Dialog<Map<String, String>> dialog = new Dialog<>();
+        dialog.setTitle("Filtruj: " + reportName);
+        dialog.setHeaderText("Podaj dodatkowe parametry");
+
+        ButtonType genType = new ButtonType("Generuj", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(genType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20));
+
+        // domyślne filtry datami
+        Map<String, String> filters = new HashMap<>();
+        filters.put("from", from.toString());
+        filters.put("to",   to.toString());
+
+        int row = 0;
+        switch (reportName) {
+            case "Raport sprzedaży":
+                TextField category = new TextField();
+                category.setPromptText("Kategoria produktu");
+                grid.add(new Label("Kategoria:"), 0, row);
+                grid.add(category, 1, row++);
+                dialog.setResultConverter(btn -> {
+                    if (btn == genType) {
+                        filters.put("category", category.getText());
+                        return filters;
+                    }
+                    return null;
+                });
+                break;
+
+            case "Raport pracowników":
+                TextField role = new TextField();
+                role.setPromptText("Stanowisko");
+                grid.add(new Label("Stanowisko:"), 0, row);
+                grid.add(role, 1, row++);
+                dialog.setResultConverter(btn -> {
+                    if (btn == genType) {
+                        filters.put("role", role.getText());
+                        return filters;
+                    }
+                    return null;
+                });
+                break;
+
+            case "Raport zgłoszeń":
+                ComboBox<String> statusBox = new ComboBox<>();
+                statusBox.getItems().addAll("Nowe", "W trakcie", "Rozwiązane");
+                statusBox.setPromptText("Status zgłoszenia");
+                grid.add(new Label("Status:"), 0, row);
+                grid.add(statusBox, 1, row++);
+                dialog.setResultConverter(btn -> {
+                    if (btn == genType) {
+                        filters.put("status", statusBox.getValue());
+                        return filters;
+                    }
+                    return null;
+                });
+                break;
+
+            default:
+                dialog.setResultConverter(btn -> btn == genType ? filters : null);
+        }
+
+        dialog.getDialogPane().setContent(grid);
+
+        Optional<Map<String, String>> result = dialog.showAndWait();
+        result.ifPresent(flt -> {
+            try {
+                File output = ReportGenerator.generate(reportName, flt);
+                showAlert(Alert.AlertType.INFORMATION,
+                        "Gotowe",
+                        "Raport wygenerowany:\n" + output.getAbsolutePath());
+            } catch (Exception ex) {
+                showAlert(Alert.AlertType.ERROR,
+                        "Błąd",
+                        "Nie udało się wygenerować raportu:\n" + ex.getMessage());
+            }
+        });
+    }
+
 }

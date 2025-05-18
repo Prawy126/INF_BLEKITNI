@@ -17,6 +17,7 @@ import java.util.Properties;
 public class ConfigManager {
 
     private static final String CONFIG_FILE = "config.properties";
+    private static Properties props = new Properties();
 
     public static String getReportPath() {
         Properties props = new Properties();
@@ -27,6 +28,33 @@ public class ConfigManager {
             return "";
         }
     }
+
+    public static boolean isNotificationsEnabled() {
+        return Boolean.parseBoolean(props.getProperty("notifications.enabled", "true"));
+    }
+
+    public static void setNotificationsEnabled(boolean on) {
+        props.setProperty("notifications.enabled", Boolean.toString(on));
+        save();
+    }
+
+    public static boolean isLoggingEnabled() {
+        return Boolean.parseBoolean(props.getProperty("logging.enabled", "true"));
+    }
+
+    public static void setLoggingEnabled(boolean on) {
+        props.setProperty("logging.enabled", Boolean.toString(on));
+        save();
+    }
+
+    private static void save() {
+        try (OutputStream out = new FileOutputStream(CONFIG_FILE)) {
+            props.store(out, "Ustawienia aplikacji");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static void setReportPath(String path) {
         Properties props = new Properties();
