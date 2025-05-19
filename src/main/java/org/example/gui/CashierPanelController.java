@@ -992,20 +992,23 @@ public class CashierPanelController {
      * użyj:
      *   transactionRepository.getTransactionsByPeriod(selectedDate, toPdfPeriodType(periodType))
      */
-    private List<SalesReportGenerator.SalesRecord> getSalesDataForReport(org.example.sys.PeriodType periodType,
-                                                                         LocalDate selectedDate) {
-        // Konwertujemy periodType na ten oczekiwany przez TransactionRepository:
-        pdf.SalesReportGenerator.PeriodType pdfPeriod = toPdfPeriodType(periodType);
+    /**
+     * Pobiera transakcje z repozytorium (na podstawie sys.PeriodType),
+     * a następnie adaptuje je do rekordów PDF-owych.
+     */
+    private List<SalesReportGenerator.SalesRecord> getSalesDataForReport(
+            org.example.sys.PeriodType periodType,
+            LocalDate selectedDate) {
 
-        // Teraz repozytorium przyjmie właściwe enumy:
+        // 1) Pobranie transakcji z repozytorium JPA, używając enum-a sys.PeriodType
         List<Transaction> transactions =
-                transactionRepository.getTransactionsByPeriod(selectedDate, pdfPeriod);
+                transactionRepository.getTransactionsByPeriod(selectedDate, periodType);
 
+        // 2) Konwersja każdej transakcji na rekord PDF-owy
         List<SalesReportGenerator.SalesRecord> salesRecords = new ArrayList<>();
         for (Transaction tx : transactions) {
             for (org.example.sys.Product srcProduct : tx.getProdukty()) {
-                // adaptujemy do klasy PDF-owej
-                // jeżeli masz gdzieś w transakcji info o ilości, np. transaction.getQuantity(product)
+                // adaptujemy obiekt sys.Product na pdf-owy
                 sys.Product pdfProduct = ProductAdapter.toPdfProduct(srcProduct);
 
                 LocalDateTime txDate = tx.getData()
@@ -1018,8 +1021,8 @@ public class CashierPanelController {
                         txDate,
                         pdfProduct.getName(),
                         pdfProduct.getCategory(),
-                        pdfProduct.getQuantity(),
-                        pdfProduct.getPrice() * pdfProduct.getQuantity()
+                        pdfProduct.getQuantity(),                         // ilość
+                        pdfProduct.getPrice() * pdfProduct.getQuantity()  // wartość
                 ));
             }
         }

@@ -21,6 +21,7 @@ module org.example.gui {
     requires java.desktop;
     requires kernel;
     requires layout;
+    requires mysql.connector.j;
 
     opens org.example.gui to javafx.fxml;
     opens org.example.sys to javafx.base, javafx.fxml, org.hibernate.orm.core, jakarta.persistence;

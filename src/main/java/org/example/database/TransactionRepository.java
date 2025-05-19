@@ -8,14 +8,20 @@
 
 package org.example.database;
 
+import com.mysql.cj.Session;
 import jakarta.persistence.*;
+import org.example.sys.PeriodType;
 import org.example.sys.Transaction;
 import pdf.SalesReportGenerator;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+
+import static pdf.SalesReportGenerator.PeriodType.DAILY;
 
 public class TransactionRepository {
 
@@ -86,48 +92,68 @@ public class TransactionRepository {
     }
 
     /**
-     * Pobiera transakcje z określonego okresu.
-     *
-     * @param date data dla której pobieramy transakcje
-     * @param periodType typ okresu (dzienny, miesięczny, roczny)
-     * @return lista transakcji z danego okresu
+     * Pobiera transakcje z określonego okresu (dziennie, miesięcznie lub rocznie)
+     * i od razu fetche kolekcję t.produkty, żeby uniknąć LazyInitializationException.
      */
-    public List<Transaction> getTransactionsByPeriod(LocalDate date, SalesReportGenerator.PeriodType periodType) {
+    public List<Transaction> getTransactionsByPeriod(LocalDate selectedDate, PeriodType periodType) {
+        // 1) Obliczamy zakres od–do (LocalDateTime)
+        LocalDateTime od, do_;
+        switch (periodType) {
+            case DAILY:
+                od  = selectedDate.atStartOfDay();
+                do_ = selectedDate.atTime(LocalTime.MAX);
+                break;
+            case MONTHLY:
+                od  = selectedDate.withDayOfMonth(1).atStartOfDay();
+                do_ = selectedDate.withDayOfMonth(selectedDate.lengthOfMonth())
+                        .atTime(LocalTime.MAX);
+                break;
+            case YEARLY:
+                od  = selectedDate.withDayOfYear(1).atStartOfDay();
+                do_ = selectedDate.withDayOfYear(selectedDate.lengthOfYear())
+                        .atTime(LocalTime.MAX);
+                break;
+            default:
+                throw new IllegalArgumentException("Nieznany typ okresu: " + periodType);
+        }
+
+        // 2) Konwersja na java.util.Date (bo pole Transaction.data jest Date)
+        Date start = Date.from(od.atZone(ZoneId.systemDefault()).toInstant());
+        Date end   = Date.from(do_.atZone(ZoneId.systemDefault()).toInstant());
+
         EntityManager em = emf.createEntityManager();
         try {
-            LocalDate startDate, endDate;
+            // 3) Budujemy JPQL z fetch-join
+            String jpql = """
+            SELECT DISTINCT t
+            FROM Transaction t
+              LEFT JOIN FETCH t.produkty p
+            WHERE t.data BETWEEN :start AND :end
+            ORDER BY t.data
+            """;
 
-            switch (periodType) {
-                case DAILY:
-                    startDate = date;
-                    endDate = date;
-                    break;
-                case MONTHLY:
-                    startDate = date.withDayOfMonth(1);
-                    endDate = startDate.plusMonths(1).minusDays(1);
-                    break;
-                case YEARLY:
-                    startDate = date.withDayOfYear(1);
-                    endDate = startDate.plusYears(1).minusDays(1);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Nieprawidłowy typ okresu");
+            EntityTransaction tx = em.getTransaction();
+            tx.begin();
+
+            TypedQuery<Transaction> query = em.createQuery(jpql, Transaction.class);
+            query.setParameter("start", start, TemporalType.TIMESTAMP);
+            query.setParameter("end",   end,   TemporalType.TIMESTAMP);
+
+            List<Transaction> wynik = query.getResultList();
+
+            tx.commit();
+            return wynik;
+        } catch (RuntimeException ex) {
+            // w razie błędu wycofujemy i przepuszczamy dalej
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
             }
-
-            // Konwersja LocalDate na Date
-            Date startDateUtil = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            Date endDateUtil = Date.from(endDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).minusSeconds(1).toInstant());
-
-            return em.createQuery(
-                            "SELECT t FROM Transaction t WHERE t.data >= :startDate AND t.data <= :endDate",
-                            Transaction.class)
-                    .setParameter("startDate", startDateUtil)
-                    .setParameter("endDate", endDateUtil)
-                    .getResultList();
+            throw ex;
         } finally {
             em.close();
         }
     }
+
 
     public void close() {
         if (emf.isOpen()) {
