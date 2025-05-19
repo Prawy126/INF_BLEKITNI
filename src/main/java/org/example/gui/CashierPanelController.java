@@ -20,17 +20,22 @@ import javafx.stage.*;
 import javafx.util.Duration;
 import javafx.util.converter.IntegerStringConverter;
 import org.example.database.*;
+import org.example.pdflib.ProductAdapter;
 import org.example.sys.*;
 import org.example.database.RaportRepository;
 import org.example.sys.Raport;
 import org.example.sys.PeriodType;
 import org.example.pdflib.ReportGenerator;
+import pdf.SalesReportGenerator;
+import pdf.SalesReportGenerator.SalesRecord;
 
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.*;
 import java.util.List;
@@ -249,12 +254,10 @@ public class CashierPanelController {
             }
 
             try {
-                // Generowanie raportu
-                PeriodType periodType = getPeriodTypeFromString(reportTypeStr);
-                //String reportPath = generateSalesReport(periodType, selectedDate, selectedCategories);
+                org.example.sys.PeriodType periodType = getPeriodTypeFromString(reportTypeStr);
+                String reportPath = generateSalesReport(periodType, selectedDate, selectedCategories);
+                saveReportInfo(periodType, selectedDate, reportPath);
 
-                // Zapisanie informacji o raporcie w bazie danych
-                //saveReportInfo(periodType, selectedDate, reportPath);
 
                 showNotification("Sukces", "Raport został wygenerowany.");
                 dialog.close();
@@ -263,6 +266,7 @@ public class CashierPanelController {
                 ex.printStackTrace();
                 showNotification("Błąd", "Nie udało się wygenerować raportu: " + ex.getMessage());
             }
+
         });
 
         cancelBtn.setOnAction(e -> dialog.close());
@@ -951,6 +955,83 @@ public class CashierPanelController {
             return product.getPrice() * quantity;
         }
     }
+
+    private String generateSalesReport(org.example.sys.PeriodType periodType,
+                                       LocalDate selectedDate,
+                                       List<String> categories) throws Exception {
+
+        List<SalesReportGenerator.SalesRecord> salesData =
+                getSalesDataForReport(periodType, selectedDate);
+
+        if (salesData.isEmpty()) {
+            throw new Exception("Brak danych transakcji dla wybranego okresu.");
+        }
+
+        SalesReportGenerator reportGenerator = new SalesReportGenerator();
+        reportGenerator.setSalesData(salesData);
+
+        String periodName = switch (periodType) {
+            case DAILY   -> "dzienny";
+            case MONTHLY -> "miesięczny";
+            case YEARLY  -> "roczny";
+        };
+
+        String fileName  = "raport_%s_%s.pdf".formatted(
+                periodName,
+                selectedDate.format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE));
+        String outputPath = REPORTS_DIRECTORY + File.separator + fileName;
+
+        // <--- przekazujemy J-Ż poprawny (PDF-owy) enum
+        reportGenerator.generateReport(outputPath, toPdfPeriodType(periodType), categories);
+
+        return outputPath;
+    }
+    /**
+     * Zamiast:
+     *   transactionRepository.getTransactionsByPeriod(selectedDate, periodType)
+     * użyj:
+     *   transactionRepository.getTransactionsByPeriod(selectedDate, toPdfPeriodType(periodType))
+     */
+    private List<SalesReportGenerator.SalesRecord> getSalesDataForReport(org.example.sys.PeriodType periodType,
+                                                                         LocalDate selectedDate) {
+        // Konwertujemy periodType na ten oczekiwany przez TransactionRepository:
+        pdf.SalesReportGenerator.PeriodType pdfPeriod = toPdfPeriodType(periodType);
+
+        // Teraz repozytorium przyjmie właściwe enumy:
+        List<Transaction> transactions =
+                transactionRepository.getTransactionsByPeriod(selectedDate, pdfPeriod);
+
+        List<SalesReportGenerator.SalesRecord> salesRecords = new ArrayList<>();
+        for (Transaction tx : transactions) {
+            for (org.example.sys.Product srcProduct : tx.getProdukty()) {
+                // adaptujemy do klasy PDF-owej
+                // jeżeli masz gdzieś w transakcji info o ilości, np. transaction.getQuantity(product)
+                sys.Product pdfProduct = ProductAdapter.toPdfProduct(srcProduct);
+
+                LocalDateTime txDate = tx.getData()
+                        .toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime();
+
+                salesRecords.add(new SalesReportGenerator.SalesRecord(
+                        tx.getId(),
+                        txDate,
+                        pdfProduct.getName(),
+                        pdfProduct.getCategory(),
+                        pdfProduct.getQuantity(),
+                        pdfProduct.getPrice() * pdfProduct.getQuantity()
+                ));
+            }
+        }
+        return salesRecords;
+    }
+
+    // Dodaj to do klasy CashierPanelController:
+    private pdf.SalesReportGenerator.PeriodType toPdfPeriodType(org.example.sys.PeriodType periodType) {
+        return switch (periodType) {
+            case DAILY   -> pdf.SalesReportGenerator.PeriodType.DAILY;
+            case MONTHLY -> pdf.SalesReportGenerator.PeriodType.MONTHLY;
+            case YEARLY  -> pdf.SalesReportGenerator.PeriodType.YEARLY;
+        };
+    }
 }
-
-

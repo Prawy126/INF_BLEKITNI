@@ -16,45 +16,29 @@ import sys.Product;
  */
 public class ProductAdapter {
 
-    /**
-     * Konwertuje obiekt Product z głównego projektu na obiekt Product
-     * używany przez bibliotekę PDF.
-     *
-     * @param sourceProduct obiekt Product z głównego projektu
-     * @return obiekt Product kompatybilny z biblioteką PDF
-     */
-    public static sys.Product toPdfProduct(Product sourceProduct) {
-        if (sourceProduct == null) {
-            return null;
-        }
+    public static sys.Product toPdfProduct(org.example.sys.Product source) {
+        if (source == null) return null;
+        // używamy PDF-owego konstruktora (name, category, price)
         return new sys.Product(
-                sourceProduct.getName(),
-                sourceProduct.getCategory(),
-                sourceProduct.getPrice(),
-                sourceProduct.getQuantity()
+                source.getName(),
+                source.getCategory(),
+                source.getPrice()
         );
     }
 
-    /**
-     * Konwertuje listę obiektów Product z głównego projektu na listę obiektów
-     * Product używanych przez bibliotekę PDF.
-     *
-     * @param sourceProducts lista obiektów Product z głównego projektu
-     * @return lista obiektów Product kompatybilnych z biblioteką PDF
-     */
-    public static java.util.List<sys.Product> toPdfProducts(java.util.List<Product> sourceProducts) {
-        if (sourceProducts == null) {
-            return null;
-        }
 
-        java.util.List<sys.Product> pdfProducts = new java.util.ArrayList<>(sourceProducts.size());
-        for (Product sourceProduct : sourceProducts) {
-            pdfProducts.add(toPdfProduct(sourceProduct));
-        }
+    // Lista, jeśli potrzebujesz:
+    public static java.util.List<sys.Product> toPdfProducts(
+            java.util.List<org.example.sys.Product> src,
+            java.util.List<Integer> quantities) {
 
-        return pdfProducts;
+        if (src == null || quantities == null || src.size() != quantities.size()) return null;
+        java.util.List<sys.Product> out = new java.util.ArrayList<>(src.size());
+        for (int i = 0; i < src.size(); i++) {
+            out.add(toPdfProduct(src.get(i)));
+        }
+        return out;
     }
-
     /**
      * Konwertuje obiekt Product z biblioteki PDF z powrotem na obiekt Product
      * z głównego projektu.
