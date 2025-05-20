@@ -26,6 +26,7 @@ import org.example.database.RaportRepository;
 import org.example.sys.Raport;
 import org.example.sys.PeriodType;
 import org.example.pdflib.ReportGenerator;
+import org.hibernate.Session;
 import pdf.SalesReportGenerator;
 import pdf.SalesReportGenerator.SalesRecord;
 
@@ -48,6 +49,7 @@ public class CashierPanelController {
     private final RaportRepository reportRepository;
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private boolean reportGeneratedInCurrentSession = false;
 
 
     // Ścieżka do katalogu z raportami
@@ -234,6 +236,8 @@ public class CashierPanelController {
                 PeriodType.MONTHLY.getDisplayName(),
                 PeriodType.YEARLY.getDisplayName()
         );
+        // Domyślnie wybierz raport dzienny
+        typeBox.setValue(PeriodType.DAILY.getDisplayName());
 
         // Wybór daty
         Label dateLabel = new Label("Data raportu:");
@@ -270,8 +274,43 @@ public class CashierPanelController {
             }
 
             try {
+                // Wyświetl informację o rozpoczęciu generowania raportu
+                System.out.println("Rozpoczynam generowanie raportu typu: " + reportTypeStr);
+
                 PeriodType periodType = getPeriodTypeFromString(reportTypeStr);
                 LocalDate[] dates = calculateReportDates(periodType, selectedDate);
+
+                System.out.println("Generowanie raportu dla okresu: " + dates[0] + " do " + dates[1]);
+
+                // Sprawdź, czy istnieją transakcje w wybranym okresie
+                Date d1 = Date.from(dates[0].atStartOfDay(ZoneId.systemDefault()).toInstant());
+                Date d2 = Date.from(dates[1].atTime(23,59,59).atZone(ZoneId.systemDefault()).toInstant());
+                List<Transaction> transactions = transactionRepository.getTransactionsBetweenDates(d1, d2);
+
+                if (transactions.isEmpty()) {
+                    // Wyświetl komunikat o braku danych
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Brak danych");
+                    alert.setHeaderText("Brak transakcji w wybranym okresie");
+                    alert.setContentText("Nie znaleziono żadnych transakcji w okresie od " +
+                            dates[0].format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) +
+                            " do " +
+                            dates[1].format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) +
+                            ".\n\nNie można wygenerować raportu bez danych.");
+
+                    alert.showAndWait();
+
+                    // Mimo braku raportu, oznaczamy flagę jako true, aby umożliwić zamknięcie aplikacji
+                    reportGeneratedInCurrentSession = true;
+
+                    // Zapisujemy informację o próbie wygenerowania raportu
+                    saveEmptyReportInfo(periodType, dates[0], dates[1]);
+
+                    System.out.println("Próba wygenerowania raportu bez danych, flaga ustawiona na: " + reportGeneratedInCurrentSession);
+
+                    dialog.close();
+                    return;
+                }
 
                 String reportPath = generateSalesReport(
                         periodType,
@@ -280,17 +319,36 @@ public class CashierPanelController {
                         selectedCategories
                 );
 
+                System.out.println("Raport wygenerowany pomyślnie: " + reportPath);
+                System.out.println("Stan flagi przed zapisaniem informacji: " + reportGeneratedInCurrentSession);
+
+                // Zapisz informacje o raporcie w bazie danych
                 saveReportInfo(periodType, dates[0], dates[1], reportPath);
 
+                // Bezpośrednio ustaw flagę po zapisaniu raportu
+                reportGeneratedInCurrentSession = true;
+
+                System.out.println("Stan flagi po zapisaniu informacji: " + reportGeneratedInCurrentSession);
+
+                // Wyświetl powiadomienie o sukcesie
                 showNotification("Sukces", "Raport zapisano w: " + reportPath);
+
+                // Zamknij dialog po wygenerowaniu raportu
+                dialog.close();
+
+                // Dodatkowe sprawdzenie po zamknięciu dialogu
+                System.out.println("Stan flagi po zamknięciu dialogu: " + reportGeneratedInCurrentSession);
+
             } catch (Exception ex) {
                 ex.printStackTrace();
                 showNotification("Błąd", "Nie udało się wygenerować raportu: " + ex.getMessage());
             }
-
         });
 
-        cancelBtn.setOnAction(e -> dialog.close());
+        cancelBtn.setOnAction(e -> {
+            System.out.println("Anulowano generowanie raportu");
+            dialog.close();
+        });
 
         VBox root = new VBox(10);
         root.setPadding(new Insets(20));
@@ -302,78 +360,54 @@ public class CashierPanelController {
                 buttonBox
         );
 
+        // Dodaj informację o stanie flagi przed otwarciem dialogu
+        System.out.println("Stan flagi przed otwarciem dialogu: " + reportGeneratedInCurrentSession);
+
         setupDialog(dialog, root);
+
+        // Dodaj obsługę zamknięcia okna
+        dialog.setOnHidden(event -> {
+            System.out.println("Dialog zamknięty, stan flagi: " + reportGeneratedInCurrentSession);
+        });
+    }
+
+    /**
+     * Zapisuje informację o próbie wygenerowania raportu bez danych.
+     */
+    private void saveEmptyReportInfo(PeriodType periodType, LocalDate startDate, LocalDate endDate) {
+        // Pobranie zalogowanego pracownika
+        Employee currentEmployee = userRepository.getCurrentEmployee();
+        if (currentEmployee == null) {
+            throw new IllegalStateException("Nie jesteś zalogowany.");
+        }
+
+        // Utworzenie obiektu raportu
+        Raport report = new Raport();
+        report.setPracownik(currentEmployee);
+        report.setDataPoczatku(startDate);
+        report.setDataZakonczenia(endDate);
+        report.setTypRaportu(periodType.getDisplayName() + " (brak danych)");
+        report.setSciezkaPliku(""); // Brak ścieżki, ponieważ nie wygenerowano pliku
+
+        // Zapisanie raportu w bazie danych
+        reportRepository.dodajRaport(report);
+
+        // Upewnij się, że flaga jest ustawiona
+        this.reportGeneratedInCurrentSession = true;
+
+        // Dodaj log dla debugowania
+        System.out.println("Zapisano informację o próbie wygenerowania raportu bez danych, flaga ustawiona na: " + this.reportGeneratedInCurrentSession);
     }
 
     private PeriodType getPeriodTypeFromString(String typeStr) {
         return PeriodType.fromDisplay(typeStr);
     }
 
+    public boolean isReportGeneratedInCurrentSession() {
+        return reportGeneratedInCurrentSession;
+    }
 
-    /*private String generateSalesReport(PeriodType periodType, LocalDate selectedDate, List<String> categories) throws Exception {
-        // Pobranie danych transakcji
-        List<SalesRecord> salesData = getSalesDataForReport(periodType, selectedDate);
-
-        if (salesData.isEmpty()) {
-            throw new Exception("Brak danych transakcji dla wybranego okresu.");
-        }
-
-        // Utworzenie generatora raportów
-        SalesReportGenerator reportGenerator = new SalesReportGenerator();
-        reportGenerator.setSalesData(salesData);
-
-        // Ustalenie nazwy pliku
-        String periodName = switch (periodType) {
-            case DAILY -> "dzienny";
-            case MONTHLY -> "miesięczny";
-            case YEARLY -> "roczny";
-        };
-
-        String fileName = String.format("raport_%s_%s.pdf", periodName, selectedDate.format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE));
-        String outputPath = REPORTS_DIRECTORY + File.separator + fileName;
-
-        // Generowanie raportu
-        reportGenerator.generateReport(outputPath, periodType, categories);
-
-        return outputPath;
-    }*/
-
-    /*private List<SalesRecord> getSalesDataForReport(PeriodType periodType, LocalDate selectedDate) {
-        // Pobranie transakcji z bazy danych
-        List<Transaction> transactions = transactionRepository.getTransactionsByPeriod(selectedDate, periodType);
-
-        // Konwersja danych transakcji do formatu wymaganego przez generator raportów
-        List<SalesRecord> salesRecords = new ArrayList<>();
-
-        for (Transaction transaction : transactions) {
-            // Dla każdego produktu w transakcji tworzymy rekord sprzedaży
-            for (Warehouse product : transaction.getProdukty()) {
-                // Zakładamy, że Warehouse zawiera informacje o produkcie i ilości
-                // W rzeczywistej implementacji należy dostosować to do struktury danych
-
-                LocalDateTime transactionDateTime = transaction.getData()
-                        .toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDateTime();
-
-                // Tworzenie rekordu sprzedaży
-                SalesRecord salesRecord = new SalesRecord(
-                        transaction.getId(),
-                        transactionDateTime,
-                        product.getNazwa(),
-                        product.getKategoria(),
-                        product.getIlosc(),
-                        product.getCena() * product.getIlosc()
-                );
-
-                salesRecords.add(salesRecord);
-            }
-        }
-
-        return salesRecords;
-    }*/
-
-    private void saveReportInfo(PeriodType periodType, LocalDate startDate, LocalDate endDate,String reportPath) {
+    private void saveReportInfo(PeriodType periodType, LocalDate startDate, LocalDate endDate, String reportPath) {
         // Pobranie zalogowanego pracownika
         Employee currentEmployee = userRepository.getCurrentEmployee();
         if (currentEmployee == null) {
@@ -403,10 +437,14 @@ public class CashierPanelController {
         report.setTypRaportu(periodType.getDisplayName());
         report.setSciezkaPliku(reportPath);
 
-
-
         // Zapisanie raportu w bazie danych
         reportRepository.dodajRaport(report);
+
+        // Upewnij się, że flaga jest ustawiona
+        this.reportGeneratedInCurrentSession = true;
+
+        // Dodaj log dla debugowania
+        System.out.println("Raport wygenerowany, flaga ustawiona na: " + this.reportGeneratedInCurrentSession);
     }
 
     private TableView<Raport> createReportTable() {
@@ -579,14 +617,6 @@ public class CashierPanelController {
                     periodType = PeriodType.YEARLY;
                     break;
             }
-
-            // Generowanie raportu
-            //List<SalesRecord> salesData = getSalesDataForReport(periodType, date);
-            //String reportPath = generateSalesReport(periodType, date, null);
-
-            // Zapisanie informacji o raporcie
-            //saveReportInfo(periodType, date, reportPath);
-
         } catch (Exception e) {
             e.printStackTrace();
             showNotification("Błąd", "Nie udało się wygenerować raportu: " + e.getMessage());
@@ -725,21 +755,43 @@ public class CashierPanelController {
                 return;
             }
 
+            // Zapisz transakcję
             Transaction transaction = new Transaction();
             transaction.setPracownik(currentEmployee);
             transaction.setData(new Date());
+            transactionRepository.dodajTransakcje(transaction);
+
+            // Pobierz ID zapisanej transakcji
+            int transactionId = transaction.getId();
+
+            // Zapisz produkty w transakcji za pomocą natywnego SQL
+            Session session = transactionRepository.getSession();
+            session.beginTransaction();
 
             WarehouseRepository warehouseRepo = new WarehouseRepository();
             for (TransactionItem item : items) {
-                int produktId      = item.getProduct().getId();
-                int dostepnaIlosc  = getDostepnaIlosc(item.getProduct());
-                int nowaIlosc      = dostepnaIlosc - item.getQuantity();
-                warehouseRepo.ustawIloscProduktu(produktId, nowaIlosc);
-                transaction.getProdukty().add(item.getProduct());   //        <-- relacja ManyToMany
+                int productId = item.getProduct().getId();
+                int quantity = item.getQuantity();
+
+                // Aktualizuj stan magazynowy
+                int dostepnaIlosc = getDostepnaIlosc(item.getProduct());
+                int nowaIlosc = dostepnaIlosc - quantity;
+                warehouseRepo.ustawIloscProduktu(productId, nowaIlosc);
+
+                // Zapisz relację transakcja-produkt za pomocą natywnego SQL
+                session.createNativeQuery(
+                                "INSERT INTO Transakcje_Produkty (Id_transakcji, Id_produktu, Ilosc) VALUES (:txId, :prodId, :qty)",
+                                Void.class)
+                        .setParameter("txId", transactionId)
+                        .setParameter("prodId", productId)
+                        .setParameter("qty", quantity)
+                        .executeUpdate();
             }
+
+            session.getTransaction().commit();
+            session.close();
             warehouseRepo.close();
 
-            transactionRepository.dodajTransakcje(transaction);
             showNotification("Sukces", "Transakcja została zapisana pomyślnie.");
             dialog.close();
 
@@ -788,16 +840,95 @@ public class CashierPanelController {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
+
+        // Sprawdź, czy raport dzienny został wygenerowany dzisiaj
+        boolean reportGeneratedToday = isDailyReportGeneratedToday();
+        System.out.println("Czy raport dzienny został wygenerowany dzisiaj: " + reportGeneratedToday);
+
+        // Użyj obu warunków do decyzji
+        if (!reportGeneratedInCurrentSession && !reportGeneratedToday) {
+            Label warningLabel = new Label("Uwaga: Nie wygenerowano jeszcze raportu dziennego!");
+            warningLabel.setStyle("-fx-text-fill: #E74C3C; -fx-font-weight: bold;");
+
+            Button generateReportButton = cashierPanel.createStyledButton("Wygeneruj raport dzienny", "#3498DB");
+            generateReportButton.setOnAction(e -> showReportDialog());
+
+            layout.getChildren().addAll(warningLabel, generateReportButton);
+        }
+
         Button confirmButton = cashierPanel.createStyledButton("Potwierdź zamknięcie zmiany", "#E67E22");
         confirmButton.setOnAction(e -> {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Zamknięcie zmiany");
-            alert.setHeaderText("Zmiana została pomyślnie zamknięta");
-            alert.setContentText("Dziękujemy za pracę w tej zmianie!");
-            alert.showAndWait();
+            // Sprawdź ponownie, bo mogło się zmienić
+            boolean currentReportGeneratedToday = isDailyReportGeneratedToday();
+
+            if (!reportGeneratedInCurrentSession && !currentReportGeneratedToday) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Ostrzeżenie");
+                alert.setHeaderText("Nie wygenerowano raportu dziennego");
+                alert.setContentText("Przed zamknięciem zmiany należy wygenerować raport dzienny. Czy chcesz to zrobić teraz?");
+
+                ButtonType generateButton = new ButtonType("Generuj raport");
+                ButtonType ignoreButton = new ButtonType("Ignoruj i zamknij");
+                ButtonType cancelButton = new ButtonType("Anuluj", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                alert.getButtonTypes().setAll(generateButton, ignoreButton, cancelButton);
+
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isPresent()) {
+                    if (result.get() == generateButton) {
+                        showReportDialog();
+                        return;
+                    } else if (result.get() == cancelButton) {
+                        return;
+                    }
+                    // Jeśli wybrano "Ignoruj i zamknij", kontynuuj
+                }
+            }
+
+            // Kod zamykania zmiany
+            Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+            successAlert.setTitle("Zamknięcie zmiany");
+            successAlert.setHeaderText("Zmiana została pomyślnie zamknięta");
+            successAlert.setContentText("Dziękujemy za pracę w tej zmianie!");
+            successAlert.showAndWait();
+
+            // Resetuj flagę po zamknięciu zmiany
+            reportGeneratedInCurrentSession = false;
         });
+
         layout.getChildren().add(confirmButton);
         cashierPanel.setCenterPane(layout);
+    }
+
+    public void resetReportGeneratedFlag() {
+        reportGeneratedInCurrentSession = false;
+    }
+
+    public boolean isDailyReportGeneratedToday() {
+        LocalDate today = LocalDate.now();
+        Employee currentEmployee = userRepository.getCurrentEmployee();
+
+        if (currentEmployee == null) {
+            System.out.println("isDailyReportGeneratedToday: Brak zalogowanego pracownika");
+            return false;
+        }
+
+        List<Raport> todaysReports = reportRepository.pobierzRaportyPracownikaDzien(
+                currentEmployee.getId(),
+                today);
+
+        System.out.println("isDailyReportGeneratedToday: Znaleziono " + todaysReports.size() + " raportów na dzisiaj");
+
+        return !todaysReports.isEmpty();
+    }
+
+    public void markReportAsGenerated() {
+        System.out.println("Oznaczanie raportu jako wygenerowany");
+        this.reportGeneratedInCurrentSession = true;
+    }
+
+    public void checkReportFlagState(String panelName) {
+        System.out.println("Sprawdzanie flagi przy przełączaniu do panelu " + panelName + ": " + reportGeneratedInCurrentSession);
     }
 
     public void showAbsenceRequestForm() {
@@ -937,12 +1068,34 @@ public class CashierPanelController {
     }
 
     public void logout() {
+        System.out.println("Sprawdzanie flagi przed wylogowaniem: " + reportGeneratedInCurrentSession);
+
+        // Sprawdź, czy raport dzienny został wygenerowany dzisiaj
+        boolean reportGeneratedToday = isDailyReportGeneratedToday();
+        System.out.println("Czy raport dzienny został wygenerowany dzisiaj: " + reportGeneratedToday);
+
+        // Użyj obu warunków do decyzji
+        if (!reportGeneratedInCurrentSession && !reportGeneratedToday) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Uwaga");
+            alert.setHeaderText("Nie wygenerowano raportu dziennego");
+            alert.setContentText("Czy na pewno chcesz się wylogować bez wygenerowania raportu dziennego?");
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() != ButtonType.OK) {
+                return; // Anuluj wylogowanie
+            }
+        }
+
         UserRepository.resetCurrentEmployee();
         Stage primaryStage = cashierPanel.getPrimaryStage();
+
+        // Usuń handler zamknięcia okna przed zamknięciem
+        primaryStage.setOnCloseRequest(null);
+
         primaryStage.close();
         HelloApplication.showLoginScreen(primaryStage);
     }
-
 
     public static class TransactionItem {
         private final Product product;
@@ -1008,10 +1161,6 @@ public class CashierPanelController {
         return new File(outputPath).getAbsolutePath();
     }
 
-    /**
-     * Pobiera transakcje z repozytorium (na podstawie sys.PeriodType),
-     * a następnie adaptuje je do rekordów PDF-owych.
-     */
     private List<SalesReportGenerator.SalesRecord> getSalesDataForReport(
             LocalDate startDate, LocalDate endDate) {
 
@@ -1026,9 +1175,10 @@ public class CashierPanelController {
                     Instant.ofEpochMilli(tx.getData().getTime()),
                     ZoneId.systemDefault());
 
-            for (Product p : tx.getProdukty()) {
-                int qty = transactionRepository
-                        .getSoldQuantityForProductOnDate(p, txTime.toLocalDate());
+            // Używamy nowej struktury TransactionProduct
+            for (TransactionProduct tp : tx.getTransactionProducts()) {
+                Product p = tp.getProduct();
+                int qty = tp.getQuantity();
 
                 out.add(new SalesReportGenerator.SalesRecord(
                         tx.getId(),

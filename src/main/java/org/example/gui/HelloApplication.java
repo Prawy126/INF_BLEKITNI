@@ -49,6 +49,9 @@ public class HelloApplication extends Application {
      */
     public static void showLoginScreen(Stage primaryStage) {
         try {
+            // Usuwamy wszystkie handlery zdarzeń z primaryStage
+            primaryStage.setOnCloseRequest(null);
+
             // Tworzenie nowego obiektu HelloApplication
             HelloApplication app = new HelloApplication();
 
@@ -608,6 +611,10 @@ public class HelloApplication extends Application {
         try {
             // Inicjalizacja bazy danych
             org.example.database.DatabaseInitializer.initialize();
+
+            // Dodajmy handler zamknięcia dla całej aplikacji
+            Platform.setImplicitExit(false);
+
             launch(args);
         } catch (Exception e) {
             // Obsługa wyjątków związanych z bazą danych

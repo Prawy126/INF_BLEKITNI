@@ -122,10 +122,11 @@ CREATE TABLE IF NOT EXISTS Transakcje (
 CREATE TABLE IF NOT EXISTS Transakcje_Produkty (
     Id_transakcji  INT,
     Id_produktu    INT,
+    Ilosc          INT NOT NULL DEFAULT 1,
     PRIMARY KEY (Id_transakcji, Id_produktu),
     FOREIGN KEY (Id_transakcji) REFERENCES Transakcje(Id),
     FOREIGN KEY (Id_produktu)   REFERENCES Produkty(Id)
-);
+    );
 
 -- =============================================================
 -- TABELA: Raporty (bez kaskadowego usuwania)
@@ -306,16 +307,16 @@ WHERE NOT EXISTS (
 );
 
 -- Transakcje_Produkty
-INSERT INTO Transakcje_Produkty (Id_transakcji, Id_produktu)
+INSERT INTO Transakcje_Produkty (Id_transakcji, Id_produktu, Ilosc)
 SELECT * FROM (
-    SELECT 1, 1 UNION ALL
-    SELECT 1, 2 UNION ALL
-    SELECT 2, 3 UNION ALL
-    SELECT 3, 4 UNION ALL
-    SELECT 4, 5 UNION ALL
-    SELECT 5, 1 UNION ALL
-    SELECT 5, 5
-) AS tmp
+    SELECT 1, 1, 3 UNION ALL
+    SELECT 1, 2, 2 UNION ALL
+    SELECT 2, 3, 1 UNION ALL
+    SELECT 3, 4, 5 UNION ALL
+    SELECT 4, 5, 2 UNION ALL
+    SELECT 5, 1, 4 UNION ALL
+    SELECT 5, 5, 3
+) AS tmp (Id_transakcji, Id_produktu, Ilosc)
 WHERE NOT EXISTS (
     SELECT 1 FROM Transakcje_Produkty tp
     WHERE tp.Id_transakcji = tmp.Id_transakcji AND tp.Id_produktu = tmp.Id_produktu

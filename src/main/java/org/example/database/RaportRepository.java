@@ -3,8 +3,10 @@ package org.example.database;
 
 import jakarta.persistence.*;
 import org.example.sys.Raport;
+import pdf.SalesReportGenerator;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.util.List;
 
 public class RaportRepository {
@@ -58,4 +60,20 @@ public class RaportRepository {
             em.close();
         }
     }
+
+    public List<Raport> pobierzRaportyPracownikaDzien(int idPracownika, LocalDate date) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT r FROM Raport r WHERE r.pracownik.id = :idPracownika " +
+                                    "AND r.dataPoczatku <= :date AND r.dataZakonczenia >= :date", Raport.class)
+                    .setParameter("idPracownika", idPracownika)
+                    .setParameter("date", date)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+
 }
