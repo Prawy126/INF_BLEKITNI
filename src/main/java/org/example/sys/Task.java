@@ -7,7 +7,16 @@
 
 package org.example.sys;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.util.Date;
 
 /**

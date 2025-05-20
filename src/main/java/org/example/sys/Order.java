@@ -5,7 +5,6 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-
 package org.example.sys;
 
 import jakarta.persistence.Entity;
@@ -55,9 +54,21 @@ public class Order {
     @Column(name = "Data", nullable = false)
     private Date data;
 
+    /**
+     * Domyślny konstruktor.
+     */
     public Order() {
     }
 
+    /**
+     * Konstruktor z parametrami.
+     *
+     * @param produkt  Produkt zamówienia
+     * @param pracownik Pracownik realizujący zamówienie
+     * @param ilosc    Ilość zamówionego produktu
+     * @param cena     Cena zamówienia
+     * @param data     Data zamówienia
+     */
     public Order(Product produkt, Employee pracownik, int ilosc, BigDecimal cena, Date data) {
         this.produkt = produkt;
         this.pracownik = pracownik;
@@ -68,50 +79,110 @@ public class Order {
 
     // === Gettery i settery ===
 
+    /**
+     * Zwraca id zamówienia.
+     *
+     * @return Identyfikator zamówienia
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * Zwraca produkt zamówienia.
+     *
+     * @return produkt Produkt zamówienia
+     */
     public Product getProdukt() {
         return produkt;
     }
 
+    /**
+     * Ustawia produkt zamówienia.
+     *
+     * @param produkt Produkt zamówienia
+     */
     public void setProdukt(Product produkt) {
         this.produkt = produkt;
     }
 
+    /**
+     * Zwraca pracownika realizującego zamówienie.
+     *
+     * @return pracownik Pracownik realizujący zamówienie
+     */
     public Employee getPracownik() {
         return pracownik;
     }
 
+    /**
+     * Ustawia pracownika realizującego zamówienie.
+     *
+     * @param pracownik Pracownik realizujący zamówienie
+     */
     public void setPracownik(Employee pracownik) {
         this.pracownik = pracownik;
     }
 
+    /**
+     * Zwraca ilość zamówionego produktu.
+     *
+     * @return ilosc Ilość zamówionego produktu
+     */
     public int getIlosc() {
         return ilosc;
     }
 
+    /**
+     * Ustawia ilość zamówionego produktu.
+     *
+     * @param ilosc Ilość zamówionego produktu
+     */
     public void setIlosc(int ilosc) {
         this.ilosc = ilosc;
     }
 
+    /**
+     * Zwraca cenę zamówienia.
+     *
+     * @return cena Cena zamówienia
+     */
     public BigDecimal getCena() {
         return cena;
     }
 
+    /**
+     * Ustawia cenę zamówienia.
+     *
+     * @param cena Cena zamówienia
+     */
     public void setCena(BigDecimal cena) {
         this.cena = cena;
     }
 
+    /**
+     * Zwraca datę zamówienia.
+     *
+     * @return data Data zamówienia
+     */
     public Date getData() {
         return data;
     }
 
+    /**
+     * Ustawia datę zamówienia.
+     *
+     * @param data Data zamówienia
+     */
     public void setData(Date data) {
         this.data = data;
     }
 
+    /**
+     * Zwraca reprezentację tekstową zamówienia.
+     *
+     * @return Reprezentacja tekstowa zamówienia
+     */
     @Override
     public String toString() {
         return "Order{" +
