@@ -33,9 +33,11 @@ import pdf.SalesReportGenerator.SalesRecord;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.*;
 import java.util.List;
@@ -208,6 +210,20 @@ public class CashierPanelController {
         tableView.setItems(FXCollections.observableArrayList(reports));
     }
 
+    private LocalDate[] calculateReportDates(PeriodType periodType, LocalDate selectedDate) {
+        return switch (periodType) {
+            case DAILY -> new LocalDate[]{selectedDate, selectedDate};
+            case MONTHLY -> {
+                LocalDate start = selectedDate.withDayOfMonth(1);
+                yield new LocalDate[]{start, start.plusMonths(1).minusDays(1)};
+            }
+            case YEARLY -> {
+                LocalDate start = selectedDate.withDayOfYear(1);
+                yield new LocalDate[]{start, start.plusYears(1).minusDays(1)};
+            }
+        };
+    }
+
     private void showReportDialog() {
         Stage dialog = createStyledDialog("Generowanie raportu sprzedaży");
 
@@ -254,14 +270,19 @@ public class CashierPanelController {
             }
 
             try {
-                org.example.sys.PeriodType periodType = getPeriodTypeFromString(reportTypeStr);
-                String reportPath = generateSalesReport(periodType, selectedDate, selectedCategories);
-                saveReportInfo(periodType, selectedDate, reportPath);
+                PeriodType periodType = getPeriodTypeFromString(reportTypeStr);
+                LocalDate[] dates = calculateReportDates(periodType, selectedDate);
 
+                String reportPath = generateSalesReport(
+                        periodType,
+                        dates[0], // startDate
+                        dates[1], // endDate
+                        selectedCategories
+                );
 
-                showNotification("Sukces", "Raport został wygenerowany.");
-                dialog.close();
+                saveReportInfo(periodType, dates[0], dates[1], reportPath);
 
+                showNotification("Sukces", "Raport zapisano w: " + reportPath);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 showNotification("Błąd", "Nie udało się wygenerować raportu: " + ex.getMessage());
@@ -352,27 +373,22 @@ public class CashierPanelController {
         return salesRecords;
     }*/
 
-    private void saveReportInfo(PeriodType periodType, LocalDate selectedDate, String reportPath) {
+    private void saveReportInfo(PeriodType periodType, LocalDate startDate, LocalDate endDate,String reportPath) {
         // Pobranie zalogowanego pracownika
         Employee currentEmployee = userRepository.getCurrentEmployee();
         if (currentEmployee == null) {
             throw new IllegalStateException("Nie jesteś zalogowany.");
         }
 
-        // Ustalenie dat raportu
-        LocalDate startDate, endDate;
-
         switch (periodType) {
             case DAILY:
-                startDate = selectedDate;
-                endDate = selectedDate;
                 break;
             case MONTHLY:
-                startDate = selectedDate.withDayOfMonth(1);
+                startDate = startDate.withDayOfMonth(1);
                 endDate = startDate.plusMonths(1).minusDays(1);
                 break;
             case YEARLY:
-                startDate = selectedDate.withDayOfYear(1);
+                startDate = startDate.withDayOfYear(1);
                 endDate = startDate.plusYears(1).minusDays(1);
                 break;
             default:
@@ -386,7 +402,8 @@ public class CashierPanelController {
         report.setDataZakonczenia(endDate);
         report.setTypRaportu(periodType.getDisplayName());
         report.setSciezkaPliku(reportPath);
-        //report.setDataWygenerowania(LocalDate.now());
+
+
 
         // Zapisanie raportu w bazie danych
         reportRepository.dodajRaport(report);
@@ -412,9 +429,6 @@ public class CashierPanelController {
         dateEndColumn.setCellValueFactory(new PropertyValueFactory<>("dataZakonczenia"));
         dateEndColumn.setPrefWidth(100);
 
-        TableColumn<Raport, LocalDate> genDateColumn = new TableColumn<>("Data wygenerowania");
-        genDateColumn.setCellValueFactory(new PropertyValueFactory<>("dataWygenerowania"));
-        genDateColumn.setPrefWidth(150);
 
         TableColumn<Raport, String> employeeColumn = new TableColumn<>("Wygenerował");
         employeeColumn.setCellValueFactory(cellData ->
@@ -460,7 +474,7 @@ public class CashierPanelController {
         });
 
         tableView.getColumns().addAll(idColumn, typeColumn, dateStartColumn, dateEndColumn,
-                genDateColumn, employeeColumn, actionsColumn);
+                employeeColumn, actionsColumn);
         return tableView;
     }
 
@@ -956,78 +970,80 @@ public class CashierPanelController {
         }
     }
 
-    private String generateSalesReport(org.example.sys.PeriodType periodType,
-                                       LocalDate selectedDate,
+    /**
+     * Generuje plik PDF z raportem sprzedaży.
+     *
+     * @return absolutna ścieżka do wygenerowanego pliku
+     */
+    private String generateSalesReport(PeriodType periodType,
+                                       LocalDate startDate,
+                                       LocalDate endDate,
                                        List<String> categories) throws Exception {
 
+        // 1) Pobranie danych sprzedaży
         List<SalesReportGenerator.SalesRecord> salesData =
-                getSalesDataForReport(periodType, selectedDate);
+                getSalesDataForReport(startDate, endDate);
 
         if (salesData.isEmpty()) {
-            throw new Exception("Brak danych transakcji dla wybranego okresu.");
+            throw new SalesReportGenerator.NoDataException(
+                    "Brak danych transakcji dla wybranego zakresu dat.");
         }
 
-        SalesReportGenerator reportGenerator = new SalesReportGenerator();
-        reportGenerator.setSalesData(salesData);
+        // 2) Konfiguracja generatora PDF
+        SalesReportGenerator gen = new SalesReportGenerator();
+        gen.setSalesData(salesData);
 
-        String periodName = switch (periodType) {
-            case DAILY   -> "dzienny";
-            case MONTHLY -> "miesięczny";
-            case YEARLY  -> "roczny";
-        };
+        // 3) Nazwa pliku
+        String fileName = "raport_%s_%s_%s.pdf".formatted(
+                periodType.getDisplayName().toLowerCase(),
+                startDate.format(DateTimeFormatter.BASIC_ISO_DATE),
+                endDate.format(DateTimeFormatter.BASIC_ISO_DATE));
 
-        String fileName  = "raport_%s_%s.pdf".formatted(
-                periodName,
-                selectedDate.format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE));
         String outputPath = REPORTS_DIRECTORY + File.separator + fileName;
 
-        // <--- przekazujemy J-Ż poprawny (PDF-owy) enum
-        reportGenerator.generateReport(outputPath, toPdfPeriodType(periodType), categories);
+        // 4) Wywołanie JEDYNEJ dostępnej metody generateReport(...)
+        SalesReportGenerator.PeriodType pdfType = toPdfPeriodType(periodType);
+        gen.generateReport(outputPath, pdfType, categories == null ? List.of() : categories);
 
-        return outputPath;
+        return new File(outputPath).getAbsolutePath();
     }
-    /**
-     * Zamiast:
-     *   transactionRepository.getTransactionsByPeriod(selectedDate, periodType)
-     * użyj:
-     *   transactionRepository.getTransactionsByPeriod(selectedDate, toPdfPeriodType(periodType))
-     */
+
     /**
      * Pobiera transakcje z repozytorium (na podstawie sys.PeriodType),
      * a następnie adaptuje je do rekordów PDF-owych.
      */
     private List<SalesReportGenerator.SalesRecord> getSalesDataForReport(
-            org.example.sys.PeriodType periodType,
-            LocalDate selectedDate) {
+            LocalDate startDate, LocalDate endDate) {
 
-        // 1) Pobranie transakcji z repozytorium JPA, używając enum-a sys.PeriodType
-        List<Transaction> transactions =
-                transactionRepository.getTransactionsByPeriod(selectedDate, periodType);
+        Date d1 = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date d2 = Date.from(endDate.atTime(23,59,59).atZone(ZoneId.systemDefault()).toInstant());
 
-        // 2) Konwersja każdej transakcji na rekord PDF-owy
-        List<SalesReportGenerator.SalesRecord> salesRecords = new ArrayList<>();
-        for (Transaction tx : transactions) {
-            for (org.example.sys.Product srcProduct : tx.getProdukty()) {
-                // adaptujemy obiekt sys.Product na pdf-owy
-                sys.Product pdfProduct = ProductAdapter.toPdfProduct(srcProduct);
+        List<Transaction> txs = transactionRepository.getTransactionsBetweenDates(d1, d2);
+        List<SalesReportGenerator.SalesRecord> out = new ArrayList<>();
 
-                LocalDateTime txDate = tx.getData()
-                        .toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDateTime();
+        for (Transaction tx : txs) {
+            LocalDateTime txTime = LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(tx.getData().getTime()),
+                    ZoneId.systemDefault());
 
-                salesRecords.add(new SalesReportGenerator.SalesRecord(
+            for (Product p : tx.getProdukty()) {
+                int qty = transactionRepository
+                        .getSoldQuantityForProductOnDate(p, txTime.toLocalDate());
+
+                out.add(new SalesReportGenerator.SalesRecord(
                         tx.getId(),
-                        txDate,
-                        pdfProduct.getName(),
-                        pdfProduct.getCategory(),
-                        pdfProduct.getQuantity(),                         // ilość
-                        pdfProduct.getPrice() * pdfProduct.getQuantity()  // wartość
+                        txTime,
+                        p.getName(),
+                        p.getCategory(),
+                        qty,
+                        qty * p.getPrice()
                 ));
             }
         }
-        return salesRecords;
+        return out;
     }
+
+
 
     // Dodaj to do klasy CashierPanelController:
     private pdf.SalesReportGenerator.PeriodType toPdfPeriodType(org.example.sys.PeriodType periodType) {

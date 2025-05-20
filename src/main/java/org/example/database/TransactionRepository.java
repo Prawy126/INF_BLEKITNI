@@ -10,7 +10,9 @@ package org.example.database;
 
 import com.mysql.cj.Session;
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.*;
 import org.example.sys.PeriodType;
+import org.example.sys.Product;
 import org.example.sys.Transaction;
 import pdf.SalesReportGenerator;
 
@@ -78,6 +80,36 @@ public class TransactionRepository {
         }
     }
 
+    /**
+     * Zwraca liczbę sztuk danego produktu sprzedanych w podanym dniu
+     * (liczymy na podstawie tabeli Zamowienia).
+     *
+     * @param produkt encja produktu (org.example.sys.Product)
+     * @param date    dzień, dla którego liczymy sprzedaż (LocalDate bez czasu)
+     * @return        liczba sprzedanych sztuk (0 – gdy brak rekordów)
+     */
+    public int getSoldQuantityForProductOnDate(Product produkt, LocalDate date) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            // konwersja LocalDate -> java.util.Date (początek dnia w strefie systemowej)
+            Date sqlDate = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+            Long total = em.createQuery(
+                            "SELECT COALESCE(SUM(z.ilosc), 0) " +
+                                    "FROM Zamowienie z " +
+                                    "WHERE z.produkt = :produkt " +
+                                    "  AND z.data      = :data", Long.class)
+                    .setParameter("produkt", produkt)
+                    .setParameter("data",    sqlDate)
+                    .getSingleResult();          // zawsze jedna liczba, nigdy null dzięki COALESCE
+
+            return total.intValue();
+        } finally {
+            em.close();
+        }
+    }
+
+
     public void aktualizujTransakcje(Transaction transakcja) {
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -92,63 +124,22 @@ public class TransactionRepository {
     }
 
     /**
-     * Pobiera transakcje z określonego okresu (dziennie, miesięcznie lub rocznie)
-     * i od razu fetche kolekcję t.produkty, żeby uniknąć LazyInitializationException.
+     * Fetche transakcje razem z kolekcją produktów, między dwiema datami.
      */
-    public List<Transaction> getTransactionsByPeriod(LocalDate selectedDate, PeriodType periodType) {
-        // 1) Obliczamy zakres od–do (LocalDateTime)
-        LocalDateTime od, do_;
-        switch (periodType) {
-            case DAILY:
-                od  = selectedDate.atStartOfDay();
-                do_ = selectedDate.atTime(LocalTime.MAX);
-                break;
-            case MONTHLY:
-                od  = selectedDate.withDayOfMonth(1).atStartOfDay();
-                do_ = selectedDate.withDayOfMonth(selectedDate.lengthOfMonth())
-                        .atTime(LocalTime.MAX);
-                break;
-            case YEARLY:
-                od  = selectedDate.withDayOfYear(1).atStartOfDay();
-                do_ = selectedDate.withDayOfYear(selectedDate.lengthOfYear())
-                        .atTime(LocalTime.MAX);
-                break;
-            default:
-                throw new IllegalArgumentException("Nieznany typ okresu: " + periodType);
-        }
-
-        // 2) Konwersja na java.util.Date (bo pole Transaction.data jest Date)
-        Date start = Date.from(od.atZone(ZoneId.systemDefault()).toInstant());
-        Date end   = Date.from(do_.atZone(ZoneId.systemDefault()).toInstant());
-
+    public List<Transaction> getTransactionsBetweenDates(Date startDate, Date endDate) {
         EntityManager em = emf.createEntityManager();
         try {
-            // 3) Budujemy JPQL z fetch-join
-            String jpql = """
-            SELECT DISTINCT t
-            FROM Transaction t
-              LEFT JOIN FETCH t.produkty p
-            WHERE t.data BETWEEN :start AND :end
-            ORDER BY t.data
-            """;
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Transaction> cq = cb.createQuery(Transaction.class);
+            Root<Transaction> root = cq.from(Transaction.class);
+            // fetch produktów, żeby nie było LazyInitializationException
+            root.fetch("produkty", JoinType.LEFT);
 
-            EntityTransaction tx = em.getTransaction();
-            tx.begin();
+            cq.select(root)
+                    .where(cb.between(root.get("data"), startDate, endDate))
+                    .orderBy(cb.asc(root.get("data")));
 
-            TypedQuery<Transaction> query = em.createQuery(jpql, Transaction.class);
-            query.setParameter("start", start, TemporalType.TIMESTAMP);
-            query.setParameter("end",   end,   TemporalType.TIMESTAMP);
-
-            List<Transaction> wynik = query.getResultList();
-
-            tx.commit();
-            return wynik;
-        } catch (RuntimeException ex) {
-            // w razie błędu wycofujemy i przepuszczamy dalej
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            throw ex;
+            return em.createQuery(cq).getResultList();
         } finally {
             em.close();
         }
