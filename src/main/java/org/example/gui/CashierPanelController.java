@@ -282,6 +282,36 @@ public class CashierPanelController {
 
                 System.out.println("Generowanie raportu dla okresu: " + dates[0] + " do " + dates[1]);
 
+                // Sprawdź, czy istnieją transakcje w wybranym okresie
+                Date d1 = Date.from(dates[0].atStartOfDay(ZoneId.systemDefault()).toInstant());
+                Date d2 = Date.from(dates[1].atTime(23,59,59).atZone(ZoneId.systemDefault()).toInstant());
+                List<Transaction> transactions = transactionRepository.getTransactionsBetweenDates(d1, d2);
+
+                if (transactions.isEmpty()) {
+                    // Wyświetl komunikat o braku danych
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Brak danych");
+                    alert.setHeaderText("Brak transakcji w wybranym okresie");
+                    alert.setContentText("Nie znaleziono żadnych transakcji w okresie od " +
+                            dates[0].format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) +
+                            " do " +
+                            dates[1].format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) +
+                            ".\n\nNie można wygenerować raportu bez danych.");
+
+                    alert.showAndWait();
+
+                    // Mimo braku raportu, oznaczamy flagę jako true, aby umożliwić zamknięcie aplikacji
+                    reportGeneratedInCurrentSession = true;
+
+                    // Zapisujemy informację o próbie wygenerowania raportu
+                    saveEmptyReportInfo(periodType, dates[0], dates[1]);
+
+                    System.out.println("Próba wygenerowania raportu bez danych, flaga ustawiona na: " + reportGeneratedInCurrentSession);
+
+                    dialog.close();
+                    return;
+                }
+
                 String reportPath = generateSalesReport(
                         periodType,
                         dates[0], // startDate
@@ -300,12 +330,6 @@ public class CashierPanelController {
 
                 System.out.println("Stan flagi po zapisaniu informacji: " + reportGeneratedInCurrentSession);
 
-                // Dodatkowe sprawdzenie po zapisaniu raportu
-                if (!reportGeneratedInCurrentSession) {
-                    System.out.println("UWAGA: Flaga reportGeneratedInCurrentSession nadal nie jest ustawiona!");
-                    reportGeneratedInCurrentSession = true;
-                }
-
                 // Wyświetl powiadomienie o sukcesie
                 showNotification("Sukces", "Raport zapisano w: " + reportPath);
 
@@ -314,11 +338,6 @@ public class CashierPanelController {
 
                 // Dodatkowe sprawdzenie po zamknięciu dialogu
                 System.out.println("Stan flagi po zamknięciu dialogu: " + reportGeneratedInCurrentSession);
-
-                // Jeśli to raport dzienny, oznacz że raport dzienny został wygenerowany
-                if (periodType == PeriodType.DAILY && selectedDate.equals(LocalDate.now())) {
-                    System.out.println("Wygenerowano raport dzienny na dzisiaj");
-                }
 
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -352,6 +371,34 @@ public class CashierPanelController {
         });
     }
 
+    /**
+     * Zapisuje informację o próbie wygenerowania raportu bez danych.
+     */
+    private void saveEmptyReportInfo(PeriodType periodType, LocalDate startDate, LocalDate endDate) {
+        // Pobranie zalogowanego pracownika
+        Employee currentEmployee = userRepository.getCurrentEmployee();
+        if (currentEmployee == null) {
+            throw new IllegalStateException("Nie jesteś zalogowany.");
+        }
+
+        // Utworzenie obiektu raportu
+        Raport report = new Raport();
+        report.setPracownik(currentEmployee);
+        report.setDataPoczatku(startDate);
+        report.setDataZakonczenia(endDate);
+        report.setTypRaportu(periodType.getDisplayName() + " (brak danych)");
+        report.setSciezkaPliku(""); // Brak ścieżki, ponieważ nie wygenerowano pliku
+
+        // Zapisanie raportu w bazie danych
+        reportRepository.dodajRaport(report);
+
+        // Upewnij się, że flaga jest ustawiona
+        this.reportGeneratedInCurrentSession = true;
+
+        // Dodaj log dla debugowania
+        System.out.println("Zapisano informację o próbie wygenerowania raportu bez danych, flaga ustawiona na: " + this.reportGeneratedInCurrentSession);
+    }
+
     private PeriodType getPeriodTypeFromString(String typeStr) {
         return PeriodType.fromDisplay(typeStr);
     }
@@ -359,70 +406,6 @@ public class CashierPanelController {
     public boolean isReportGeneratedInCurrentSession() {
         return reportGeneratedInCurrentSession;
     }
-
-
-    /*private String generateSalesReport(PeriodType periodType, LocalDate selectedDate, List<String> categories) throws Exception {
-        // Pobranie danych transakcji
-        List<SalesRecord> salesData = getSalesDataForReport(periodType, selectedDate);
-
-        if (salesData.isEmpty()) {
-            throw new Exception("Brak danych transakcji dla wybranego okresu.");
-        }
-
-        // Utworzenie generatora raportów
-        SalesReportGenerator reportGenerator = new SalesReportGenerator();
-        reportGenerator.setSalesData(salesData);
-
-        // Ustalenie nazwy pliku
-        String periodName = switch (periodType) {
-            case DAILY -> "dzienny";
-            case MONTHLY -> "miesięczny";
-            case YEARLY -> "roczny";
-        };
-
-        String fileName = String.format("raport_%s_%s.pdf", periodName, selectedDate.format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE));
-        String outputPath = REPORTS_DIRECTORY + File.separator + fileName;
-
-        // Generowanie raportu
-        reportGenerator.generateReport(outputPath, periodType, categories);
-
-        return outputPath;
-    }*/
-
-    /*private List<SalesRecord> getSalesDataForReport(PeriodType periodType, LocalDate selectedDate) {
-        // Pobranie transakcji z bazy danych
-        List<Transaction> transactions = transactionRepository.getTransactionsByPeriod(selectedDate, periodType);
-
-        // Konwersja danych transakcji do formatu wymaganego przez generator raportów
-        List<SalesRecord> salesRecords = new ArrayList<>();
-
-        for (Transaction transaction : transactions) {
-            // Dla każdego produktu w transakcji tworzymy rekord sprzedaży
-            for (Warehouse product : transaction.getProdukty()) {
-                // Zakładamy, że Warehouse zawiera informacje o produkcie i ilości
-                // W rzeczywistej implementacji należy dostosować to do struktury danych
-
-                LocalDateTime transactionDateTime = transaction.getData()
-                        .toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDateTime();
-
-                // Tworzenie rekordu sprzedaży
-                SalesRecord salesRecord = new SalesRecord(
-                        transaction.getId(),
-                        transactionDateTime,
-                        product.getNazwa(),
-                        product.getKategoria(),
-                        product.getIlosc(),
-                        product.getCena() * product.getIlosc()
-                );
-
-                salesRecords.add(salesRecord);
-            }
-        }
-
-        return salesRecords;
-    }*/
 
     private void saveReportInfo(PeriodType periodType, LocalDate startDate, LocalDate endDate, String reportPath) {
         // Pobranie zalogowanego pracownika
@@ -634,14 +617,6 @@ public class CashierPanelController {
                     periodType = PeriodType.YEARLY;
                     break;
             }
-
-            // Generowanie raportu
-            //List<SalesRecord> salesData = getSalesDataForReport(periodType, date);
-            //String reportPath = generateSalesReport(periodType, date, null);
-
-            // Zapisanie informacji o raporcie
-            //saveReportInfo(periodType, date, reportPath);
-
         } catch (Exception e) {
             e.printStackTrace();
             showNotification("Błąd", "Nie udało się wygenerować raportu: " + e.getMessage());
