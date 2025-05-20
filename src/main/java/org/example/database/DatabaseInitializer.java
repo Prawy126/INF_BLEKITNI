@@ -34,31 +34,51 @@ public class DatabaseInitializer implements ILacz {
 
         try {
             // Rejestracja sterownika JDBC
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+            } catch (ClassNotFoundException e) {
+                throw new SQLException("Nie znaleziono sterownika JDBC MySQL: " + e.getMessage(), e);
+            }
 
-            // Krok 1: Połączenie do serwera MySQL (bez konkretnej bazy)
-            serverConn = DriverManager.getConnection(MYSQL_SERVER_URL, MYSQL_USER, MYSQL_PASSWORD);
+            // Krok 1: Połączenie do serwera MySQL (bez wskazania konkretnej bazy)
+            try {
+                serverConn = DriverManager.getConnection(MYSQL_SERVER_URL, MYSQL_USER, MYSQL_PASSWORD);
+            } catch (SQLException e) {
+                throw new SQLException("Nie można połączyć się z serwerem MySQL: " + e.getMessage(), e);
+            }
 
-            // Krok 2: Tworzenie bazy danych, jeśli nie istnieje
-            serverStmt = serverConn.createStatement();
-            serverStmt.execute("CREATE DATABASE IF NOT EXISTS " + DB_NAME);
+            // Krok 2: Tworzenie bazy danych jeśli nie istnieje
+            try {
+                serverStmt = serverConn.createStatement();
+                serverStmt.execute("CREATE DATABASE IF NOT EXISTS " + DB_NAME);
+            } catch (SQLException e) {
+                throw new SQLException("Nie można utworzyć bazy danych " + DB_NAME + ": " + e.getMessage(), e);
+            }
 
-            // Krok 3: Połączenie z nowo utworzoną bazą danych
-            dbConn = DriverManager.getConnection(MYSQL_DB_URL, MYSQL_USER, MYSQL_PASSWORD);
+            // Krok 3: Połączenie do utworzonej bazy danych
+            try {
+                dbConn = DriverManager.getConnection(MYSQL_DB_URL, MYSQL_USER, MYSQL_PASSWORD);
+            } catch (SQLException e) {
+                throw new SQLException("Nie można połączyć się z bazą danych " + DB_NAME + ": " + e.getMessage(), e);
+            }
 
             // Krok 4: Import struktury z pliku SQL
-            executeSqlScript(dbConn, "src/main/resources/Stonka.sql");
+            try {
+                executeSqlScript(dbConn, "src/main/resources/Stonka.sql");
+            } catch (IOException e) {
+                throw new IOException("Nie można odczytać pliku SQL: " + e.getMessage(), e);
+            } catch (SQLException e) {
+                throw new SQLException("Błąd podczas wykonywania skryptu SQL: " + e.getMessage(), e);
+            }
 
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("Nie znaleziono sterownika JDBC MySQL.", e);
-        } catch (SQLException | IOException e) {
-            throw e; // rethrow bezpośrednio, jeśli już są odpowiednie typy
         } finally {
+            // Zamknięcie zasobów w odwrotnej kolejności ich tworzenia
             closeQuietly(serverStmt);
             closeQuietly(serverConn);
             closeQuietly(dbConn);
         }
     }
+
 
 
     /**

@@ -37,6 +37,9 @@ public class Logistician {
 
     // === Metody operujące na danych pracownika ===
 
+    /**
+     * Metoda aktualizująca imię logistyka.
+     */
     public void updateName(String newName) {
         try {
             employee.setName(newName);
@@ -45,6 +48,9 @@ public class Logistician {
         }
     }
 
+    /**
+     * Metoda aktualizująca nazwisko logistyka.
+     */
     public void updateSurname(String newSurname) {
         try {
             employee.setSurname(newSurname);
@@ -53,6 +59,9 @@ public class Logistician {
         }
     }
 
+    /**
+     * Metoda aktualizująca wiek logistyka.
+     */
     public void updateAge(int newAge) {
         try {
             employee.setAge(newAge);
@@ -61,10 +70,16 @@ public class Logistician {
         }
     }
 
+    /**
+     * Metoda aktualizująca adres logistyka.
+     */
     public void updateAddress(Address newAddress) {
         employee.setAdres(newAddress);
     }
 
+    /**
+     * Metoda aktualizująca hasło logistyka.
+     */
     public void updatePassword(String newPassword) {
         try {
             employee.setPassword(newPassword);
@@ -73,10 +88,16 @@ public class Logistician {
         }
     }
 
+    /**
+     * Metoda aktualizująca stanowisko logistyka.
+     */
     public void updateDepartment(String newDepartment) {
         employee.setStanowisko(newDepartment);
     }
 
+    /**
+     * Metoda aktualizująca zarobki logistyka.
+     */
     public void updateSalary(BigDecimal newSalary) {
         try {
             employee.setZarobki(newSalary);
@@ -87,8 +108,14 @@ public class Logistician {
 
     // === Przykładowa metoda logistyczna ===
 
+    /**
+     * Metoda przydzielająca zamówienie do realizacji.
+     *
+     * @param orderId ID zamówienia do przydzielenia
+     */
     public void przydzielZamowienie(int orderId) {
         // tutaj można dodać logikę przydziału zamówienia
-        System.out.println("Logistyk " + employee.getName() + " przydzielił zamówienie o ID: " + orderId);
+        System.out.println("Logistyk " + employee.getName() + " przydzielił zam" +
+                "ówienie o ID: " + orderId);
     }
 }
