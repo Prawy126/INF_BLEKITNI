@@ -1,18 +1,17 @@
 /*
  * Classname: Transaction
  * Version information: 1.0
- * Date: 2025-05-16
+ * Date: 2025-05-20
  * Copyright notice: © BŁĘKITNI
  */
-
 
 package org.example.sys;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "Transakcje")
@@ -29,13 +28,9 @@ public class Transaction {
     @Temporal(TemporalType.DATE)
     private Date data;
 
-    @ManyToMany
-    @JoinTable(
-            name = "Transakcje_Produkty",
-            joinColumns = @JoinColumn(name = "Id_transakcji"),
-            inverseJoinColumns = @JoinColumn(name = "Id_produktu")
-    )
-    private Set<Product> produkty = new HashSet<>();
+    // Zmieniamy relację z ManyToMany na OneToMany do tabeli pośredniczącej
+    @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TransactionProduct> transactionProducts = new ArrayList<>();
 
     // === Gettery i settery ===
 
@@ -59,11 +54,31 @@ public class Transaction {
         this.data = data;
     }
 
-    public Set<Product> getProdukty() {
-        return produkty;
+    public List<TransactionProduct> getTransactionProducts() {
+        return transactionProducts;
     }
 
-    public void setProdukty(Set<Product> produkty) {
-        this.produkty = produkty;
+    public void setTransactionProducts(List<TransactionProduct> transactionProducts) {
+        this.transactionProducts = transactionProducts;
+    }
+
+    // Metody pomocnicze do zarządzania relacją
+    public void addProduct(Product product, int quantity) {
+        // Upewnij się, że produkt jest zarządzany przez sesję
+        TransactionProduct transactionProduct = new TransactionProduct(this, product, quantity);
+        transactionProducts.add(transactionProduct);
+    }
+
+    public void removeProduct(Product product) {
+        transactionProducts.removeIf(tp -> tp.getProduct().equals(product));
+    }
+
+    // Metoda pomocnicza do zachowania kompatybilności z istniejącym kodem
+    public List<Product> getProdukty() {
+        List<Product> products = new ArrayList<>();
+        for (TransactionProduct tp : transactionProducts) {
+            products.add(tp.getProduct());
+        }
+        return products;
     }
 }

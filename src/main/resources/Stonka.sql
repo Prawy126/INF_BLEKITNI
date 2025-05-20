@@ -123,10 +123,11 @@ CREATE TABLE IF NOT EXISTS Transakcje (
 CREATE TABLE IF NOT EXISTS Transakcje_Produkty (
     Id_transakcji  INT,
     Id_produktu    INT,
+    Ilosc          INT NOT NULL DEFAULT 1,
     PRIMARY KEY (Id_transakcji, Id_produktu),
     FOREIGN KEY (Id_transakcji) REFERENCES Transakcje(Id),
     FOREIGN KEY (Id_produktu)   REFERENCES Produkty(Id)
-);
+    );
 
 -- =============================================================
 -- TABELA: Raporty (bez kaskadowego usuwania)
@@ -249,8 +250,14 @@ INSERT INTO Transakcje (Id_pracownika, Data) VALUES
 (5, '2025-04-14');
 
 -- Transakcje_Produkty
-INSERT INTO Transakcje_Produkty (Id_transakcji, Id_produktu) VALUES
-(1, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 1), (5, 5);
+INSERT INTO Transakcje_Produkty (Id_transakcji, Id_produktu, Ilosc) VALUES
+(1, 1, 3),  -- 3 sztuki produktu 1 w transakcji 1
+(1, 2, 2),  -- 2 sztuki produktu 2 w transakcji 1
+(2, 3, 1),  -- 1 sztuka produktu 3 w transakcji 2
+(3, 4, 5),  -- 5 sztuk produktu 4 w transakcji 3
+(4, 5, 2),  -- 2 sztuki produktu 5 w transakcji 4
+(5, 1, 4),  -- 4 sztuki produktu 1 w transakcji 5
+(5, 5, 3);  -- 3 sztuki produktu 5 w transakcji 5
 
 -- Raporty
 INSERT INTO Raporty (Typ_raportu, Data_poczatku, Data_zakonczenia, Id_pracownika, Plik) VALUES

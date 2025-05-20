@@ -101,7 +101,16 @@ public class Login implements ILacz {
                 switch (position.toLowerCase()) {
                     case "admin" -> new AdminPanel(nextStage);
                     case "kierownik" -> new ManagerPanel(nextStage);
-                    case "kasjer" -> new CashierPanel(nextStage);
+                    case "kasjer" -> {
+                        CashierPanel cashierPanel = new CashierPanel(nextStage);
+                        // Resetuj flagę raportu przy nowym logowaniu
+                        cashierPanel.getController().resetReportGeneratedFlag();
+                        // Sprawdź, czy raport dzienny został już wygenerowany
+                        if (cashierPanel.getController().isDailyReportGeneratedToday()) {
+                            System.out.println("Raport dzienny już wygenerowany, ustawianie flagi");
+                            cashierPanel.getController().markReportAsGenerated();
+                        }
+                    }
                     case "logistyk" -> new LogisticianPanel(nextStage);
                     default -> showUnknownPositionAlert(position);
                 }
