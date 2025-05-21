@@ -7,6 +7,8 @@
 
 package org.example.database;
 
+import org.example.database.AddressRepository;
+import org.example.database.UserRepository;
 import org.example.sys.Address;
 import org.example.sys.Employee;
 import org.example.wyjatki.SalaryException;
@@ -17,7 +19,7 @@ import java.util.List;
 /**
  * Klasa testująca działanie UserRepository i AddressRepository.
  */
-public class TestUserRepository {
+public class UserRepositoryTest {
 
     public static void main(String[] args) {
         UserRepository userRepo = new UserRepository();

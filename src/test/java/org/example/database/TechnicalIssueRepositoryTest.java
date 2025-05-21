@@ -7,6 +7,8 @@
 
 package org.example.database;
 
+import org.example.database.TechnicalIssueRepository;
+import org.example.database.UserRepository;
 import org.example.sys.Employee;
 import org.example.sys.TechnicalIssue;
 
@@ -16,7 +18,7 @@ import java.util.List;
 /**
  * Klasa testująca działanie TechnicalIssueRepository.
  */
-public class TestTechnicalIssueRepository {
+public class TechnicalIssueRepositoryTest {
 
     public static void main(String[] args) {
         TechnicalIssueRepository issueRepo = new TechnicalIssueRepository();

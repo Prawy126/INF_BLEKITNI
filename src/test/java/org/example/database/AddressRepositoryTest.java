@@ -7,6 +7,7 @@
 
 package org.example.database;
 
+import org.example.database.AddressRepository;
 import org.example.sys.Address;
 
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
 /**
  * Klasa testująca działanie AddressRepository.
  */
-public class TestAddressRepository {
+public class AddressRepositoryTest {
 
     public static void main(String[] args) {
         AddressRepository addressRepo = new AddressRepository();

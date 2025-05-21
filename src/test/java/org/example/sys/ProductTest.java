@@ -1,4 +1,4 @@
-package sys;
+package org.example.sys;
 
 import org.example.sys.Product;
 import org.junit.jupiter.api.Test;
