@@ -1,5 +1,3 @@
-package org.example.database;
-
 import org.example.database.OrderRepository;
 import org.example.database.ProductRepository;
 import org.example.database.UserRepository;

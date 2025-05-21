@@ -1,5 +1,3 @@
-package org.example.sys;
-
 import org.example.sys.Product;
 import org.example.sys.Warehouse;
 import org.junit.jupiter.api.Test;

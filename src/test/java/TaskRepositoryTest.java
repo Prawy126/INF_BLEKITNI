@@ -5,8 +5,6 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.database;
-
 import org.example.database.TaskRepository;
 import org.example.sys.Task;
 

@@ -5,8 +5,6 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.database;
-
 import org.example.database.TechnicalIssueRepository;
 import org.example.database.UserRepository;
 import org.example.sys.Employee;

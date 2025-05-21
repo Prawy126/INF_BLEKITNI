@@ -1,5 +1,3 @@
-package org.example.sys;
-
 import org.example.sys.Registration;
 import org.example.sys.StatusRegistration;
 import org.junit.jupiter.api.Test;

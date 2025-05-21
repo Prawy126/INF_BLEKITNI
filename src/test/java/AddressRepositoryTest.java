@@ -5,8 +5,6 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.database;
-
 import org.example.database.AddressRepository;
 import org.example.sys.Address;
 

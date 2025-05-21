@@ -1,5 +1,3 @@
-package org.example.database;
-
 import org.example.database.WarehouseRepository;
 import org.example.sys.Product;
 import org.example.sys.Warehouse;

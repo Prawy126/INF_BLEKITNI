@@ -1,5 +1,3 @@
-package org.example.sys;
-
 import org.example.sys.Employee;
 import org.example.sys.Logistician;
 import org.example.sys.Address;
