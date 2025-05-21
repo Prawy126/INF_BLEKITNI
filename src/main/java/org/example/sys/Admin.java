@@ -5,7 +5,6 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-
 package org.example.sys;
 
 import org.example.wyjatki.AgeException;

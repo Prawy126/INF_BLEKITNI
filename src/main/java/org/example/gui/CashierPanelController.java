@@ -1,3 +1,11 @@
+/*
+ * Classname: CashierPanelController
+ * Version information: 1.5
+ * Date: 2025-05-22
+ * Copyright notice: © BŁĘKITNI
+ */
+
+
 package org.example.gui;
 
 import javafx.animation.*;
@@ -704,13 +712,18 @@ public class CashierPanelController {
         });
 
         TableColumn<TransactionItem, Double> priceCol = new TableColumn<>("Cena jedn.");
-        priceCol.setCellValueFactory(cellData ->
-                new SimpleDoubleProperty(cellData.getValue().getProduct().getPrice()).asObject());
+        priceCol.setCellValueFactory(cell ->
+                new SimpleDoubleProperty(
+                        cell.getValue().getProduct().getPrice().doubleValue()
+                ).asObject());
 
         TableColumn<TransactionItem, Double> totalCol = new TableColumn<>("Suma");
-        totalCol.setCellValueFactory(cellData ->
-                new SimpleDoubleProperty(cellData.getValue().getProduct().getPrice() *
-                        cellData.getValue().getQuantity()).asObject());
+        totalCol.setCellValueFactory(cell ->
+                new SimpleDoubleProperty(
+                        cell.getValue().getProduct().getPrice().doubleValue() *
+                                cell.getValue().getQuantity()
+                ).asObject());
+
 
         TableColumn<TransactionItem, Void> actionCol = new TableColumn<>("Akcje");
         actionCol.setCellFactory(param -> new TableCell<>() {
@@ -740,7 +753,7 @@ public class CashierPanelController {
     private void updateTotalPrice(ObservableList<TransactionItem> items, Label totalPriceLabel) {
         double total = 0;
         for (TransactionItem item : items) {
-            total += item.getProduct().getPrice() * item.getQuantity();
+            total += item.getProduct().getPrice().doubleValue() * item.getQuantity();
         }
         if (totalPriceLabel != null) {
             totalPriceLabel.setText(String.format("%.2f zł", total));
@@ -1119,8 +1132,9 @@ public class CashierPanelController {
         }
 
         public double getTotal() {
-            return product.getPrice() * quantity;
+            return product.getPrice().doubleValue() * quantity;
         }
+
     }
 
     /**
@@ -1186,7 +1200,7 @@ public class CashierPanelController {
                         p.getName(),
                         p.getCategory(),
                         qty,
-                        qty * p.getPrice()
+                        qty * p.getPrice().doubleValue()   // <- zamiast BigDecimal * int
                 ));
             }
         }

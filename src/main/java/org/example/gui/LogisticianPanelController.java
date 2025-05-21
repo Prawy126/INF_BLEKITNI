@@ -253,7 +253,7 @@ public class LogisticianPanelController {
                             p.getName(),
                             p.getCategory(),
                             qtyById.getOrDefault(p.getId(), 0),
-                            (int) Math.round(p.getPrice())
+                            (int) Math.round(p.getPrice().doubleValue())  // <- BigDecimal → double
                     ))
                     .collect(Collectors.toList());
 
@@ -444,7 +444,7 @@ public class LogisticianPanelController {
                             if (!minPriceField.getText().isEmpty()) {
                                 try {
                                     double minPrice = Double.parseDouble(minPriceField.getText().replace(",", "."));
-                                    if (product.getPrice() < minPrice) {
+                                    if (product.getPrice().doubleValue() < minPrice) {   // <- .doubleValue()
                                         return false;
                                     }
                                 } catch (NumberFormatException ex) {
@@ -456,7 +456,7 @@ public class LogisticianPanelController {
                             if (!maxPriceField.getText().isEmpty()) {
                                 try {
                                     double maxPrice = Double.parseDouble(maxPriceField.getText().replace(",", "."));
-                                    if (product.getPrice() > maxPrice) {
+                                    if (product.getPrice().doubleValue() > maxPrice) {   // <- .doubleValue()
                                         return false;
                                     }
                                 } catch (NumberFormatException ex) {

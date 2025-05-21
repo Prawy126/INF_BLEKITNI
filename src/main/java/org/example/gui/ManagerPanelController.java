@@ -21,7 +21,9 @@ import org.example.sys.AbsenceRequest;
 import org.example.sys.Employee;
 import org.example.sys.Task;
 
-import java.util.Date;
+import java.time.LocalTime;
+import java.sql.Date;
+
 
 /**
  * Kontroler logiki interfejsu użytkownika dla panelu kierownika.
@@ -170,27 +172,36 @@ public class ManagerPanelController {
         saveButton.setStyle("-fx-background-color: #2980B9; -fx-text-fill: white;");
         saveButton.setOnAction(e -> {
             try {
-                String nazwa = nameField.getText();
-                String opis = descriptionArea.getText();
-                String status = statusCombo.getValue();
-                java.sql.Date data = java.sql.Date.valueOf(deadlinePicker.getValue());
+                String nazwa   = nameField.getText();
+                String opis    = descriptionArea.getText();
+                String status  = statusCombo.getValue();
+                // deadlinePicker to Twój DatePicker z datą terminu
+                Date data = Date.valueOf(deadlinePicker.getValue());
+
+                // jeśli masz pole timeField (np. Spinner<LocalTime>), użyj jej:
+                // LocalTime czasZmiany = timeField.getValue();
+                // a jeśli nie, użyj bieżącej godziny:
+                LocalTime czasZmiany = LocalTime.now();
 
                 if (nazwa.isEmpty() || opis.isEmpty() || status == null || data == null) {
                     showAlert(Alert.AlertType.WARNING, "Błąd", "Wypełnij wszystkie pola.");
                     return;
                 }
 
-                Task noweZadanie = new Task(nazwa, data, status, opis);
+                // teraz konstruktor pięcio-argumentowy
+                Task noweZadanie = new Task(nazwa, data, status, opis, czasZmiany);
                 taskRepository.dodajZadanie(noweZadanie);
 
                 showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zadanie dodane!");
                 showTaskPanel();
+
             } catch (Exception ex) {
                 ex.printStackTrace();
                 showAlert(Alert.AlertType.ERROR, "Błąd",
                         "Nie udało się dodać zadania: " + ex.getMessage());
             }
         });
+
 
         buttonBox.getChildren().addAll(backButton, saveButton);
 
@@ -248,10 +259,11 @@ public class ManagerPanelController {
         // Kolumna daty od
         TableColumn<AbsenceRequest, String> fromDateColumn = new TableColumn<>("Od");
         fromDateColumn.setCellValueFactory(data -> {
-            Date dataRozpoczecia = data.getValue().getDataRozpoczecia();
-            if (dataRozpoczecia != null) {
-                return new javafx.beans.property.SimpleStringProperty(
-                        dataRozpoczecia.toString());
+            // użyj:
+            java.util.Date utilStart = data.getValue().getDataRozpoczecia();
+            if (utilStart != null) {
+                java.sql.Date sqlStart = new java.sql.Date(utilStart.getTime());
+                return new javafx.beans.property.SimpleStringProperty(sqlStart.toString());
             } else {
                 return new javafx.beans.property.SimpleStringProperty("Brak daty");
             }
@@ -261,10 +273,10 @@ public class ManagerPanelController {
         // Kolumna daty do
         TableColumn<AbsenceRequest, String> toDateColumn = new TableColumn<>("Do");
         toDateColumn.setCellValueFactory(data -> {
-            Date dataZakonczenia = data.getValue().getDataZakonczenia();
-            if (dataZakonczenia != null) {
-                return new javafx.beans.property.SimpleStringProperty(
-                        dataZakonczenia.toString());
+            java.util.Date utilEnd = data.getValue().getDataZakonczenia();
+            if (utilEnd != null) {
+                java.sql.Date sqlEnd = new java.sql.Date(utilEnd.getTime());
+                return new javafx.beans.property.SimpleStringProperty(sqlEnd.toString());
             } else {
                 return new javafx.beans.property.SimpleStringProperty("Brak daty");
             }

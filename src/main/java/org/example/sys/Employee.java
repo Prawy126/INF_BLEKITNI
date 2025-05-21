@@ -25,9 +25,24 @@ import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
 import org.example.wyjatki.NameException;
 import org.example.wyjatki.AgeException;
+import jakarta.persistence.ColumnResult;
+import jakarta.persistence.ConstructorResult;
+import jakarta.persistence.SqlResultSetMapping;
 
 import java.math.BigDecimal;
 import java.util.Date;
+
+@SqlResultSetMapping(
+        name = "EmployeeWorkloadMapping",
+        classes = @ConstructorResult(
+                targetClass = pdf.WorkloadReportGenerator.EmployeeWorkload.class,
+                columns = {
+                        @ColumnResult(name = "employeeName", type = String.class),
+                        @ColumnResult(name = "department", type = String.class),
+                        @ColumnResult(name = "totalHours", type = Double.class)
+                }
+        )
+)
 
 /**
  * Klasa reprezentująca pracownika w systemie.

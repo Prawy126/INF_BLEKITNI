@@ -22,7 +22,7 @@ public class ProductAdapter {
         return new sys.Product(
                 source.getName(),
                 source.getCategory(),
-                source.getPrice()
+                source.getPrice().doubleValue()
         );
     }
 

@@ -8,6 +8,7 @@
 import org.example.database.ProductRepository;
 import org.example.sys.Product;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -46,12 +47,16 @@ public class ProductRepositoryTest {
             System.out.println(">>> Zmieniono kategorię produktu.");
 
             // === 6. Aktualizacja ceny ===
-            productRepo.aktualizujCeneProduktu(produkt2.getId(), 10.99);
+            productRepo.aktualizujCeneProduktu(produkt2.getId(), BigDecimal.valueOf(10.99));
             System.out.println(">>> Zmieniono cenę produktu Szampon.");
 
             // === 7. Produkty w zakresie cenowym ===
             System.out.println("\n>>> Produkty w zakresie cenowym 5.00 - 11.00:");
-            wypiszProdukty(productRepo.pobierzProduktyWZakresieCenowym(5.00, 11.00));
+            List<Product> lista = productRepo.pobierzProduktyWZakresieCenowym(
+                    BigDecimal.valueOf(5.00),
+                    BigDecimal.valueOf(11.00)
+            );
+            wypiszProdukty(lista);
 
             // === 8. Usunięcie produktów po kategorii ===
             int usuniete = productRepo.usunProduktyZKategorii("Produkty spożywcze");

@@ -1,21 +1,11 @@
-/*
- * Classname: Product
- * Version information: 1.0
- * Date: 2025-05-16
- * Copyright notice: © BŁĘKITNI
- */
-
-
 package org.example.sys;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 
-/**
- * Klasa reprezentująca produkt w systemie.
- * Zawiera informacje o nazwie, kategorii i cenie produktu.
- */
 @Entity
 @Table(name = "Produkty")
+@Access(AccessType.FIELD)
 public class Product {
 
     @Id
@@ -29,114 +19,65 @@ public class Product {
     @Column(name = "Kategoria", nullable = false, length = 100)
     private String category;
 
-    @Column(name = "Cena", nullable = false)
-    private double price;
+    @Column(name = "Cena", nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
+
+    public Product() { }
 
     /**
-     * Domyślny konstruktor.
-     * Używany przez Hibernate do tworzenia instancji klasy.
+     * Stary konstruktor – przyjmował double, teraz tylko opakowuje w BigDecimal.
      */
-    public Product() {
+    public Product(String name, String category, double price) {
+        this(name, category, BigDecimal.valueOf(price));
     }
 
     /**
-     * Konstruktor z parametrami.
-     * Umożliwia ustawienie nazwy, kategorii i ceny produktu.
-     *
-     * @param name     Nazwa produktu
-     * @param category Kategoria produktu
-     * @param price    Cena produktu
+     * Nowy konstruktor – możesz mu podać od razu BigDecimal.
      */
-    public Product(String name, String category, double price) {
-        this.name = name;
+    public Product(String name, String category, BigDecimal price) {
+        this.name     = name;
         this.category = category;
-        this.price = price;
+        setPrice(price);
     }
 
     // === Gettery i settery ===
 
-    /**
-     * Zwraca identyfikator produktu.
-     *
-     * @return Identyfikator produktu
-     */
     public int getId() {
         return id;
     }
 
-    /**
-     * Ustawia identyfikator produktu.
-     *
-     * @param id Identyfikator produktu
-     */
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    /**
-     * Zwraca nazwę produktu.
-     *
-     * @return Nazwa produktu
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * Ustawia nazwę produktu.
-     *
-     * @param name Nazwa produktu
-     */
     public void setName(String name) {
         this.name = name;
     }
 
-    /**
-     * Zwraca kategorię produktu.
-     *
-     * @return Kategoria produktu
-     */
     public String getCategory() {
         return category;
     }
 
-    /**
-     * Ustawia kategorię produktu.
-     *
-     * @param category Kategoria produktu
-     */
     public void setCategory(String category) {
         this.category = category;
     }
 
-    /**
-     * Zwraca cenę produktu.
-     *
-     * @return Cena produktu
-     */
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
     /**
-     * Ustawia cenę produktu.
-     *
-     * @param price Cena produktu
+     * Ustawia cenę tylko gdy nie jest null i >= 0
      */
-    public void setPrice(double price) {
-        if (price >= 0) {
+    public void setPrice(BigDecimal price) {
+        if (price != null && price.compareTo(BigDecimal.ZERO) >= 0) {
             this.price = price;
         }
     }
 
-    /**
-     * Zwraca reprezentację tekstową produktu.
-     *
-     * @return Reprezentacja tekstowa produktu
-     */
     @Override
     public String toString() {
-        return String.format("Product{id=%d, name='%s', category='%s', price=%.2f}",
+        return String.format("Product{id=%d, name='%s', category='%s', price=%s}",
                 id, name, category, price);
     }
 }

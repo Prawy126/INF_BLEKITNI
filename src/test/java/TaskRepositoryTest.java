@@ -9,6 +9,7 @@ import org.example.database.TaskRepository;
 import org.example.sys.Task;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 import java.util.List;
 
 /**
@@ -16,32 +17,36 @@ import java.util.List;
  */
 public class TaskRepositoryTest {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         TaskRepository taskRepo = new TaskRepository();
 
         try {
             // === 1. Dodawanie nowych zadań ===
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            LocalTime defaultShiftTime = LocalTime.of(8, 0); // np. zmiana zaczyna się o 08:00
 
             Task zadanie1 = new Task(
                     "Przyjęcie dostawy",
                     sdf.parse("2025-05-01"),
                     "Nowe",
-                    "Przyjąć dostawę mleka."
+                    "Przyjąć dostawę mleka.",
+                    defaultShiftTime
             );
 
             Task zadanie2 = new Task(
                     "Sprawdzenie stanów",
                     sdf.parse("2025-05-03"),
                     "Nowe",
-                    "Sprawdzić ilość jogurtów."
+                    "Sprawdzić ilość jogurtów.",
+                    defaultShiftTime
             );
 
             Task zadanie3 = new Task(
                     "Aktualizacja cen",
                     sdf.parse("2025-05-05"),
                     "W trakcie",
-                    "Aktualizacja cen nabiału."
+                    "Aktualizacja cen nabiału.",
+                    defaultShiftTime
             );
 
             taskRepo.dodajZadanie(zadanie1);
@@ -72,8 +77,6 @@ public class TaskRepositoryTest {
             System.out.println("\n>>> Lista zadań po usunięciu:");
             wypiszZadania(taskRepo.pobierzWszystkieZadania());
 
-        } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             taskRepo.close();
         }
