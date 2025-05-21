@@ -613,7 +613,7 @@ public class HelloApplication extends Application {
             org.example.database.DatabaseInitializer.initialize();
 
             // Dodajmy handler zamknięcia dla całej aplikacji
-            Platform.setImplicitExit(false);
+            Platform.setImplicitExit(true);
 
             launch(args);
         } catch (Exception e) {
