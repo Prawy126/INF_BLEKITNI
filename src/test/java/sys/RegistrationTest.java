@@ -1,3 +1,4 @@
+package sys;
 
 import org.example.sys.Registration;
 import org.example.sys.StatusRegistration;

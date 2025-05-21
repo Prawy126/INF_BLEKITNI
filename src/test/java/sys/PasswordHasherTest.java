@@ -1,3 +1,5 @@
+package sys;
+
 import org.example.sys.PasswordHasher;
 import org.junit.jupiter.api.Test;
 import java.security.InvalidKeyException;
