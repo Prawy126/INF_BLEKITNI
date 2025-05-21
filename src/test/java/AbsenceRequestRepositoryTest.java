@@ -5,8 +5,8 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.database;
-
+import org.example.database.AbsenceRequestRepository;
+import org.example.database.UserRepository;
 import org.example.sys.AbsenceRequest;
 import org.example.sys.Employee;
 
@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Klasa testująca działanie AbsenceRequestRepository.
  */
-public class TestAbsenceRequestRepository {
+public class AbsenceRequestRepositoryTest {
 
     public static void main(String[] args) {
         AbsenceRequestRepository absenceRepo = new AbsenceRequestRepository();

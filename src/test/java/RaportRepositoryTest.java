@@ -5,8 +5,8 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.database;
-
+import org.example.database.RaportRepository;
+import org.example.database.UserRepository;
 import org.example.sys.Employee;
 import org.example.sys.Raport;
 
@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Klasa testująca działanie RaportRepository.
  */
-public class TestRaportRepository {
+public class RaportRepositoryTest {
 
     public static void main(String[] args) {
         RaportRepository raportRepo = new RaportRepository();

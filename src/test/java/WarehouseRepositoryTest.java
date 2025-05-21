@@ -1,5 +1,4 @@
-package org.example.database;
-
+import org.example.database.WarehouseRepository;
 import org.example.sys.Product;
 import org.example.sys.Warehouse;
 
@@ -8,7 +7,7 @@ import java.util.List;
 /**
  * Klasa testująca działanie WarehouseRepository.
  */
-public class TestWarehouseRepository {
+public class WarehouseRepositoryTest {
 
     public static void main(String[] args) {
         WarehouseRepository repo = new WarehouseRepository();

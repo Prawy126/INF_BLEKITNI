@@ -1,5 +1,6 @@
-package org.example.database;
-
+import org.example.database.OrderRepository;
+import org.example.database.ProductRepository;
+import org.example.database.UserRepository;
 import org.example.sys.Order;
 import org.example.sys.Employee;
 import org.example.sys.Product;
@@ -11,7 +12,7 @@ import java.util.List;
 /**
  * Klasa testująca działanie OrderRepository.
  */
-public class TestOrderRepository {
+public class OrderRepositoryTest {
 
     public static void main(String[] args) {
         OrderRepository orderRepo = new OrderRepository();

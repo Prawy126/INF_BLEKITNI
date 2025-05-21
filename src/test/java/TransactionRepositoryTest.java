@@ -5,8 +5,8 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.database;
-
+import org.example.database.TransactionRepository;
+import org.example.database.UserRepository;
 import org.example.sys.Employee;
 import org.example.sys.Transaction;
 
@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Klasa testująca działanie TransactionRepository.
  */
-public class TestTransactionRepository {
+public class TransactionRepositoryTest {
 
     public static void main(String[] args) {
         TransactionRepository transactionRepo = new TransactionRepository();

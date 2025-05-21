@@ -5,8 +5,7 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.database;
-
+import org.example.database.ProductRepository;
 import org.example.sys.Product;
 
 import java.util.List;
@@ -14,7 +13,7 @@ import java.util.List;
 /**
  * Klasa testująca działanie ProductRepository.
  */
-public class TestProductRepository {
+public class ProductRepositoryTest {
 
     public static void main(String[] args) {
         ProductRepository productRepo = new ProductRepository();

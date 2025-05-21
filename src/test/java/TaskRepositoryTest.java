@@ -5,18 +5,16 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.database;
-
+import org.example.database.TaskRepository;
 import org.example.sys.Task;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 /**
  * Klasa testująca działanie TaskRepository.
  */
-public class TestTaskRepository {
+public class TaskRepositoryTest {
 
     public static void main(String[] args) {
         TaskRepository taskRepo = new TaskRepository();
