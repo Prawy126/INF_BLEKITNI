@@ -257,7 +257,7 @@ public class CashierPanelController {
 
         // Pobranie dostępnych kategorii
         ProductRepository productRepo = new ProductRepository();
-        List<String> categories = productRepo.pobierzKategorie();
+        List<String> categories = productRepo.getCategories();
         categoryListView.setItems(FXCollections.observableArrayList(categories));
         productRepo.close();
 
@@ -647,7 +647,7 @@ public class CashierPanelController {
         table.getColumns().addAll(idCol, nameCol, categoryCol, priceCol);
 
         ProductRepository productRepo = new ProductRepository();
-        ObservableList<Product> productList = FXCollections.observableArrayList(productRepo.pobierzWszystkieProdukty());
+        ObservableList<Product> productList = FXCollections.observableArrayList(productRepo.getAllProducts());
         productRepo.close();
 
         table.setItems(productList);

@@ -163,7 +163,7 @@ public class TaskRepository {
      * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
      */
     public List<Task> znajdzPoNazwie(String nazwaFragment) {
-        logger.debug("znajdzPoNazwie() – nazwaFragment={}", nazwaFragment);
+        logger.debug("findByName() – nazwaFragment={}", nazwaFragment);
         EntityManager em = emf.createEntityManager();
         try {
             List<Task> list = em.createQuery(
@@ -171,14 +171,14 @@ public class TaskRepository {
                             Task.class)
                     .setParameter("frag", nazwaFragment)
                     .getResultList();
-            logger.info("znajdzPoNazwie() – znaleziono {} zadań", list.size());
+            logger.info("findByName() – znaleziono {} zadań", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoNazwie() – błąd podczas wyszukiwania", e);
+            logger.error("findByName() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoNazwie() – EntityManager zamknięty");
+            logger.debug("findByName() – EntityManager zamknięty");
         }
     }
 

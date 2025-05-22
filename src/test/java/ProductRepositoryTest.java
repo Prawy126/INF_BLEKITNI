@@ -22,53 +22,53 @@ public class ProductRepositoryTest {
         try {
             // === 1. Dodanie produktu ===
             Product produkt1 = new Product("Masło", "Nabiał", 6.99);
-            productRepo.dodajProdukt(produkt1);
+            productRepo.addProduct(produkt1);
             System.out.println(">>> Dodano produkt: Masło");
 
             Product produkt2 = new Product("Szampon", "Kosmetyki", 12.49);
-            productRepo.dodajProdukt(produkt2);
+            productRepo.addProduct(produkt2);
             System.out.println(">>> Dodano produkt: Szampon");
 
             // === 2. Pobranie wszystkich produktów ===
             System.out.println("\n>>> Wszystkie produkty:");
-            wypiszProdukty(productRepo.pobierzWszystkieProdukty());
+            wypiszProdukty(productRepo.getAllProducts());
 
             // === 3. Pobranie produktu po ID ===
-            Product znaleziony = productRepo.znajdzProduktPoId(produkt1.getId());
+            Product znaleziony = productRepo.findProductById(produkt1.getId());
             System.out.println(">>> Znaleziony po ID: " + znaleziony);
 
             // === 4. Pobranie po kategorii ===
             System.out.println("\n>>> Produkty w kategorii 'Nabiał':");
-            wypiszProdukty(productRepo.pobierzProduktyPoKategorii("Nabiał"));
+            wypiszProdukty(productRepo.getProductsByCategory("Nabiał"));
 
             // === 5. Aktualizacja obiektu produkt ===
             znaleziony.setCategory("Produkty spożywcze");
-            productRepo.aktualizujProdukt(znaleziony);
+            productRepo.updateProduct(znaleziony);
             System.out.println(">>> Zmieniono kategorię produktu.");
 
             // === 6. Aktualizacja ceny ===
-            productRepo.aktualizujCeneProduktu(produkt2.getId(), BigDecimal.valueOf(10.99));
+            productRepo.updateProductPrice(produkt2.getId(), BigDecimal.valueOf(10.99));
             System.out.println(">>> Zmieniono cenę produktu Szampon.");
 
             // === 7. Produkty w zakresie cenowym ===
             System.out.println("\n>>> Produkty w zakresie cenowym 5.00 - 11.00:");
-            List<Product> lista = productRepo.pobierzProduktyWZakresieCenowym(
+            List<Product> lista = productRepo.getPriceRangeProducts(
                     BigDecimal.valueOf(5.00),
                     BigDecimal.valueOf(11.00)
             );
             wypiszProdukty(lista);
 
             // === 8. Usunięcie produktów po kategorii ===
-            int usuniete = productRepo.usunProduktyZKategorii("Produkty spożywcze");
+            int usuniete = productRepo.removeProductsFromCategory("Produkty spożywcze");
             System.out.println(">>> Usunięto produktów z kategorii 'Produkty spożywcze': " + usuniete);
 
             // === 9. Usunięcie konkretnego produktu ===
-            productRepo.usunProdukt(produkt2.getId());
+            productRepo.removeProduct(produkt2.getId());
             System.out.println(">>> Usunięto produkt: Szampon");
 
             // === 10. Lista końcowa ===
             System.out.println("\n>>> Lista produktów po usunięciach:");
-            wypiszProdukty(productRepo.pobierzWszystkieProdukty());
+            wypiszProdukty(productRepo.getAllProducts());
 
         } catch (Exception e) {
             e.printStackTrace();

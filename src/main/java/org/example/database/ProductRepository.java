@@ -1,6 +1,6 @@
 /*
  * Classname: ProductRepository
- * Version information: 1.4
+ * Version information: 1.5
  * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
@@ -34,25 +34,25 @@ public class ProductRepository {
     }
 
     /**
-     * Dodaje nowy produkt do bazy.
+     * Dodaje nowy product do bazy.
      *
-     * @param produkt obiekt produktu do zapisania
+     * @param product obiekt produktu do zapisania
      */
-    public void dodajProdukt(Product produkt) {
-        logger.debug("dodajProdukt() – start, produkt={}", produkt);
+    public void addProduct(Product product) {
+        logger.debug("addProduct() – start, product={}", product);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            em.persist(produkt);
+            em.persist(product);
             tx.commit();
-            logger.info("dodajProdukt() – produkt dodany: {}", produkt);
+            logger.info("addProduct() – product dodany: {}", product);
         } catch (Exception e) {
-            logger.error("dodajProdukt() – błąd podczas dodawania produktu", e);
+            logger.error("addProduct() – błąd podczas dodawania produktu", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("dodajProdukt() – EntityManager zamknięty");
+            logger.debug("addProduct() – EntityManager zamknięty");
         }
     }
 
@@ -62,19 +62,19 @@ public class ProductRepository {
      * @param id identyfikator produktu
      * @return znaleziony produkt lub null, jeśli nie istnieje
      */
-    public Product znajdzProduktPoId(int id) {
-        logger.debug("znajdzProduktPoId() – start, id={}", id);
+    public Product findProductById(int id) {
+        logger.debug("findProductById() – start, id={}", id);
         EntityManager em = emf.createEntityManager();
         try {
             Product p = em.find(Product.class, id);
-            logger.info("znajdzProduktPoId() – znaleziono: {}", p);
+            logger.info("findProductById() – znaleziono: {}", p);
             return p;
         } catch (Exception e) {
-            logger.error("znajdzProduktPoId() – błąd podczas wyszukiwania produktu o id={}", id, e);
+            logger.error("findProductById() – błąd podczas wyszukiwania produktu o id={}", id, e);
             return null;
         } finally {
             em.close();
-            logger.debug("znajdzProduktPoId() – EntityManager zamknięty");
+            logger.debug("findProductById() – EntityManager zamknięty");
         }
     }
 
@@ -83,45 +83,45 @@ public class ProductRepository {
      *
      * @return lista wszystkich produktów, pusta lista w razie błędu
      */
-    public List<Product> pobierzWszystkieProdukty() {
-        logger.debug("pobierzWszystkieProdukty() – start");
+    public List<Product> getAllProducts() {
+        logger.debug("getAllProducts() – start");
         EntityManager em = emf.createEntityManager();
         try {
             List<Product> list = em.createQuery("SELECT p FROM Product p", Product.class)
                     .getResultList();
-            logger.info("pobierzWszystkieProdukty() – pobrano {} produktów", list.size());
+            logger.info("getAllProducts() – pobrano {} produktów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("pobierzWszystkieProdukty() – błąd podczas pobierania produktów", e);
+            logger.error("getAllProducts() – błąd podczas pobierania produktów", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("pobierzWszystkieProdukty() – EntityManager zamknięty");
+            logger.debug("getAllProducts() – EntityManager zamknięty");
         }
     }
 
     /**
      * Pobiera produkty z określonej kategorii.
      *
-     * @param kategoria nazwa kategorii
+     * @param category nazwa kategorii
      * @return lista produktów w danej kategorii, pusta lista w razie błędu
      */
-    public List<Product> pobierzProduktyPoKategorii(String kategoria) {
-        logger.debug("pobierzProduktyPoKategorii() – start, kategoria={}", kategoria);
+    public List<Product> getProductsByCategory(String category) {
+        logger.debug("getProductsByCategory() – start, category={}", category);
         EntityManager em = emf.createEntityManager();
         try {
             List<Product> list = em.createQuery(
                             "SELECT p FROM Product p WHERE p.category = :k", Product.class)
-                    .setParameter("k", kategoria)
+                    .setParameter("k", category)
                     .getResultList();
-            logger.info("pobierzProduktyPoKategorii() – znaleziono {} produktów", list.size());
+            logger.info("getProductsByCategory() – znaleziono {} produktów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("pobierzProduktyPoKategorii() – błąd podczas wyszukiwania", e);
+            logger.error("getProductsByCategory() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("pobierzProduktyPoKategorii() – EntityManager zamknięty");
+            logger.debug("getProductsByCategory() – EntityManager zamknięty");
         }
     }
     /**
@@ -129,8 +129,8 @@ public class ProductRepository {
      *
      * @param id identyfikator produktu do usunięcia
      */
-    public void usunProdukt(int id) {
-        logger.debug("usunProdukt() – start, id={}", id);
+    public void removeProduct(int id) {
+        logger.debug("removeProduct() – start, id={}", id);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -138,40 +138,40 @@ public class ProductRepository {
             Product p = em.find(Product.class, id);
             if (p != null) {
                 em.remove(p);
-                logger.info("usunProdukt() – usunięto produkt: {}", p);
+                logger.info("removeProduct() – usunięto produkt: {}", p);
             } else {
-                logger.warn("usunProdukt() – brak produktu o id={}", id);
+                logger.warn("removeProduct() – brak produktu o id={}", id);
             }
             tx.commit();
         } catch (Exception e) {
-            logger.error("usunProdukt() – błąd podczas usuwania produktu o id={}", id, e);
+            logger.error("removeProduct() – błąd podczas usuwania produktu o id={}", id, e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("usunProdukt() – EntityManager zamknięty");
+            logger.debug("removeProduct() – EntityManager zamknięty");
         }
     }
 
     /**
-     * Aktualizuje istniejący produkt.
+     * Aktualizuje istniejący product.
      *
-     * @param produkt obiekt produktu z nowymi danymi
+     * @param product obiekt produktu z nowymi danymi
      */
-    public void aktualizujProdukt(Product produkt) {
-        logger.debug("aktualizujProdukt() – start, produkt={}", produkt);
+    public void updateProduct(Product product) {
+        logger.debug("updateProduct() – start, product={}", product);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            em.merge(produkt);
+            em.merge(product);
             tx.commit();
-            logger.info("aktualizujProdukt() – produkt zaktualizowany: {}", produkt);
+            logger.info("updateProduct() – product zaktualizowany: {}", product);
         } catch (Exception e) {
-            logger.error("aktualizujProdukt() – błąd podczas aktualizacji produktu", e);
+            logger.error("updateProduct() – błąd podczas aktualizacji produktu", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("aktualizujProdukt() – EntityManager zamknięty");
+            logger.debug("updateProduct() – EntityManager zamknięty");
         }
     }
 
@@ -179,86 +179,86 @@ public class ProductRepository {
      * Aktualizuje cenę produktu.
      *
      * @param id       identyfikator produktu
-     * @param nowaCena nowa cena ≥ 0
+     * @param minPrice nowa cena ≥ 0
      */
-    public void aktualizujCeneProduktu(int id, BigDecimal nowaCena) {
-        logger.debug("aktualizujCeneProduktu() – start, id={}, nowaCena={}", id, nowaCena);
+    public void updateProductPrice(int id, BigDecimal minPrice) {
+        logger.debug("updateProductPrice() – start, id={}, minPrice={}", id, minPrice);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             Product p = em.find(Product.class, id);
-            if (p != null && nowaCena.compareTo(BigDecimal.ZERO) >= 0) {
-                p.setPrice(nowaCena);
+            if (p != null && minPrice.compareTo(BigDecimal.ZERO) >= 0) {
+                p.setPrice(minPrice);
                 em.merge(p);
-                logger.info("aktualizujCeneProduktu() – cena zaktualizowana: {}", p);
+                logger.info("updateProductPrice() – cena zaktualizowana: {}", p);
             } else {
-                logger.warn("aktualizujCeneProduktu() – niepoprawne dane lub brak produktu id={}", id);
+                logger.warn("updateProductPrice() – niepoprawne dane lub brak produktu id={}", id);
             }
             tx.commit();
         } catch (Exception e) {
-            logger.error("aktualizujCeneProduktu() – błąd podczas aktualizacji ceny", e);
+            logger.error("updateProductPrice() – błąd podczas aktualizacji ceny", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("aktualizujCeneProduktu() – EntityManager zamknięty");
+            logger.debug("updateProductPrice() – EntityManager zamknięty");
         }
     }
 
     /**
      * Usuwa wszystkie produkty z danej kategorii.
      *
-     * @param kategoria nazwa kategorii
+     * @param category nazwa kategorii
      * @return liczba usuniętych rekordów
      */
-    public int usunProduktyZKategorii(String kategoria) {
-        logger.debug("usunProduktyZKategorii() – start, kategoria={}", kategoria);
+    public int removeProductsFromCategory(String category) {
+        logger.debug("removeProductsFromCategory() – start, category={}", category);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             int removed = em.createQuery(
                             "DELETE FROM Product p WHERE p.category = :k")
-                    .setParameter("k", kategoria)
+                    .setParameter("k", category)
                     .executeUpdate();
             tx.commit();
-            logger.info("usunProduktyZKategorii() – usunięto {} produktów", removed);
+            logger.info("removeProductsFromCategory() – usunięto {} produktów", removed);
             return removed;
         } catch (Exception e) {
-            logger.error("usunProduktyZKategorii() – błąd podczas usuwania produktów", e);
+            logger.error("removeProductsFromCategory() – błąd podczas usuwania produktów", e);
             if (tx.isActive()) tx.rollback();
             return 0;
         } finally {
             em.close();
-            logger.debug("usunProduktyZKategorii() – EntityManager zamknięty");
+            logger.debug("removeProductsFromCategory() – EntityManager zamknięty");
         }
     }
 
     /**
      * Pobiera produkty w zadanym przedziale cenowym.
      *
-     * @param minCena cena minimalna
-     * @param maxCena cena maksymalna
+     * @param minPrice cena minimalna
+     * @param maxPrice cena maksymalna
      * @return lista produktów, pusta lista w razie błędu
      */
-    public List<Product> pobierzProduktyWZakresieCenowym(BigDecimal minCena, BigDecimal maxCena) {
-        logger.debug("pobierzProduktyWZakresieCenowym() – start, minCena={}, maxCena={}", minCena, maxCena);
+    public List<Product> getPriceRangeProducts(BigDecimal minPrice, BigDecimal maxPrice) {
+        logger.debug("getPriceRangeProducts() – start, minPrice={}, maxPrice={}", minPrice, maxPrice);
         EntityManager em = emf.createEntityManager();
         try {
             List<Product> list = em.createQuery(
                             "SELECT p FROM Product p WHERE p.price BETWEEN :min AND :max",
                             Product.class)
-                    .setParameter("min", minCena)
-                    .setParameter("max", maxCena)
+                    .setParameter("min", minPrice)
+                    .setParameter("max", maxPrice)
                     .getResultList();
-            logger.info("pobierzProduktyWZakresieCenowym() – znaleziono {} produktów", list.size());
+            logger.info("getPriceRangeProducts() – znaleziono {} produktów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("pobierzProduktyWZakresieCenowym() – błąd podczas wyszukiwania", e);
+            logger.error("getPriceRangeProducts() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("pobierzProduktyWZakresieCenowym() – EntityManager zamknięty");
+            logger.debug("getPriceRangeProducts() – EntityManager zamknięty");
         }
     }
 
@@ -267,21 +267,21 @@ public class ProductRepository {
      *
      * @return lista kategorii lub pusta lista w razie błędu
      */
-    public List<String> pobierzKategorie() {
-        logger.debug("pobierzKategorie() – start");
+    public List<String> getCategories() {
+        logger.debug("getCategories() – start");
         EntityManager em = emf.createEntityManager();
         try {
             List<String> list = em.createQuery(
                             "SELECT DISTINCT p.category FROM Product p", String.class)
                     .getResultList();
-            logger.info("pobierzKategorie() – znaleziono {} kategorii", list.size());
+            logger.info("getCategories() – znaleziono {} kategorii", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("pobierzKategorie() – błąd", e);
+            logger.error("getCategories() – błąd", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("pobierzKategorie() – EntityManager zamknięty");
+            logger.debug("getCategories() – EntityManager zamknięty");
         }
     }
 
@@ -293,8 +293,8 @@ public class ProductRepository {
      * @param fragName fragment nazwy
      * @return lista produktów, pusta lista w razie błędu
      */
-    public List<Product> znajdzPoNazwie(String fragName) {
-        logger.debug("znajdzPoNazwie() – start, fragName={}", fragName);
+    public List<Product> findByName(String fragName) {
+        logger.debug("findByName() – start, fragName={}", fragName);
         EntityManager em = emf.createEntityManager();
         try {
             List<Product> list = em.createQuery(
@@ -302,89 +302,89 @@ public class ProductRepository {
                             Product.class)
                     .setParameter("f", fragName)
                     .getResultList();
-            logger.info("znajdzPoNazwie() – znaleziono {} produktów", list.size());
+            logger.info("findByName() – znaleziono {} produktów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoNazwie() – błąd podczas wyszukiwania", e);
+            logger.error("findByName() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoNazwie() – EntityManager zamknięty");
+            logger.debug("findByName() – EntityManager zamknięty");
         }
     }
 
     /**
      * Znajduje produkty o dokładnej cenie.
      *
-     * @param cena dokładna wartość ceny
+     * @param price dokładna wartość ceny
      * @return lista produktów, pusta lista w razie błędu
      */
-    public List<Product> znajdzPoCenieDokladnej(BigDecimal cena) {
-        logger.debug("znajdzPoCenieDokladnej() – cena={}", cena);
+    public List<Product> findByExactPrice(BigDecimal price) {
+        logger.debug("findByExactPrice() – price={}", price);
         EntityManager em = emf.createEntityManager();
         try {
             List<Product> list = em.createQuery(
                             "SELECT p FROM Product p WHERE p.price = :c", Product.class)
-                    .setParameter("c", cena)
+                    .setParameter("c", price)
                     .getResultList();
-            logger.info("znajdzPoCenieDokladnej() – znaleziono {} produktów", list.size());
+            logger.info("findByExactPrice() – znaleziono {} produktów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoCenieDokladnej() – błąd podczas wyszukiwania", e);
+            logger.error("findByExactPrice() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoCenieDokladnej() – EntityManager zamknięty");
+            logger.debug("findByExactPrice() – EntityManager zamknięty");
         }
     }
 
     /**
      * Znajduje produkty o cenie nie mniejszej niż podana.
      *
-     * @param minCena minimalna cena
+     * @param minPrice minimalna cena
      * @return lista produktów, pusta lista w razie błędu
      */
-    public List<Product> znajdzPoCenieMin(BigDecimal minCena) {
-        logger.debug("znajdzPoCenieMin() – minCena={}", minCena);
+    public List<Product> findByMinPrice(BigDecimal minPrice) {
+        logger.debug("findByMinPrice() – minPrice={}", minPrice);
         EntityManager em = emf.createEntityManager();
         try {
             List<Product> list = em.createQuery(
                             "SELECT p FROM Product p WHERE p.price >= :min", Product.class)
-                    .setParameter("min", minCena)
+                    .setParameter("min", minPrice)
                     .getResultList();
-            logger.info("znajdzPoCenieMin() – znaleziono {} produktów", list.size());
+            logger.info("findByMinPrice() – znaleziono {} produktów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoCenieMin() – błąd podczas wyszukiwania", e);
+            logger.error("findByMinPrice() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoCenieMin() – EntityManager zamknięty");
+            logger.debug("findByMinPrice() – EntityManager zamknięty");
         }
     }
 
     /**
      * Znajduje produkty o cenie nie większej niż podana.
      *
-     * @param maxCena maksymalna cena
+     * @param maxPrice maksymalna cena
      * @return lista produktów, pusta lista w razie błędu
      */
-    public List<Product> znajdzPoCenieMax(BigDecimal maxCena) {
-        logger.debug("znajdzPoCenieMax() – maxCena={}", maxCena);
+    public List<Product> findByMaxPrice(BigDecimal maxPrice) {
+        logger.debug("findByMaxPrice() – maxPrice={}", maxPrice);
         EntityManager em = emf.createEntityManager();
         try {
             List<Product> list = em.createQuery(
                             "SELECT p FROM Product p WHERE p.price <= :max", Product.class)
-                    .setParameter("max", maxCena)
+                    .setParameter("max", maxPrice)
                     .getResultList();
-            logger.info("znajdzPoCenieMax() – znaleziono {} produktów", list.size());
+            logger.info("findByMaxPrice() – znaleziono {} produktów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoCenieMax() – błąd podczas wyszukiwania", e);
+            logger.error("findByMaxPrice() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoCenieMax() – EntityManager zamknięty");
+            logger.debug("findByMaxPrice() – EntityManager zamknięty");
         }
     }
 

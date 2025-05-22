@@ -174,7 +174,7 @@ public class LogisticianPanelController {
         Label categoriesLabel = new Label("Wybierz kategorie:");
         ListView<String> categoriesList = new ListView<>();
         try {
-            categoriesList.getItems().addAll(productRepository.pobierzKategorie());
+            categoriesList.getItems().addAll(productRepository.getCategories());
         } catch (Exception ex) {
             logger.error("Błąd pobierania kategorii", ex);
         }
@@ -235,7 +235,7 @@ public class LogisticianPanelController {
         }
 
         try {
-            List<org.example.sys.Product> products = productRepository.pobierzWszystkieProdukty();
+            List<org.example.sys.Product> products = productRepository.getAllProducts();
 
             Map<Integer, Integer> qtyById = warehouseRepository
                     .pobierzWszystkieStany()
@@ -394,7 +394,7 @@ public class LogisticianPanelController {
 
         // Pobieranie kategorii z bazy danych
         try {
-            List<org.example.sys.Product> products = productRepository.pobierzWszystkieProdukty();
+            List<org.example.sys.Product> products = productRepository.getAllProducts();
             List<String> categories = products.stream()
                     .map(org.example.sys.Product::getCategory)
                     .distinct()
@@ -422,7 +422,7 @@ public class LogisticianPanelController {
         filterButton.setOnAction(e -> {
             try {
                 // Pobieranie wszystkich produktów
-                List<org.example.sys.Product> allProducts = productRepository.pobierzWszystkieProdukty();
+                List<org.example.sys.Product> allProducts = productRepository.getAllProducts();
 
                 // Filtrowanie produktów
                 List<org.example.sys.Product> filteredProducts = allProducts.stream()

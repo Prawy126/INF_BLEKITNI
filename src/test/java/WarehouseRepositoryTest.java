@@ -29,7 +29,7 @@ class WarehouseRepositoryTest {
     void testAddProductAndWarehouse() {
         // 1. add a product for FK
         testProduct = new Product("Jogurt truskawkowy", "Nabiał", 3.49);
-        assertDoesNotThrow(() -> productRepo.dodajProdukt(testProduct),
+        assertDoesNotThrow(() -> productRepo.addProduct(testProduct),
                 "Should add product without exception");
         assertTrue(testProduct.getId() > 0, "Product should have an ID");
 
