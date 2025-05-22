@@ -238,7 +238,7 @@ public class LogisticianPanelController {
             List<org.example.sys.Product> products = productRepository.getAllProducts();
 
             Map<Integer, Integer> qtyById = warehouseRepository
-                    .pobierzWszystkieStany()
+                    .getAllStates()
                     .stream()
                     .collect(Collectors.toMap(
                             org.example.sys.Warehouse::getProductId,

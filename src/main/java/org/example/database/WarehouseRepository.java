@@ -1,6 +1,6 @@
 /*
  * Classname: WarehouseRepository
- * Version information: 1.4
+ * Version information: 1.5
  * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
@@ -36,47 +36,47 @@ public class WarehouseRepository {
     }
 
     /**
-     * Dodaje nowy stan magazynowy (pozycję) do bazy.
+     * Dodaje nowy state magazynowy (pozycję) do bazy.
      *
-     * @param stan obiekt Warehouse reprezentujący stan magazynowy do zapisania
+     * @param state obiekt Warehouse reprezentujący state magazynowy do zapisania
      */
-    public void dodajStanMagazynowy(Warehouse stan) {
-        logger.debug("dodajStanMagazynowy() – start, stan={}", stan);
+    public void addWarehouseState(Warehouse state) {
+        logger.debug("addWarehouseState() – start, state={}", state);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            em.persist(stan);
+            em.persist(state);
             tx.commit();
-            logger.info("dodajStanMagazynowy() – dodano stan: {}", stan);
+            logger.info("addWarehouseState() – dodano state: {}", state);
         } catch (Exception ex) {
-            logger.error("dodajStanMagazynowy() – błąd podczas dodawania stanu", ex);
+            logger.error("addWarehouseState() – błąd podczas dodawania stanu", ex);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("dodajStanMagazynowy() – EM zamknięty");
+            logger.debug("addWarehouseState() – EM zamknięty");
         }
     }
 
     /**
      * Pobiera stan magazynowy (pozycję) na podstawie identyfikatora produktu.
      *
-     * @param idProduktu identyfikator produktu
+     * @param productId identyfikator produktu
      * @return obiekt Warehouse lub null, jeśli nie znaleziono
      */
-    public Warehouse znajdzStanPoIdProduktu(int idProduktu) {
-        logger.debug("znajdzStanPoIdProduktu() – start, idProduktu={}", idProduktu);
+    public Warehouse findStateByProductId(int productId) {
+        logger.debug("findStateByProductId() – start, productId={}", productId);
         EntityManager em = emf.createEntityManager();
         try {
-            Warehouse stan = em.find(Warehouse.class, idProduktu);
-            logger.info("znajdzStanPoIdProduktu() – znaleziono: {}", stan);
+            Warehouse stan = em.find(Warehouse.class, productId);
+            logger.info("findStateByProductId() – znaleziono: {}", stan);
             return stan;
         } catch (Exception ex) {
-            logger.error("znajdzStanPoIdProduktu() – błąd podczas wyszukiwania idProduktu={}", idProduktu, ex);
+            logger.error("findStateByProductId() – błąd podczas wyszukiwania productId={}", productId, ex);
             return null;
         } finally {
             em.close();
-            logger.debug("znajdzStanPoIdProduktu() – EM zamknięty");
+            logger.debug("findStateByProductId() – EM zamknięty");
         }
     }
 
@@ -85,71 +85,71 @@ public class WarehouseRepository {
      *
      * @return lista obiektów Warehouse lub pusta lista w przypadku błędu
      */
-    public List<Warehouse> pobierzWszystkieStany() {
-        logger.debug("pobierzWszystkieStany() – start");
+    public List<Warehouse> getAllStates() {
+        logger.debug("getAllStates() – start");
         EntityManager em = emf.createEntityManager();
         try {
             List<Warehouse> list = em.createQuery("SELECT w FROM Warehouse w", Warehouse.class)
                     .getResultList();
-            logger.info("pobierzWszystkieStany() – pobrano {} rekordów", list.size());
+            logger.info("getAllStates() – pobrano {} rekordów", list.size());
             return list;
         } catch (Exception ex) {
-            logger.error("pobierzWszystkieStany() – błąd podczas pobierania wszystkich stanów", ex);
+            logger.error("getAllStates() – błąd podczas pobierania wszystkich stanów", ex);
             return List.of();
         } finally {
             em.close();
-            logger.debug("pobierzWszystkieStany() – EM zamknięty");
+            logger.debug("getAllStates() – EM zamknięty");
         }
     }
 
     /**
      * Usuwa stan magazynowy na podstawie identyfikatora produktu.
      *
-     * @param idProduktu identyfikator produktu
+     * @param productId identyfikator produktu
      */
-    public void usunStan(int idProduktu) {
-        logger.debug("usunStan() – start, idProduktu={}", idProduktu);
+    public void removeState(int productId) {
+        logger.debug("removeState() – start, productId={}", productId);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            Warehouse stan = em.find(Warehouse.class, idProduktu);
+            Warehouse stan = em.find(Warehouse.class, productId);
             if (stan != null) {
                 em.remove(stan);
-                logger.info("usunStan() – usunięto stan: {}", stan);
+                logger.info("removeState() – usunięto stan: {}", stan);
             } else {
-                logger.warn("usunStan() – brak rekordu dla idProduktu={}", idProduktu);
+                logger.warn("removeState() – brak rekordu dla productId={}", productId);
             }
             tx.commit();
         } catch (Exception ex) {
-            logger.error("usunStan() – błąd podczas usuwania idProduktu={}", idProduktu, ex);
+            logger.error("removeState() – błąd podczas usuwania productId={}", productId, ex);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("usunStan() – EM zamknięty");
+            logger.debug("removeState() – EM zamknięty");
         }
     }
 
     /**
-     * Aktualizuje istniejący stan magazynowy.
+     * Aktualizuje istniejący state magazynowy.
      *
-     * @param stan obiekt Warehouse z zaktualizowanymi danymi
+     * @param state obiekt Warehouse z zaktualizowanymi danymi
      */
-    public void aktualizujStan(Warehouse stan) {
-        logger.debug("aktualizujStan() – start, stan={}", stan);
+    public void updateState(Warehouse state) {
+        logger.debug("updateState() – start, state={}", state);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            em.merge(stan);
+            em.merge(state);
             tx.commit();
-            logger.info("aktualizujStan() – zaktualizowano stan: {}", stan);
+            logger.info("updateState() – zaktualizowano state: {}", state);
         } catch (Exception ex) {
-            logger.error("aktualizujStan() – błąd podczas aktualizacji stanu", ex);
+            logger.error("updateState() – błąd podczas aktualizacji stanu", ex);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("aktualizujStan() – EM zamknięty");
+            logger.debug("updateState() – EM zamknięty");
         }
     }
 
@@ -159,8 +159,8 @@ public class WarehouseRepository {
      * @param productId identyfikator produktu
      * @param newQty    nowa ilość produktu
      */
-    public void ustawIloscProduktu(int productId, int newQty) {
-        logger.debug("ustawIloscProduktu() – start, productId={}, newQty={}", productId, newQty);
+    public void setProductQuantity(int productId, int newQty) {
+        logger.debug("setProductQuantity() – start, productId={}, newQty={}", productId, newQty);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -169,42 +169,42 @@ public class WarehouseRepository {
             if (w != null) {
                 w.setQuantity(newQty);
                 em.merge(w);
-                logger.info("ustawIloscProduktu() – ilość zaktualizowana: {} → {}", productId, newQty);
+                logger.info("setProductQuantity() – ilość zaktualizowana: {} → {}", productId, newQty);
             } else {
-                logger.warn("ustawIloscProduktu() – brak rekordu dla productId={}", productId);
+                logger.warn("setProductQuantity() – brak rekordu dla productId={}", productId);
             }
             tx.commit();
         } catch (Exception ex) {
-            logger.error("ustawIloscProduktu() – błąd podczas ustawiania ilości", ex);
+            logger.error("setProductQuantity() – błąd podczas ustawiania ilości", ex);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("ustawIloscProduktu() – EM zamknięty");
+            logger.debug("setProductQuantity() – EM zamknięty");
         }
     }
 
     /**
      * Wyszukuje stany magazynowe o dokładnie podanej ilości.
      *
-     * @param ilosc wartość ilości
+     * @param quantity wartość ilości
      * @return lista rekordów Warehouse lub pusta lista
      */
-    public List<Warehouse> znajdzPoIlosci(int ilosc) {
-        logger.debug("znajdzPoIlosci() – ilosc={}", ilosc);
+    public List<Warehouse> findByQuantity(int quantity) {
+        logger.debug("findByQuantity() – quantity={}", quantity);
         EntityManager em = emf.createEntityManager();
         try {
             List<Warehouse> list = em.createQuery(
-                            "SELECT w FROM Warehouse w WHERE w.ilosc = :ilosc", Warehouse.class)
-                    .setParameter("ilosc", ilosc)
+                            "SELECT w FROM Warehouse w WHERE w.quantity = :quantity", Warehouse.class)
+                    .setParameter("quantity", quantity)
                     .getResultList();
-            logger.info("znajdzPoIlosci() – znaleziono {} rekordów", list.size());
+            logger.info("findByQuantity() – znaleziono {} rekordów", list.size());
             return list;
         } catch (Exception ex) {
-            logger.error("znajdzPoIlosci() – błąd dla ilosc={}", ilosc, ex);
+            logger.error("findByQuantity() – błąd dla quantity={}", quantity, ex);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoIlosci() – EM zamknięty");
+            logger.debug("findByQuantity() – EM zamknięty");
         }
     }
 
@@ -214,22 +214,22 @@ public class WarehouseRepository {
      * @param max maksymalna ilość
      * @return lista rekordów Warehouse lub pusta lista
      */
-    public List<Warehouse> znajdzPoIlosciMniejszejNiz(int max) {
-        logger.debug("znajdzPoIlosciMniejszejNiz() – max={}", max);
+    public List<Warehouse> findByQuantityLowerThan(int max) {
+        logger.debug("findByQuantityLowerThan() – max={}", max);
         EntityManager em = emf.createEntityManager();
         try {
             List<Warehouse> list = em.createQuery(
-                            "SELECT w FROM Warehouse w WHERE w.ilosc < :max", Warehouse.class)
+                            "SELECT w FROM Warehouse w WHERE w.quantity < :max", Warehouse.class)
                     .setParameter("max", max)
                     .getResultList();
-            logger.info("znajdzPoIlosciMniejszejNiz() – znaleziono {} rekordów", list.size());
+            logger.info("findByQuantityLowerThan() – znaleziono {} rekordów", list.size());
             return list;
         } catch (Exception ex) {
-            logger.error("znajdzPoIlosciMniejszejNiz() – błąd dla max={}", max, ex);
+            logger.error("findByQuantityLowerThan() – błąd dla max={}", max, ex);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoIlosciMniejszejNiz() – EM zamknięty");
+            logger.debug("findByQuantityLowerThan() – EM zamknięty");
         }
     }
 
@@ -239,22 +239,22 @@ public class WarehouseRepository {
      * @param min minimalna ilość
      * @return lista rekordów Warehouse lub pusta lista
      */
-    public List<Warehouse> znajdzPoIlosciWiekszejNiz(int min) {
-        logger.debug("znajdzPoIlosciWiekszejNiz() – min={}", min);
+    public List<Warehouse> findByQuantityGreaterThan(int min) {
+        logger.debug("findByQuantityGreaterThan() – min={}", min);
         EntityManager em = emf.createEntityManager();
         try {
             List<Warehouse> list = em.createQuery(
-                            "SELECT w FROM Warehouse w WHERE w.ilosc > :min", Warehouse.class)
+                            "SELECT w FROM Warehouse w WHERE w.quantity > :min", Warehouse.class)
                     .setParameter("min", min)
                     .getResultList();
-            logger.info("znajdzPoIlosciWiekszejNiz() – znaleziono {} rekordów", list.size());
+            logger.info("findByQuantityGreaterThan() – znaleziono {} rekordów", list.size());
             return list;
         } catch (Exception ex) {
-            logger.error("znajdzPoIlosciWiekszejNiz() – błąd dla min={}", min, ex);
+            logger.error("findByQuantityGreaterThan() – błąd dla min={}", min, ex);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoIlosciWiekszejNiz() – EM zamknięty");
+            logger.debug("findByQuantityGreaterThan() – EM zamknięty");
         }
     }
 
@@ -265,23 +265,23 @@ public class WarehouseRepository {
      * @param max maksymalna ilość
      * @return lista rekordów Warehouse lub pusta lista
      */
-    public List<Warehouse> znajdzPoIlosciWMiedzy(int min, int max) {
-        logger.debug("znajdzPoIlosciWMiedzy() – min={}, max={}", min, max);
+    public List<Warehouse> findByQuantityBetween(int min, int max) {
+        logger.debug("findByQuantityBetween() – min={}, max={}", min, max);
         EntityManager em = emf.createEntityManager();
         try {
             List<Warehouse> list = em.createQuery(
-                            "SELECT w FROM Warehouse w WHERE w.ilosc BETWEEN :min AND :max", Warehouse.class)
+                            "SELECT w FROM Warehouse w WHERE w.quantity BETWEEN :min AND :max", Warehouse.class)
                     .setParameter("min", min)
                     .setParameter("max", max)
                     .getResultList();
-            logger.info("znajdzPoIlosciWMiedzy() – znaleziono {} rekordów", list.size());
+            logger.info("findByQuantityBetween() – znaleziono {} rekordów", list.size());
             return list;
         } catch (Exception ex) {
-            logger.error("znajdzPoIlosciWMiedzy() – błąd dla min={}, max={}", min, max, ex);
+            logger.error("findByQuantityBetween() – błąd dla min={}, max={}", min, max, ex);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoIlosciWMiedzy() – EM zamknięty");
+            logger.debug("findByQuantityBetween() – EM zamknięty");
         }
     }
 

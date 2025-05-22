@@ -675,7 +675,7 @@ public class CashierPanelController {
         WarehouseRepository warehouseRepo = new WarehouseRepository();
         int ilosc = 0;
         try {
-            Warehouse stan = warehouseRepo.znajdzStanPoIdProduktu(produkt.getId());
+            Warehouse stan = warehouseRepo.findStateByProductId(produkt.getId());
             if (stan != null) {
                 ilosc = stan.getQuantity();
             }
@@ -786,7 +786,7 @@ public class CashierPanelController {
                 // Aktualizuj stan magazynowy
                 int dostepnaIlosc = getDostepnaIlosc(item.getProduct());
                 int nowaIlosc = dostepnaIlosc - quantity;
-                warehouseRepo.ustawIloscProduktu(productId, nowaIlosc);
+                warehouseRepo.setProductQuantity(productId, nowaIlosc);
 
                 // Zapisz relację transakcja-produkt za pomocą natywnego SQL
                 session.createNativeQuery(
