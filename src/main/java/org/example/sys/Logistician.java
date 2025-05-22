@@ -1,7 +1,7 @@
 /*
  * Classname: Logistician
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.1
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -74,7 +74,7 @@ public class Logistician {
      * Metoda aktualizująca adres logistyka.
      */
     public void updateAddress(Address newAddress) {
-        employee.setAdres(newAddress);
+        employee.setAddress(newAddress);
     }
 
     /**
@@ -92,7 +92,7 @@ public class Logistician {
      * Metoda aktualizująca stanowisko logistyka.
      */
     public void updateDepartment(String newDepartment) {
-        employee.setStanowisko(newDepartment);
+        employee.setPosition(newDepartment);
     }
 
     /**
@@ -100,7 +100,7 @@ public class Logistician {
      */
     public void updateSalary(BigDecimal newSalary) {
         try {
-            employee.setZarobki(newSalary);
+            employee.setSalary(newSalary);
         } catch (SalaryException e) {
             System.err.println("Błąd zmiany zarobków: " + e.getMessage());
         }

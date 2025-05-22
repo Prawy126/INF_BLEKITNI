@@ -1,7 +1,7 @@
 /*
  * Classname: Admin
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.1
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -66,7 +66,7 @@ public class Admin {
      * Usuwa pracownika z listy wszystkich pracowników.
      */
     public void removeEmployee(Employee e) {
-        if (e != null && "root".equalsIgnoreCase(e.getStanowisko())) {
+        if (e != null && "root".equalsIgnoreCase(e.getPosition())) {
             System.err.println("Próba usunięcia użytkownika z rolą root została zablokowana");
             return;
         }
@@ -122,7 +122,7 @@ public class Admin {
      * @return Hasło administratora.
      */
     public void updateAddress(Address address) {
-        employee.setAdres(address);
+        employee.setAddress(address);
     }
 
     /**
@@ -140,7 +140,7 @@ public class Admin {
      * Aktualizuje stanowisko pracownika.
      */
     public void updateDepartment(String newDepartment) {
-        employee.setStanowisko(newDepartment);
+        employee.setPosition(newDepartment);
     }
 
     /**
@@ -148,7 +148,7 @@ public class Admin {
      */
     public void updateSalary(BigDecimal newSalary) {
         try {
-            employee.setZarobki(newSalary);
+            employee.setSalary(newSalary);
         } catch (SalaryException e) {
             System.err.println("Błąd zmiany wynagrodzenia: " + e.getMessage());
         }

@@ -1,7 +1,7 @@
 /*
  * Classname: Employee
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.1
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -16,7 +16,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Access;
@@ -65,13 +64,13 @@ public class Employee extends Person {
 
     @ManyToOne
     @JoinColumn(name = "Id_adresu")
-    private Address adres;
+    private Address address;
 
     @Column(name = "Zarobki", precision = 10, scale = 2, nullable = false)
-    private BigDecimal zarobki;
+    private BigDecimal salary;
 
     @Column(name = "Stanowisko", nullable = false)
-    private String stanowisko;
+    private String position;
 
     @Column(name = "onSickLeave", nullable = false)
     private boolean onSickLeave;
@@ -81,8 +80,8 @@ public class Employee extends Person {
     private Date sickLeaveStartDate;
 
     // Dodane pole do usuwania miękkiego
-    @Column(name = "usuniety", nullable = false)
-    private boolean usuniety = false;
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
 
     /*
      * Konstruktor domyślny
@@ -98,20 +97,20 @@ public class Employee extends Person {
      * @param email      Adres e-mail pracownika
      * @param login      Login pracownika
      * @param password   Hasło pracownika
-     * @param adres      Adres pracownika
-     * @param stanowisko Stanowisko pracownika
-     * @param zarobki    Zarobki pracownika
+     * @param address      Adres pracownika
+     * @param position Stanowisko pracownika
+     * @param salary    Zarobki pracownika
      */
     public Employee(String name, String surname, int age, String email,
-                    String login, String password, Address adres,
-                    String stanowisko, BigDecimal zarobki)
+                    String login, String password, Address address,
+                    String position, BigDecimal salary)
             throws NameException, AgeException, PasswordException, SalaryException {
         super(name, surname, age, email);
         setLogin(login);
         setPassword(password);
-        this.adres = adres;
-        this.stanowisko = stanowisko;
-        setZarobki(zarobki);
+        this.address = address;
+        this.position = position;
+        setSalary(salary);
         this.onSickLeave = false;
     }
 
@@ -121,42 +120,42 @@ public class Employee extends Person {
      * @param name       Imię pracownika
      * @param surname    Nazwisko pracownika
      * @param age        Wiek pracownika
-     * @param adres      Adres pracownika
+     * @param address      Adres pracownika
      * @param login      Login pracownika
      * @param password   Hasło pracownika
-     * @param stanowisko Stanowisko pracownika
-     * @param zarobki    Zarobki pracownika
+     * @param position Stanowisko pracownika
+     * @param salary    Zarobki pracownika
      */
-    public Employee(String name, String surname, int age, Address adres,
-                    String login, String password, String stanowisko, BigDecimal zarobki)
+    public Employee(String name, String surname, int age, Address address,
+                    String login, String password, String position, BigDecimal salary)
             throws NameException, AgeException, SalaryException, PasswordException {
         super(name, surname, age, null);
-        this.adres = adres;
+        this.address = address;
         setLogin(login);
         setPassword(password);
-        this.stanowisko = stanowisko;
-        setZarobki(zarobki);
+        this.position = position;
+        setSalary(salary);
         this.onSickLeave = false;
         this.sickLeaveStartDate = null;
     }
 
-    // Getter i setter dla pola 'usuniety'
+    // Getter i setter dla pola 'deleted'
     /**
      * Zwraca informację, czy pracownik został usunięty.
      *
      * @return true, jeśli pracownik został usunięty, false w przeciwnym razie
      */
-    public boolean isUsuniety() {
-        return usuniety;
+    public boolean isDeleted() {
+        return deleted;
     }
 
     /**
      * Ustawia informację, czy pracownik został usunięty.
      *
-     * @param usuniety true, jeśli pracownik został usunięty, false w przeciwnym razie
+     * @param deleted true, jeśli pracownik został usunięty, false w przeciwnym razie
      */
-    public void setUsuniety(boolean usuniety) {
-        this.usuniety = usuniety;
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     /**
@@ -213,61 +212,61 @@ public class Employee extends Person {
     }
 
     /**
-     * Zwraca adres pracownika.
+     * Zwraca address pracownika.
      *
      * @return Adres pracownika
      */
-    public Address getAdres() {
-        return adres;
+    public Address getAddress() {
+        return address;
     }
 
     /**
-     * Ustawia adres pracownika.
+     * Ustawia address pracownika.
      *
-     * @param adres Adres do ustawienia
+     * @param address Adres do ustawienia
      */
-    public void setAdres(Address adres) {
-        this.adres = adres;
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
     /**
-     * Zwraca zarobki pracownika.
+     * Zwraca salary pracownika.
      *
      * @return Zarobki pracownika
      */
-    public BigDecimal getZarobki() {
-        return zarobki;
+    public BigDecimal getSalary() {
+        return salary;
     }
 
     /**
-     * Ustawia zarobki pracownika.
+     * Ustawia salary pracownika.
      *
-     * @param zarobki Zarobki do ustawienia
-     * @throws SalaryException jeśli zarobki są mniejsze lub równe 0
+     * @param salary Zarobki do ustawienia
+     * @throws SalaryException jeśli salary są mniejsze lub równe 0
      */
-    public void setZarobki(BigDecimal zarobki) throws SalaryException {
-        if (zarobki == null || zarobki.compareTo(BigDecimal.ZERO) <= 0) {
+    public void setSalary(BigDecimal salary) throws SalaryException {
+        if (salary == null || salary.compareTo(BigDecimal.ZERO) <= 0) {
             throw new SalaryException("Zarobki muszą być większe od zera");
         }
-        this.zarobki = zarobki;
+        this.salary = salary;
     }
 
     /**
-     * Zwraca stanowisko pracownika.
+     * Zwraca position pracownika.
      *
      * @return Stanowisko pracownika
      */
-    public String getStanowisko() {
-        return stanowisko;
+    public String getPosition() {
+        return position;
     }
 
     /**
-     * Ustawia stanowisko pracownika.
+     * Ustawia position pracownika.
      *
-     * @param stanowisko Stanowisko do ustawienia
+     * @param position Stanowisko do ustawienia
      */
-    public void setStanowisko(String stanowisko) {
-        this.stanowisko = stanowisko;
+    public void setPosition(String position) {
+        this.position = position;
     }
 
     /**
@@ -295,7 +294,7 @@ public class Employee extends Person {
      * @return true jeśli pracownik ma rolę "root", false w przeciwnym przypadku
      */
     public boolean isRoot() {
-        return "root".equalsIgnoreCase(this.stanowisko);
+        return "root".equalsIgnoreCase(this.position);
     }
 
     /**

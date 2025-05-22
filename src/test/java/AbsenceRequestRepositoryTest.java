@@ -29,7 +29,7 @@ public class AbsenceRequestRepositoryTest {
             Date end = sdf.parse("2025-07-10");
 
             // === 1. Tworzenie przykładowego pracownika ===
-            Employee testEmployee = userRepo.pobierzWszystkichPracownikow().get(0); // zakładamy że istnieje
+            Employee testEmployee = userRepo.getAllEmployess().get(0); // zakładamy że istnieje
 
             // === 2. Dodanie nowego wniosku ===
             AbsenceRequest request = new AbsenceRequest();

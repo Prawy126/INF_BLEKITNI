@@ -23,12 +23,12 @@ class RaportTest {
         employee.setLogin("jkowal");
         try {
             employee.setPassword("bezpieczneHaslo");
-            employee.setZarobki(new BigDecimal("5000"));
+            employee.setSalary(new BigDecimal("5000"));
         } catch (Exception e) {
             fail("Nieoczekiwany wyjątek: " + e.getMessage());
         }
-        employee.setStanowisko("Kierownik");
-        employee.setAdres(address);
+        employee.setPosition("Kierownik");
+        employee.setAddress(address);
 
         LocalDate start = LocalDate.of(2025, 5, 1);
         LocalDate end = LocalDate.of(2025, 5, 31);

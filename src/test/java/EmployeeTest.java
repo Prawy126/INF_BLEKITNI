@@ -31,11 +31,11 @@ class EmployeeTest {
         assertEquals("john@example.com", employee.getEmail());
         assertEquals("jdoe", employee.getLogin());
         assertEquals("pass12345", employee.getPassword());
-        assertEquals("Manager", employee.getStanowisko());
-        assertEquals(new BigDecimal("5000.00"), employee.getZarobki());
+        assertEquals("Manager", employee.getPosition());
+        assertEquals(new BigDecimal("5000.00"), employee.getSalary());
         assertFalse(employee.isOnSickLeave());
         assertNull(employee.getSickLeaveStartDate());
-        assertEquals("Warszawa", employee.getAdres().getCity());
+        assertEquals("Warszawa", employee.getAddress().getCity());
     }
 
     @Test
@@ -50,9 +50,9 @@ class EmployeeTest {
         employee.setEmail("jane@example.com");
         employee.setLogin("jsmith");
         employee.setPassword("securepass");
-        employee.setStanowisko("Developer");
-        employee.setZarobki(new BigDecimal("6000.00"));
-        employee.setAdres(address);
+        employee.setPosition("Developer");
+        employee.setSalary(new BigDecimal("6000.00"));
+        employee.setAddress(address);
 
         assertEquals("Jane", employee.getName());
         assertEquals("Smith", employee.getSurname());
@@ -60,9 +60,9 @@ class EmployeeTest {
         assertEquals("jane@example.com", employee.getEmail());
         assertEquals("jsmith", employee.getLogin());
         assertEquals("securepass", employee.getPassword());
-        assertEquals("Developer", employee.getStanowisko());
-        assertEquals(new BigDecimal("6000.00"), employee.getZarobki());
-        assertEquals("Lublin", employee.getAdres().getCity());
+        assertEquals("Developer", employee.getPosition());
+        assertEquals(new BigDecimal("6000.00"), employee.getSalary());
+        assertEquals("Lublin", employee.getAddress().getCity());
     }
 
     @Test
@@ -91,9 +91,9 @@ class EmployeeTest {
         assertNull(employee.getEmail());
         assertNull(employee.getLogin());
         assertNull(employee.getPassword());
-        assertNull(employee.getStanowisko());
-        assertNull(employee.getZarobki());
-        assertNull(employee.getAdres());
+        assertNull(employee.getPosition());
+        assertNull(employee.getSalary());
+        assertNull(employee.getAddress());
         assertFalse(employee.isOnSickLeave());
         assertNull(employee.getSickLeaveStartDate());
     }
@@ -168,7 +168,7 @@ class EmployeeTest {
         }
 
         public void updateAddress(Employee employee,Address newAddress) {
-            employee.setAdres(newAddress);
+            employee.setAddress(newAddress);
         }
 
         public void updatePassword(Employee employee, String newPassword)throws PasswordException {
@@ -176,11 +176,11 @@ class EmployeeTest {
         }
 
         public void updateDepartment(Employee employee, String newDepartment) {
-            employee.setStanowisko(newDepartment);
+            employee.setPosition(newDepartment);
         }
 
         public void updateSalary(Employee employee, BigDecimal newSalary) throws SalaryException {
-            employee.setZarobki(newSalary);
+            employee.setSalary(newSalary);
         }
 
         public Employee getEmployee(Employee employee) {

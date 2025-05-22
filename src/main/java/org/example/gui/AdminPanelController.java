@@ -1,7 +1,7 @@
 /*
  * Classname: AdminPanelController
- * Version information: 1.3
- * Date: 2025-05-18
+ * Version information: 1.4
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -242,7 +242,7 @@ public class AdminPanelController {
         AddressRepository addressRepository = new AddressRepository();
         ComboBox<Address> adresComboBox = new ComboBox<>();
         adresComboBox.getItems().addAll(addressRepository.getAllAddresses());
-        adresComboBox.setValue(selected.getAdres()); // ustawiamy istniejący
+        adresComboBox.setValue(selected.getAddress()); // ustawiamy istniejący
         adresComboBox.setPromptText("Wybierz adres");
 
         Button dodajNowyAdresBtn = new Button("Dodaj nowy adres");
@@ -250,12 +250,12 @@ public class AdminPanelController {
 
         ComboBox<String> stanowiskoBox = new ComboBox<>();
         stanowiskoBox.getItems().addAll("Kasjer", "Kierownik", "Admin", "Logistyk");
-        stanowiskoBox.setValue(selected.getStanowisko());
+        stanowiskoBox.setValue(selected.getPosition());
 
         TextField ageField = new TextField(String.valueOf(selected.getAge()));
         ageField.setPromptText("Wiek");
 
-        TextField salaryField = new TextField(selected.getZarobki().toString());
+        TextField salaryField = new TextField(selected.getSalary().toString());
         salaryField.setPromptText("Zarobki (PLN)");
 
         Button saveButton = new Button("Zapisz zmiany");
@@ -303,18 +303,18 @@ public class AdminPanelController {
                 selected.setSurname(surnameField.getText());
                 selected.setLogin(loginField.getText());
                 selected.setEmail(emailField.getText());
-                selected.setAdres(adresComboBox.getValue());
+                selected.setAddress(adresComboBox.getValue());
                 if (!passwordField.getText().isEmpty()) {
                     selected.setPassword(passwordField.getText());
                 }
-                selected.setStanowisko(stanowiskoBox.getValue());
+                selected.setPosition(stanowiskoBox.getValue());
                 selected.setAge(Integer.parseInt(ageField.getText()));
-                selected.setZarobki(new BigDecimal(salaryField.getText()));
+                selected.setSalary(new BigDecimal(salaryField.getText()));
 
                 Task<Void> updateTask = new Task<>() {
                     @Override
                     protected Void call() throws Exception {
-                        userRepository.aktualizujPracownika(selected);
+                        userRepository.updateEmployee(selected);
                         return null;
                     }
                 };
@@ -366,7 +366,7 @@ public class AdminPanelController {
         Task<List<Employee>> task = new Task<>() {
             @Override
             protected List<Employee> call() throws Exception {
-                return userRepository.pobierzWszystkichPracownikow();
+                return userRepository.getAllEmployess();
             }
         };
 
@@ -482,15 +482,15 @@ public class AdminPanelController {
                 nowy.setLogin(loginField.getText());
                 nowy.setPassword(passwordField.getText());
                 nowy.setEmail(emailField.getText());
-                nowy.setAdres(adresComboBox.getValue());
-                nowy.setStanowisko(stanowiskoBox.getValue());
+                nowy.setAddress(adresComboBox.getValue());
+                nowy.setPosition(stanowiskoBox.getValue());
                 nowy.setAge(wiek);
-                nowy.setZarobki(zarobki);
+                nowy.setSalary(zarobki);
 
                 Task<Void> addTask = new Task<>() {
                     @Override
                     protected Void call() throws Exception {
-                        userRepository.dodajPracownika(nowy);
+                        userRepository.addEmployee(nowy);
                         return null;
                     }
                 };
@@ -553,7 +553,7 @@ public class AdminPanelController {
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.OK) {
                 try {
-                    userRepository.usunPracownika(selected);
+                    userRepository.removeEmployee(selected);
                     odswiezListePracownikow(); // ponowne załadowanie aktywnych
                     showAlert(
                             Alert.AlertType.INFORMATION,

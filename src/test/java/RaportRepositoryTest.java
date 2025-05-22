@@ -24,7 +24,7 @@ public class RaportRepositoryTest {
 
         try {
             // === 1. Przykładowy pracownik do raportu ===
-            List<Employee> pracownicy = userRepo.pobierzWszystkichPracownikow();
+            List<Employee> pracownicy = userRepo.getAllEmployess();
             if (pracownicy.isEmpty()) {
                 System.out.println("Brak pracowników w bazie. Dodaj przynajmniej jednego przed testami.");
                 return;

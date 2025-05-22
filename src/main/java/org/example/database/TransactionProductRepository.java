@@ -67,15 +67,15 @@ public class TransactionProductRepository {
      * @return obiekt TransactionProduct lub null, jeśli nie znaleziono
      */
     public TransactionProduct znajdzPoId(int transactionId, int productId) {
-        logger.debug("znajdzPoId() – start, txId={}, prodId={}", transactionId, productId);
+        logger.debug("findById() – start, txId={}, prodId={}", transactionId, productId);
         EntityManager em = emf.createEntityManager();
         try {
             TransactionProductId id = new TransactionProductId(transactionId, productId);
             TransactionProduct tp = em.find(TransactionProduct.class, id);
-            logger.info("znajdzPoId() – znaleziono: {}", tp);
+            logger.info("findById() – znaleziono: {}", tp);
             return tp;
         } catch (Exception e) {
-            logger.error("znajdzPoId() – błąd przy find()", e);
+            logger.error("findById() – błąd przy find()", e);
             return null;
         } finally {
             em.close();

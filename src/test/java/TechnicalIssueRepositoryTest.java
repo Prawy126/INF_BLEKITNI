@@ -24,7 +24,7 @@ public class TechnicalIssueRepositoryTest {
 
         try {
             // Pobierz pracownika do przypisania zgłoszenia
-            List<Employee> pracownicy = userRepo.pobierzWszystkichPracownikow();
+            List<Employee> pracownicy = userRepo.getAllEmployess();
             if (pracownicy.isEmpty()) {
                 System.out.println("Brak pracowników w bazie. Dodaj pracownika przed testem.");
                 return;

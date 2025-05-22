@@ -37,7 +37,7 @@ public class WorkloadRepository implements AutoCloseable {
      *
      * @param startDate data początkowa (włącznie)
      * @param endDate   data końcowa (włącznie)
-     * @return lista obiektów EmployeeWorkload zawierających imię i nazwisko pracownika, stanowisko oraz
+     * @return lista obiektów EmployeeWorkload zawierających imię i nazwisko pracownika, position oraz
      *         łączną liczbę godzin; zwraca pustą listę w przypadku błędu
      */
     public List<EmployeeWorkload> getWorkloadData(LocalDate startDate,

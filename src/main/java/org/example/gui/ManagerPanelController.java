@@ -338,7 +338,7 @@ public class ManagerPanelController {
                     if (selectedRequest.getRequestType().toLowerCase().contains("chorob")) {
                         Employee pracownik = selectedRequest.getEmployee();
                         pracownik.startSickLeave(selectedRequest.getStartDate());
-                        userRepository.aktualizujPracownika(pracownik);
+                        userRepository.updateEmployee(pracownik);
                     }
 
                     showAlert(Alert.AlertType.INFORMATION, "Sukces",
@@ -442,7 +442,7 @@ public class ManagerPanelController {
 
         Label employeeLabel = new Label("Wybierz pracownika:");
         ComboBox<String> employeeComboBox = new ComboBox<>();
-        userRepository.pobierzWszystkichPracownikow().forEach(p ->
+        userRepository.getAllEmployess().forEach(p ->
                 employeeComboBox.getItems().add(p.getName() + " " + p.getSurname())
         );
 

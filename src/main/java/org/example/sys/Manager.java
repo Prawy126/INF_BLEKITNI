@@ -1,7 +1,7 @@
 /*
  * Classname: Manager
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.1
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -107,7 +107,7 @@ public class Manager {
      * @param newAddress aktualizuje adres menedżera
      */
     public void updateAddress(Address newAddress) {
-        employee.setAdres(newAddress);
+        employee.setAddress(newAddress);
     }
 
     /**
@@ -128,7 +128,7 @@ public class Manager {
      * @param newDepartment aktualizuje stanowisko menedżera
      */
     public void updateDepartment(String newDepartment) {
-        employee.setStanowisko(newDepartment);
+        employee.setPosition(newDepartment);
     }
 
     /**
@@ -138,7 +138,7 @@ public class Manager {
      */
     public void updateSalary(BigDecimal newSalary) {
         try {
-            employee.setZarobki(newSalary);
+            employee.setSalary(newSalary);
         } catch (SalaryException e) {
             System.err.println("Błąd zmiany wynagrodzenia: " + e.getMessage());
         }

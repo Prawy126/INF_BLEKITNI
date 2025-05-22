@@ -26,7 +26,7 @@ public class OrderRepositoryTest {
             Product produkt = new Product("Testowy produkt", "Testowa kategoria", 5.99);
             productRepo.dodajProdukt(produkt);
 
-            Employee pracownik = userRepo.pobierzWszystkichPracownikow().get(0); // zakładamy, że już jest
+            Employee pracownik = userRepo.getAllEmployess().get(0); // zakładamy, że już jest
 
             // === 2. Dodanie nowego zamówienia ===
             Order order = new Order();

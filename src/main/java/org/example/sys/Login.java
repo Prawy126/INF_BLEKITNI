@@ -1,7 +1,7 @@
 /*
  * Classname: Login
- * Version information: 1.1
- * Date: 2025-05-17
+ * Version information: 1.2
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -67,7 +67,7 @@ public class Login implements ILacz {
         return new Task<>() {
             @Override
             protected Employee call() throws Exception {
-                return userRepository.znajdzPoLoginieIHasle(username, password);
+                return userRepository.findByLoginAndPassword(username, password);
             }
         };
     }
@@ -113,7 +113,7 @@ public class Login implements ILacz {
         Platform.runLater(() -> {
             UserRepository.setLoggedInEmployee(employee.getId());
             showSuccessAlert(employee);
-            redirectToProperPanel(employee.getStanowisko().toLowerCase(), root);
+            redirectToProperPanel(employee.getPosition().toLowerCase(), root);
         });
     }
 

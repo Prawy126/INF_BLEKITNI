@@ -47,17 +47,17 @@ public class UserRepositoryTest {
                     new BigDecimal("3200.00")
             );
 
-            userRepo.dodajPracownika(nowyKasjer);
+            userRepo.addEmployee(nowyKasjer);
             System.out.println(
                     ">>> Dodano pracownika: " + nowyKasjer.getLogin()
             );
 
             // === 3. Pobieranie kasjerów ===
             System.out.println("\n>>> Lista kasjerów po dodaniu:");
-            wypiszPracownikow(userRepo.pobierzKasjerow());
+            wypiszPracownikow(userRepo.getCashiers());
 
             // === 4. Wyszukiwanie po loginie ===
-            Employee znalezionyPoLoginie = userRepo.znajdzPoLoginie("mbrzo");
+            Employee znalezionyPoLoginie = userRepo.findByLogin("mbrzo");
             System.out.println(
                     "\n>>> Znaleziony po loginie: " +
                             znalezionyPoLoginie.getName() + " " +
@@ -66,7 +66,7 @@ public class UserRepositoryTest {
 
             // === 5. Wyszukiwanie po loginie i haśle ===
             Employee znalezionyPoLoginieIHasle = userRepo
-                    .znajdzPoLoginieIHasle("mbrzo", "tajnehaslo");
+                    .findByLoginAndPassword("mbrzo", "tajnehaslo");
             if (znalezionyPoLoginieIHasle != null) {
                 System.out.println(
                         ">>> Znaleziony użytkownik (login + hasło): " +
@@ -81,23 +81,23 @@ public class UserRepositoryTest {
 
             // === 6. Aktualizacja pracownika ===
             znalezionyPoLoginie.setSurname("Brzoza");
-            znalezionyPoLoginie.setZarobki(new BigDecimal("3400.00"));
-            userRepo.aktualizujPracownika(znalezionyPoLoginie);
+            znalezionyPoLoginie.setSalary(new BigDecimal("3400.00"));
+            userRepo.updateEmployee(znalezionyPoLoginie);
             System.out.println(">>> Zaktualizowano nazwisko i pensję.");
 
-            Employee poAktualizacji = userRepo.znajdzPoLoginie("mbrzo");
+            Employee poAktualizacji = userRepo.findByLogin("mbrzo");
             System.out.println(
                     ">>> Po aktualizacji: " + poAktualizacji.getName() + " " +
                             poAktualizacji.getSurname() + ", zarobki: " +
-                            poAktualizacji.getZarobki()
+                            poAktualizacji.getSalary()
             );
 
             // === 7. Pobieranie wszystkich pracowników ===
             System.out.println("\n>>> Lista wszystkich pracowników:");
-            wypiszPracownikow(userRepo.pobierzWszystkichPracownikow());
+            wypiszPracownikow(userRepo.getAllEmployess());
 
             // === 8. Usuwanie pracownika ===
-            userRepo.usunPracownika(poAktualizacji);
+            userRepo.removeEmployee(poAktualizacji);
             System.out.println(
                     ">>> Usunięto pracownika o id = " +
                             poAktualizacji.getId()
@@ -105,7 +105,7 @@ public class UserRepositoryTest {
 
             // === 9. Sprawdzenie kasjerów po usunięciu ===
             System.out.println("\n>>> Lista kasjerów po usunięciu:");
-            wypiszPracownikow(userRepo.pobierzKasjerow());
+            wypiszPracownikow(userRepo.getCashiers());
 
         } catch (SalaryException e) {
             System.err.println(
@@ -138,7 +138,7 @@ public class UserRepositoryTest {
                     e.getName(),
                     e.getSurname(),
                     e.getLogin(),
-                    e.getZarobki()
+                    e.getSalary()
             );
         }
         System.out.println("-----------------------------");

@@ -81,7 +81,7 @@ class ManagerTest {
         Address newAddress = new Address();
         newAddress.setCity("Wrocław");
         manager.updateAddress(newAddress);
-        assertEquals("Wrocław", manager.getEmployee().getAdres().getCity());
+        assertEquals("Wrocław", manager.getEmployee().getAddress().getCity());
     }
 
     @Test
@@ -93,13 +93,13 @@ class ManagerTest {
     @Test
     void testUpdateDepartment() {
         manager.updateDepartment("Logistyka");
-        assertEquals("Logistyka", manager.getEmployee().getStanowisko());
+        assertEquals("Logistyka", manager.getEmployee().getPosition());
     }
 
     @Test
     void testUpdateSalary() {
         manager.updateSalary(new BigDecimal("9000.00"));
-        assertEquals(new BigDecimal("9000.00"), manager.getEmployee().getZarobki());
+        assertEquals(new BigDecimal("9000.00"), manager.getEmployee().getSalary());
     }
 
     @Test

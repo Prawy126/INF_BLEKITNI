@@ -54,7 +54,7 @@ class LogisticianTest {
         Address newAddress = new Address();
         newAddress.setCity("Kraków");
         logistician.updateAddress(newAddress);
-        assertEquals("Kraków", employee.getAdres().getCity());
+        assertEquals("Kraków", employee.getAddress().getCity());
     }
 
     @Test
@@ -66,13 +66,13 @@ class LogisticianTest {
     @Test
     void testUpdateDepartment() {
         logistician.updateDepartment("Koordynator");
-        assertEquals("Koordynator", employee.getStanowisko());
+        assertEquals("Koordynator", employee.getPosition());
     }
 
     @Test
     void testUpdateSalary() {
         logistician.updateSalary(new BigDecimal("7500.00"));
-        assertEquals(new BigDecimal("7500.00"), employee.getZarobki());
+        assertEquals(new BigDecimal("7500.00"), employee.getSalary());
     }
 
     @Test

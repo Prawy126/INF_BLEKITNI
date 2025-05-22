@@ -1,7 +1,7 @@
 /*
  * Classname: Cashier
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.1
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -57,7 +57,7 @@ public class Cashier {
      */
     public void updateSalary(BigDecimal newSalary) {
         try {
-            employee.setZarobki(newSalary);
+            employee.setSalary(newSalary);
         } catch (SalaryException e) {
             System.err.println("Błąd zmiany wynagrodzenia: " + e.getMessage());
         }
@@ -68,7 +68,7 @@ public class Cashier {
      *
      * @return Wynagrodzenie kasjera.
      */
-    public void zeskanujProdukt(String productName) {
+    public void scanProduct(String productName) {
         System.out.println("Kasjer " + employee.getName() + " zeskanował produkt: " + productName);
     }
 
@@ -77,7 +77,7 @@ public class Cashier {
      *
      * @return true, jeśli użytkownik jest kasjerem, false w przeciwnym razie.
      */
-    public void zakonczTransakcje() {
+    public void endTransaction() {
         System.out.println("Kasjer " + employee.getName() + " zakończył transakcję.");
     }
 }

@@ -28,7 +28,7 @@ public class TransactionRepositoryTest {
             Date data = sdf.parse("2025-05-12");
 
             // === 1. Wybierz istniejącego pracownika ===
-            Employee employee = userRepo.pobierzWszystkichPracownikow().get(0); // zakładamy że istnieje
+            Employee employee = userRepo.getAllEmployess().get(0); // zakładamy że istnieje
 
             // === 2. Dodanie transakcji ===
             Transaction transakcja = new Transaction();

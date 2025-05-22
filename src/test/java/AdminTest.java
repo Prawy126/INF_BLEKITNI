@@ -54,7 +54,7 @@ class AdminTest {
         newAddr.setCity("Kraków");
 
         admin.updateAddress(newAddr);
-        assertEquals("Kraków", employee.getAdres().getCity());
+        assertEquals("Kraków", employee.getAddress().getCity());
     }
 
     @Test
@@ -66,14 +66,14 @@ class AdminTest {
     @Test
     void testUpdateDepartment() {
         admin.updateDepartment("HR");
-        assertEquals("HR", employee.getStanowisko());
+        assertEquals("HR", employee.getPosition());
     }
 
     @Test
     void testUpdateSalary() {
         BigDecimal newSalary = new BigDecimal("8800.50");
         admin.updateSalary(newSalary);
-        assertEquals(newSalary, employee.getZarobki());
+        assertEquals(newSalary, employee.getSalary());
     }
 
     @Test
