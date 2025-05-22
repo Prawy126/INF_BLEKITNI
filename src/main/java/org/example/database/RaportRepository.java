@@ -312,6 +312,13 @@ public class RaportRepository {
         }
     }
 
+    /**
+     * Wyszukuje raporty, których ścieżka pliku zawiera podany fragment (bez uwzględniania wielkości liter).
+     *
+     * @param fileFragment fragment tekstu do wyszukania w ścieżce pliku
+     * @return lista obiektów Raport, których ścieżka pliku zawiera podany fragment;
+     *         zwraca pustą listę w przypadku błędu lub braku wyników
+     */
     public List<Raport> znajdzPoSciezcePliku(String fileFragment) {
         logger.debug("znajdzPoSciezcePliku() – fileFragment={}", fileFragment);
         EntityManager em = emf.createEntityManager();
@@ -332,7 +339,10 @@ public class RaportRepository {
         }
     }
 
-    /** Zamyka EntityManagerFactory. */
+    /**
+     * Zamyka fabrykę EntityManagerFactory, zwalniając wszystkie zasoby związane z persistence unit.
+     * Po wywołaniu tej metody instancja klasy nie może być dalej używana do operacji na bazie.
+     */
     public void close() {
         logger.debug("close() – zamykanie EMF");
         if (emf.isOpen()) {
