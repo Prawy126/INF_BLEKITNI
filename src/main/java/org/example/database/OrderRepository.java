@@ -1,6 +1,6 @@
 /*
  * Classname: OrderRepository
- * Version information: 1.4
+ * Version information: 1.5
  * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
@@ -32,62 +32,62 @@ public class OrderRepository {
     }
 
     /** Dodaje nowe zamówienie. */
-    public void dodajZamowienie(Order zamowienie) {
-        logger.debug("dodajZamowienie() - start, zamowienie={}", zamowienie);
+    public void addOrder(Order order) {
+        logger.debug("addOrder() - start, order={}", order);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            em.persist(zamowienie);
+            em.persist(order);
             tx.commit();
-            logger.info("dodajZamowienie() - zamówienie dodane: {}", zamowienie);
+            logger.info("addOrder() - zamówienie dodane: {}", order);
         } catch (Exception e) {
-            logger.error("dodajZamowienie() - błąd podczas dodawania zamówienia", e);
+            logger.error("addOrder() - błąd podczas dodawania zamówienia", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("dodajZamowienie() - EM zamknięty");
+            logger.debug("addOrder() - EM zamknięty");
         }
     }
 
     /** Pobiera zamówienie po ID. */
-    public Order znajdzZamowieniePoId(int id) {
-        logger.debug("znajdzZamowieniePoId() - start, id={}", id);
+    public Order findOrderById(int id) {
+        logger.debug("findOrderById() - start, id={}", id);
         EntityManager em = emf.createEntityManager();
         try {
             Order o = em.find(Order.class, id);
-            logger.info("znajdzZamowieniePoId() - znaleziono: {}", o);
+            logger.info("findOrderById() - znaleziono: {}", o);
             return o;
         } catch (Exception e) {
-            logger.error("znajdzZamowieniePoId() - błąd podczas pobierania zamówienia o id={}", id, e);
+            logger.error("findOrderById() - błąd podczas pobierania zamówienia o id={}", id, e);
             return null;
         } finally {
             em.close();
-            logger.debug("znajdzZamowieniePoId() - EM zamknięty");
+            logger.debug("findOrderById() - EM zamknięty");
         }
     }
 
     /** Pobiera wszystkie zamówienia. */
-    public List<Order> pobierzWszystkieZamowienia() {
-        logger.debug("pobierzWszystkieZamowienia() - start");
+    public List<Order> getAllOrders() {
+        logger.debug("getAllOrders() - start");
         EntityManager em = emf.createEntityManager();
         try {
             List<Order> list = em.createQuery("SELECT o FROM Order o", Order.class)
                     .getResultList();
-            logger.info("pobierzWszystkieZamowienia() - pobrano {} zamówień", list.size());
+            logger.info("getAllOrders() - pobrano {} zamówień", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("pobierzWszystkieZamowienia() - błąd podczas pobierania zamówień", e);
+            logger.error("getAllOrders() - błąd podczas pobierania zamówień", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("pobierzWszystkieZamowienia() - EM zamknięty");
+            logger.debug("getAllOrders() - EM zamknięty");
         }
     }
 
     /** Usuwa zamówienie o podanym ID. */
-    public void usunZamowienie(int id) {
-        logger.debug("usunZamowienie() - start, id={}", id);
+    public void removeOrders(int id) {
+        logger.debug("removeOrders() - start, id={}", id);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -95,158 +95,158 @@ public class OrderRepository {
             Order o = em.find(Order.class, id);
             if (o != null) {
                 em.remove(o);
-                logger.info("usunZamowienie() - usunięto zamówienie: {}", o);
+                logger.info("removeOrders() - usunięto zamówienie: {}", o);
             } else {
-                logger.warn("usunZamowienie() - brak zamówienia o id={}", id);
+                logger.warn("removeOrders() - brak zamówienia o id={}", id);
             }
             tx.commit();
         } catch (Exception e) {
-            logger.error("usunZamowienie() - błąd podczas usuwania zamówienia o id={}", id, e);
+            logger.error("removeOrders() - błąd podczas usuwania zamówienia o id={}", id, e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("usunZamowienie() - EM zamknięty");
+            logger.debug("removeOrders() - EM zamknięty");
         }
     }
 
     /** Aktualizuje istniejące zamówienie. */
-    public void aktualizujZamowienie(Order zamowienie) {
-        logger.debug("aktualizujZamowienie() - start, zamowienie={}", zamowienie);
+    public void updateOrder(Order zamowienie) {
+        logger.debug("updateOrder() - start, zamowienie={}", zamowienie);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             em.merge(zamowienie);
             tx.commit();
-            logger.info("aktualizujZamowienie() - zamówienie zaktualizowane: {}", zamowienie);
+            logger.info("updateOrder() - zamówienie zaktualizowane: {}", zamowienie);
         } catch (Exception e) {
-            logger.error("aktualizujZamowienie() - błąd podczas aktualizacji zamówienia", e);
+            logger.error("updateOrder() - błąd podczas aktualizacji zamówienia", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("aktualizujZamowienie() - EM zamknięty");
+            logger.debug("updateOrder() - EM zamknięty");
         }
     }
 
     /** Pobiera zamówienia po ID produktu. */
-    public List<Order> znajdzZamowieniaPoIdProduktu(int idProduktu) {
-        logger.debug("znajdzZamowieniaPoIdProduktu() - idProduktu={}", idProduktu);
+    public List<Order> findOrdersByProductId(int productId) {
+        logger.debug("findOrdersByProductId() - productId={}", productId);
         EntityManager em = emf.createEntityManager();
         try {
             List<Order> list = em.createQuery(
-                            "SELECT o FROM Order o WHERE o.idProduktu = :idProduktu", Order.class)
-                    .setParameter("idProduktu", idProduktu)
+                            "SELECT o FROM Order o WHERE o.productId = :productId", Order.class)
+                    .setParameter("productId", productId)
                     .getResultList();
-            logger.info("znajdzZamowieniaPoIdProduktu() - znaleziono {} zamówień", list.size());
+            logger.info("findOrdersByProductId() - znaleziono {} zamówień", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzZamowieniaPoIdProduktu() - błąd podczas wyszukiwania", e);
+            logger.error("findOrdersByProductId() - błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzZamowieniaPoIdProduktu() - EM zamknięty");
+            logger.debug("findOrdersByProductId() - EM zamknięty");
         }
     }
 
     /** Pobiera zamówienia po ID pracownika. */
-    public List<Order> znajdzZamowieniaPoIdPracownika(int idPracownika) {
-        logger.debug("znajdzZamowieniaPoIdPracownika() - idPracownika={}", idPracownika);
+    public List<Order> findOrdersByEmployeeId(int employeeId) {
+        logger.debug("findOrdersByEmployeeId() - employeeId={}", employeeId);
         EntityManager em = emf.createEntityManager();
         try {
             List<Order> list = em.createQuery(
-                            "SELECT o FROM Order o WHERE o.idPracownika = :idPracownika", Order.class)
-                    .setParameter("idPracownika", idPracownika)
+                            "SELECT o FROM Order o WHERE o.employeeId = :employeeId", Order.class)
+                    .setParameter("employeeId", employeeId)
                     .getResultList();
-            logger.info("znajdzZamowieniaPoIdPracownika() - znaleziono {} zamówień", list.size());
+            logger.info("findOrdersByEmployeeId() - znaleziono {} zamówień", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzZamowieniaPoIdPracownika() - błąd podczas wyszukiwania", e);
+            logger.error("findOrdersByEmployeeId() - błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzZamowieniaPoIdPracownika() - EM zamknięty");
+            logger.debug("findOrdersByEmployeeId() - EM zamknięty");
         }
     }
 
     /** Pobiera zamówienia dokonane w danym dniu. */
-    public List<Order> znajdzZamowieniaPoDacie(LocalDate data) {
-        logger.debug("znajdzZamowieniaPoDacie() - data={}", data);
+    public List<Order> findOrdersByDate(LocalDate date) {
+        logger.debug("findOrdersByDate() - date={}", date);
         EntityManager em = emf.createEntityManager();
         try {
             List<Order> list = em.createQuery(
-                            "SELECT o FROM Order o WHERE o.data = :data", Order.class)
-                    .setParameter("data", data)
+                            "SELECT o FROM Order o WHERE o.date = :date", Order.class)
+                    .setParameter("date", date)
                     .getResultList();
-            logger.info("znajdzZamowieniaPoDacie() - znaleziono {} zamówień", list.size());
+            logger.info("findOrdersByDate() - znaleziono {} zamówień", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzZamowieniaPoDacie() - błąd podczas wyszukiwania", e);
+            logger.error("findOrdersByDate() - błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzZamowieniaPoDacie() - EM zamknięty");
+            logger.debug("findOrdersByDate() - EM zamknięty");
         }
     }
 
     /** Pobiera zamówienia w podanym przedziale dat. */
-    public List<Order> znajdzZamowieniaWZakresieDat(LocalDate dataOd, LocalDate dataDo) {
-        logger.debug("znajdzZamowieniaWZakresieDat() - dataOd={}, dataDo={}", dataOd, dataDo);
+    public List<Order> findDateRangeOrders(LocalDate fromDate, LocalDate toDate) {
+        logger.debug("findDateRangeOrder() - fromDate={}, toDate={}", fromDate, toDate);
         EntityManager em = emf.createEntityManager();
         try {
             List<Order> list = em.createQuery(
-                            "SELECT o FROM Order o WHERE o.data BETWEEN :od AND :do", Order.class)
-                    .setParameter("od", dataOd)
-                    .setParameter("do", dataDo)
+                            "SELECT o FROM Order o WHERE o.data BETWEEN :fromDate AND :toDate", Order.class)
+                    .setParameter("fromDate", fromDate)
+                    .setParameter("toDate", toDate)
                     .getResultList();
-            logger.info("znajdzZamowieniaWZakresieDat() - znaleziono {} zamówień", list.size());
+            logger.info("findDateRangeOrder() - znaleziono {} zamówień", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzZamowieniaWZakresieDat() - błąd podczas wyszukiwania", e);
+            logger.error("findDateRangeOrder() - błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzZamowieniaWZakresieDat() - EM zamknięty");
+            logger.debug("findDateRangeOrder() - EM zamknięty");
         }
     }
 
     /** Pobiera zamówienia z minimalną ilością większą lub równą podanej. */
-    public List<Order> znajdzZamowieniaZMinimalnaIloscia(int minimalnaIlosc) {
-        logger.debug("znajdzZamowieniaZMinimalnaIloscia() - minimalnaIlosc={}", minimalnaIlosc);
+    public List<Order> findOrdersWithMinimalQuantity(int minimalQuantity) {
+        logger.debug("findOrdersWithMinimalQuantity() - minimalQuantity={}", minimalQuantity);
         EntityManager em = emf.createEntityManager();
         try {
             List<Order> list = em.createQuery(
-                            "SELECT o FROM Order o WHERE o.ilosc >= :minimalnaIlosc", Order.class)
-                    .setParameter("minimalnaIloscia", minimalnaIlosc)
+                            "SELECT o FROM Order o WHERE o.quantity >= :minimalQuantity", Order.class)
+                    .setParameter("minimalQuantity", minimalQuantity)
                     .getResultList();
-            logger.info("znajdzZamowieniaZMinimalnaIloscia() - znaleziono {} zamówień", list.size());
+            logger.info("findOrdersWithMinimalQuantity() - znaleziono {} zamówień", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzZamowieniaZMinimalnaIloscia() - błąd podczas wyszukiwania", e);
+            logger.error("findOrdersWithMinimalQuantity() - błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzZamowieniaZMinimalnaIloscia() - EM zamknięty");
+            logger.debug("findOrdersWithMinimalQuantity() - EM zamknięty");
         }
     }
 
     /** Pobiera zamówienia o cenie mieszczącej się w podanym przedziale. */
-    public List<Order> znajdzZamowieniaWPrzedzialeCenowym(BigDecimal minCena, BigDecimal maxCena) {
-        logger.debug("znajdzZamowieniaWPrzedzialeCenowym() - minCena={}, maxCena={}", minCena, maxCena);
+    public List<Order> findPriceRangeOrders(BigDecimal minPrice, BigDecimal maxPrice) {
+        logger.debug("findPriceRangeOrders() - minPrice={}, maxPrice={}", minPrice, maxPrice);
         EntityManager em = emf.createEntityManager();
         try {
             List<Order> list = em.createQuery(
-                            "SELECT o FROM Order o WHERE o.cena BETWEEN :minCena AND :maxCena", Order.class)
-                    .setParameter("minCena", minCena)
-                    .setParameter("maxCena", maxCena)
+                            "SELECT o FROM Order o WHERE o.cena BETWEEN :minPrice AND :maxPrice", Order.class)
+                    .setParameter("minPrice", minPrice)
+                    .setParameter("maxPrice", maxPrice)
                     .getResultList();
-            logger.info("znajdzZamowieniaWPrzedzialeCenowym() - znaleziono {} zamówień", list.size());
+            logger.info("findPriceRangeOrders() - znaleziono {} zamówień", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzZamowieniaWPrzedzialeCenowym() - błąd podczas wyszukiwania", e);
+            logger.error("findPriceRangeOrders() - błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzZamowieniaWPrzedzialeCenowym() - EM zamknięty");
+            logger.debug("findPriceRangeOrders() - EM zamknięty");
         }
     }
 

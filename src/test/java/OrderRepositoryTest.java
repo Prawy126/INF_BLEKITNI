@@ -36,30 +36,30 @@ public class OrderRepositoryTest {
             order.setPrice(new BigDecimal("59.90"));
             order.setDate(sdf.parse("2025-05-12"));
 
-            orderRepo.dodajZamowienie(order);
+            orderRepo.addOrder(order);
             System.out.println(">>> Dodano zamówienie.");
 
             // === 3. Pobranie wszystkich zamówień ===
             System.out.println("\n>>> Lista wszystkich zamówień:");
-            wypiszZamowienia(orderRepo.pobierzWszystkieZamowienia());
+            wypiszZamowienia(orderRepo.getAllOrders());
 
             // === 4. Aktualizacja ===
             order.setQuantity(20);
             order.setPrice(new BigDecimal("119.80"));
-            orderRepo.aktualizujZamowienie(order);
+            orderRepo.updateOrder(order);
             System.out.println(">>> Zaktualizowano zamówienie.");
 
             // === 5. Pobranie po ID ===
-            Order znalezione = orderRepo.znajdzZamowieniePoId(order.getId());
+            Order znalezione = orderRepo.findOrderById(order.getId());
             System.out.println(">>> Zamówienie po ID: " + znalezione);
 
             // === 6. Usunięcie ===
-            orderRepo.usunZamowienie(order.getId());
+            orderRepo.removeOrders(order.getId());
             System.out.println(">>> Usunięto zamówienie.");
 
             // === 7. Sprawdzenie listy po usunięciu ===
             System.out.println("\n>>> Lista zamówień po usunięciu:");
-            wypiszZamowienia(orderRepo.pobierzWszystkieZamowienia());
+            wypiszZamowienia(orderRepo.getAllOrders());
 
         } catch (Exception e) {
             e.printStackTrace();
