@@ -134,7 +134,7 @@ public class CashierPanelController {
             Product selectedProduct = productTable.getSelectionModel().getSelectedItem();
             if (selectedProduct != null) {
                 int quantity = quantitySpinner.getValue();
-                int availableQuantity = getDostepnaIlosc(selectedProduct);
+                int availableQuantity = getAvailableQuantity(selectedProduct);
 
                 if (availableQuantity < quantity) {
                     showNotification("Błąd", "Niewystarczająca ilość produktu. Dostępne: " + availableQuantity);
@@ -671,18 +671,18 @@ public class CashierPanelController {
         return table;
     }
 
-    private int getDostepnaIlosc(Product produkt) {
+    private int getAvailableQuantity(Product product) {
         WarehouseRepository warehouseRepo = new WarehouseRepository();
-        int ilosc = 0;
+        int quantity = 0;
         try {
-            Warehouse stan = warehouseRepo.findStateByProductId(produkt.getId());
-            if (stan != null) {
-                ilosc = stan.getQuantity();
+            Warehouse state = warehouseRepo.findStateByProductId(product.getId());
+            if (state != null) {
+                quantity = state.getQuantity();
             }
         } finally {
             warehouseRepo.close();
         }
-        return ilosc;
+        return quantity;
     }
 
     private TableView<TransactionItem> createCartTable() {
@@ -698,7 +698,7 @@ public class CashierPanelController {
         quantityCol.setOnEditCommit(event -> {
             TransactionItem item = event.getRowValue();
             int newValue = event.getNewValue();
-            int maxQuantity = getDostepnaIlosc(item.getProduct());
+            int maxQuantity = getAvailableQuantity(item.getProduct());
             if (newValue > 0 && newValue <= maxQuantity) {
                 item.setQuantity(newValue);
                 updateTotalPrice(table.getItems(), null);
@@ -784,9 +784,9 @@ public class CashierPanelController {
                 int quantity = item.getQuantity();
 
                 // Aktualizuj stan magazynowy
-                int dostepnaIlosc = getDostepnaIlosc(item.getProduct());
-                int nowaIlosc = dostepnaIlosc - quantity;
-                warehouseRepo.setProductQuantity(productId, nowaIlosc);
+                int availableQuantity = getAvailableQuantity(item.getProduct());
+                int newQuantity = availableQuantity - quantity;
+                warehouseRepo.setProductQuantity(productId, newQuantity);
 
                 // Zapisz relację transakcja-produkt za pomocą natywnego SQL
                 session.createNativeQuery(
