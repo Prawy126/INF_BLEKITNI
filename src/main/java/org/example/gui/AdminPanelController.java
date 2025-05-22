@@ -92,7 +92,7 @@ public class AdminPanelController {
                 userManagementView = task.getValue();
                 adminPanel.setCenterPane(userManagementView);
                 // Załaduj dane pracowników asynchronicznie
-                odswiezListePracownikow();
+                refreshEmployeeList();
             });
 
             task.setOnFailed(e -> {
@@ -105,7 +105,7 @@ public class AdminPanelController {
             // Jeśli widok już istnieje, po prostu go pokaż
             adminPanel.setCenterPane(userManagementView);
             // Odśwież dane
-            odswiezListePracownikow();
+            refreshEmployeeList();
         }
     }
 
@@ -168,7 +168,7 @@ public class AdminPanelController {
                 loginCol, emailCol, stanowiskoCol, zarobkiCol
         );
 
-        odswiezListePracownikow();
+        refreshEmployeeList();
 
         // === Przyciski ===
         HBox buttonBox = new HBox(10);
@@ -178,9 +178,9 @@ public class AdminPanelController {
         Button editUserButton = new Button("Edytuj użytkownika");
         Button deleteUserButton = new Button("Usuń użytkownika");
 
-        addUserButton.setOnAction(e -> dodajNowegoUzytkownika());
-        editUserButton.setOnAction(e -> edytujWybranegoUzytkownika());
-        deleteUserButton.setOnAction(e -> usunWybranegoUzytkownika());
+        addUserButton.setOnAction(e -> addNewUser());
+        editUserButton.setOnAction(e -> editSelectedUser());
+        deleteUserButton.setOnAction(e -> removeSelectedUser());
 
         buttonBox.getChildren().addAll(
                 addUserButton, editUserButton, deleteUserButton
@@ -207,7 +207,7 @@ public class AdminPanelController {
     /**
      * Formularz edycji wybranego użytkownika.
      */
-    private void edytujWybranegoUzytkownika() {
+    private void editSelectedUser() {
         Employee selected = tableView.getSelectionModel().getSelectedItem();
         if (selected == null) {
             showAlert(Alert.AlertType.WARNING,
@@ -240,17 +240,17 @@ public class AdminPanelController {
         // Adres
         Label addressLabel = new Label("Adres:");
         AddressRepository addressRepository = new AddressRepository();
-        ComboBox<Address> adresComboBox = new ComboBox<>();
-        adresComboBox.getItems().addAll(addressRepository.getAllAddresses());
-        adresComboBox.setValue(selected.getAddress()); // ustawiamy istniejący
-        adresComboBox.setPromptText("Wybierz adres");
+        ComboBox<Address> addressComboBox = new ComboBox<>();
+        addressComboBox.getItems().addAll(addressRepository.getAllAddresses());
+        addressComboBox.setValue(selected.getAddress()); // ustawiamy istniejący
+        addressComboBox.setPromptText("Wybierz adres");
 
-        Button dodajNowyAdresBtn = new Button("Dodaj nowy adres");
-        dodajNowyAdresBtn.setOnAction(e -> otworzOknoNowegoAdresu(adresComboBox));
+        Button addNewAddressBtn = new Button("Dodaj nowy adres");
+        addNewAddressBtn.setOnAction(e -> openNewAddressWindow(addressComboBox));
 
-        ComboBox<String> stanowiskoBox = new ComboBox<>();
-        stanowiskoBox.getItems().addAll("Kasjer", "Kierownik", "Admin", "Logistyk");
-        stanowiskoBox.setValue(selected.getPosition());
+        ComboBox<String> positionBox = new ComboBox<>();
+        positionBox.getItems().addAll("Kasjer", "Kierownik", "Admin", "Logistyk");
+        positionBox.setValue(selected.getPosition());
 
         TextField ageField = new TextField(String.valueOf(selected.getAge()));
         ageField.setPromptText("Wiek");
@@ -271,8 +271,8 @@ public class AdminPanelController {
                 passwordField,
                 emailField,
                 addressLabel,
-                new HBox(10, adresComboBox, dodajNowyAdresBtn),
-                stanowiskoBox,
+                new HBox(10, addressComboBox, addNewAddressBtn),
+                positionBox,
                 ageField,
                 salaryField,
                 buttons
@@ -286,8 +286,8 @@ public class AdminPanelController {
                         || surnameField.getText().isEmpty()
                         || loginField.getText().isEmpty()
                         || emailField.getText().isEmpty()
-                        || adresComboBox.getValue() == null
-                        || stanowiskoBox.getValue() == null
+                        || addressComboBox.getValue() == null
+                        || positionBox.getValue() == null
                         || ageField.getText().isEmpty()
                         || salaryField.getText().isEmpty()) {
 
@@ -303,11 +303,11 @@ public class AdminPanelController {
                 selected.setSurname(surnameField.getText());
                 selected.setLogin(loginField.getText());
                 selected.setEmail(emailField.getText());
-                selected.setAddress(adresComboBox.getValue());
+                selected.setAddress(addressComboBox.getValue());
                 if (!passwordField.getText().isEmpty()) {
                     selected.setPassword(passwordField.getText());
                 }
-                selected.setPosition(stanowiskoBox.getValue());
+                selected.setPosition(positionBox.getValue());
                 selected.setAge(Integer.parseInt(ageField.getText()));
                 selected.setSalary(new BigDecimal(salaryField.getText()));
 
@@ -362,7 +362,7 @@ public class AdminPanelController {
     /**
      * Pobiera dane z bazy i ładuje do tabeli asynchronicznie.
      */
-    private void odswiezListePracownikow() {
+    private void refreshEmployeeList() {
         Task<List<Employee>> task = new Task<>() {
             @Override
             protected List<Employee> call() throws Exception {
@@ -390,7 +390,7 @@ public class AdminPanelController {
     /**
      * Formularz dodawania nowego użytkownika.
      */
-    private void dodajNowegoUzytkownika() {
+    private void addNewUser() {
         VBox formLayout = new VBox(10);
         formLayout.setPadding(new Insets(20));
 
@@ -415,16 +415,16 @@ public class AdminPanelController {
         // Adres
         Label addressLabel = new Label("Adres:");
         AddressRepository addressRepository = new AddressRepository();
-        ComboBox<Address> adresComboBox = new ComboBox<>();
-        adresComboBox.getItems().addAll(addressRepository.getAllAddresses());
-        adresComboBox.setPromptText("Wybierz istniejący adres");
+        ComboBox<Address> addressComboBox = new ComboBox<>();
+        addressComboBox.getItems().addAll(addressRepository.getAllAddresses());
+        addressComboBox.setPromptText("Wybierz istniejący adres");
 
-        Button dodajNowyAdresBtn = new Button("Dodaj nowy adres");
-        dodajNowyAdresBtn.setOnAction(e -> otworzOknoNowegoAdresu(adresComboBox));
+        Button addNewAddressBtn = new Button("Dodaj nowy adres");
+        addNewAddressBtn.setOnAction(e -> openNewAddressWindow(addressComboBox));
 
-        ComboBox<String> stanowiskoBox = new ComboBox<>();
-        stanowiskoBox.getItems().addAll("Kasjer", "Kierownik", "Admin", "Logistyk");
-        stanowiskoBox.setPromptText("Stanowisko");
+        ComboBox<String> positionComboBox = new ComboBox<>();
+        positionComboBox.getItems().addAll("Kasjer", "Kierownik", "Admin", "Logistyk");
+        positionComboBox.setPromptText("Stanowisko");
 
         TextField ageField = new TextField();
         ageField.setPromptText("Wiek");
@@ -447,8 +447,8 @@ public class AdminPanelController {
                 passwordField,
                 emailField,
                 addressLabel,
-                new HBox(10, adresComboBox, dodajNowyAdresBtn),
-                stanowiskoBox,
+                new HBox(10, addressComboBox, addNewAddressBtn),
+                positionComboBox,
                 ageField,
                 salaryField,
                 buttons
@@ -464,8 +464,8 @@ public class AdminPanelController {
                         || loginField.getText().isEmpty()
                         || passwordField.getText().isEmpty()
                         || emailField.getText().isEmpty()
-                        || adresComboBox.getValue() == null
-                        || stanowiskoBox.getValue() == null
+                        || addressComboBox.getValue() == null
+                        || positionComboBox.getValue() == null
                         || ageField.getText().isEmpty()
                         || salaryField.getText().isEmpty()) {
 
@@ -473,24 +473,24 @@ public class AdminPanelController {
                     return;
                 }
 
-                int wiek = Integer.parseInt(ageField.getText());
-                BigDecimal zarobki = new BigDecimal(salaryField.getText());
+                int age = Integer.parseInt(ageField.getText());
+                BigDecimal salary = new BigDecimal(salaryField.getText());
 
-                Employee nowy = new Employee();
-                nowy.setName(nameField.getText());
-                nowy.setSurname(surnameField.getText());
-                nowy.setLogin(loginField.getText());
-                nowy.setPassword(passwordField.getText());
-                nowy.setEmail(emailField.getText());
-                nowy.setAddress(adresComboBox.getValue());
-                nowy.setPosition(stanowiskoBox.getValue());
-                nowy.setAge(wiek);
-                nowy.setSalary(zarobki);
+                Employee newEmployee = new Employee();
+                newEmployee.setName(nameField.getText());
+                newEmployee.setSurname(surnameField.getText());
+                newEmployee.setLogin(loginField.getText());
+                newEmployee.setPassword(passwordField.getText());
+                newEmployee.setEmail(emailField.getText());
+                newEmployee.setAddress(addressComboBox.getValue());
+                newEmployee.setPosition(positionComboBox.getValue());
+                newEmployee.setAge(age);
+                newEmployee.setSalary(salary);
 
                 Task<Void> addTask = new Task<>() {
                     @Override
                     protected Void call() throws Exception {
-                        userRepository.addEmployee(nowy);
+                        userRepository.addEmployee(newEmployee);
                         return null;
                     }
                 };
@@ -533,7 +533,7 @@ public class AdminPanelController {
      * Zabezpiecza przed usunięciem użytkownika z rolą "root".
      * Usuwa zaznaczonego użytkownika (soft-delete) i odświeża tabelę.
      */
-    private void usunWybranegoUzytkownika() {
+    private void removeSelectedUser() {
         Employee selected = tableView.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
@@ -554,7 +554,7 @@ public class AdminPanelController {
             if (response == ButtonType.OK) {
                 try {
                     userRepository.removeEmployee(selected);
-                    odswiezListePracownikow(); // ponowne załadowanie aktywnych
+                    refreshEmployeeList(); // ponowne załadowanie aktywnych
                     showAlert(
                             Alert.AlertType.INFORMATION,
                             "Sukces",
@@ -1061,67 +1061,67 @@ public class AdminPanelController {
         });
     }
 
-    private void otworzOknoNowegoAdresu(ComboBox<Address> adresComboBox) {
+    private void openNewAddressWindow(ComboBox<Address> addressComboBox) {
         Stage stage = new Stage();
         stage.setTitle("Dodaj nowy adres");
         VBox layout = new VBox(10);
         layout.setPadding(new Insets(20));
 
-        TextField miejscowosc = new TextField();
-        miejscowosc.setPromptText("Miejscowość");
+        TextField town = new TextField();
+        town.setPromptText("Miejscowość");
 
-        TextField numerDomu = new TextField();
-        numerDomu.setPromptText("Numer domu");
+        TextField houseNumber = new TextField();
+        houseNumber.setPromptText("Numer domu");
 
-        TextField numerMieszkania = new TextField();
-        numerMieszkania.setPromptText("Numer mieszkania (opcjonalnie)");
+        TextField apartmentNumber = new TextField();
+        apartmentNumber.setPromptText("Numer mieszkania (opcjonalnie)");
 
-        TextField kodPocztowy = new TextField();
-        kodPocztowy.setPromptText("Kod pocztowy");
+        TextField zipCode = new TextField();
+        zipCode.setPromptText("Kod pocztowy");
 
-        TextField miasto = new TextField();
-        miasto.setPromptText("Miasto");
+        TextField city = new TextField();
+        city.setPromptText("Miasto");
 
-        Button zapiszBtn = new Button("Zapisz adres");
+        Button saveButton = new Button("Zapisz adres");
 
-        zapiszBtn.setOnAction(e -> {
+        saveButton.setOnAction(e -> {
             // WALIDACJA
-            if (miejscowosc.getText().isEmpty()
-                    || numerDomu.getText().isEmpty()
-                    || kodPocztowy.getText().isEmpty()
-                    || miasto.getText().isEmpty()) {
+            if (town.getText().isEmpty()
+                    || houseNumber.getText().isEmpty()
+                    || zipCode.getText().isEmpty()
+                    || city.getText().isEmpty()) {
                 showAlert(Alert.AlertType.ERROR, "Błąd", "Wszystkie pola (poza numerem mieszkania) muszą być wypełnione.");
                 return;
             }
 
-            if (!kodPocztowy.getText().matches("\\d{2}-\\d{3}")) {
+            if (!zipCode.getText().matches("\\d{2}-\\d{3}")) {
                 showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowy format kodu pocztowego. Poprawny to np. 00-001.");
                 return;
             }
 
             // ZAPIS
             AddressRepository repo = new AddressRepository();
-            Address nowy = new Address();
-            nowy.setTown(miejscowosc.getText());
-            nowy.setHouseNumber(numerDomu.getText());
-            nowy.setApartmentNumber(numerMieszkania.getText().isEmpty() ? null : numerMieszkania.getText());
-            nowy.setZipCode(kodPocztowy.getText());
-            nowy.setCity(miasto.getText());
+            Address newAddress = new Address();
+            newAddress.setTown(town.getText());
+            newAddress.setHouseNumber(houseNumber.getText());
+            newAddress.setApartmentNumber(apartmentNumber.getText().isEmpty() ? null : apartmentNumber.getText());
+            newAddress.setZipCode(zipCode.getText());
+            newAddress.setCity(city.getText());
 
-            repo.addAddress(nowy);
+            repo.addAddress(newAddress);
 
-            // Odśwież listę i wybierz nowy adres
-            adresComboBox.getItems().clear();
-            adresComboBox.getItems().addAll(repo.getAllAddresses());
-            adresComboBox.setValue(nowy);
+            // Odśwież listę i wybierz newAddress adres
+            addressComboBox.getItems().clear();
+            addressComboBox.getItems().addAll(repo.getAllAddresses());
+            addressComboBox.setValue(newAddress);
 
             stage.close();
         });
 
         layout.getChildren().addAll(
                 new Label("Nowy adres:"),
-                miejscowosc, numerDomu, numerMieszkania,
-                kodPocztowy, miasto, zapiszBtn
+                town, houseNumber, apartmentNumber,
+                zipCode, city, saveButton
         );
 
         stage.setScene(new javafx.scene.Scene(layout));
