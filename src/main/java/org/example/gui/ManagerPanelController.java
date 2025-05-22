@@ -300,7 +300,7 @@ public class ManagerPanelController {
 
         // Pobranie wszystkich wniosków
         try {
-            absenceTable.getItems().addAll(absenceRepository.downloadAllRequests());
+            absenceTable.getItems().addAll(absenceRepository.getAllRequests());
         } catch (Exception e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Błąd",
@@ -346,7 +346,7 @@ public class ManagerPanelController {
 
                     // Odświeżenie tabeli
                     absenceTable.getItems().clear();
-                    absenceTable.getItems().addAll(absenceRepository.downloadAllRequests());
+                    absenceTable.getItems().addAll(absenceRepository.getAllRequests());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     showAlert(Alert.AlertType.ERROR, "Błąd",
@@ -375,7 +375,7 @@ public class ManagerPanelController {
 
                     // Odświeżenie tabeli
                     absenceTable.getItems().clear();
-                    absenceTable.getItems().addAll(absenceRepository.downloadAllRequests());
+                    absenceTable.getItems().addAll(absenceRepository.getAllRequests());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     showAlert(Alert.AlertType.ERROR, "Błąd",
@@ -391,7 +391,7 @@ public class ManagerPanelController {
         refreshButton.setOnAction(e -> {
             try {
                 absenceTable.getItems().clear();
-                absenceTable.getItems().addAll(absenceRepository.downloadAllRequests());
+                absenceTable.getItems().addAll(absenceRepository.getAllRequests());
                 showAlert(Alert.AlertType.INFORMATION, "Sukces",
                         "Lista wniosków została odświeżona.");
             } catch (Exception ex) {

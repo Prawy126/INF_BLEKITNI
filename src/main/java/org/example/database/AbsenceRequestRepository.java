@@ -82,21 +82,21 @@ public class AbsenceRequestRepository {
      *
      * @return lista wniosków (może być pusta)
      */
-    public List<AbsenceRequest> downloadAllRequests() {
-        logger.debug("downloadAllRequests() - start");
+    public List<AbsenceRequest> getAllRequests() {
+        logger.debug("getAllRequests() - start");
         EntityManager em = emf.createEntityManager();
         try {
             List<AbsenceRequest> list = em
                     .createQuery("SELECT w FROM AbsenceRequest w", AbsenceRequest.class)
                     .getResultList();
-            logger.info("downloadAllRequests() - pobrano {} wniosków", list.size());
+            logger.info("getAllRequests() - pobrano {} wniosków", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("downloadAllRequests() - błąd podczas pobierania wszystkich wniosków", e);
+            logger.error("getAllRequests() - błąd podczas pobierania wszystkich wniosków", e);
             return Collections.emptyList();
         } finally {
             em.close();
-            logger.debug("downloadAllRequests() - EM zamknięty");
+            logger.debug("getAllRequests() - EM zamknięty");
         }
     }
 
@@ -105,8 +105,8 @@ public class AbsenceRequestRepository {
      *
      * @param id identyfikator wniosku do usunięcia
      */
-    public void deleteRequest(int id) {
-        logger.debug("deleteRequest() - start, id={}", id);
+    public void removeRequest(int id) {
+        logger.debug("removeRequest() - start, id={}", id);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -114,17 +114,17 @@ public class AbsenceRequestRepository {
             AbsenceRequest w = em.find(AbsenceRequest.class, id);
             if (w != null) {
                 em.remove(w);
-                logger.info("deleteRequest() - usunięto wniosek: {}", w);
+                logger.info("removeRequest() - usunięto wniosek: {}", w);
             } else {
-                logger.warn("deleteRequest() - brak wniosku o id={}", id);
+                logger.warn("removeRequest() - brak wniosku o id={}", id);
             }
             tx.commit();
         } catch (Exception e) {
-            logger.error("deleteRequest() - błąd podczas usuwania wniosku o id={}", id, e);
+            logger.error("removeRequest() - błąd podczas usuwania wniosku o id={}", id, e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("deleteRequest() - EM zamknięty");
+            logger.debug("removeRequest() - EM zamknięty");
         }
     }
 

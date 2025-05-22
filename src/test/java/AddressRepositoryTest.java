@@ -32,19 +32,19 @@ public class AddressRepositoryTest {
 
             // === 2. Wyświetlenie wszystkich adresów ===
             System.out.println("\n>>> Lista adresów:");
-            wypiszAdresy(addressRepo.downloadAllAddresses());
+            wypiszAdresy(addressRepo.getAllAddresses());
 
             // === 3. Odczyt po ID ===
             Address znaleziony = addressRepo.findAddressById(address1.getId());
             System.out.println("\n>>> Adres po ID: " + znaleziony);
 
             // === 4. Usunięcie adresu ===
-            addressRepo.deleteAddress(address1.getId());
+            addressRepo.removeAddress(address1.getId());
             System.out.println(">>> Usunięto adres.");
 
             // === 5. Wyświetlenie po usunięciu ===
             System.out.println("\n>>> Lista adresów po usunięciu:");
-            wypiszAdresy(addressRepo.downloadAllAddresses());
+            wypiszAdresy(addressRepo.getAllAddresses());
 
         } catch (Exception e) {
             e.printStackTrace();

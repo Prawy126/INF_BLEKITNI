@@ -80,20 +80,20 @@ public class AddressRepository implements AutoCloseable {
      *
      * @return lista obiektów Address (może być pusta)
      */
-    public List<Address> downloadAllAddresses() {
-        logger.debug("downloadAllAddresses() - start");
+    public List<Address> getAllAddresses() {
+        logger.debug("getAllAddresses() - start");
         EntityManager em = emf.createEntityManager();
         try {
             List<Address> list = em.createQuery("SELECT a FROM Address a", Address.class)
                     .getResultList();
-            logger.info("downloadAllAddresses() - pobrano {} adresów", list.size());
+            logger.info("getAllAddresses() - pobrano {} adresów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("downloadAllAddresses() - błąd podczas pobierania adresów", e);
+            logger.error("getAllAddresses() - błąd podczas pobierania adresów", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("downloadAllAddresses() - EM zamknięty");
+            logger.debug("getAllAddresses() - EM zamknięty");
         }
     }
 
@@ -102,8 +102,8 @@ public class AddressRepository implements AutoCloseable {
      *
      * @param id identyfikator Address do usunięcia
      */
-    public void deleteAddress(int id) {
-        logger.debug("deleteAddress() - start, id={}", id);
+    public void removeAddress(int id) {
+        logger.debug("removeAddress() - start, id={}", id);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -111,17 +111,17 @@ public class AddressRepository implements AutoCloseable {
             Address address = em.find(Address.class, id);
             if (address != null) {
                 em.remove(address);
-                logger.info("deleteAddress() - usunięto adres: {}", address);
+                logger.info("removeAddress() - usunięto adres: {}", address);
             } else {
-                logger.warn("deleteAddress() - brak adresu o id={}", id);
+                logger.warn("removeAddress() - brak adresu o id={}", id);
             }
             tx.commit();
         } catch (Exception e) {
-            logger.error("deleteAddress() - błąd podczas usuwania adresu o id=" + id, e);
+            logger.error("removeAddress() - błąd podczas usuwania adresu o id=" + id, e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("deleteAddress() - EM zamknięty");
+            logger.debug("removeAddress() - EM zamknięty");
         }
     }
 

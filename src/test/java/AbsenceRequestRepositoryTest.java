@@ -44,7 +44,7 @@ public class AbsenceRequestRepositoryTest {
 
             // === 3. Pobranie wszystkich wniosków ===
             System.out.println("\n>>> Lista wszystkich wniosków:");
-            wypiszWnioski(absenceRepo.downloadAllRequests());
+            wypiszWnioski(absenceRepo.getAllRequests());
 
             // === 4. Aktualizacja ===
             request.setDescription("Zmieniony opis urlopu");
@@ -56,12 +56,12 @@ public class AbsenceRequestRepositoryTest {
             System.out.println(">>> Wniosek po ID: " + loaded);
 
             // === 6. Usunięcie ===
-            absenceRepo.deleteRequest(loaded.getId());
+            absenceRepo.removeRequest(loaded.getId());
             System.out.println(">>> Usunięto wniosek.");
 
             // === 7. Lista po usunięciu ===
             System.out.println("\n>>> Lista po usunięciu:");
-            wypiszWnioski(absenceRepo.downloadAllRequests());
+            wypiszWnioski(absenceRepo.getAllRequests());
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -241,7 +241,7 @@ public class AdminPanelController {
         Label addressLabel = new Label("Adres:");
         AddressRepository addressRepository = new AddressRepository();
         ComboBox<Address> adresComboBox = new ComboBox<>();
-        adresComboBox.getItems().addAll(addressRepository.downloadAllAddresses());
+        adresComboBox.getItems().addAll(addressRepository.getAllAddresses());
         adresComboBox.setValue(selected.getAdres()); // ustawiamy istniejący
         adresComboBox.setPromptText("Wybierz adres");
 
@@ -416,7 +416,7 @@ public class AdminPanelController {
         Label addressLabel = new Label("Adres:");
         AddressRepository addressRepository = new AddressRepository();
         ComboBox<Address> adresComboBox = new ComboBox<>();
-        adresComboBox.getItems().addAll(addressRepository.downloadAllAddresses());
+        adresComboBox.getItems().addAll(addressRepository.getAllAddresses());
         adresComboBox.setPromptText("Wybierz istniejący adres");
 
         Button dodajNowyAdresBtn = new Button("Dodaj nowy adres");
@@ -1112,7 +1112,7 @@ public class AdminPanelController {
 
             // Odśwież listę i wybierz nowy adres
             adresComboBox.getItems().clear();
-            adresComboBox.getItems().addAll(repo.downloadAllAddresses());
+            adresComboBox.getItems().addAll(repo.getAllAddresses());
             adresComboBox.setValue(nowy);
 
             stage.close();
