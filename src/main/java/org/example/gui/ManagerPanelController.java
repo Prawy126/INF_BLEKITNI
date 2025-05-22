@@ -77,7 +77,7 @@ public class ManagerPanelController {
         );
 
         taskTable.getColumns().addAll(nameCol, dateCol);
-        taskTable.getItems().addAll(taskRepository.pobierzWszystkieZadania());
+        taskTable.getItems().addAll(taskRepository.getAllTasks());
 
         HBox taskButtons = new HBox(10);
         taskButtons.setAlignment(Pos.CENTER);
@@ -103,7 +103,7 @@ public class ManagerPanelController {
         deleteButton.setOnAction(e -> {
             Task selectedTask = taskTable.getSelectionModel().getSelectedItem();
             if (selectedTask != null) {
-                taskRepository.usunZadanie(selectedTask);
+                taskRepository.removeTask(selectedTask);
                 showAlert(Alert.AlertType.INFORMATION, "Sukces", "Usunięto zadanie.");
                 showTaskPanel();
             } else {
@@ -190,7 +190,7 @@ public class ManagerPanelController {
 
                 // teraz konstruktor pięcio-argumentowy
                 Task noweZadanie = new Task(nazwa, data, status, opis, czasZmiany);
-                taskRepository.dodajZadanie(noweZadanie);
+                taskRepository.addTask(noweZadanie);
 
                 showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zadanie dodane!");
                 showTaskPanel();
@@ -437,7 +437,7 @@ public class ManagerPanelController {
 
         Label taskLabel = new Label("Wybierz zadanie:");
         ComboBox<String> taskComboBox = new ComboBox<>();
-        taskRepository.pobierzWszystkieZadania()
+        taskRepository.getAllTasks()
                 .forEach(t -> taskComboBox.getItems().add(t.getName()));
 
         Label employeeLabel = new Label("Wybierz pracownika:");
@@ -527,7 +527,7 @@ public class ManagerPanelController {
                 if (deadlinePicker.getValue() != null) {
                     task.setDate(java.sql.Date.valueOf(deadlinePicker.getValue()));
                 }
-                taskRepository.aktualizujZadanie(task);
+                taskRepository.updateTask(task);
 
                 showAlert(Alert.AlertType.INFORMATION, "Sukces",
                         "Zadanie zaktualizowane!");

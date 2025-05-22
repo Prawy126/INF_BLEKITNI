@@ -316,21 +316,21 @@ public class TransactionRepository {
      * @return lista obiektów Transaction lub pusta lista
      */
     public List<Transaction> znajdzPoDacie(Date data) {
-        logger.debug("znajdzPoDacie() – data={}", data);
+        logger.debug("findByDate() – data={}", data);
         EntityManager em = emf.createEntityManager();
         try {
             List<Transaction> list = em.createQuery(
                             "SELECT t FROM Transaction t WHERE t.data = :data", Transaction.class)
                     .setParameter("data", data, TemporalType.DATE)
                     .getResultList();
-            logger.info("znajdzPoDacie() – znaleziono {} transakcji", list.size());
+            logger.info("findByDate() – znaleziono {} transakcji", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoDacie() – błąd podczas wyszukiwania", e);
+            logger.error("findByDate() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoDacie() – EntityManager zamknięty");
+            logger.debug("findByDate() – EntityManager zamknięty");
         }
     }
 

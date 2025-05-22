@@ -193,7 +193,7 @@ public class TechnicalIssueRepository {
      * @return lista dopasowanych zgłoszeń lub pusta lista
      */
     public List<TechnicalIssue> znajdzPoDacie(LocalDate start, LocalDate end) {
-        logger.debug("znajdzPoDacie() – start={}, end={}", start, end);
+        logger.debug("findByDate() – start={}, end={}", start, end);
         EntityManager em = emf.createEntityManager();
         try {
             List<TechnicalIssue> list = em.createQuery(
@@ -202,14 +202,14 @@ public class TechnicalIssueRepository {
                     .setParameter("start", start)
                     .setParameter("end", end)
                     .getResultList();
-            logger.info("znajdzPoDacie() – znaleziono {} zgłoszeń", list.size());
+            logger.info("findByDate() – znaleziono {} zgłoszeń", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoDacie() – błąd podczas wyszukiwania", e);
+            logger.error("findByDate() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoDacie() – EntityManager zamknięty");
+            logger.debug("findByDate() – EntityManager zamknięty");
         }
     }
 
@@ -220,7 +220,7 @@ public class TechnicalIssueRepository {
      * @return lista dopasowanych zgłoszeń lub pusta lista
      */
     public List<TechnicalIssue> znajdzPoStatusie(String status) {
-        logger.debug("znajdzPoStatusie() – status={}", status);
+        logger.debug("findByStatus() – status={}", status);
         EntityManager em = emf.createEntityManager();
         try {
             List<TechnicalIssue> list = em.createQuery(
@@ -228,14 +228,14 @@ public class TechnicalIssueRepository {
                             TechnicalIssue.class)
                     .setParameter("status", status)
                     .getResultList();
-            logger.info("znajdzPoStatusie() – znaleziono {} zgłoszeń", list.size());
+            logger.info("findByStatus() – znaleziono {} zgłoszeń", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoStatusie() – błąd podczas wyszukiwania", e);
+            logger.error("findByStatus() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoStatusie() – EntityManager zamknięty");
+            logger.debug("findByStatus() – EntityManager zamknięty");
         }
     }
 

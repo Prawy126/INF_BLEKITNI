@@ -49,33 +49,33 @@ public class TaskRepositoryTest {
                     defaultShiftTime
             );
 
-            taskRepo.dodajZadanie(zadanie1);
-            taskRepo.dodajZadanie(zadanie2);
-            taskRepo.dodajZadanie(zadanie3);
+            taskRepo.addTask(zadanie1);
+            taskRepo.addTask(zadanie2);
+            taskRepo.addTask(zadanie3);
 
             System.out.println(">>> Dodano zadania!");
 
             // === 2. Pobieranie wszystkich zadań ===
             System.out.println("\n>>> Lista wszystkich zadań:");
-            wypiszZadania(taskRepo.pobierzWszystkieZadania());
+            wypiszZadania(taskRepo.getAllTasks());
 
             // === 3. Aktualizacja istniejącego zadania ===
             zadanie1.setStatus("W trakcie");
             zadanie1.setDescription("Dostawa mleka zrealizowana w połowie.");
-            taskRepo.aktualizujZadanie(zadanie1);
+            taskRepo.updateTask(zadanie1);
             System.out.println("\n>>> Zaktualizowano zadanie 1.");
 
             // === 4. Pobieranie zadania po ID ===
-            Task znalezione = taskRepo.znajdzZadaniePoId(zadanie1.getId());
+            Task znalezione = taskRepo.findTaskById(zadanie1.getId());
             System.out.println(">>> Zadanie po ID: " + znalezione);
 
             // === 5. Usuwanie zadania ===
-            taskRepo.usunZadanie(zadanie2);
+            taskRepo.removeTask(zadanie2);
             System.out.println("\n>>> Usunięto zadanie 2.");
 
             // === 6. Lista zadań po usunięciu ===
             System.out.println("\n>>> Lista zadań po usunięciu:");
-            wypiszZadania(taskRepo.pobierzWszystkieZadania());
+            wypiszZadania(taskRepo.getAllTasks());
 
         } finally {
             taskRepo.close();

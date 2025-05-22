@@ -1,6 +1,6 @@
 /*
  * Classname: TaskRepository
- * Version information: 1.2
+ * Version information: 1.3
  * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
@@ -42,21 +42,21 @@ public class TaskRepository {
      *
      * @param task obiekt Task do zapisania
      */
-    public void dodajZadanie(Task task) {
-        logger.debug("dodajZadanie() – start, task={}", task);
+    public void addTask(Task task) {
+        logger.debug("addTask() – start, task={}", task);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             em.persist(task);
             tx.commit();
-            logger.info("dodajZadanie() – zadanie dodane: {}", task);
+            logger.info("addTask() – zadanie dodane: {}", task);
         } catch (Exception e) {
-            logger.error("dodajZadanie() – błąd podczas dodawania zadania", e);
+            logger.error("addTask() – błąd podczas dodawania zadania", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("dodajZadanie() – EntityManager zamknięty");
+            logger.debug("addTask() – EntityManager zamknięty");
         }
     }
 
@@ -66,19 +66,19 @@ public class TaskRepository {
      * @param id identyfikator zadania
      * @return obiekt Task lub null, jeśli nie istnieje
      */
-    public Task znajdzZadaniePoId(int id) {
-        logger.debug("znajdzZadaniePoId() – start, id={}", id);
+    public Task findTaskById(int id) {
+        logger.debug("findTaskById() – start, id={}", id);
         EntityManager em = emf.createEntityManager();
         try {
             Task t = em.find(Task.class, id);
-            logger.info("znajdzZadaniePoId() – znaleziono: {}", t);
+            logger.info("findTaskById() – znaleziono: {}", t);
             return t;
         } catch (Exception e) {
-            logger.error("znajdzZadaniePoId() – błąd podczas wyszukiwania zadania id={}", id, e);
+            logger.error("findTaskById() – błąd podczas wyszukiwania zadania id={}", id, e);
             return null;
         } finally {
             em.close();
-            logger.debug("znajdzZadaniePoId() – EntityManager zamknięty");
+            logger.debug("findTaskById() – EntityManager zamknięty");
         }
     }
 
@@ -87,20 +87,20 @@ public class TaskRepository {
      *
      * @return lista wszystkich zadań lub pusta lista w przypadku błędu
      */
-    public List<Task> pobierzWszystkieZadania() {
-        logger.debug("pobierzWszystkieZadania() – start");
+    public List<Task> getAllTasks() {
+        logger.debug("getAllTasks() – start");
         EntityManager em = emf.createEntityManager();
         try {
             List<Task> list = em.createQuery("SELECT t FROM Task t", Task.class)
                     .getResultList();
-            logger.info("pobierzWszystkieZadania() – pobrano {} zadań", list.size());
+            logger.info("getAllTasks() – pobrano {} zadań", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("pobierzWszystkieZadania() – błąd podczas pobierania zadań", e);
+            logger.error("getAllTasks() – błąd podczas pobierania zadań", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("pobierzWszystkieZadania() – EntityManager zamknięty");
+            logger.debug("getAllTasks() – EntityManager zamknięty");
         }
     }
 
@@ -109,21 +109,21 @@ public class TaskRepository {
      *
      * @param task obiekt Task do zaktualizowania
      */
-    public void aktualizujZadanie(Task task) {
-        logger.debug("aktualizujZadanie() – start, task={}", task);
+    public void updateTask(Task task) {
+        logger.debug("updateTask() – start, task={}", task);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             em.merge(task);
             tx.commit();
-            logger.info("aktualizujZadanie() – zadanie zaktualizowane: {}", task);
+            logger.info("updateTask() – zadanie zaktualizowane: {}", task);
         } catch (Exception e) {
-            logger.error("aktualizujZadanie() – błąd podczas aktualizacji zadania", e);
+            logger.error("updateTask() – błąd podczas aktualizacji zadania", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("aktualizujZadanie() – EntityManager zamknięty");
+            logger.debug("updateTask() – EntityManager zamknięty");
         }
     }
 
@@ -133,8 +133,8 @@ public class TaskRepository {
      *
      * @param task obiekt Task do usunięcia
      */
-    public void usunZadanie(Task task) {
-        logger.debug("usunZadanie() – start, task={}", task);
+    public void removeTask(Task task) {
+        logger.debug("removeTask() – start, task={}", task);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -142,34 +142,34 @@ public class TaskRepository {
             Task managed = em.find(Task.class, task.getId());
             if (managed != null) {
                 em.remove(managed);
-                logger.info("usunZadanie() – usunięto zadanie: {}", managed);
+                logger.info("removeTask() – usunięto zadanie: {}", managed);
             } else {
-                logger.warn("usunZadanie() – brak zadania o id={}", task.getId());
+                logger.warn("removeTask() – brak zadania o id={}", task.getId());
             }
             tx.commit();
         } catch (Exception e) {
-            logger.error("usunZadanie() – błąd podczas usuwania zadania", e);
+            logger.error("removeTask() – błąd podczas usuwania zadania", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("usunZadanie() – EntityManager zamknięty");
+            logger.debug("removeTask() – EntityManager zamknięty");
         }
     }
 
     /**
      * Znajduje zadania, których nazwa zawiera podany fragment (bez uwzględniania wielkości liter).
      *
-     * @param nazwaFragment fragment tekstu nazwy
+     * @param nameFragment fragment tekstu nazwy
      * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
      */
-    public List<Task> znajdzPoNazwie(String nazwaFragment) {
-        logger.debug("findByName() – nazwaFragment={}", nazwaFragment);
+    public List<Task> findByName(String nameFragment) {
+        logger.debug("findByName() – nameFragment={}", nameFragment);
         EntityManager em = emf.createEntityManager();
         try {
             List<Task> list = em.createQuery(
-                            "SELECT t FROM Task t WHERE LOWER(t.nazwa) LIKE LOWER(CONCAT('%', :frag, '%'))",
+                            "SELECT t FROM Task t WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :frag, '%'))",
                             Task.class)
-                    .setParameter("frag", nazwaFragment)
+                    .setParameter("frag", nameFragment)
                     .getResultList();
             logger.info("findByName() – znaleziono {} zadań", list.size());
             return list;
@@ -185,25 +185,25 @@ public class TaskRepository {
     /**
      * Znajduje zadania o dokładnie podanej dacie.
      *
-     * @param data data zadania (bez czasu)
+     * @param date date zadania (bez czasu)
      * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
      */
-    public List<Task> znajdzPoDacie(Date data) {
-        logger.debug("znajdzPoDacie() – data={}", data);
+    public List<Task> findByDate(Date date) {
+        logger.debug("findByDate() – date={}", date);
         EntityManager em = emf.createEntityManager();
         try {
             List<Task> list = em.createQuery(
-                            "SELECT t FROM Task t WHERE t.data = :data", Task.class)
-                    .setParameter("data", data, TemporalType.DATE)
+                            "SELECT t FROM Task t WHERE t.date = :date", Task.class)
+                    .setParameter("date", date, TemporalType.DATE)
                     .getResultList();
-            logger.info("znajdzPoDacie() – znaleziono {} zadań", list.size());
+            logger.info("findByDate() – znaleziono {} zadań", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoDacie() – błąd podczas wyszukiwania", e);
+            logger.error("findByDate() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoDacie() – EntityManager zamknięty");
+            logger.debug("findByDate() – EntityManager zamknięty");
         }
     }
 
@@ -213,76 +213,76 @@ public class TaskRepository {
      * @param status status zadania
      * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
      */
-    public List<Task> znajdzPoStatusie(String status) {
-        logger.debug("znajdzPoStatusie() – status={}", status);
+    public List<Task> findByStatus(String status) {
+        logger.debug("findByStatus() – status={}", status);
         EntityManager em = emf.createEntityManager();
         try {
             List<Task> list = em.createQuery(
                             "SELECT t FROM Task t WHERE t.status = :status", Task.class)
                     .setParameter("status", status)
                     .getResultList();
-            logger.info("znajdzPoStatusie() – znaleziono {} zadań", list.size());
+            logger.info("findByStatus() – znaleziono {} zadań", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoStatusie() – błąd podczas wyszukiwania", e);
+            logger.error("findByStatus() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoStatusie() – EntityManager zamknięty");
+            logger.debug("findByStatus() – EntityManager zamknięty");
         }
     }
 
     /**
      * Znajduje zadania, których opis zawiera podany fragment (bez uwzględniania wielkości liter).
      *
-     * @param opisFragment fragment tekstu opisu
+     * @param descriptionFragment fragment tekstu opisu
      * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
      */
-    public List<Task> znajdzPoOpisie(String opisFragment) {
-        logger.debug("znajdzPoOpisie() – opisFragment={}", opisFragment);
+    public List<Task> findByDescription(String descriptionFragment) {
+        logger.debug("findByDescription() – descriptionFragment={}", descriptionFragment);
         EntityManager em = emf.createEntityManager();
         try {
             List<Task> list = em.createQuery(
-                            "SELECT t FROM Task t WHERE LOWER(t.opis) LIKE LOWER(CONCAT('%', :frag, '%'))",
+                            "SELECT t FROM Task t WHERE LOWER(t.description) LIKE LOWER(CONCAT('%', :frag, '%'))",
                             Task.class)
-                    .setParameter("frag", opisFragment)
+                    .setParameter("frag", descriptionFragment)
                     .getResultList();
-            logger.info("znajdzPoOpisie() – znaleziono {} zadań", list.size());
+            logger.info("findByDescription() – znaleziono {} zadań", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoOpisie() – błąd podczas wyszukiwania", e);
+            logger.error("findByDescription() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoOpisie() – EntityManager zamknięty");
+            logger.debug("findByDescription() – EntityManager zamknięty");
         }
     }
 
     /**
      * Znajduje zadania, których czas trwania zmiany mieści się w podanym przedziale.
      *
-     * @param od     początek przedziału czasu (inclusive)
-     * @param doTime koniec przedziału czasu (inclusive)
+     * @param from     początek przedziału czasu (inclusive)
+     * @param toTime   koniec przedziału czasu (inclusive)
      * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
      */
-    public List<Task> znajdzPoCzasieTrwaniaZmiany(LocalTime od, LocalTime doTime) {
-        logger.debug("znajdzPoCzasieTrwaniaZmiany() – od={}, doTime={}", od, doTime);
+    public List<Task> findByTimeShiftDuration(LocalTime from, LocalTime toTime) {
+        logger.debug("findByTimeShiftDuration() – from={}, toTime={}", from, toTime);
         EntityManager em = emf.createEntityManager();
         try {
             List<Task> list = em.createQuery(
-                            "SELECT t FROM Task t WHERE t.czasTrwaniaZmiany BETWEEN :od AND :doTime",
+                            "SELECT t FROM Task t WHERE t.durationOfTheShift BETWEEN :from AND :toTime",
                             Task.class)
-                    .setParameter("od", od)
-                    .setParameter("doTime", doTime)
+                    .setParameter("from", from)
+                    .setParameter("toTime", toTime)
                     .getResultList();
-            logger.info("znajdzPoCzasieTrwaniaZmiany() – znaleziono {} zadań", list.size());
+            logger.info("findByTimeShiftDuration() – znaleziono {} zadań", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoCzasieTrwaniaZmiany() – błąd podczas wyszukiwania", e);
+            logger.error("findByTimeShiftDuration() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoCzasieTrwaniaZmiany() – EntityManager zamknięty");
+            logger.debug("findByTimeShiftDuration() – EntityManager zamknięty");
         }
     }
 
