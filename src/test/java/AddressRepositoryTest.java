@@ -1,7 +1,7 @@
 /*
  * Classname: TestAddressRepository
- * Version information: 1.0
- * Date: 2025-05-12
+ * Version information: 1.1
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -32,7 +32,7 @@ public class AddressRepositoryTest {
 
             // === 2. Wyświetlenie wszystkich adresów ===
             System.out.println("\n>>> Lista adresów:");
-            wypiszAdresy(addressRepo.getAllAddresses());
+            writeAddresses(addressRepo.getAllAddresses());
 
             // === 3. Odczyt po ID ===
             Address znaleziony = addressRepo.findAddressById(address1.getId());
@@ -44,7 +44,7 @@ public class AddressRepositoryTest {
 
             // === 5. Wyświetlenie po usunięciu ===
             System.out.println("\n>>> Lista adresów po usunięciu:");
-            wypiszAdresy(addressRepo.getAllAddresses());
+            writeAddresses(addressRepo.getAllAddresses());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -56,13 +56,13 @@ public class AddressRepositoryTest {
     /**
      * Pomocnicza metoda wypisująca listę adresów.
      *
-     * @param adresy lista adresów
+     * @param addresses lista adresów
      */
-    private static void wypiszAdresy(List<Address> adresy) {
-        if (adresy.isEmpty()) {
+    private static void writeAddresses(List<Address> addresses) {
+        if (addresses.isEmpty()) {
             System.out.println("(Brak adresów)");
         } else {
-            for (Address a : adresy) {
+            for (Address a : addresses) {
                 System.out.printf("ID: %-3d Miasto: %-15s Miejscowość: %-15s Kod: %-10s%n",
                         a.getId(),
                         a.getCity(),

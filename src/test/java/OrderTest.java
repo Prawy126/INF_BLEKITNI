@@ -12,40 +12,40 @@ class OrderTest {
 
     @Test
     void testConstructorAndGetters() {
-        Product produkt = new Product("Laptop", "Elektronika", 2500.00);
-        Employee pracownik = new Employee();
-        pracownik.setLogin("test_user");
-        Date data = new Date();
+        Product product = new Product("Laptop", "Elektronika", 2500.00);
+        Employee employee = new Employee();
+        employee.setLogin("test_user");
+        Date date = new Date();
 
-        Order order = new Order(produkt, pracownik, 10, new BigDecimal("25000.00"), data);
+        Order order = new Order(product, employee, 10, new BigDecimal("25000.00"), date);
 
-        assertEquals(produkt, order.getProduct());
-        assertEquals(pracownik, order.getEmployee());
+        assertEquals(product, order.getProduct());
+        assertEquals(employee, order.getEmployee());
         assertEquals(10, order.getQuantity());
         assertEquals(new BigDecimal("25000.00"), order.getPrice());
-        assertEquals(data, order.getDate());
+        assertEquals(date, order.getDate());
     }
 
     @Test
     void testSettersAndToString() {
         Order order = new Order();
 
-        Product produkt = new Product("Tablet", "Elektronika", 1000.00);
-        Employee pracownik = new Employee();
-        pracownik.setLogin("admin");
-        Date data = new Date();
+        Product product = new Product("Tablet", "Elektronika", 1000.00);
+        Employee employee = new Employee();
+        employee.setLogin("admin");
+        Date date = new Date();
 
-        order.setProduct(produkt);
-        order.setEmployee(pracownik);
+        order.setProduct(product);
+        order.setEmployee(employee);
         order.setQuantity(5);
         order.setPrice(new BigDecimal("5000.00"));
-        order.setDate(data);
+        order.setDate(date);
 
-        assertEquals(produkt, order.getProduct());
-        assertEquals(pracownik, order.getEmployee());
+        assertEquals(product, order.getProduct());
+        assertEquals(employee, order.getEmployee());
         assertEquals(5, order.getQuantity());
         assertEquals(new BigDecimal("5000.00"), order.getPrice());
-        assertEquals(data, order.getDate());
+        assertEquals(date, order.getDate());
 
         assertTrue(order.toString().contains("Tablet"));
         assertTrue(order.toString().contains("5000.00"));

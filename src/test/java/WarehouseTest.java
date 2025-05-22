@@ -8,10 +8,10 @@ class WarehouseTest {
 
     @Test
     void testParameterizedConstructor() {
-        Product produkt = new Product("Laptop", "Elektronika", 1500.00);
-        Warehouse warehouse = new Warehouse(produkt, 10);
+        Product product = new Product("Laptop", "Elektronika", 1500.00);
+        Warehouse warehouse = new Warehouse(product, 10);
 
-        assertEquals(produkt, warehouse.getProduct());
+        assertEquals(product, warehouse.getProduct());
         assertEquals("Laptop", warehouse.getProduct().getName());
         assertEquals(1500.00, warehouse.getProduct().getPrice());
         assertEquals(10, warehouse.getQuantity());
@@ -19,9 +19,9 @@ class WarehouseTest {
 
     @Test
     void testSettersAndGetters() {
-        Product produkt = new Product("Monitor", "Elektronika", 799.99);
+        Product product = new Product("Monitor", "Elektronika", 799.99);
         Warehouse warehouse = new Warehouse();
-        warehouse.setProduct(produkt);
+        warehouse.setProduct(product);
         warehouse.setQuantity(25);
 
         assertEquals("Monitor", warehouse.getProduct().getName());
@@ -31,8 +31,8 @@ class WarehouseTest {
 
     @Test
     void testToString() {
-        Product produkt = new Product("Biurko", "Meble", 300.00);
-        Warehouse warehouse = new Warehouse(produkt, 5);
+        Product product = new Product("Biurko", "Meble", 300.00);
+        Warehouse warehouse = new Warehouse(product, 5);
         String result = warehouse.toString();
 
         assertTrue(result.contains("Biurko"));
@@ -41,8 +41,8 @@ class WarehouseTest {
 
     @Test
     void testZeroQuantity() {
-        Product produkt = new Product("Długopis", "Biuro", 0.00);
-        Warehouse warehouse = new Warehouse(produkt, 0);
+        Product product = new Product("Długopis", "Biuro", 0.00);
+        Warehouse warehouse = new Warehouse(product, 0);
 
         assertEquals(0.00, warehouse.getProduct().getPrice());
         assertEquals(0, warehouse.getQuantity());
@@ -50,8 +50,8 @@ class WarehouseTest {
 
     @Test
     void testNegativeValuesAccepted() {
-        Product produkt = new Product("Krzesło", "Meble", -50.00); // brak walidacji w Product
-        Warehouse warehouse = new Warehouse(produkt, -10);
+        Product product = new Product("Krzesło", "Meble", -50.00); // brak walidacji w Product
+        Warehouse warehouse = new Warehouse(product, -10);
 
         assertEquals(-50.00, warehouse.getProduct().getPrice());
         assertEquals(-10, warehouse.getQuantity());

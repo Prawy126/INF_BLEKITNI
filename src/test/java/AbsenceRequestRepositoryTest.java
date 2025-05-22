@@ -1,7 +1,7 @@
 /*
  * Classname: TestAbsenceRequestRepository
- * Version information: 1.0
- * Date: 2025-05-12
+ * Version information: 1.1
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -44,7 +44,7 @@ public class AbsenceRequestRepositoryTest {
 
             // === 3. Pobranie wszystkich wniosków ===
             System.out.println("\n>>> Lista wszystkich wniosków:");
-            wypiszWnioski(absenceRepo.getAllRequests());
+            writeRequests(absenceRepo.getAllRequests());
 
             // === 4. Aktualizacja ===
             request.setDescription("Zmieniony opis urlopu");
@@ -61,7 +61,7 @@ public class AbsenceRequestRepositoryTest {
 
             // === 7. Lista po usunięciu ===
             System.out.println("\n>>> Lista po usunięciu:");
-            wypiszWnioski(absenceRepo.getAllRequests());
+            writeRequests(absenceRepo.getAllRequests());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -74,13 +74,13 @@ public class AbsenceRequestRepositoryTest {
     /**
      * Pomocnicza metoda wypisująca wnioski o nieobecność.
      *
-     * @param lista lista wniosków
+     * @param list list wniosków
      */
-    private static void wypiszWnioski(List<AbsenceRequest> lista) {
-        if (lista.isEmpty()) {
+    private static void writeRequests(List<AbsenceRequest> list) {
+        if (list.isEmpty()) {
             System.out.println("(Brak wniosków)");
         } else {
-            for (AbsenceRequest r : lista) {
+            for (AbsenceRequest r : list) {
                 System.out.printf("ID: %-3d | Typ: %-25s | Pracownik: %-20s | Od: %s | Do: %s | Opis: %s%n",
                         r.getId(),
                         r.getRequestType(),

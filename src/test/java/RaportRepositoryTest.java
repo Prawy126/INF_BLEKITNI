@@ -1,7 +1,7 @@
 /*
  * Classname: TestRaportRepository
- * Version information: 1.0
- * Date: 2025-05-15
+ * Version information: 1.1
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -23,20 +23,20 @@ public class RaportRepositoryTest {
         UserRepository userRepo = new UserRepository(); // aby pobrać pracownika
 
         try {
-            // === 1. Przykładowy pracownik do raportu ===
-            List<Employee> pracownicy = userRepo.getAllEmployess();
-            if (pracownicy.isEmpty()) {
+            // === 1. Przykładowy employee do raportu ===
+            List<Employee> employess = userRepo.getAllEmployess();
+            if (employess.isEmpty()) {
                 System.out.println("Brak pracowników w bazie. Dodaj przynajmniej jednego przed testami.");
                 return;
             }
-            Employee pracownik = pracownicy.get(0);
+            Employee employee = employess.get(0);
 
             // === 2. Dodawanie raportów ===
             Report r1 = new Report(
                     "Raport sprzedaży",
                     LocalDate.of(2025, 4, 1),
                     LocalDate.of(2025, 4, 30),
-                    pracownik,
+                    employee,
                     "raporty/sprzedaz_0425.pdf"
             );
 
@@ -44,7 +44,7 @@ public class RaportRepositoryTest {
                     "Raport pracowników",
                     LocalDate.of(2025, 5, 1),
                     LocalDate.of(2025, 5, 10),
-                    pracownik,
+                    employee,
                     "raporty/pracownicy_0525.pdf"
             );
 
@@ -54,7 +54,7 @@ public class RaportRepositoryTest {
 
             // === 3. Pobieranie wszystkich raportów ===
             System.out.println("\n>>> Lista wszystkich raportów:");
-            wypiszRaporty(raportRepo.getAllReports());
+            writeReports(raportRepo.getAllReports());
 
             // === 4. Aktualizacja ===
             r1.setReportType("Raport sprzedaży — zmodyfikowany");
@@ -63,8 +63,8 @@ public class RaportRepositoryTest {
             System.out.println(">>> Zaktualizowano raport r1.");
 
             // === 5. Pobranie po ID ===
-            Report znaleziony = raportRepo.findReportById(r1.getId());
-            System.out.println(">>> Raport po ID: " + znaleziony.getReportType() + " | " + znaleziony.getFilePath());
+            Report found = raportRepo.findReportById(r1.getId());
+            System.out.println(">>> Raport po ID: " + found.getReportType() + " | " + found.getFilePath());
 
             // === 6. Usunięcie ===
             raportRepo.removeReport(r2.getId());
@@ -72,7 +72,7 @@ public class RaportRepositoryTest {
 
             // === 7. Lista po usunięciu ===
             System.out.println("\n>>> Raporty po usunięciu:");
-            wypiszRaporty(raportRepo.getAllReports());
+            writeReports(raportRepo.getAllReports());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -83,15 +83,15 @@ public class RaportRepositoryTest {
     }
 
     /**
-     * Pomocnicza metoda wypisująca raporty.
+     * Pomocnicza metoda wypisująca reports.
      *
-     * @param raporty lista raportów
+     * @param reports lista raportów
      */
-    private static void wypiszRaporty(List<Report> raporty) {
-        if (raporty.isEmpty()) {
+    private static void writeReports(List<Report> reports) {
+        if (reports.isEmpty()) {
             System.out.println("(Brak raportów)");
         } else {
-            for (Report r : raporty) {
+            for (Report r : reports) {
                 System.out.println("[" + r.getId() + "] "
                         + r.getReportType()
                         + " | " + r.getStartDate()
