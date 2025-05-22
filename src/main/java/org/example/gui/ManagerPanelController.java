@@ -172,25 +172,25 @@ public class ManagerPanelController {
         saveButton.setStyle("-fx-background-color: #2980B9; -fx-text-fill: white;");
         saveButton.setOnAction(e -> {
             try {
-                String nazwa   = nameField.getText();
-                String opis    = descriptionArea.getText();
+                String name   = nameField.getText();
+                String description    = descriptionArea.getText();
                 String status  = statusCombo.getValue();
                 // deadlinePicker to Twój DatePicker z datą terminu
-                Date data = Date.valueOf(deadlinePicker.getValue());
+                Date date = Date.valueOf(deadlinePicker.getValue());
 
                 // jeśli masz pole timeField (np. Spinner<LocalTime>), użyj jej:
-                // LocalTime czasZmiany = timeField.getValue();
+                // LocalTime timeOfShift = timeField.getValue();
                 // a jeśli nie, użyj bieżącej godziny:
-                LocalTime czasZmiany = LocalTime.now();
+                LocalTime timeOfShift = LocalTime.now();
 
-                if (nazwa.isEmpty() || opis.isEmpty() || status == null || data == null) {
+                if (name.isEmpty() || description.isEmpty() || status == null || date == null) {
                     showAlert(Alert.AlertType.WARNING, "Błąd", "Wypełnij wszystkie pola.");
                     return;
                 }
 
                 // teraz konstruktor pięcio-argumentowy
-                Task noweZadanie = new Task(nazwa, data, status, opis, czasZmiany);
-                taskRepository.addTask(noweZadanie);
+                Task newTask = new Task(name, date, status, description, timeOfShift);
+                taskRepository.addTask(newTask);
 
                 showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zadanie dodane!");
                 showTaskPanel();
@@ -246,10 +246,10 @@ public class ManagerPanelController {
         // Kolumna pracownika
         TableColumn<AbsenceRequest, String> employeeColumn = new TableColumn<>("Pracownik");
         employeeColumn.setCellValueFactory(data -> {
-            Employee pracownik = data.getValue().getEmployee();
-            if (pracownik != null) {
+            Employee employee = data.getValue().getEmployee();
+            if (employee != null) {
                 return new javafx.beans.property.SimpleStringProperty(
-                        pracownik.getName() + " " + pracownik.getSurname());
+                        employee.getName() + " " + employee.getSurname());
             } else {
                 return new javafx.beans.property.SimpleStringProperty("Nieznany");
             }
@@ -325,20 +325,20 @@ public class ManagerPanelController {
             AbsenceRequest selectedRequest = absenceTable.getSelectionModel().getSelectedItem();
             if (selectedRequest != null) {
                 try {
-                    String currentOpis = selectedRequest.getDescription();
-                    String newOpis = (currentOpis != null && !currentOpis.isEmpty())
-                            ? currentOpis + " [ZATWIERDZONY]"
+                    String currentDescription = selectedRequest.getDescription();
+                    String newDescription = (currentDescription != null && !currentDescription.isEmpty())
+                            ? currentDescription + " [ZATWIERDZONY]"
                             : "[ZATWIERDZONY]";
-                    selectedRequest.setDescription(newOpis);
+                    selectedRequest.setDescription(newDescription);
 
                     // Aktualizacja wniosku
                     absenceRepository.updateRequest(selectedRequest);
 
                     // Aktualizacja statusu pracownika, jeśli to urlop chorobowy
                     if (selectedRequest.getRequestType().toLowerCase().contains("chorob")) {
-                        Employee pracownik = selectedRequest.getEmployee();
-                        pracownik.startSickLeave(selectedRequest.getStartDate());
-                        userRepository.updateEmployee(pracownik);
+                        Employee employee = selectedRequest.getEmployee();
+                        employee.startSickLeave(selectedRequest.getStartDate());
+                        userRepository.updateEmployee(employee);
                     }
 
                     showAlert(Alert.AlertType.INFORMATION, "Sukces",
@@ -363,11 +363,11 @@ public class ManagerPanelController {
             AbsenceRequest selectedRequest = absenceTable.getSelectionModel().getSelectedItem();
             if (selectedRequest != null) {
                 try {
-                    String currentOpis = selectedRequest.getDescription();
-                    String newOpis = (currentOpis != null && !currentOpis.isEmpty())
-                            ? currentOpis + " [REJECTED]"
+                    String currentDescription = selectedRequest.getDescription();
+                    String newDescription = (currentDescription != null && !currentDescription.isEmpty())
+                            ? currentDescription + " [REJECTED]"
                             : "[REJECTED]";
-                    selectedRequest.setDescription(newOpis);
+                    selectedRequest.setDescription(newDescription);
 
                     absenceRepository.updateRequest(selectedRequest);
                     showAlert(Alert.AlertType.INFORMATION, "Sukces",
