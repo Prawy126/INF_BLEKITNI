@@ -1,6 +1,6 @@
 /*
  * Classname: WorkloadRepository
- * Version information: 1.2
+ * Version information: 1.3
  * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
@@ -24,6 +24,8 @@ import java.util.Collections;
 
 /**
  * Repozytorium do pobierania danych o obciążeniu pracowników.
+ * Umożliwia wykonanie zapytań natywnych do obliczenia sumy godzin przepracowanych przez pracowników
+ * w zadanym przedziale dat.
  */
 public class WorkloadRepository implements AutoCloseable {
     private static final Logger logger = LogManager.getLogger(WorkloadRepository.class);
@@ -35,7 +37,8 @@ public class WorkloadRepository implements AutoCloseable {
      *
      * @param startDate data początkowa (włącznie)
      * @param endDate   data końcowa (włącznie)
-     * @return lista EmployeeWorkload lub pusta lista przy błędzie
+     * @return lista obiektów EmployeeWorkload zawierających imię i nazwisko pracownika, stanowisko oraz
+     *         łączną liczbę godzin; zwraca pustą listę w przypadku błędu
      */
     public List<EmployeeWorkload> getWorkloadData(LocalDate startDate,
                                                   LocalDate endDate) {
@@ -79,7 +82,8 @@ public class WorkloadRepository implements AutoCloseable {
     }
 
     /**
-     * Zamyka fabrykę EntityManagerFactory.
+     * Zamyka fabrykę EntityManagerFactory, zwalniając wszystkie zasoby persistence.
+     * Po wywołaniu tej metody instancja repozytorium nie może być już używana.
      */
     @Override
     public void close() {

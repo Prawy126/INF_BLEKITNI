@@ -1,7 +1,7 @@
 /*
  * Classname: TaskEmployeeRepository
- * Version information: 1.3
- * Date: 2025-05-21
+ * Version information: 1.4
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -19,23 +19,27 @@ import org.example.sys.TaskEmployeeId;
 
 import java.util.List;
 
+/**
+ * Repozytorium zarządzające powiązaniami zadań z pracownikami.
+ * Umożliwia tworzenie, usuwanie oraz wyszukiwanie przypisań.
+ */
 public class TaskEmployeeRepository {
     private static final Logger logger = LogManager.getLogger(TaskEmployeeRepository.class);
     private final EntityManagerFactory emf;
 
+    /**
+     * Konstruktor inicjalizujący EntityManagerFactory dla persistence unit "myPU".
+     */
     public TaskEmployeeRepository() {
         this.emf = Persistence.createEntityManagerFactory("myPU");
         logger.info("Utworzono TaskEmployeeRepository, EMF={}", emf);
     }
 
-    public void close() {
-        if (emf.isOpen()) {
-            emf.close();
-            logger.info("Zamknięto EntityManagerFactory dla TaskEmployeeRepository");
-        }
-    }
-
-    /** Dodaje przypisanie zadania do pracownika */
+    /**
+     * Dodaje nowe przypisanie zadania do pracownika.
+     *
+     * @param te obiekt TaskEmployee reprezentujący relację zadanie–pracownik
+     */
     public void add(TaskEmployee te) {
         logger.debug("add() – start, te={}", te);
         EntityManager em = emf.createEntityManager();
@@ -54,7 +58,11 @@ public class TaskEmployeeRepository {
         }
     }
 
-    /** Usuwa przypisanie */
+    /**
+     * Usuwa istniejące przypisanie zadania do pracownika.
+     *
+     * @param te obiekt TaskEmployee do usunięcia
+     */
     public void remove(TaskEmployee te) {
         logger.debug("remove() – start, te={}", te);
         EntityManager em = emf.createEntityManager();
@@ -74,7 +82,13 @@ public class TaskEmployeeRepository {
         }
     }
 
-    /** Szuka przypisania po kluczu (EmbeddedId) */
+    /**
+     * Wyszukuje przypisanie zadania do pracownika po kluczu złożonym (EmbeddedId).
+     *
+     * @param taskId     identyfikator zadania
+     * @param employeeId identyfikator pracownika
+     * @return obiekt TaskEmployee lub null, jeśli nie istnieje
+     */
     public TaskEmployee findById(int taskId, int employeeId) {
         logger.debug("findById() – start, taskId={}, employeeId={}", taskId, employeeId);
         EntityManager em = emf.createEntityManager();
@@ -94,7 +108,12 @@ public class TaskEmployeeRepository {
         }
     }
 
-    /** Pobiera wszystkie przypisania dla danego pracownika */
+    /**
+     * Pobiera wszystkie przypisania zadań dla danego pracownika.
+     *
+     * @param employeeId identyfikator pracownika
+     * @return lista obiektów TaskEmployee lub pusta lista w przypadku błędu lub braku wyników
+     */
     public List<TaskEmployee> findByEmployee(int employeeId) {
         logger.debug("findByEmployee() – start, employeeId={}", employeeId);
         EntityManager em = emf.createEntityManager();
@@ -116,7 +135,12 @@ public class TaskEmployeeRepository {
         }
     }
 
-    /** Pobiera wszystkie przypisania dla danego zadania */
+    /**
+     * Pobiera wszystkie przypisania pracowników dla danego zadania.
+     *
+     * @param taskId identyfikator zadania
+     * @return lista obiektów TaskEmployee lub pusta lista w przypadku błędu lub braku wyników
+     */
     public List<TaskEmployee> findByTask(int taskId) {
         logger.debug("findByTask() – start, taskId={}", taskId);
         EntityManager em = emf.createEntityManager();
@@ -135,6 +159,17 @@ public class TaskEmployeeRepository {
         } finally {
             em.close();
             logger.debug("findByTask() – EntityManager zamknięty");
+        }
+    }
+
+    /**
+     * Zamyka fabrykę EntityManagerFactory, zwalniając zasoby.
+     * Po wywołaniu tej metody instancja nie może być używana do dalszych operacji.
+     */
+    public void close() {
+        if (emf.isOpen()) {
+            emf.close();
+            logger.info("Zamknięto EntityManagerFactory dla TaskEmployeeRepository");
         }
     }
 }

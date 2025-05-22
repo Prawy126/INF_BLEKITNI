@@ -1,7 +1,7 @@
 /*
  * Classname: TransactionProductRepository
- * Version information: 1.3
- * Date: 2025-05-21
+ * Version information: 1.4
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -20,17 +20,28 @@ import org.example.sys.TransactionProductId;
 
 import java.util.List;
 
+/**
+ * Repozytorium do zarządzania pozycjami produktów w ramach transakcji.
+ * Umożliwia tworzenie, odczyt, aktualizację, usuwanie oraz wyszukiwanie rekordów TransactionProduct.
+ */
 public class TransactionProductRepository {
 
     private static final Logger logger = LogManager.getLogger(TransactionProductRepository.class);
     private final EntityManagerFactory emf;
 
+    /**
+     * Konstruktor inicjalizujący EntityManagerFactory dla persistence unit "myPU".
+     */
     public TransactionProductRepository() {
         this.emf = Persistence.createEntityManagerFactory("myPU");
         logger.info("Utworzono TransactionProductRepository, EMF={}", emf);
     }
 
-    /** 1. Dodaje nową pozycję transakcji. */
+    /**
+     * Dodaje nową pozycję produktu do transakcji.
+     *
+     * @param tp obiekt TransactionProduct do zapisania
+     */
     public void dodajTransactionProduct(TransactionProduct tp) {
         logger.debug("dodajTransactionProduct() – start, tp={}", tp);
         EntityManager em = emf.createEntityManager();
@@ -48,7 +59,13 @@ public class TransactionProductRepository {
         }
     }
 
-    /** 2. Znajduje pozycję po kluczu złożonym (transactionId + productId). */
+    /**
+     * Znajduje pozycję transakcji po kluczu złożonym (transactionId + productId).
+     *
+     * @param transactionId identyfikator transakcji
+     * @param productId     identyfikator produktu
+     * @return obiekt TransactionProduct lub null, jeśli nie znaleziono
+     */
     public TransactionProduct znajdzPoId(int transactionId, int productId) {
         logger.debug("znajdzPoId() – start, txId={}, prodId={}", transactionId, productId);
         EntityManager em = emf.createEntityManager();
@@ -65,7 +82,12 @@ public class TransactionProductRepository {
         }
     }
 
-    /** 3. Pobiera wszystkie pozycje dla danej transakcji. */
+    /**
+     * Pobiera wszystkie pozycje produktów dla danej transakcji.
+     *
+     * @param transactionId identyfikator transakcji
+     * @return lista obiektów TransactionProduct lub pusta lista
+     */
     public List<TransactionProduct> pobierzPoTransakcji(int transactionId) {
         logger.debug("pobierzPoTransakcji() – start, txId={}", transactionId);
         EntityManager em = emf.createEntityManager();
@@ -85,7 +107,12 @@ public class TransactionProductRepository {
         }
     }
 
-    /** 4. Pobiera wszystkie pozycje dla danego produktu. */
+    /**
+     * Pobiera wszystkie pozycje transakcji powiązane z danym produktem.
+     *
+     * @param productId identyfikator produktu
+     * @return lista obiektów TransactionProduct lub pusta lista
+     */
     public List<TransactionProduct> pobierzPoProdukcie(int productId) {
         logger.debug("pobierzPoProdukcie() – start, prodId={}", productId);
         EntityManager em = emf.createEntityManager();
@@ -105,7 +132,11 @@ public class TransactionProductRepository {
         }
     }
 
-    /** 5. Pobiera wszystkie wpisy w tabeli. */
+    /**
+     * Pobiera wszystkie wpisy w tabeli TransactionProduct.
+     *
+     * @return lista wszystkich obiektów TransactionProduct lub pusta lista
+     */
     public List<TransactionProduct> pobierzWszystkie() {
         logger.debug("pobierzWszystkie() – start");
         EntityManager em = emf.createEntityManager();
@@ -123,7 +154,11 @@ public class TransactionProductRepository {
         }
     }
 
-    /** 6. Aktualizuje istniejącą pozycję transakcji. */
+    /**
+     * Aktualizuje istniejącą pozycję transakcji.
+     *
+     * @param tp obiekt TransactionProduct do zaktualizowania
+     */
     public void aktualizujTransactionProduct(TransactionProduct tp) {
         logger.debug("aktualizujTransactionProduct() – start, tp={}", tp);
         EntityManager em = emf.createEntityManager();
@@ -141,7 +176,11 @@ public class TransactionProductRepository {
         }
     }
 
-    /** 7. Usuwa pozycję transakcji. */
+    /**
+     * Usuwa pozycję transakcji z bazy.
+     *
+     * @param tp obiekt TransactionProduct do usunięcia
+     */
     public void usunTransactionProduct(TransactionProduct tp) {
         logger.debug("usunTransactionProduct() – start, tp={}", tp);
         EntityManager em = emf.createEntityManager();
@@ -164,7 +203,10 @@ public class TransactionProductRepository {
         }
     }
 
-    /** 8. Zamyka EntityManagerFactory. */
+    /**
+     * Zamyka fabrykę EntityManagerFactory, zwalniając wszystkie zasoby.
+     * Po wywołaniu tej metody instancja nie może być używana do dalszych operacji.
+     */
     public void close() {
         logger.debug("close() – zamykanie EMF");
         if (emf.isOpen()) {

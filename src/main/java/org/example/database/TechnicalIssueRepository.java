@@ -1,7 +1,7 @@
 /*
  * Classname: TechnicalIssueRepository
- * Version information: 1.1
- * Date: 2025-05-21
+ * Version information: 1.2
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -22,13 +22,14 @@ import java.util.List;
 
 /**
  * Repozytorium do obsługi zgłoszeń technicznych.
+ * Umożliwia tworzenie, odczyt, aktualizację, usuwanie oraz wyszukiwanie zgłoszeń.
  */
 public class TechnicalIssueRepository {
     private static final Logger logger = LogManager.getLogger(TechnicalIssueRepository.class);
     private final EntityManagerFactory emf;
 
     /**
-     * Konstruktor inicjalizujący EntityManagerFactory.
+     * Konstruktor inicjalizujący EntityManagerFactory dla persistence unit "myPU".
      */
     public TechnicalIssueRepository() {
         this.emf = Persistence.createEntityManagerFactory("myPU");
@@ -36,9 +37,9 @@ public class TechnicalIssueRepository {
     }
 
     /**
-     * Dodaje nowe zgłoszenie techniczne.
+     * Dodaje nowe zgłoszenie techniczne do bazy.
      *
-     * @param issue zgłoszenie do dodania
+     * @param issue obiekt TechnicalIssue do zapisania
      */
     public void dodajZgloszenie(TechnicalIssue issue) {
         logger.debug("dodajZgloszenie() – start, issue={}", issue);
@@ -59,10 +60,10 @@ public class TechnicalIssueRepository {
     }
 
     /**
-     * Pobiera zgłoszenie po ID.
+     * Pobiera zgłoszenie techniczne o podanym identyfikatorze.
      *
      * @param id identyfikator zgłoszenia
-     * @return znalezione zgłoszenie lub null
+     * @return obiekt TechnicalIssue lub null, jeśli nie znaleziono
      */
     public TechnicalIssue znajdzZgloszeniePoId(int id) {
         logger.debug("znajdzZgloszeniePoId() – start, id={}", id);
@@ -81,15 +82,16 @@ public class TechnicalIssueRepository {
     }
 
     /**
-     * Pobiera wszystkie zgłoszenia techniczne.
+     * Pobiera wszystkie zgłoszenia techniczne z bazy.
      *
-     * @return lista wszystkich zgłoszeń
+     * @return lista obiektów TechnicalIssue lub pusta lista w przypadku błędu
      */
     public List<TechnicalIssue> pobierzWszystkieZgloszenia() {
         logger.debug("pobierzWszystkieZgloszenia() – start");
         EntityManager em = emf.createEntityManager();
         try {
-            List<TechnicalIssue> list = em.createQuery("SELECT t FROM TechnicalIssue t", TechnicalIssue.class)
+            List<TechnicalIssue> list = em.createQuery(
+                            "SELECT t FROM TechnicalIssue t", TechnicalIssue.class)
                     .getResultList();
             logger.info("pobierzWszystkieZgloszenia() – pobrano {} zgłoszeń", list.size());
             return list;
@@ -103,9 +105,9 @@ public class TechnicalIssueRepository {
     }
 
     /**
-     * Aktualizuje istniejące zgłoszenie (np. zmienia status).
+     * Aktualizuje istniejące zgłoszenie techniczne (np. zmienia status lub opis).
      *
-     * @param issue zgłoszenie do aktualizacji
+     * @param issue obiekt TechnicalIssue do zaktualizowania
      */
     public void aktualizujZgloszenie(TechnicalIssue issue) {
         logger.debug("aktualizujZgloszenie() – start, issue={}", issue);
@@ -126,9 +128,9 @@ public class TechnicalIssueRepository {
     }
 
     /**
-     * Usuwa zgłoszenie techniczne.
+     * Usuwa zgłoszenie techniczne z bazy.
      *
-     * @param issue zgłoszenie do usunięcia
+     * @param issue obiekt TechnicalIssue do usunięcia
      */
     public void usunZgloszenie(TechnicalIssue issue) {
         logger.debug("usunZgloszenie() – start, issue={}", issue);
@@ -158,7 +160,10 @@ public class TechnicalIssueRepository {
     // =========================================================
 
     /**
-     * Znajduje zgłoszenia, których typ zawiera podany fragment (case-insensitive).
+     * Wyszukuje zgłoszenia, których typ zawiera podany fragment (bez uwzględniania wielkości liter).
+     *
+     * @param typFragment fragment tekstu pola type
+     * @return lista dopasowanych zgłoszeń lub pusta lista
      */
     public List<TechnicalIssue> znajdzPoTypie(String typFragment) {
         logger.debug("znajdzPoTypie() – typFragment={}", typFragment);
@@ -181,7 +186,11 @@ public class TechnicalIssueRepository {
     }
 
     /**
-     * Znajduje zgłoszenia z datą zgłoszenia w podanym przedziale.
+     * Wyszukuje zgłoszenia z datą zgłoszenia w podanym przedziale.
+     *
+     * @param start początek przedziału (inclusive)
+     * @param end   koniec przedziału (inclusive)
+     * @return lista dopasowanych zgłoszeń lub pusta lista
      */
     public List<TechnicalIssue> znajdzPoDacie(LocalDate start, LocalDate end) {
         logger.debug("znajdzPoDacie() – start={}, end={}", start, end);
@@ -205,7 +214,10 @@ public class TechnicalIssueRepository {
     }
 
     /**
-     * Znajduje zgłoszenia o dokładnie podanym statusie.
+     * Wyszukuje zgłoszenia o dokładnie podanym statusie.
+     *
+     * @param status status zgłoszenia
+     * @return lista dopasowanych zgłoszeń lub pusta lista
      */
     public List<TechnicalIssue> znajdzPoStatusie(String status) {
         logger.debug("znajdzPoStatusie() – status={}", status);
@@ -228,7 +240,10 @@ public class TechnicalIssueRepository {
     }
 
     /**
-     * Znajduje zgłoszenia zgłoszone przez pracownika o danym ID.
+     * Wyszukuje zgłoszenia zgłoszone przez konkretnego pracownika.
+     *
+     * @param pracownikId identyfikator pracownika
+     * @return lista dopasowanych zgłoszeń lub pusta lista
      */
     public List<TechnicalIssue> znajdzPoPracowniku(int pracownikId) {
         logger.debug("znajdzPoPracowniku() – pracownikId={}", pracownikId);
@@ -250,7 +265,10 @@ public class TechnicalIssueRepository {
         }
     }
 
-    /** Zamknięcie EntityManagerFactory. */
+    /**
+     * Zamyka fabrykę EntityManagerFactory, zwalniając wszystkie zasoby.
+     * Po wywołaniu tej metody instancja nie może być używana do dalszych operacji.
+     */
     public void close() {
         logger.debug("close() – zamykanie EMF");
         if (emf.isOpen()) {

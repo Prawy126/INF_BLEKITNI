@@ -22,6 +22,7 @@ import java.util.List;
 
 /**
  * Repozytorium do zarządzania pracownikami (użytkownikami) w systemie.
+ * Umożliwia tworzenie, odczyt, aktualizację, usuwanie oraz zaawansowane wyszukiwanie pracowników.
  */
 public class UserRepository {
     private static final Logger logger = LogManager.getLogger(UserRepository.class);
@@ -29,7 +30,7 @@ public class UserRepository {
     private static int loggedInEmployeeId = -1;
 
     /**
-     * Konstruktor inicjalizujący fabrykę EntityManagerFactory.
+     * Konstruktor inicjalizujący fabrykę EntityManagerFactory dla persistence unit "myPU".
      */
     public UserRepository() {
         this.emf = Persistence.createEntityManagerFactory("myPU");
@@ -37,9 +38,9 @@ public class UserRepository {
     }
 
     /**
-     * Pobiera wszystkich pracowników nieoznaczonych jako usunięci.
+     * Pobiera wszystkich pracowników nieoznaczonych jako usunięci (soft delete = false).
      *
-     * @return lista aktywnych pracowników
+     * @return lista aktywnych pracowników lub pusta lista w przypadku błędu
      */
     public List<Employee> pobierzWszystkichPracownikow() {
         logger.debug("pobierzWszystkichPracownikow() – start");
@@ -61,9 +62,9 @@ public class UserRepository {
     }
 
     /**
-     * Pobiera pracowników o stanowisku 'Kasjer'.
+     * Pobiera wszystkich pracowników o stanowisku 'Kasjer', którzy nie są usunięci.
      *
-     * @return lista kasjerów
+     * @return lista pracowników na stanowisku Kasjer lub pusta lista
      */
     public List<Employee> pobierzKasjerow() {
         logger.debug("pobierzKasjerow() – start");
@@ -85,10 +86,10 @@ public class UserRepository {
     }
 
     /**
-     * Znajduje pracownika po loginie.
+     * Wyszukuje pracownika po unikalnym loginie, pomijając usuniętych.
      *
      * @param login login pracownika
-     * @return obiekt Employee lub null
+     * @return obiekt Employee lub null, jeśli nie znaleziono lub użytkownik jest usunięty
      */
     public Employee znajdzPoLoginie(String login) {
         logger.debug("znajdzPoLoginie() – start, login={}", login);
@@ -120,11 +121,11 @@ public class UserRepository {
     }
 
     /**
-     * Uwierzytelnia pracownika po loginie i haśle.
+     * Uwierzytelnia pracownika po loginie i haśle; ustawia zalogowanego.
      *
-     * @param login login pracownika
-     * @param haslo hasło pracownika
-     * @return zalogowany Employee lub null
+     * @param login login
+     * @param haslo hasło
+     * @return zalogowany obiekt Employee lub null w przypadku niepowodzenia
      */
     public Employee znajdzPoLoginieIHasle(String login, String haslo) {
         logger.debug("znajdzPoLoginieIHasle() – start, login={}", login);
@@ -158,7 +159,7 @@ public class UserRepository {
     }
 
     /**
-     * Pobiera pracownika po identyfikatorze.
+     * Pobiera pracownika po jego identyfikatorze, pomijając usuniętych.
      *
      * @param id identyfikator pracownika
      * @return obiekt Employee lub null
@@ -185,9 +186,9 @@ public class UserRepository {
     }
 
     /**
-     * Dodaje nowego pracownika.
+     * Dodaje nowego pracownika do bazy.
      *
-     * @param pracownik encja pracownika do dodania
+     * @param pracownik encja Employee do zapisania
      */
     public void dodajPracownika(Employee pracownik) {
         logger.debug("dodajPracownika() – start, {}", pracownik);
@@ -208,9 +209,9 @@ public class UserRepository {
     }
 
     /**
-     * Aktualizuje istniejącego pracownika.
+     * Aktualizuje istniejącego pracownika w bazie.
      *
-     * @param pracownik encja pracownika do aktualizacji
+     * @param pracownik encja Employee do zaktualizowania
      */
     public void aktualizujPracownika(Employee pracownik) {
         logger.debug("aktualizujPracownika() – start, {}", pracownik);
@@ -233,7 +234,7 @@ public class UserRepository {
     /**
      * Oznacza pracownika jako usuniętego (soft delete).
      *
-     * @param pracownik encja pracownika do oznaczenia jako usunięta
+     * @param pracownik encja Employee do oznaczenia jako usunięta
      */
     public void usunPracownika(Employee pracownik) {
         logger.debug("usunPracownika() – start, {}", pracownik);
@@ -260,9 +261,9 @@ public class UserRepository {
     }
 
     /**
-     * Zwraca aktualnie zalogowanego pracownika.
+     * Zwraca obiekt aktualnie zalogowanego pracownika.
      *
-     * @return obiekt Employee lub null
+     * @return obiekt Employee lub null jeśli nikt nie jest zalogowany
      */
     public Employee getCurrentEmployee() {
         logger.debug("getCurrentEmployee() – currentId={}", loggedInEmployeeId);
@@ -296,8 +297,9 @@ public class UserRepository {
         loggedInEmployeeId = employeeId;
     }
 
+
     /**
-     * Resetuje ID aktualnie zalogowanego pracownika.
+     * Resetuje informację o aktualnie zalogowanym pracowniku.
      */
     public static void resetCurrentEmployee() {
         logger.debug("resetCurrentEmployee() – reset ID");
@@ -305,10 +307,10 @@ public class UserRepository {
     }
 
     /**
-     * Znajduje pracowników po fragmencie imienia.
+     * Wyszukuje pracowników po fragmencie imienia, pomijając usuniętych.
      *
-     * @param imieFragment fragment imienia
-     * @return lista pracowników pasujących do kryterium
+     * @param imieFragment fragment imienia do wyszukania
+     * @return lista pasujących pracowników lub pusta lista
      */
     public List<Employee> znajdzPoImieniu(String imieFragment) {
         logger.debug("znajdzPoImieniu() – fragment={}", imieFragment);
@@ -334,10 +336,10 @@ public class UserRepository {
     }
 
     /**
-     * Znajduje pracowników po fragmencie nazwiska.
+     * Wyszukuje pracowników po fragmencie nazwiska, pomijając usuniętych.
      *
      * @param nazwiskoFragment fragment nazwiska
-     * @return lista pracowników pasujących do kryterium
+     * @return lista pasujących pracowników lub pusta lista
      */
     public List<Employee> znajdzPoNazwisku(String nazwiskoFragment) {
         logger.debug("znajdzPoNazwisku() – fragment={}", nazwiskoFragment);
@@ -363,11 +365,11 @@ public class UserRepository {
     }
 
     /**
-     * Znajduje pracowników w przedziale wieku.
+     * Wyszukuje pracowników w podanym przedziale wieku, pomijając usuniętych.
      *
      * @param min minimalny wiek
      * @param max maksymalny wiek
-     * @return lista pracowników spełniających kryterium
+     * @return lista pracowników spełniających kryterium lub pusta lista
      */
     public List<Employee> znajdzPoWieku(int min, int max) {
         logger.debug("znajdzPoWieku() – min={}, max={}", min, max);
@@ -394,7 +396,7 @@ public class UserRepository {
     }
 
     /**
-     * Znajduje pracowników po identyfikatorze adresu.
+     * Wyszukuje pracowników według identyfikatora adresu, pomijając usuniętych.
      *
      * @param addressId identyfikator adresu
      * @return lista pracowników mieszkających pod danym adresem
@@ -422,10 +424,10 @@ public class UserRepository {
     }
 
     /**
-     * Znajduje pracowników po fragmencie e-maila.
+     * Wyszukuje pracowników po fragmencie e-maila, pomijając usuniętych.
      *
      * @param emailFragment fragment adresu e-mail
-     * @return lista pracowników pasujących do kryterium
+     * @return lista pasujących pracowników lub pusta lista
      */
     public List<Employee> znajdzPoEmailu(String emailFragment) {
         logger.debug("znajdzPoEmailu() – fragment={}", emailFragment);
@@ -451,11 +453,11 @@ public class UserRepository {
     }
 
     /**
-     * Znajduje pracowników w przedziale zarobków.
+     * Wyszukuje pracowników w podanym przedziale zarobków, pomijając usuniętych.
      *
      * @param min minimalne zarobki
      * @param max maksymalne zarobki
-     * @return lista pracowników spełniających kryterium
+     * @return lista pracowników spełniających kryterium lub pusta lista
      */
     public List<Employee> znajdzPoZarobkach(double min, double max) {
         logger.debug("znajdzPoZarobkach() – min={}, max={}", min, max);
@@ -482,10 +484,10 @@ public class UserRepository {
     }
 
     /**
-     * Znajduje pracowników po stanowisku.
+     * Wyszukuje pracowników według stanowiska, pomijając usuniętych.
      *
      * @param stanowisko nazwa stanowiska
-     * @return lista pracowników na danym stanowisku
+     * @return lista pracowników na danym stanowisku lub pusta lista
      */
     public List<Employee> znajdzPoStanowisku(String stanowisko) {
         logger.debug("znajdzPoStanowisku() – stanowisko={}", stanowisko);
@@ -510,7 +512,7 @@ public class UserRepository {
     }
 
     /**
-     * Pobiera pracowników będących na zwolnieniu lekarskim.
+     * Pobiera pracowników będących na zwolnieniu lekarskim, pomijając usuniętych.
      *
      * @return lista pracowników na zwolnieniu
      */
@@ -535,9 +537,9 @@ public class UserRepository {
     }
 
     /**
-     * Pobiera pracowników niebędących na zwolnieniu lekarskim.
+     * Pobiera pracowników niebędących na zwolnieniu lekarskim, pomijając usuniętych.
      *
-     * @return lista pracowników nie będących na zwolnieniu
+     * @return lista pracowników nie na zwolnieniu
      */
     public List<Employee> pobierzNieNaSickLeave() {
         logger.debug("pobierzNieNaSickLeave() – start");
@@ -560,7 +562,8 @@ public class UserRepository {
     }
 
     /**
-     * Zamyka fabrykę EntityManagerFactory.
+     * Zamyka fabrykę EntityManagerFactory, zwalniając wszystkie zasoby.
+     * Po wywołaniu tej metody instancja repozytorium nie może być już używana.
      */
     public void close() {
         logger.debug("close() – start zamykania EMF");

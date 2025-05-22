@@ -1,7 +1,7 @@
 /*
  * Classname: TaskRepository
- * Version information: 1.1
- * Date: 2025-05-21
+ * Version information: 1.2
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -21,17 +21,27 @@ import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Repozytorium zarządzające zadaniami w bazie danych.
+ * Umożliwia tworzenie, odczyt, aktualizację, usuwanie oraz wyszukiwanie zadań.
+ */
 public class TaskRepository {
     private static final Logger logger = LogManager.getLogger(TaskRepository.class);
     private final EntityManagerFactory emf;
 
-    /** Konstruktor inicjalizujący EntityManagerFactory. */
+    /**
+     * Konstruktor inicjalizujący EntityManagerFactory dla persistence unit "myPU".
+     */
     public TaskRepository() {
         this.emf = Persistence.createEntityManagerFactory("myPU");
         logger.info("Utworzono TaskRepository, EMF={}", emf);
     }
 
-    /** Dodaje nowe zadanie. */
+    /**
+     * Dodaje nowe zadanie do bazy.
+     *
+     * @param task obiekt Task do zapisania
+     */
     public void dodajZadanie(Task task) {
         logger.debug("dodajZadanie() – start, task={}", task);
         EntityManager em = emf.createEntityManager();
@@ -50,7 +60,12 @@ public class TaskRepository {
         }
     }
 
-    /** Pobiera zadanie po ID. */
+    /**
+     * Znajduje zadanie o podanym identyfikatorze.
+     *
+     * @param id identyfikator zadania
+     * @return obiekt Task lub null, jeśli nie istnieje
+     */
     public Task znajdzZadaniePoId(int id) {
         logger.debug("znajdzZadaniePoId() – start, id={}", id);
         EntityManager em = emf.createEntityManager();
@@ -67,7 +82,11 @@ public class TaskRepository {
         }
     }
 
-    /** Pobiera wszystkie zadania. */
+    /**
+     * Pobiera wszystkie zadania z bazy.
+     *
+     * @return lista wszystkich zadań lub pusta lista w przypadku błędu
+     */
     public List<Task> pobierzWszystkieZadania() {
         logger.debug("pobierzWszystkieZadania() – start");
         EntityManager em = emf.createEntityManager();
@@ -85,7 +104,11 @@ public class TaskRepository {
         }
     }
 
-    /** Aktualizuje istniejące zadanie. */
+    /**
+     * Aktualizuje istniejące zadanie w bazie.
+     *
+     * @param task obiekt Task do zaktualizowania
+     */
     public void aktualizujZadanie(Task task) {
         logger.debug("aktualizujZadanie() – start, task={}", task);
         EntityManager em = emf.createEntityManager();
@@ -105,10 +128,10 @@ public class TaskRepository {
     }
 
     /**
-     * Usuwa zadanie.
-     * TODO: Obsłużyć usuwanie przypisania do pracownika przy usunięciu zadania (Więzy integralności).
+     * Usuwa zadanie z bazy.
+     * TODO: Obsłużyć usuwanie przypisań do pracowników w kontekście więzów integralności.
      *
-     * @param task zadanie do usunięcia
+     * @param task obiekt Task do usunięcia
      */
     public void usunZadanie(Task task) {
         logger.debug("usunZadanie() – start, task={}", task);
@@ -133,9 +156,12 @@ public class TaskRepository {
         }
     }
 
-    // === metody wyszukiwania ===
-
-    /** Znajduje zadania, których nazwa zawiera podany fragment. */
+    /**
+     * Znajduje zadania, których nazwa zawiera podany fragment (bez uwzględniania wielkości liter).
+     *
+     * @param nazwaFragment fragment tekstu nazwy
+     * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
+     */
     public List<Task> znajdzPoNazwie(String nazwaFragment) {
         logger.debug("znajdzPoNazwie() – nazwaFragment={}", nazwaFragment);
         EntityManager em = emf.createEntityManager();
@@ -156,7 +182,12 @@ public class TaskRepository {
         }
     }
 
-    /** Znajduje zadania o dokładnie podanej dacie. */
+    /**
+     * Znajduje zadania o dokładnie podanej dacie.
+     *
+     * @param data data zadania (bez czasu)
+     * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
+     */
     public List<Task> znajdzPoDacie(Date data) {
         logger.debug("znajdzPoDacie() – data={}", data);
         EntityManager em = emf.createEntityManager();
@@ -176,7 +207,12 @@ public class TaskRepository {
         }
     }
 
-    /** Znajduje zadania o dokładnie podanym statusie. */
+    /**
+     * Znajduje zadania o podanym statusie.
+     *
+     * @param status status zadania
+     * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
+     */
     public List<Task> znajdzPoStatusie(String status) {
         logger.debug("znajdzPoStatusie() – status={}", status);
         EntityManager em = emf.createEntityManager();
@@ -196,7 +232,12 @@ public class TaskRepository {
         }
     }
 
-    /** Znajduje zadania, których opis zawiera podany fragment. */
+    /**
+     * Znajduje zadania, których opis zawiera podany fragment (bez uwzględniania wielkości liter).
+     *
+     * @param opisFragment fragment tekstu opisu
+     * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
+     */
     public List<Task> znajdzPoOpisie(String opisFragment) {
         logger.debug("znajdzPoOpisie() – opisFragment={}", opisFragment);
         EntityManager em = emf.createEntityManager();
@@ -219,6 +260,10 @@ public class TaskRepository {
 
     /**
      * Znajduje zadania, których czas trwania zmiany mieści się w podanym przedziale.
+     *
+     * @param od     początek przedziału czasu (inclusive)
+     * @param doTime koniec przedziału czasu (inclusive)
+     * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
      */
     public List<Task> znajdzPoCzasieTrwaniaZmiany(LocalTime od, LocalTime doTime) {
         logger.debug("znajdzPoCzasieTrwaniaZmiany() – od={}, doTime={}", od, doTime);
@@ -241,7 +286,10 @@ public class TaskRepository {
         }
     }
 
-    /** Zamknięcie EntityManagerFactory. */
+    /**
+     * Zamyka fabrykę EntityManagerFactory, zwalniając wszystkie zasoby.
+     * Po wywołaniu tej metody instancja nie może być używana do dalszych operacji.
+     */
     public void close() {
         logger.debug("close() – zamykanie EMF");
         if (emf.isOpen()) {

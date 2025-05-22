@@ -1,6 +1,6 @@
 /*
  * Classname: WarehouseRepository
- * Version information: 1.3
+ * Version information: 1.4
  * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
@@ -21,13 +21,14 @@ import java.util.List;
 
 /**
  * Repozytorium do zarządzania stanem magazynowym.
+ * Umożliwia tworzenie, odczyt, aktualizację, usuwanie oraz wyszukiwanie stanów magazynowych.
  */
 public class WarehouseRepository {
     private static final Logger logger = LogManager.getLogger(WarehouseRepository.class);
     private final EntityManagerFactory emf;
 
     /**
-     * Konstruktor inicjalizujący fabrykę EntityManagerFactory.
+     * Konstruktor inicjalizujący fabrykę EntityManagerFactory dla persistence unit "myPU".
      */
     public WarehouseRepository() {
         this.emf = Persistence.createEntityManagerFactory("myPU");
@@ -35,9 +36,9 @@ public class WarehouseRepository {
     }
 
     /**
-     * Dodaje nowy stan magazynowy.
+     * Dodaje nowy stan magazynowy (pozycję) do bazy.
      *
-     * @param stan obiekt Warehouse do zapisania
+     * @param stan obiekt Warehouse reprezentujący stan magazynowy do zapisania
      */
     public void dodajStanMagazynowy(Warehouse stan) {
         logger.debug("dodajStanMagazynowy() – start, stan={}", stan);
@@ -58,10 +59,10 @@ public class WarehouseRepository {
     }
 
     /**
-     * Pobiera stan magazynowy po identyfikatorze produktu.
+     * Pobiera stan magazynowy (pozycję) na podstawie identyfikatora produktu.
      *
      * @param idProduktu identyfikator produktu
-     * @return obiekt Warehouse lub null
+     * @return obiekt Warehouse lub null, jeśli nie znaleziono
      */
     public Warehouse znajdzStanPoIdProduktu(int idProduktu) {
         logger.debug("znajdzStanPoIdProduktu() – start, idProduktu={}", idProduktu);
@@ -80,9 +81,9 @@ public class WarehouseRepository {
     }
 
     /**
-     * Pobiera wszystkie stany magazynowe.
+     * Pobiera wszystkie stany magazynowe z bazy.
      *
-     * @return lista obiektów Warehouse
+     * @return lista obiektów Warehouse lub pusta lista w przypadku błędu
      */
     public List<Warehouse> pobierzWszystkieStany() {
         logger.debug("pobierzWszystkieStany() – start");
@@ -102,7 +103,7 @@ public class WarehouseRepository {
     }
 
     /**
-     * Usuwa stan magazynowy na podstawie ID produktu.
+     * Usuwa stan magazynowy na podstawie identyfikatora produktu.
      *
      * @param idProduktu identyfikator produktu
      */
@@ -132,7 +133,7 @@ public class WarehouseRepository {
     /**
      * Aktualizuje istniejący stan magazynowy.
      *
-     * @param stan obiekt Warehouse do zaktualizowania
+     * @param stan obiekt Warehouse z zaktualizowanymi danymi
      */
     public void aktualizujStan(Warehouse stan) {
         logger.debug("aktualizujStan() – start, stan={}", stan);
@@ -153,10 +154,10 @@ public class WarehouseRepository {
     }
 
     /**
-     * Ustawia ilość produktu w magazynie (soft update).
+     * Ustawia nową ilość produktu w magazynie (soft update).
      *
      * @param productId identyfikator produktu
-     * @param newQty    nowa ilość w magazynie
+     * @param newQty    nowa ilość produktu
      */
     public void ustawIloscProduktu(int productId, int newQty) {
         logger.debug("ustawIloscProduktu() – start, productId={}, newQty={}", productId, newQty);
@@ -183,10 +184,10 @@ public class WarehouseRepository {
     }
 
     /**
-     * Znajduje stany magazynowe o dokładnie podanej ilości.
+     * Wyszukuje stany magazynowe o dokładnie podanej ilości.
      *
      * @param ilosc wartość ilości
-     * @return lista pasujących rekordów
+     * @return lista rekordów Warehouse lub pusta lista
      */
     public List<Warehouse> znajdzPoIlosci(int ilosc) {
         logger.debug("znajdzPoIlosci() – ilosc={}", ilosc);
@@ -208,10 +209,10 @@ public class WarehouseRepository {
     }
 
     /**
-     * Znajduje stany magazynowe o ilości mniejszej niż podana.
+     * Wyszukuje stany magazynowe o ilości mniejszej niż podana.
      *
      * @param max maksymalna ilość
-     * @return lista pasujących rekordów
+     * @return lista rekordów Warehouse lub pusta lista
      */
     public List<Warehouse> znajdzPoIlosciMniejszejNiz(int max) {
         logger.debug("znajdzPoIlosciMniejszejNiz() – max={}", max);
@@ -233,10 +234,10 @@ public class WarehouseRepository {
     }
 
     /**
-     * Znajduje stany magazynowe o ilości większej niż podana.
+     * Wyszukuje stany magazynowe o ilości większej niż podana.
      *
      * @param min minimalna ilość
-     * @return lista pasujących rekordów
+     * @return lista rekordów Warehouse lub pusta lista
      */
     public List<Warehouse> znajdzPoIlosciWiekszejNiz(int min) {
         logger.debug("znajdzPoIlosciWiekszejNiz() – min={}", min);
@@ -258,11 +259,11 @@ public class WarehouseRepository {
     }
 
     /**
-     * Znajduje stany magazynowe o ilości w podanym przedziale.
+     * Wyszukuje stany magazynowe o ilości mieszczącej się w podanym przedziale.
      *
      * @param min minimalna ilość
      * @param max maksymalna ilość
-     * @return lista pasujących rekordów
+     * @return lista rekordów Warehouse lub pusta lista
      */
     public List<Warehouse> znajdzPoIlosciWMiedzy(int min, int max) {
         logger.debug("znajdzPoIlosciWMiedzy() – min={}, max={}", min, max);
@@ -285,7 +286,8 @@ public class WarehouseRepository {
     }
 
     /**
-     * Zamyka fabrykę EntityManagerFactory.
+     * Zamyka fabrykę EntityManagerFactory, zwalniając wszystkie zasoby.
+     * Po wywołaniu tej metody instancja repozytorium nie może być używana.
      */
     public void close() {
         logger.debug("close() – start zamykania EMF");
