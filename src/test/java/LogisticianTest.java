@@ -20,7 +20,7 @@ class LogisticianTest {
     @BeforeEach
     void setUp() throws AgeException, PasswordException, SalaryException {
         Address address = new Address();
-        address.setMiasto("Warszawa");
+        address.setCity("Warszawa");
 
         employee = new Employee(
                 "Anna", "Kowalska", 30, "anna@example.com",
@@ -52,9 +52,9 @@ class LogisticianTest {
     @Test
     void testUpdateAddress() {
         Address newAddress = new Address();
-        newAddress.setMiasto("Kraków");
+        newAddress.setCity("Kraków");
         logistician.updateAddress(newAddress);
-        assertEquals("Kraków", employee.getAdres().getMiasto());
+        assertEquals("Kraków", employee.getAdres().getCity());
     }
 
     @Test

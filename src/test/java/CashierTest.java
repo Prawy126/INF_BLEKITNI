@@ -19,7 +19,7 @@ class CashierTest {
     @BeforeEach
     void setUp() throws Exception {
         Address address = new Address();
-        address.setMiasto("Łódź");
+        address.setCity("Łódź");
         employee = new Employee("Kamil", "Nowak", 29, "kamil@example.com",
                 "kamiln", "silneHaslo1", address, "Kasjer", new BigDecimal("4000"));
         cashier = new Cashier(employee);

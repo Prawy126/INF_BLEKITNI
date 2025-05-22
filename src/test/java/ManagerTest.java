@@ -17,7 +17,7 @@ class ManagerTest {
     @BeforeEach
     void setUp() throws Exception {
         Address address = new Address();
-        address.setMiasto("Warszawa");
+        address.setCity("Warszawa");
         employee = new Employee("Jan", "Kowalski", 35, "jan@example.com",
                 "jkowal", "bezpieczneHaslo", address, "Manager", new BigDecimal("6000"));
         manager = new Manager(employee);
@@ -79,9 +79,9 @@ class ManagerTest {
     @Test
     void testUpdateAddress() {
         Address newAddress = new Address();
-        newAddress.setMiasto("Wrocław");
+        newAddress.setCity("Wrocław");
         manager.updateAddress(newAddress);
-        assertEquals("Wrocław", manager.getEmployee().getAdres().getMiasto());
+        assertEquals("Wrocław", manager.getEmployee().getAdres().getCity());
     }
 
     @Test
@@ -110,7 +110,7 @@ class ManagerTest {
     // Pomocnicza metoda
     private Employee createOtherEmployee() throws Exception {
         Address address = new Address();
-        address.setMiasto("Gdańsk");
+        address.setCity("Gdańsk");
         return new Employee("Anna", "Zielińska", 28, "anna@example.com",
                 "aziel", "haslo1234", address, "Specjalista", new BigDecimal("4800"));
     }

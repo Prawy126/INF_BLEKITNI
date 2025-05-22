@@ -35,21 +35,21 @@ public class AddressRepository implements AutoCloseable {
      *
      * @param address obiekt Address do zapisania
      */
-    public void dodajAdres(Address address) {
-        logger.debug("dodajAdres() - start, address={}", address);
+    public void addAddress(Address address) {
+        logger.debug("addAddress() - start, address={}", address);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             em.persist(address);
             tx.commit();
-            logger.info("dodajAdres() - dodano adres: {}", address);
+            logger.info("addAddress() - dodano adres: {}", address);
         } catch (Exception e) {
-            logger.error("dodajAdres() - błąd podczas dodawania adresu", e);
+            logger.error("addAddress() - błąd podczas dodawania adresu", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("dodajAdres() - EM zamknięty");
+            logger.debug("addAddress() - EM zamknięty");
         }
     }
 
@@ -59,19 +59,19 @@ public class AddressRepository implements AutoCloseable {
      * @param id identyfikator Address
      * @return znaleziony Address lub null, jeśli brak
      */
-    public Address znajdzAdresPoId(int id) {
-        logger.debug("znajdzAdresPoId() - start, id={}", id);
+    public Address findAddressById(int id) {
+        logger.debug("findAddressById() - start, id={}", id);
         EntityManager em = emf.createEntityManager();
         try {
             Address a = em.find(Address.class, id);
-            logger.info("znajdzAdresPoId() - znaleziono: {}", a);
+            logger.info("findAddressById() - znaleziono: {}", a);
             return a;
         } catch (Exception e) {
-            logger.error("znajdzAdresPoId() - błąd podczas pobierania adresu o id=" + id, e);
+            logger.error("findAddressById() - błąd podczas pobierania adresu o id=" + id, e);
             return null;
         } finally {
             em.close();
-            logger.debug("znajdzAdresPoId() - EM zamknięty");
+            logger.debug("findAddressById() - EM zamknięty");
         }
     }
 
@@ -80,20 +80,20 @@ public class AddressRepository implements AutoCloseable {
      *
      * @return lista obiektów Address (może być pusta)
      */
-    public List<Address> pobierzWszystkieAdresy() {
-        logger.debug("pobierzWszystkieAdresy() - start");
+    public List<Address> downloadAllAddresses() {
+        logger.debug("downloadAllAddresses() - start");
         EntityManager em = emf.createEntityManager();
         try {
             List<Address> list = em.createQuery("SELECT a FROM Address a", Address.class)
                     .getResultList();
-            logger.info("pobierzWszystkieAdresy() - pobrano {} adresów", list.size());
+            logger.info("downloadAllAddresses() - pobrano {} adresów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("pobierzWszystkieAdresy() - błąd podczas pobierania adresów", e);
+            logger.error("downloadAllAddresses() - błąd podczas pobierania adresów", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("pobierzWszystkieAdresy() - EM zamknięty");
+            logger.debug("downloadAllAddresses() - EM zamknięty");
         }
     }
 
@@ -102,8 +102,8 @@ public class AddressRepository implements AutoCloseable {
      *
      * @param id identyfikator Address do usunięcia
      */
-    public void usunAdres(int id) {
-        logger.debug("usunAdres() - start, id={}", id);
+    public void deleteAddress(int id) {
+        logger.debug("deleteAddress() - start, id={}", id);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -111,147 +111,147 @@ public class AddressRepository implements AutoCloseable {
             Address address = em.find(Address.class, id);
             if (address != null) {
                 em.remove(address);
-                logger.info("usunAdres() - usunięto adres: {}", address);
+                logger.info("deleteAddress() - usunięto adres: {}", address);
             } else {
-                logger.warn("usunAdres() - brak adresu o id={}", id);
+                logger.warn("deleteAddress() - brak adresu o id={}", id);
             }
             tx.commit();
         } catch (Exception e) {
-            logger.error("usunAdres() - błąd podczas usuwania adresu o id=" + id, e);
+            logger.error("deleteAddress() - błąd podczas usuwania adresu o id=" + id, e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("usunAdres() - EM zamknięty");
+            logger.debug("deleteAddress() - EM zamknięty");
         }
     }
 
     /**
      * Wyszukuje adresy po fragmencie nazwy miejscowości (case-insensitive).
      *
-     * @param miejscowosc fragment nazwy miejscowości
+     * @param town fragment nazwy miejscowości
      * @return lista pasujących Address (może być pusta)
      */
-    public List<Address> znajdzPoMiejscowosci(String miejscowosc) {
-        logger.debug("znajdzPoMiejscowosci() - miejscowosc={}", miejscowosc);
+    public List<Address> findByTown(String town) {
+        logger.debug("findByTown() - town={}", town);
         EntityManager em = emf.createEntityManager();
         try {
             List<Address> list = em.createQuery(
-                            "SELECT a FROM Address a WHERE LOWER(a.miejscowosc) LIKE LOWER(CONCAT('%', :miejscowosc, '%'))",
+                            "SELECT a FROM Address a WHERE LOWER(a.town) LIKE LOWER(CONCAT('%', :town, '%'))",
                             Address.class)
-                    .setParameter("miejscowosc", miejscowosc)
+                    .setParameter("town", town)
                     .getResultList();
-            logger.info("znajdzPoMiejscowosci() - znaleziono {} adresów", list.size());
+            logger.info("findByTown() - znaleziono {} adresów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoMiejscowosci() - błąd podczas wyszukiwania", e);
+            logger.error("findByTown() - błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoMiejscowosci() - EM zamknięty");
+            logger.debug("findByTown() - EM zamknięty");
         }
     }
 
     /**
      * Wyszukuje adresy po numerze domu.
      *
-     * @param numerDomu numer domu
+     * @param houseNumber numer domu
      * @return lista pasujących Address
      */
-    public List<Address> znajdzPoNumerzeDomu(String numerDomu) {
-        logger.debug("znajdzPoNumerzeDomu() - numerDomu={}", numerDomu);
+    public List<Address> findByHouseNumber(String houseNumber) {
+        logger.debug("findByHouseNumber() - houseNumber={}", houseNumber);
         EntityManager em = emf.createEntityManager();
         try {
             List<Address> list = em.createQuery(
-                            "SELECT a FROM Address a WHERE a.numerDomu = :numerDomu",
+                            "SELECT a FROM Address a WHERE a.houseNumber = :houseNumber",
                             Address.class)
-                    .setParameter("numerDomu", numerDomu)
+                    .setParameter("houseNumber", houseNumber)
                     .getResultList();
-            logger.info("znajdzPoNumerzeDomu() - znaleziono {} adresów", list.size());
+            logger.info("findByHouseNumber() - znaleziono {} adresów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoNumerzeDomu() - błąd podczas wyszukiwania", e);
+            logger.error("findByHouseNumber() - błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoNumerzeDomu() - EM zamknięty");
+            logger.debug("findByHouseNumber() - EM zamknięty");
         }
     }
 
     /**
      * Wyszukuje adresy po numerze mieszkania.
      *
-     * @param numerMieszkania numer mieszkania
+     * @param apartmentNumber numer mieszkania
      * @return lista pasujących Address
      */
-    public List<Address> znajdzPoNumerzeMieszkania(String numerMieszkania) {
-        logger.debug("znajdzPoNumerzeMieszkania() - numerMieszkania={}", numerMieszkania);
+    public List<Address> findByApartmentNumber(String apartmentNumber) {
+        logger.debug("findByApartmentNumber() - apartmentNumber={}", apartmentNumber);
         EntityManager em = emf.createEntityManager();
         try {
             List<Address> list = em.createQuery(
-                            "SELECT a FROM Address a WHERE a.numerMieszkania = :numerMieszkania",
+                            "SELECT a FROM Address a WHERE a.apartmentNumber = :apartmentNumber",
                             Address.class)
-                    .setParameter("numerMieszkania", numerMieszkania)
+                    .setParameter("apartmentNumber", apartmentNumber)
                     .getResultList();
-            logger.info("znajdzPoNumerzeMieszkania() - znaleziono {} adresów", list.size());
+            logger.info("findByApartmentNumber() - znaleziono {} adresów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoNumerzeMieszkania() - błąd podczas wyszukiwania", e);
+            logger.error("findByApartmentNumber() - błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoNumerzeMieszkania() - EM zamknięty");
+            logger.debug("findByApartmentNumber() - EM zamknięty");
         }
     }
 
     /**
      * Wyszukuje adresy po kodzie pocztowym.
      *
-     * @param kodPocztowy kod pocztowy
+     * @param zipCode kod pocztowy
      * @return lista pasujących Address
      */
-    public List<Address> znajdzPoKodPocztowym(String kodPocztowy) {
-        logger.debug("znajdzPoKodPocztowym() - kodPocztowy={}", kodPocztowy);
+    public List<Address> findByZipCode(String zipCode) {
+        logger.debug("findByZipCode() - zipCode={}", zipCode);
         EntityManager em = emf.createEntityManager();
         try {
             List<Address> list = em.createQuery(
-                            "SELECT a FROM Address a WHERE a.kodPocztowy = :kodPocztowy",
+                            "SELECT a FROM Address a WHERE a.zipCode = :zipCode",
                             Address.class)
-                    .setParameter("kodPocztowy", kodPocztowy)
+                    .setParameter("zipCode", zipCode)
                     .getResultList();
-            logger.info("znajdzPoKodPocztowym() - znaleziono {} adresów", list.size());
+            logger.info("findByZipCode() - znaleziono {} adresów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoKodPocztowym() - błąd podczas wyszukiwania", e);
+            logger.error("findByZipCode() - błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoKodPocztowym() - EM zamknięty");
+            logger.debug("findByZipCode() - EM zamknięty");
         }
     }
 
     /**
      * Wyszukuje adresy po mieście (case-insensitive).
      *
-     * @param miasto nazwa miasta
+     * @param city nazwa miasta
      * @return lista pasujących Address
      */
-    public List<Address> znajdzPoMiescie(String miasto) {
-        logger.debug("znajdzPoMiescie() - miasto={}", miasto);
+    public List<Address> findByCity(String city) {
+        logger.debug("findByCity() - city={}", city);
         EntityManager em = emf.createEntityManager();
         try {
             List<Address> list = em.createQuery(
-                            "SELECT a FROM Address a WHERE LOWER(a.miasto) = LOWER(:miasto)",
+                            "SELECT a FROM Address a WHERE LOWER(a.city) = LOWER(:city)",
                             Address.class)
-                    .setParameter("miasto", miasto)
+                    .setParameter("city", city)
                     .getResultList();
-            logger.info("znajdzPoMiescie() - znaleziono {} adresów", list.size());
+            logger.info("findByCity() - znaleziono {} adresów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoMiescie() - błąd podczas wyszukiwania", e);
+            logger.error("findByCity() - błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoMiescie() - EM zamknięty");
+            logger.debug("findByCity() - EM zamknięty");
         }
     }
 

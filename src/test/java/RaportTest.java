@@ -13,7 +13,7 @@ class RaportTest {
     @Test
     void testConstructorInitialization() {
         Address address = new Address();
-        address.setMiasto("Warszawa");
+        address.setCity("Warszawa");
 
         Employee employee = new Employee();
         employee.setName("Jan");

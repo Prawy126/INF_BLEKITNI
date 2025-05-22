@@ -38,7 +38,7 @@ public class AbsenceRequestRepository {
      * @param request obiekt wniosku do dodania
      */
     public void addRequest(AbsenceRequest request) {
-        logger.debug("addRequest() - start, wniosek={}", request);
+        logger.debug("addRequest() - start, request={}", request);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -134,7 +134,7 @@ public class AbsenceRequestRepository {
      * @param request obiekt wniosku z zmienionymi danymi
      */
     public void updateRequest(AbsenceRequest request) {
-        logger.debug("updateRequest() - start, wniosek={}", request);
+        logger.debug("updateRequest() - start, request={}", request);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -165,7 +165,7 @@ public class AbsenceRequestRepository {
         try {
             List<AbsenceRequest> list = em
                     .createQuery(
-                            "SELECT w FROM AbsenceRequest w WHERE w.pracownik = :employee",
+                            "SELECT w FROM AbsenceRequest w WHERE w.employee = :employee",
                             AbsenceRequest.class
                     )
                     .setParameter("employee", employee)
@@ -193,7 +193,7 @@ public class AbsenceRequestRepository {
         try {
             List<AbsenceRequest> list = em
                     .createQuery(
-                            "SELECT w FROM AbsenceRequest w WHERE w.pracownik.id = :id",
+                            "SELECT w FROM AbsenceRequest w WHERE w.employee.id = :id",
                             AbsenceRequest.class
                     )
                     .setParameter("id", employeeId)
@@ -221,7 +221,7 @@ public class AbsenceRequestRepository {
         try {
             List<AbsenceRequest> list = em
                     .createQuery(
-                            "SELECT w FROM AbsenceRequest w WHERE w.Typ_wniosku = :type",
+                            "SELECT w FROM AbsenceRequest w WHERE w.type = :type",
                             AbsenceRequest.class
                     )
                     .setParameter("type", requestType)
@@ -277,7 +277,7 @@ public class AbsenceRequestRepository {
         try {
             List<AbsenceRequest> list = em
                     .createQuery(
-                            "SELECT w FROM AbsenceRequest w WHERE w.Data_rozpoczecia >= :fromDate",
+                            "SELECT w FROM AbsenceRequest w WHERE w.fromDate >= :fromDate",
                             AbsenceRequest.class
                     )
                     .setParameter("fromDate", fromDate)
@@ -305,7 +305,7 @@ public class AbsenceRequestRepository {
         try {
             List<AbsenceRequest> list = em
                     .createQuery(
-                            "SELECT w FROM AbsenceRequest w WHERE w.Data_zakonczenia <= :toDate",
+                            "SELECT w FROM AbsenceRequest w WHERE w.toDate <= :toDate",
                             AbsenceRequest.class
                     )
                     .setParameter("toDate", toDate)
@@ -334,7 +334,7 @@ public class AbsenceRequestRepository {
         try {
             List<AbsenceRequest> list = em
                     .createQuery(
-                            "SELECT w FROM AbsenceRequest w WHERE w.Data_rozpoczecia >= :fromDate AND w.Data_zakonczenia <= :toDate",
+                            "SELECT w FROM AbsenceRequest w WHERE w.fromDate >= :fromDate AND w.toDate <= :toDate",
                             AbsenceRequest.class
                     )
                     .setParameter("fromDate", fromDate)
@@ -364,7 +364,7 @@ public class AbsenceRequestRepository {
         try {
             List<AbsenceRequest> list = em
                     .createQuery(
-                            "SELECT w FROM AbsenceRequest w WHERE w.Data_rozpoczecia <= :toDate AND w.Data_zakonczenia >= :fromDate",
+                            "SELECT w FROM AbsenceRequest w WHERE w.fromDate <= :toDate AND w.toDate >= :fromDate",
                             AbsenceRequest.class
                     )
                     .setParameter("toDate", toDate)

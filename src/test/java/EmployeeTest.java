@@ -18,7 +18,7 @@ class EmployeeTest {
     @Test
     void testConstructorInitialization() throws NameException, AgeException, PasswordException, SalaryException {
         Address address = new Address();
-        address.setMiasto("Warszawa");
+        address.setCity("Warszawa");
 
         Employee employee = new Employee(
                 "John", "Doe", 30, "john@example.com",
@@ -35,14 +35,14 @@ class EmployeeTest {
         assertEquals(new BigDecimal("5000.00"), employee.getZarobki());
         assertFalse(employee.isOnSickLeave());
         assertNull(employee.getSickLeaveStartDate());
-        assertEquals("Warszawa", employee.getAdres().getMiasto());
+        assertEquals("Warszawa", employee.getAdres().getCity());
     }
 
     @Test
     void testSettersAndGetters() throws PasswordException, SalaryException, AgeException, NameException {
         Employee employee = new Employee();
         Address address = new Address();
-        address.setMiasto("Lublin");
+        address.setCity("Lublin");
 
         employee.setName("Jane");
         employee.setSurname("Smith");
@@ -62,13 +62,13 @@ class EmployeeTest {
         assertEquals("securepass", employee.getPassword());
         assertEquals("Developer", employee.getStanowisko());
         assertEquals(new BigDecimal("6000.00"), employee.getZarobki());
-        assertEquals("Lublin", employee.getAdres().getMiasto());
+        assertEquals("Lublin", employee.getAdres().getCity());
     }
 
     @Test
     void testStartSickLeave() throws NameException, AgeException, PasswordException, SalaryException {
         Address address = new Address();
-        address.setMiasto("Kraków");
+        address.setCity("Kraków");
 
         Employee employee = new Employee(
                 "Anna", "Nowak", 29, "anna@ex.com",
@@ -101,7 +101,7 @@ class EmployeeTest {
     @Test
     void testEndSickLeave() throws NameException, AgeException, PasswordException, SalaryException {
         Address address = new Address();
-        address.setMiasto("Gdańsk");
+        address.setCity("Gdańsk");
 
         Employee employee = new Employee(
                 "Tomasz", "Lis", 45, "tomasz@abc.pl",

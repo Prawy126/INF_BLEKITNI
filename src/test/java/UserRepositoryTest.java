@@ -26,14 +26,14 @@ public class UserRepositoryTest {
         try {
             // === 1. Tworzenie i dodanie adresu ===
             Address adres = new Address();
-            adres.setMiejscowosc("Testowo");
-            adres.setNumerDomu("10A");
-            adres.setNumerMieszkania("5");
-            adres.setKodPocztowy("00-000");
-            adres.setMiasto("Testowo");
+            adres.setTown("Testowo");
+            adres.setHouseNumber("10A");
+            adres.setApartmentNumber("5");
+            adres.setZipCode("00-000");
+            adres.setCity("Testowo");
 
-            addressRepo.dodajAdres(adres);
-            System.out.println(">>> Dodano adres: " + adres.getMiasto());
+            addressRepo.addAddress(adres);
+            System.out.println(">>> Dodano adres: " + adres.getCity());
 
             // === 2. Dodanie nowego pracownika ===
             Employee nowyKasjer = new Employee(

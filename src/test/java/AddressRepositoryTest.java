@@ -21,30 +21,30 @@ public class AddressRepositoryTest {
         try {
             // === 1. Dodanie nowego adresu ===
             Address address1 = new Address();
-            address1.setMiejscowosc("Testowo");
-            address1.setMiasto("Miastko");
-            address1.setKodPocztowy("99-999");
-            address1.setNumerDomu("10B");
-            address1.setNumerMieszkania("3");
+            address1.setTown("Testowo");
+            address1.setCity("Miastko");
+            address1.setZipCode("99-999");
+            address1.setHouseNumber("10B");
+            address1.setApartmentNumber("3");
 
-            addressRepo.dodajAdres(address1);
+            addressRepo.addAddress(address1);
             System.out.println(">>> Dodano adres!");
 
             // === 2. Wyświetlenie wszystkich adresów ===
             System.out.println("\n>>> Lista adresów:");
-            wypiszAdresy(addressRepo.pobierzWszystkieAdresy());
+            wypiszAdresy(addressRepo.downloadAllAddresses());
 
             // === 3. Odczyt po ID ===
-            Address znaleziony = addressRepo.znajdzAdresPoId(address1.getId());
+            Address znaleziony = addressRepo.findAddressById(address1.getId());
             System.out.println("\n>>> Adres po ID: " + znaleziony);
 
             // === 4. Usunięcie adresu ===
-            addressRepo.usunAdres(address1.getId());
+            addressRepo.deleteAddress(address1.getId());
             System.out.println(">>> Usunięto adres.");
 
             // === 5. Wyświetlenie po usunięciu ===
             System.out.println("\n>>> Lista adresów po usunięciu:");
-            wypiszAdresy(addressRepo.pobierzWszystkieAdresy());
+            wypiszAdresy(addressRepo.downloadAllAddresses());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -65,9 +65,9 @@ public class AddressRepositoryTest {
             for (Address a : adresy) {
                 System.out.printf("ID: %-3d Miasto: %-15s Miejscowość: %-15s Kod: %-10s%n",
                         a.getId(),
-                        a.getMiasto(),
-                        a.getMiejscowosc(),
-                        a.getKodPocztowy()
+                        a.getCity(),
+                        a.getTown(),
+                        a.getZipCode()
                 );
             }
         }

@@ -21,24 +21,18 @@ import javafx.stage.Stage;
 import org.example.database.TechnicalIssueRepository;
 import org.example.database.UserRepository;
 import org.example.pdflib.ConfigManager;
-import org.example.pdflib.ReportGenerator;
 import org.example.sys.Employee;
 import org.example.sys.TechnicalIssue;
 import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
 
 import java.io.File;
-import javafx.scene.layout.GridPane;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import org.example.pdflib.ConfigManager;
-import org.example.sys.TechnicalIssue;
+
 import org.example.database.AddressRepository;
 import org.example.sys.Address;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -247,7 +241,7 @@ public class AdminPanelController {
         Label addressLabel = new Label("Adres:");
         AddressRepository addressRepository = new AddressRepository();
         ComboBox<Address> adresComboBox = new ComboBox<>();
-        adresComboBox.getItems().addAll(addressRepository.pobierzWszystkieAdresy());
+        adresComboBox.getItems().addAll(addressRepository.downloadAllAddresses());
         adresComboBox.setValue(selected.getAdres()); // ustawiamy istniejący
         adresComboBox.setPromptText("Wybierz adres");
 
@@ -422,7 +416,7 @@ public class AdminPanelController {
         Label addressLabel = new Label("Adres:");
         AddressRepository addressRepository = new AddressRepository();
         ComboBox<Address> adresComboBox = new ComboBox<>();
-        adresComboBox.getItems().addAll(addressRepository.pobierzWszystkieAdresy());
+        adresComboBox.getItems().addAll(addressRepository.downloadAllAddresses());
         adresComboBox.setPromptText("Wybierz istniejący adres");
 
         Button dodajNowyAdresBtn = new Button("Dodaj nowy adres");
@@ -1108,17 +1102,17 @@ public class AdminPanelController {
             // ZAPIS
             AddressRepository repo = new AddressRepository();
             Address nowy = new Address();
-            nowy.setMiejscowosc(miejscowosc.getText());
-            nowy.setNumerDomu(numerDomu.getText());
-            nowy.setNumerMieszkania(numerMieszkania.getText().isEmpty() ? null : numerMieszkania.getText());
-            nowy.setKodPocztowy(kodPocztowy.getText());
-            nowy.setMiasto(miasto.getText());
+            nowy.setTown(miejscowosc.getText());
+            nowy.setHouseNumber(numerDomu.getText());
+            nowy.setApartmentNumber(numerMieszkania.getText().isEmpty() ? null : numerMieszkania.getText());
+            nowy.setZipCode(kodPocztowy.getText());
+            nowy.setCity(miasto.getText());
 
-            repo.dodajAdres(nowy);
+            repo.addAddress(nowy);
 
             // Odśwież listę i wybierz nowy adres
             adresComboBox.getItems().clear();
-            adresComboBox.getItems().addAll(repo.pobierzWszystkieAdresy());
+            adresComboBox.getItems().addAll(repo.downloadAllAddresses());
             adresComboBox.setValue(nowy);
 
             stage.close();
