@@ -38,7 +38,7 @@ class WarehouseRepositoryTest {
         assertDoesNotThrow(() -> warehouseRepo.dodajStanMagazynowy(testWarehouse),
                 "Should add warehouse record without exception");
         // no generated ID here (uses product PK), so ensure getProduct().getId() matches
-        assertEquals(testProduct.getId(), testWarehouse.getProdukt().getId());
+        assertEquals(testProduct.getId(), testWarehouse.getProduct().getId());
     }
 
     @Test
@@ -46,17 +46,17 @@ class WarehouseRepositoryTest {
     void testFindAllAndUpdate() {
         // 3. fetch all stock records
         List<Warehouse> all = warehouseRepo.pobierzWszystkieStany();
-        assertTrue(all.stream().anyMatch(w -> w.getProdukt().getId() == testProduct.getId()),
+        assertTrue(all.stream().anyMatch(w -> w.getProduct().getId() == testProduct.getId()),
                 "New warehouse record should appear in list");
 
         // 4. update quantity
-        testWarehouse.setIlosc(100);
+        testWarehouse.setQuantity(100);
         assertDoesNotThrow(() -> warehouseRepo.aktualizujStan(testWarehouse),
                 "Should update warehouse record without exception");
 
         Warehouse reloaded = warehouseRepo.znajdzStanPoIdProduktu(testProduct.getId());
         assertNotNull(reloaded, "Reloaded record must not be null");
-        assertEquals(100, reloaded.getIlosc(), "Quantity should be updated to 100");
+        assertEquals(100, reloaded.getQuantity(), "Quantity should be updated to 100");
     }
 
     @Test
@@ -65,22 +65,22 @@ class WarehouseRepositoryTest {
         // quantity == 100
         List<Warehouse> eq100 = warehouseRepo.znajdzPoIlosci(100);
         assertTrue(eq100.stream()
-                .allMatch(w -> w.getIlosc() == 100), "All must have quantity 100");
+                .allMatch(w -> w.getQuantity() == 100), "All must have quantity 100");
 
         // quantity < 110
         List<Warehouse> lt110 = warehouseRepo.znajdzPoIlosciMniejszejNiz(110);
         assertTrue(lt110.stream()
-                .allMatch(w -> w.getIlosc() < 110), "All must have quantity < 110");
+                .allMatch(w -> w.getQuantity() < 110), "All must have quantity < 110");
 
         // quantity > 50
         List<Warehouse> gt50 = warehouseRepo.znajdzPoIlosciWiekszejNiz(50);
         assertTrue(gt50.stream()
-                .allMatch(w -> w.getIlosc() > 50), "All must have quantity > 50");
+                .allMatch(w -> w.getQuantity() > 50), "All must have quantity > 50");
 
         // between 80 and 120
         List<Warehouse> between = warehouseRepo.znajdzPoIlosciWMiedzy(80, 120);
         assertTrue(between.stream()
-                        .anyMatch(w -> w.getProdukt().getId() == testProduct.getId()),
+                        .anyMatch(w -> w.getProduct().getId() == testProduct.getId()),
                 "Record should appear in [80,120] range");
     }
 
@@ -95,7 +95,7 @@ class WarehouseRepositoryTest {
 
         List<Warehouse> allAfter = warehouseRepo.pobierzWszystkieStany();
         assertTrue(allAfter.stream()
-                        .noneMatch(w -> w.getProdukt().getId() == testProduct.getId()),
+                        .noneMatch(w -> w.getProduct().getId() == testProduct.getId()),
                 "Deleted record must not appear in list");
     }
 

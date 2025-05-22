@@ -1,6 +1,6 @@
 /*
  * Classname: CashierPanelController
- * Version information: 1.6
+ * Version information: 1.7
  * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
@@ -677,7 +677,7 @@ public class CashierPanelController {
         try {
             Warehouse stan = warehouseRepo.znajdzStanPoIdProduktu(produkt.getId());
             if (stan != null) {
-                ilosc = stan.getIlosc();
+                ilosc = stan.getQuantity();
             }
         } finally {
             warehouseRepo.close();
@@ -767,8 +767,8 @@ public class CashierPanelController {
 
             // Zapisz transakcję
             Transaction transaction = new Transaction();
-            transaction.setPracownik(currentEmployee);
-            transaction.setData(new Date());
+            transaction.setEmployee(currentEmployee);
+            transaction.setDate(new Date());
             transactionRepository.dodajTransakcje(transaction);
 
             // Pobierz ID zapisanej transakcji
@@ -1183,7 +1183,7 @@ public class CashierPanelController {
 
         for (Transaction tx : txs) {
             LocalDateTime txTime = LocalDateTime.ofInstant(
-                    Instant.ofEpochMilli(tx.getData().getTime()),
+                    Instant.ofEpochMilli(tx.getDate().getTime()),
                     ZoneId.systemDefault());
 
             // Używamy nowej struktury TransactionProduct

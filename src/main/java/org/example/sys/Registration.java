@@ -1,7 +1,7 @@
 /*
  * Classname: Registration
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.1
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -28,7 +28,7 @@ public class Registration {
      * Używany przez Hibernate do tworzenia instancji klasy.
      */
     public Registration(String message, String name, String surname, LocalDate date, String title) {
-        this(message, name, surname, date, title, StatusRegistration.OCZEKUJACY);
+        this(message, name, surname, date, title, StatusRegistration.PENDING);
     }
 
     /**
@@ -62,7 +62,7 @@ public class Registration {
     public Registration(String message, LocalDate date) {
         this.message = message;
         this.date = date;
-        this.status = StatusRegistration.OCZEKUJACY;
+        this.status = StatusRegistration.PENDING;
     }
 
     /**
@@ -176,21 +176,21 @@ public class Registration {
      * Ustawia status rejestracji na zaakceptowany.
      */
     public void accept() {
-        this.status = StatusRegistration.ZAAKCEPTOWANY;
+        this.status = StatusRegistration.ACCEPTED;
     }
 
     /**
      * Ustawia status rejestracji na odrzucony.
      */
     public void reject() {
-        this.status = StatusRegistration.ODRZUCONY;
+        this.status = StatusRegistration.REJECTED;
     }
 
     /**
      * Ustawia status rejestracji na zrealizowany.
      */
     public void realize() {
-        this.status = StatusRegistration.ZREALIZOWANY;
+        this.status = StatusRegistration.COMPLETED;
     }
 
     /**

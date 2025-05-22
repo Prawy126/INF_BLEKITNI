@@ -11,22 +11,22 @@ class WarehouseTest {
         Product produkt = new Product("Laptop", "Elektronika", 1500.00);
         Warehouse warehouse = new Warehouse(produkt, 10);
 
-        assertEquals(produkt, warehouse.getProdukt());
-        assertEquals("Laptop", warehouse.getProdukt().getName());
-        assertEquals(1500.00, warehouse.getProdukt().getPrice());
-        assertEquals(10, warehouse.getIlosc());
+        assertEquals(produkt, warehouse.getProduct());
+        assertEquals("Laptop", warehouse.getProduct().getName());
+        assertEquals(1500.00, warehouse.getProduct().getPrice());
+        assertEquals(10, warehouse.getQuantity());
     }
 
     @Test
     void testSettersAndGetters() {
         Product produkt = new Product("Monitor", "Elektronika", 799.99);
         Warehouse warehouse = new Warehouse();
-        warehouse.setProdukt(produkt);
-        warehouse.setIlosc(25);
+        warehouse.setProduct(produkt);
+        warehouse.setQuantity(25);
 
-        assertEquals("Monitor", warehouse.getProdukt().getName());
-        assertEquals(799.99, warehouse.getProdukt().getPrice());
-        assertEquals(25, warehouse.getIlosc());
+        assertEquals("Monitor", warehouse.getProduct().getName());
+        assertEquals(799.99, warehouse.getProduct().getPrice());
+        assertEquals(25, warehouse.getQuantity());
     }
 
     @Test
@@ -44,8 +44,8 @@ class WarehouseTest {
         Product produkt = new Product("Długopis", "Biuro", 0.00);
         Warehouse warehouse = new Warehouse(produkt, 0);
 
-        assertEquals(0.00, warehouse.getProdukt().getPrice());
-        assertEquals(0, warehouse.getIlosc());
+        assertEquals(0.00, warehouse.getProduct().getPrice());
+        assertEquals(0, warehouse.getQuantity());
     }
 
     @Test
@@ -53,7 +53,7 @@ class WarehouseTest {
         Product produkt = new Product("Krzesło", "Meble", -50.00); // brak walidacji w Product
         Warehouse warehouse = new Warehouse(produkt, -10);
 
-        assertEquals(-50.00, warehouse.getProdukt().getPrice());
-        assertEquals(-10, warehouse.getIlosc());
+        assertEquals(-50.00, warehouse.getProduct().getPrice());
+        assertEquals(-10, warehouse.getQuantity());
     }
 }

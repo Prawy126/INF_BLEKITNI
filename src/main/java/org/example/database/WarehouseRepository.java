@@ -167,7 +167,7 @@ public class WarehouseRepository {
             tx.begin();
             Warehouse w = em.find(Warehouse.class, productId);
             if (w != null) {
-                w.setIlosc(newQty);
+                w.setQuantity(newQty);
                 em.merge(w);
                 logger.info("ustawIloscProduktu() – ilość zaktualizowana: {} → {}", productId, newQty);
             } else {

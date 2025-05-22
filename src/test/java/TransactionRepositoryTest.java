@@ -32,8 +32,8 @@ public class TransactionRepositoryTest {
 
             // === 2. Dodanie transakcji ===
             Transaction transakcja = new Transaction();
-            transakcja.setData(data);
-            transakcja.setPracownik(employee);
+            transakcja.setDate(data);
+            transakcja.setEmployee(employee);
 
             transactionRepo.dodajTransakcje(transakcja);
             System.out.println(">>> Dodano transakcję!");
@@ -74,8 +74,8 @@ public class TransactionRepositoryTest {
             for (Transaction t : lista) {
                 System.out.printf("ID: %-3d | Pracownik: %-20s | Data: %s%n",
                         t.getId(),
-                        t.getPracownik().getName() + " " + t.getPracownik().getSurname(),
-                        t.getData()
+                        t.getEmployee().getName() + " " + t.getEmployee().getSurname(),
+                        t.getDate()
                 );
             }
         }

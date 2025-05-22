@@ -1,7 +1,7 @@
 /*
  * Classname: Transaction
- * Version information: 1.0
- * Date: 2025-05-20
+ * Version information: 1.1
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -16,7 +16,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import jakarta.persistence.CascadeType;
@@ -38,10 +37,10 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "Id_pracownika")
-    private Employee pracownik;
+    private Employee employee;
 
     @Temporal(TemporalType.DATE)
-    private Date data;
+    private Date date;
 
     // Zmieniamy relację z ManyToMany na OneToMany do tabeli pośredniczącej
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -53,20 +52,20 @@ public class Transaction {
         return id;
     }
 
-    public Employee getPracownik() {
-        return pracownik;
+    public Employee getEmployee() {
+        return employee;
     }
 
-    public void setPracownik(Employee pracownik) {
-        this.pracownik = pracownik;
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 
-    public Date getData() {
-        return data;
+    public Date getDate() {
+        return date;
     }
 
-    public void setData(Date data) {
-        this.data = data;
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     public List<TransactionProduct> getTransactionProducts() {
@@ -89,7 +88,7 @@ public class Transaction {
     }
 
     // Metoda pomocnicza do zachowania kompatybilności z istniejącym kodem
-    public List<Product> getProdukty() {
+    public List<Product> getProducts() {
         List<Product> products = new ArrayList<>();
         for (TransactionProduct tp : transactionProducts) {
             products.add(tp.getProduct());

@@ -77,7 +77,7 @@ public class OrderRepositoryTest {
             for (Order z : zamowienia) {
                 System.out.printf("ID: %-3d | Produkt: %-20s | Ilość: %-3d | Cena: %-7.2f | Data: %s%n",
                         z.getId(),
-                        z.getProduct().getName(), // poprawiono z getNazwa()
+                        z.getProduct().getName(), // poprawiono z getName()
                         z.getQuantity(),
                         z.getPrice(),
                         z.getDate().toString()

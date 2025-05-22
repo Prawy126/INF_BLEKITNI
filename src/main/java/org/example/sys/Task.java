@@ -1,7 +1,7 @@
 /*
  * Classname: Task
- * Version information: 1.0
- * Date: 2025-04-27
+ * Version information: 1.1
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -32,21 +32,21 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private String nazwa;
+    private String name;
 
     @Temporal(TemporalType.DATE)
-    private Date data;
+    private Date date;
 
     private String status;
 
     @Column(columnDefinition = "TEXT")
-    private String opis;
+    private String description;
 
     /**
      * Czas trwania zmiany pracownika przy zadaniu
      */
     @Column(name = "czas_trwania_zmiany")
-    private LocalTime czasTrwaniaZmiany;
+    private LocalTime durationOfTheShift;
 
     /** Konstruktor bezparametrowy wymagany przez JPA. */
     public Task() {
@@ -55,18 +55,18 @@ public class Task {
     /**
      * Konstruktor pełny (z czasem zmiany).
      *
-     * @param nazwa               nazwa zadania
-     * @param data                termin wykonania
+     * @param name               name zadania
+     * @param date                termin wykonania
      * @param status              status zadania
-     * @param opis                opis zadania
-     * @param czasTrwaniaZmiany   czas trwania zmiany przy zadaniu
+     * @param description                description zadania
+     * @param durationOfTheShift   czas trwania zmiany przy zadaniu
      */
-    public Task(String nazwa, Date data, String status, String opis, LocalTime czasTrwaniaZmiany) {
-        this.nazwa = nazwa;
-        this.data = data;
+    public Task(String name, Date date, String status, String description, LocalTime durationOfTheShift) {
+        this.name = name;
+        this.date = date;
         this.status = status;
-        this.opis = opis;
-        this.czasTrwaniaZmiany = czasTrwaniaZmiany;
+        this.description = description;
+        this.durationOfTheShift = durationOfTheShift;
     }
 
     // ==================== Gettery i Settery ====================
@@ -75,20 +75,20 @@ public class Task {
         return id;
     }
 
-    public String getNazwa() {
-        return nazwa;
+    public String getName() {
+        return name;
     }
 
-    public void setNazwa(String nazwa) {
-        this.nazwa = nazwa;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public Date getData() {
-        return data;
+    public Date getDate() {
+        return date;
     }
 
-    public void setData(Date data) {
-        this.data = data;
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     public String getStatus() {
@@ -99,20 +99,20 @@ public class Task {
         this.status = status;
     }
 
-    public String getOpis() {
-        return opis;
+    public String getDescription() {
+        return description;
     }
 
-    public void setOpis(String opis) {
-        this.opis = opis;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public LocalTime getCzasTrwaniaZmiany() {
-        return czasTrwaniaZmiany;
+    public LocalTime getDurationOfTheShift() {
+        return durationOfTheShift;
     }
 
-    public void setCzasTrwaniaZmiany(LocalTime czasTrwaniaZmiany) {
-        this.czasTrwaniaZmiany = czasTrwaniaZmiany;
+    public void setDurationOfTheShift(LocalTime durationOfTheShift) {
+        this.durationOfTheShift = durationOfTheShift;
     }
 
     /**
@@ -122,9 +122,9 @@ public class Task {
     public String toString() {
         return String.format(
                 "Zadanie: %s, Termin: %s, Czas zmiany: %s",
-                nazwa,
-                data != null ? data.toString() : "brak daty",
-                czasTrwaniaZmiany != null ? czasTrwaniaZmiany.toString() : "brak"
+                name,
+                date != null ? date.toString() : "brak daty",
+                durationOfTheShift != null ? durationOfTheShift.toString() : "brak"
         );
     }
 }

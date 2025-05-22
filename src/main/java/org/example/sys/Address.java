@@ -50,9 +50,9 @@ public class Address {
 
     @Override
     public String toString() {
-        String mieszkanie = (apartmentNumber != null && !apartmentNumber.isEmpty())
+        String apartment = (apartmentNumber != null && !apartmentNumber.isEmpty())
                 ? "/" + apartmentNumber
                 : "";
-        return town + ", ul. " + houseNumber + mieszkanie + ", " + zipCode + " " + city;
+        return town + ", ul. " + houseNumber + apartment + ", " + zipCode + " " + city;
     }
 }

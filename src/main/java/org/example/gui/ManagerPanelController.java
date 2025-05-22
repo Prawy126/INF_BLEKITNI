@@ -1,6 +1,6 @@
 /*
  * Classname: ManagerPanelController
- * Version information: 1.2
+ * Version information: 1.3
  * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
@@ -63,15 +63,15 @@ public class ManagerPanelController {
         TableColumn<Task, String> nameCol = new TableColumn<>("Zadanie");
         nameCol.setCellValueFactory(
                 data -> new javafx.beans.property.SimpleStringProperty(
-                        data.getValue().getNazwa()
+                        data.getValue().getName()
                 )
         );
 
         TableColumn<Task, String> dateCol = new TableColumn<>("Termin");
         dateCol.setCellValueFactory(
                 data -> new javafx.beans.property.SimpleStringProperty(
-                        data.getValue().getData() != null
-                                ? data.getValue().getData().toString()
+                        data.getValue().getDate() != null
+                                ? data.getValue().getDate().toString()
                                 : "brak daty"
                 )
         );
@@ -365,8 +365,8 @@ public class ManagerPanelController {
                 try {
                     String currentOpis = selectedRequest.getDescription();
                     String newOpis = (currentOpis != null && !currentOpis.isEmpty())
-                            ? currentOpis + " [ODRZUCONY]"
-                            : "[ODRZUCONY]";
+                            ? currentOpis + " [REJECTED]"
+                            : "[REJECTED]";
                     selectedRequest.setDescription(newOpis);
 
                     absenceRepository.updateRequest(selectedRequest);
@@ -438,7 +438,7 @@ public class ManagerPanelController {
         Label taskLabel = new Label("Wybierz zadanie:");
         ComboBox<String> taskComboBox = new ComboBox<>();
         taskRepository.pobierzWszystkieZadania()
-                .forEach(t -> taskComboBox.getItems().add(t.getNazwa()));
+                .forEach(t -> taskComboBox.getItems().add(t.getName()));
 
         Label employeeLabel = new Label("Wybierz pracownika:");
         ComboBox<String> employeeComboBox = new ComboBox<>();
@@ -494,10 +494,10 @@ public class ManagerPanelController {
         layout.setAlignment(Pos.CENTER);
 
         Label nameLabel = new Label("Nazwa zadania:");
-        TextField nameField = new TextField(task.getNazwa());
+        TextField nameField = new TextField(task.getName());
 
         Label descLabel = new Label("Opis:");
-        TextArea descArea = new TextArea(task.getOpis());
+        TextArea descArea = new TextArea(task.getDescription());
         descArea.setPrefRowCount(4);
 
         Label statusLabel = new Label("Status:");
@@ -507,9 +507,9 @@ public class ManagerPanelController {
 
         Label dateLabel = new Label("Termin:");
         DatePicker deadlinePicker = new DatePicker();
-        if (task.getData() != null) {
+        if (task.getDate() != null) {
             deadlinePicker.setValue(
-                    new java.sql.Date(task.getData().getTime()).toLocalDate()
+                    new java.sql.Date(task.getDate().getTime()).toLocalDate()
             );
         }
 
@@ -521,11 +521,11 @@ public class ManagerPanelController {
 
         saveButton.setOnAction(e -> {
             try {
-                task.setNazwa(nameField.getText());
-                task.setOpis(descArea.getText());
+                task.setName(nameField.getText());
+                task.setDescription(descArea.getText());
                 task.setStatus(statusCombo.getValue());
                 if (deadlinePicker.getValue() != null) {
-                    task.setData(java.sql.Date.valueOf(deadlinePicker.getValue()));
+                    task.setDate(java.sql.Date.valueOf(deadlinePicker.getValue()));
                 }
                 taskRepository.aktualizujZadanie(task);
 

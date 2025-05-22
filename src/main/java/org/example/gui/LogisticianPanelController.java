@@ -241,8 +241,8 @@ public class LogisticianPanelController {
                     .pobierzWszystkieStany()
                     .stream()
                     .collect(Collectors.toMap(
-                            org.example.sys.Warehouse::getIdProduktu,
-                            org.example.sys.Warehouse::getIlosc
+                            org.example.sys.Warehouse::getProductId,
+                            org.example.sys.Warehouse::getQuantity
                     ));
 
             List<Product> pdfProducts = products.stream()

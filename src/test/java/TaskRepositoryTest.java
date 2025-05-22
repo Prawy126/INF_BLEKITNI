@@ -61,7 +61,7 @@ public class TaskRepositoryTest {
 
             // === 3. Aktualizacja istniejącego zadania ===
             zadanie1.setStatus("W trakcie");
-            zadanie1.setOpis("Dostawa mleka zrealizowana w połowie.");
+            zadanie1.setDescription("Dostawa mleka zrealizowana w połowie.");
             taskRepo.aktualizujZadanie(zadanie1);
             System.out.println("\n>>> Zaktualizowano zadanie 1.");
 

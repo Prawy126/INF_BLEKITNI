@@ -1,7 +1,7 @@
 /*
  * Enum: StatusRegistration
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.1
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -13,10 +13,10 @@ package org.example.sys;
  * Umożliwia wybór statusu na podstawie nazwy wyświetlanej.
  */
 public enum StatusRegistration {
-    OCZEKUJACY("Oczekujący"),
-    ZAAKCEPTOWANY("Zaakceptowany"),
-    ODRZUCONY("Odrzucony"),
-    ZREALIZOWANY("Zrealizowany");
+    PENDING("Oczekujący"),
+    ACCEPTED("Zaakceptowany"),
+    REJECTED("Odrzucony"),
+    COMPLETED("Zrealizowany");
     private final String displayName;
 
     /**
