@@ -859,7 +859,7 @@ public class AdminPanelController {
                         issue.setStatus(cb.getValue());
                         executor.execute(new Task<>() {
                             @Override protected Void call() {
-                                technicalIssueRepository.aktualizujZgloszenie(issue);
+                                technicalIssueRepository.updateIssue(issue);
                                 return null;
                             }
                         });
@@ -900,7 +900,7 @@ public class AdminPanelController {
     private void refreshIssuesTable(TableView<TechnicalIssue> tbl) {
         Task<List<TechnicalIssue>> task = new Task<>() {
             @Override protected List<TechnicalIssue> call() {
-                return technicalIssueRepository.pobierzWszystkieZgloszenia();
+                return technicalIssueRepository.getAllIssues();
             }
         };
         task.setOnSucceeded(e -> {

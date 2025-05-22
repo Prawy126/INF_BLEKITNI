@@ -1,6 +1,6 @@
 /*
  * Classname: TechnicalIssueRepository
- * Version information: 1.2
+ * Version information: 1.3
  * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
@@ -41,21 +41,21 @@ public class TechnicalIssueRepository {
      *
      * @param issue obiekt TechnicalIssue do zapisania
      */
-    public void dodajZgloszenie(TechnicalIssue issue) {
-        logger.debug("dodajZgloszenie() – start, issue={}", issue);
+    public void addIssue(TechnicalIssue issue) {
+        logger.debug("addIssue() – start, issue={}", issue);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             em.persist(issue);
             tx.commit();
-            logger.info("dodajZgloszenie() – zgłoszenie dodane: {}", issue);
+            logger.info("addIssue() – zgłoszenie dodane: {}", issue);
         } catch (Exception e) {
-            logger.error("dodajZgloszenie() – błąd podczas dodawania zgłoszenia", e);
+            logger.error("addIssue() – błąd podczas dodawania zgłoszenia", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("dodajZgloszenie() – EntityManager zamknięty");
+            logger.debug("addIssue() – EntityManager zamknięty");
         }
     }
 
@@ -65,19 +65,19 @@ public class TechnicalIssueRepository {
      * @param id identyfikator zgłoszenia
      * @return obiekt TechnicalIssue lub null, jeśli nie znaleziono
      */
-    public TechnicalIssue znajdzZgloszeniePoId(int id) {
-        logger.debug("znajdzZgloszeniePoId() – start, id={}", id);
+    public TechnicalIssue findIssueById(int id) {
+        logger.debug("findIssueById() – start, id={}", id);
         EntityManager em = emf.createEntityManager();
         try {
             TechnicalIssue t = em.find(TechnicalIssue.class, id);
-            logger.info("znajdzZgloszeniePoId() – znaleziono: {}", t);
+            logger.info("findIssueById() – znaleziono: {}", t);
             return t;
         } catch (Exception e) {
-            logger.error("znajdzZgloszeniePoId() – błąd podczas pobierania zgłoszenia id={}", id, e);
+            logger.error("findIssueById() – błąd podczas pobierania zgłoszenia id={}", id, e);
             return null;
         } finally {
             em.close();
-            logger.debug("znajdzZgloszeniePoId() – EntityManager zamknięty");
+            logger.debug("findIssueById() – EntityManager zamknięty");
         }
     }
 
@@ -86,21 +86,21 @@ public class TechnicalIssueRepository {
      *
      * @return lista obiektów TechnicalIssue lub pusta lista w przypadku błędu
      */
-    public List<TechnicalIssue> pobierzWszystkieZgloszenia() {
-        logger.debug("pobierzWszystkieZgloszenia() – start");
+    public List<TechnicalIssue> getAllIssues() {
+        logger.debug("getAllIssues() – start");
         EntityManager em = emf.createEntityManager();
         try {
             List<TechnicalIssue> list = em.createQuery(
                             "SELECT t FROM TechnicalIssue t", TechnicalIssue.class)
                     .getResultList();
-            logger.info("pobierzWszystkieZgloszenia() – pobrano {} zgłoszeń", list.size());
+            logger.info("getAllIssues() – pobrano {} zgłoszeń", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("pobierzWszystkieZgloszenia() – błąd podczas pobierania zgłoszeń", e);
+            logger.error("getAllIssues() – błąd podczas pobierania zgłoszeń", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("pobierzWszystkieZgloszenia() – EntityManager zamknięty");
+            logger.debug("getAllIssues() – EntityManager zamknięty");
         }
     }
 
@@ -109,21 +109,21 @@ public class TechnicalIssueRepository {
      *
      * @param issue obiekt TechnicalIssue do zaktualizowania
      */
-    public void aktualizujZgloszenie(TechnicalIssue issue) {
-        logger.debug("aktualizujZgloszenie() – start, issue={}", issue);
+    public void updateIssue(TechnicalIssue issue) {
+        logger.debug("updateIssue() – start, issue={}", issue);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             em.merge(issue);
             tx.commit();
-            logger.info("aktualizujZgloszenie() – zgłoszenie zaktualizowane: {}", issue);
+            logger.info("updateIssue() – zgłoszenie zaktualizowane: {}", issue);
         } catch (Exception e) {
-            logger.error("aktualizujZgloszenie() – błąd podczas aktualizacji zgłoszenia", e);
+            logger.error("updateIssue() – błąd podczas aktualizacji zgłoszenia", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("aktualizujZgloszenie() – EntityManager zamknięty");
+            logger.debug("updateIssue() – EntityManager zamknięty");
         }
     }
 
@@ -132,8 +132,8 @@ public class TechnicalIssueRepository {
      *
      * @param issue obiekt TechnicalIssue do usunięcia
      */
-    public void usunZgloszenie(TechnicalIssue issue) {
-        logger.debug("usunZgloszenie() – start, issue={}", issue);
+    public void removeIssue(TechnicalIssue issue) {
+        logger.debug("removeIssue() – start, issue={}", issue);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -141,17 +141,17 @@ public class TechnicalIssueRepository {
             TechnicalIssue managed = em.find(TechnicalIssue.class, issue.getId());
             if (managed != null) {
                 em.remove(managed);
-                logger.info("usunZgloszenie() – usunięto zgłoszenie: {}", managed);
+                logger.info("removeIssue() – usunięto zgłoszenie: {}", managed);
             } else {
-                logger.warn("usunZgloszenie() – brak zgłoszenia o id={}", issue.getId());
+                logger.warn("removeIssue() – brak zgłoszenia o id={}", issue.getId());
             }
             tx.commit();
         } catch (Exception e) {
-            logger.error("usunZgloszenie() – błąd podczas usuwania zgłoszenia", e);
+            logger.error("removeIssue() – błąd podczas usuwania zgłoszenia", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("usunZgloszenie() – EntityManager zamknięty");
+            logger.debug("removeIssue() – EntityManager zamknięty");
         }
     }
 
@@ -162,17 +162,17 @@ public class TechnicalIssueRepository {
     /**
      * Wyszukuje zgłoszenia, których typ zawiera podany fragment (bez uwzględniania wielkości liter).
      *
-     * @param typFragment fragment tekstu pola type
+     * @param typeFragment fragment tekstu pola type
      * @return lista dopasowanych zgłoszeń lub pusta lista
      */
-    public List<TechnicalIssue> znajdzPoTypie(String typFragment) {
-        logger.debug("findByType() – typFragment={}", typFragment);
+    public List<TechnicalIssue> findByType(String typeFragment) {
+        logger.debug("findByType() – typeFragment={}", typeFragment);
         EntityManager em = emf.createEntityManager();
         try {
             List<TechnicalIssue> list = em.createQuery(
                             "SELECT t FROM TechnicalIssue t WHERE LOWER(t.type) LIKE LOWER(CONCAT('%', :frag, '%'))",
                             TechnicalIssue.class)
-                    .setParameter("frag", typFragment)
+                    .setParameter("frag", typeFragment)
                     .getResultList();
             logger.info("findByType() – znaleziono {} zgłoszeń", list.size());
             return list;
@@ -192,7 +192,7 @@ public class TechnicalIssueRepository {
      * @param end   koniec przedziału (inclusive)
      * @return lista dopasowanych zgłoszeń lub pusta lista
      */
-    public List<TechnicalIssue> znajdzPoDacie(LocalDate start, LocalDate end) {
+    public List<TechnicalIssue> findByDate(LocalDate start, LocalDate end) {
         logger.debug("findByDate() – start={}, end={}", start, end);
         EntityManager em = emf.createEntityManager();
         try {
@@ -219,7 +219,7 @@ public class TechnicalIssueRepository {
      * @param status status zgłoszenia
      * @return lista dopasowanych zgłoszeń lub pusta lista
      */
-    public List<TechnicalIssue> znajdzPoStatusie(String status) {
+    public List<TechnicalIssue> findByStatus(String status) {
         logger.debug("findByStatus() – status={}", status);
         EntityManager em = emf.createEntityManager();
         try {
@@ -242,17 +242,17 @@ public class TechnicalIssueRepository {
     /**
      * Wyszukuje zgłoszenia zgłoszone przez konkretnego pracownika.
      *
-     * @param pracownikId identyfikator pracownika
+     * @param employeeId identyfikator pracownika
      * @return lista dopasowanych zgłoszeń lub pusta lista
      */
-    public List<TechnicalIssue> znajdzPoPracowniku(int pracownikId) {
-        logger.debug("findByEmployee() – pracownikId={}", pracownikId);
+    public List<TechnicalIssue> findByEmployee(int employeeId) {
+        logger.debug("findByEmployee() – employeeId={}", employeeId);
         EntityManager em = emf.createEntityManager();
         try {
             List<TechnicalIssue> list = em.createQuery(
                             "SELECT t FROM TechnicalIssue t WHERE t.employee.id = :pid",
                             TechnicalIssue.class)
-                    .setParameter("pid", pracownikId)
+                    .setParameter("pid", employeeId)
                     .getResultList();
             logger.info("findByEmployee() – znaleziono {} zgłoszeń", list.size());
             return list;

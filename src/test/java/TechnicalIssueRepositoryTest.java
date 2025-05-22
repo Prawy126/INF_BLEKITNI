@@ -40,34 +40,34 @@ public class TechnicalIssueRepositoryTest {
             issue.setStatus("Nowe");
             issue.setEmployee(employee);
 
-            issueRepo.dodajZgloszenie(issue);
+            issueRepo.addIssue(issue);
             System.out.println(">>> Dodano zgłoszenie!");
 
             // === 2. Wyświetlenie wszystkich zgłoszeń ===
             System.out.println("\n>>> Lista zgłoszeń:");
-            wypiszZgloszenia(issueRepo.pobierzWszystkieZgloszenia());
+            wypiszZgloszenia(issueRepo.getAllIssues());
 
             // === 3. Odczyt zgłoszenia po ID ===
-            TechnicalIssue znalezione = issueRepo.znajdzZgloszeniePoId(issue.getId());
+            TechnicalIssue znalezione = issueRepo.findIssueById(issue.getId());
             System.out.println("\n>>> Zgłoszenie po ID: " + znalezione);
 
             // === 4. Aktualizacja zgłoszenia ===
             issue.setStatus("W trakcie");
             issue.setDescription("Zgłoszenie przekazane do serwisu.");
-            issueRepo.aktualizujZgloszenie(issue);
+            issueRepo.updateIssue(issue);
             System.out.println(">>> Zaktualizowano zgłoszenie.");
 
             // === 5. Wyświetlenie po aktualizacji ===
             System.out.println("\n>>> Lista po aktualizacji:");
-            wypiszZgloszenia(issueRepo.pobierzWszystkieZgloszenia());
+            wypiszZgloszenia(issueRepo.getAllIssues());
 
             // === 6. Usunięcie zgłoszenia ===
-            issueRepo.usunZgloszenie(issue);
+            issueRepo.removeIssue(issue);
             System.out.println(">>> Usunięto zgłoszenie.");
 
             // === 7. Lista po usunięciu ===
             System.out.println("\n>>> Lista po usunięciu:");
-            wypiszZgloszenia(issueRepo.pobierzWszystkieZgloszenia());
+            wypiszZgloszenia(issueRepo.getAllIssues());
 
         } catch (Exception e) {
             e.printStackTrace();
