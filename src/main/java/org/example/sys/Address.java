@@ -27,7 +27,7 @@ public class Address {
     @Column(name = "Miasto")
     private String city;
 
-    @OneToMany(mappedBy = "adres")
+    @OneToMany(mappedBy = "address")
     private List<Employee> employees;
 
     // Gettery i settery

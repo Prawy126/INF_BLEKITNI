@@ -390,7 +390,7 @@ public class CashierPanelController {
         Report report = new Report();
         report.setEmployee(currentEmployee);
         report.setStartDate(startDate);
-        report.setEndTime(endDate);
+        report.setEndDate(endDate);
         report.setReportType(periodType.getDisplayName() + " (brak danych)");
         report.setFilePath(""); // Brak ścieżki, ponieważ nie wygenerowano pliku
 
@@ -438,7 +438,7 @@ public class CashierPanelController {
         Report report = new Report();
         report.setEmployee(currentEmployee);
         report.setStartDate(startDate);
-        report.setEndTime(endDate);
+        report.setEndDate(endDate);
         report.setReportType(periodType.getDisplayName());
         report.setFilePath(reportPath);
 
@@ -461,15 +461,15 @@ public class CashierPanelController {
         idColumn.setPrefWidth(50);
 
         TableColumn<Report, String> typeColumn = new TableColumn<>("Typ raportu");
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("typRaportu"));
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("reportType"));
         typeColumn.setPrefWidth(120);
 
         TableColumn<Report, LocalDate> dateStartColumn = new TableColumn<>("Od");
-        dateStartColumn.setCellValueFactory(new PropertyValueFactory<>("dataPoczatku"));
+        dateStartColumn.setCellValueFactory(new PropertyValueFactory<>("startDate"));
         dateStartColumn.setPrefWidth(100);
 
         TableColumn<Report, LocalDate> dateEndColumn = new TableColumn<>("Do");
-        dateEndColumn.setCellValueFactory(new PropertyValueFactory<>("dataZakonczenia"));
+        dateEndColumn.setCellValueFactory(new PropertyValueFactory<>("endDate"));
         dateEndColumn.setPrefWidth(100);
 
 
@@ -574,7 +574,7 @@ public class CashierPanelController {
         infoGrid.add(new Label(report.getReportType()), 1, row++);
 
         infoGrid.add(new Label("Okres:"), 0, row);
-        infoGrid.add(new Label(report.getStartDate() + " - " + report.getEndTime()), 1, row++);
+        infoGrid.add(new Label(report.getStartDate() + " - " + report.getEndDate()), 1, row++);
 
         infoGrid.add(new Label("Data wygenerowania:"), 0, row);
         //infoGrid.add(new Label(report.getDataWygenerowania().toString()), 1, row++);

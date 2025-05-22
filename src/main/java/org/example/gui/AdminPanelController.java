@@ -157,15 +157,15 @@ public class AdminPanelController {
         TableColumn<Employee, String> emailCol = new TableColumn<>("Email");
         emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
 
-        TableColumn<Employee, String> stanowiskoCol = new TableColumn<>("Stanowisko");
-        stanowiskoCol.setCellValueFactory(new PropertyValueFactory<>("stanowisko"));
+        TableColumn<Employee, String> positionCol = new TableColumn<>("Stanowisko");
+        positionCol.setCellValueFactory(new PropertyValueFactory<>("position"));
 
-        TableColumn<Employee, BigDecimal> zarobkiCol = new TableColumn<>("Zarobki");
-        zarobkiCol.setCellValueFactory(new PropertyValueFactory<>("zarobki"));
+        TableColumn<Employee, BigDecimal> salaryCol = new TableColumn<>("Zarobki");
+        salaryCol.setCellValueFactory(new PropertyValueFactory<>("salary"));
 
         tableView.getColumns().addAll(
                 nameCol, surnameCol, ageCol,
-                loginCol, emailCol, stanowiskoCol, zarobkiCol
+                loginCol, emailCol, positionCol, salaryCol
         );
 
         refreshEmployeeList();

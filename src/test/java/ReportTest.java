@@ -37,7 +37,7 @@ class ReportTest {
 
         assertEquals("Miesięczny", report.getReportType());
         assertEquals(start, report.getStartDate());
-        assertEquals(end, report.getEndTime());
+        assertEquals(end, report.getEndDate());
         assertEquals(employee, report.getEmployee());
         assertEquals("plik.pdf", report.getFilePath());
     }
@@ -54,13 +54,13 @@ class ReportTest {
 
         report.setReportType("Dzienny");
         report.setStartDate(startDate);
-        report.setEndTime(endDate);
+        report.setEndDate(endDate);
         report.setEmployee(employee);
         report.setFilePath("raport_dzienny.pdf");
 
         assertEquals("Dzienny", report.getReportType());
         assertEquals(startDate, report.getStartDate());
-        assertEquals(endDate, report.getEndTime());
+        assertEquals(endDate, report.getEndDate());
         assertEquals(employee, report.getEmployee());
         assertEquals("raport_dzienny.pdf", report.getFilePath());
     }
@@ -71,7 +71,7 @@ class ReportTest {
 
         assertNull(report.getReportType());
         assertNull(report.getStartDate());
-        assertNull(report.getEndTime());
+        assertNull(report.getEndDate());
         assertNull(report.getEmployee());
         assertNull(report.getFilePath());
     }

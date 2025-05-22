@@ -95,7 +95,7 @@ public class RaportRepositoryTest {
                 System.out.println("[" + r.getId() + "] "
                         + r.getReportType()
                         + " | " + r.getStartDate()
-                        + " → " + r.getEndTime()
+                        + " → " + r.getEndDate()
                         + " | plik: " + r.getFilePath());
             }
         }

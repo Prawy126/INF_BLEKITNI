@@ -41,7 +41,7 @@ public class Report {
     private LocalDate startDate;
 
     @Column(name = "Data_zakonczenia", nullable = false)
-    private LocalDate endTime;
+    private LocalDate endDate;
 
     @ManyToOne @JoinColumn(name = "Id_pracownika", nullable = false)
     private Employee employee;
@@ -62,15 +62,15 @@ public class Report {
      *
      * @param reportType   Typ raportu
      * @param startDate    Data początkowa
-     * @param endTime      Data zakończenia
+     * @param endDate      Data zakończenia
      * @param employee     Pracownik
      * @param filePath     Ścieżka do pliku raportu
      */
     public Report(String reportType, LocalDate startDate,
-                  LocalDate endTime, Employee employee, String filePath) {
+                  LocalDate endDate, Employee employee, String filePath) {
         this.reportType = reportType;
         this.startDate = startDate;
-        this.endTime = endTime;
+        this.endDate = endDate;
         this.employee = employee;
         this.filePath = filePath;
     }
@@ -125,8 +125,8 @@ public class Report {
      *
      * @return Data zakończenia
      */
-    public LocalDate getEndTime(){
-        return endTime;
+    public LocalDate getEndDate(){
+        return endDate;
     }
 
     /**
@@ -134,8 +134,8 @@ public class Report {
      *
      * @param d Data zakończenia
      */
-    public void setEndTime(LocalDate d){
-        this.endTime = d;
+    public void setEndDate(LocalDate d){
+        this.endDate = d;
     }
 
     /**
