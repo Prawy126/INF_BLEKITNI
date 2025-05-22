@@ -103,8 +103,8 @@ class ManagerTest {
     }
 
     @Test
-    void testWygenerujRaportZespolu() {
-        manager.wygenerujRaportZespolu(); // tylko sprawdzamy, że się nie wywala, logika w konsoli
+    void testGenerateTeamReport() {
+        manager.generateTeamReport(); // tylko sprawdzamy, że się nie wywala, logika w konsoli
     }
 
     // Pomocnicza metoda

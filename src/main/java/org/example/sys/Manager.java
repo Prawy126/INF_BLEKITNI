@@ -147,7 +147,7 @@ public class Manager {
     /**
      * Generuje raport dla zespołu menedżera.
      */
-    public void wygenerujRaportZespolu() {
+    public void generateTeamReport() {
         System.out.println("Menedżer " + employee.getName() + " generuje raport " +
                 "dla " + managedEmployees.size() + " pracowników.");
     }

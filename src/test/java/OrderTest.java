@@ -19,11 +19,11 @@ class OrderTest {
 
         Order order = new Order(produkt, pracownik, 10, new BigDecimal("25000.00"), data);
 
-        assertEquals(produkt, order.getProdukt());
-        assertEquals(pracownik, order.getPracownik());
-        assertEquals(10, order.getIlosc());
-        assertEquals(new BigDecimal("25000.00"), order.getCena());
-        assertEquals(data, order.getData());
+        assertEquals(produkt, order.getProduct());
+        assertEquals(pracownik, order.getEmployee());
+        assertEquals(10, order.getQuantity());
+        assertEquals(new BigDecimal("25000.00"), order.getPrice());
+        assertEquals(data, order.getDate());
     }
 
     @Test
@@ -35,17 +35,17 @@ class OrderTest {
         pracownik.setLogin("admin");
         Date data = new Date();
 
-        order.setProdukt(produkt);
-        order.setPracownik(pracownik);
-        order.setIlosc(5);
-        order.setCena(new BigDecimal("5000.00"));
-        order.setData(data);
+        order.setProduct(produkt);
+        order.setEmployee(pracownik);
+        order.setQuantity(5);
+        order.setPrice(new BigDecimal("5000.00"));
+        order.setDate(data);
 
-        assertEquals(produkt, order.getProdukt());
-        assertEquals(pracownik, order.getPracownik());
-        assertEquals(5, order.getIlosc());
-        assertEquals(new BigDecimal("5000.00"), order.getCena());
-        assertEquals(data, order.getData());
+        assertEquals(produkt, order.getProduct());
+        assertEquals(pracownik, order.getEmployee());
+        assertEquals(5, order.getQuantity());
+        assertEquals(new BigDecimal("5000.00"), order.getPrice());
+        assertEquals(data, order.getDate());
 
         assertTrue(order.toString().contains("Tablet"));
         assertTrue(order.toString().contains("5000.00"));

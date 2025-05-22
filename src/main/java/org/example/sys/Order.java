@@ -38,21 +38,21 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "Id_produktu", nullable = false)
-    private Product produkt;
+    private Product product;
 
     @ManyToOne
     @JoinColumn(name = "Id_pracownika", nullable = false)
-    private Employee pracownik;
+    private Employee employee;
 
     @Column(name = "Ilosc", nullable = false)
-    private int ilosc;
+    private int quantity;
 
     @Column(name = "Cena", nullable = false, precision = 10, scale = 2)
-    private BigDecimal cena;
+    private BigDecimal price;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "Data", nullable = false)
-    private Date data;
+    private Date date;
 
     /**
      * Domyślny konstruktor.
@@ -63,18 +63,18 @@ public class Order {
     /**
      * Konstruktor z parametrami.
      *
-     * @param produkt  Produkt zamówienia
-     * @param pracownik Pracownik realizujący zamówienie
-     * @param ilosc    Ilość zamówionego produktu
-     * @param cena     Cena zamówienia
-     * @param data     Data zamówienia
+     * @param product  Produkt zamówienia
+     * @param employee Pracownik realizujący zamówienie
+     * @param quantity    Ilość zamówionego produktu
+     * @param price     Cena zamówienia
+     * @param date     Data zamówienia
      */
-    public Order(Product produkt, Employee pracownik, int ilosc, BigDecimal cena, Date data) {
-        this.produkt = produkt;
-        this.pracownik = pracownik;
-        this.ilosc = ilosc;
-        this.cena = cena;
-        this.data = data;
+    public Order(Product product, Employee employee, int quantity, BigDecimal price, Date date) {
+        this.product = product;
+        this.employee = employee;
+        this.quantity = quantity;
+        this.price = price;
+        this.date = date;
     }
 
     // === Gettery i settery ===
@@ -89,93 +89,93 @@ public class Order {
     }
 
     /**
-     * Zwraca produkt zamówienia.
+     * Zwraca product zamówienia.
      *
-     * @return produkt Produkt zamówienia
+     * @return product Produkt zamówienia
      */
-    public Product getProdukt() {
-        return produkt;
+    public Product getProduct() {
+        return product;
     }
 
     /**
-     * Ustawia produkt zamówienia.
+     * Ustawia product zamówienia.
      *
-     * @param produkt Produkt zamówienia
+     * @param product Produkt zamówienia
      */
-    public void setProdukt(Product produkt) {
-        this.produkt = produkt;
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
     /**
      * Zwraca pracownika realizującego zamówienie.
      *
-     * @return pracownik Pracownik realizujący zamówienie
+     * @return employee Pracownik realizujący zamówienie
      */
-    public Employee getPracownik() {
-        return pracownik;
+    public Employee getEmployee() {
+        return employee;
     }
 
     /**
      * Ustawia pracownika realizującego zamówienie.
      *
-     * @param pracownik Pracownik realizujący zamówienie
+     * @param employee Pracownik realizujący zamówienie
      */
-    public void setPracownik(Employee pracownik) {
-        this.pracownik = pracownik;
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 
     /**
      * Zwraca ilość zamówionego produktu.
      *
-     * @return ilosc Ilość zamówionego produktu
+     * @return quantity Ilość zamówionego produktu
      */
-    public int getIlosc() {
-        return ilosc;
+    public int getQuantity() {
+        return quantity;
     }
 
     /**
      * Ustawia ilość zamówionego produktu.
      *
-     * @param ilosc Ilość zamówionego produktu
+     * @param quantity Ilość zamówionego produktu
      */
-    public void setIlosc(int ilosc) {
-        this.ilosc = ilosc;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     /**
      * Zwraca cenę zamówienia.
      *
-     * @return cena Cena zamówienia
+     * @return price Cena zamówienia
      */
-    public BigDecimal getCena() {
-        return cena;
+    public BigDecimal getPrice() {
+        return price;
     }
 
     /**
      * Ustawia cenę zamówienia.
      *
-     * @param cena Cena zamówienia
+     * @param price Cena zamówienia
      */
-    public void setCena(BigDecimal cena) {
-        this.cena = cena;
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 
     /**
      * Zwraca datę zamówienia.
      *
-     * @return data Data zamówienia
+     * @return date Data zamówienia
      */
-    public Date getData() {
-        return data;
+    public Date getDate() {
+        return date;
     }
 
     /**
      * Ustawia datę zamówienia.
      *
-     * @param data Data zamówienia
+     * @param date Data zamówienia
      */
-    public void setData(Date data) {
-        this.data = data;
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     /**
@@ -187,11 +187,11 @@ public class Order {
     public String toString() {
         return "Order{" +
                 "id=" + id +
-                ", produkt=" + (produkt != null ? produkt.getName() : "null") +
-                ", pracownik=" + (pracownik != null ? pracownik.getLogin() : "null") +
-                ", ilosc=" + ilosc +
-                ", cena=" + cena +
-                ", data=" + data +
+                ", product=" + (product != null ? product.getName() : "null") +
+                ", employee=" + (employee != null ? employee.getLogin() : "null") +
+                ", quantity=" + quantity +
+                ", price=" + price +
+                ", date=" + date +
                 '}';
     }
 }

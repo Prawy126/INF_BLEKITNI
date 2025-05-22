@@ -56,25 +56,25 @@ public class OrderPanel extends VBox {
 
         TableColumn<Order, String> productCol = new TableColumn<>("Produkt");
         productCol.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getProdukt().getName()));
+                new SimpleStringProperty(cellData.getValue().getProduct().getName()));
         productCol.setPrefWidth(150);
 
         TableColumn<Order, Integer> quantityCol = new TableColumn<>("Ilość");
         quantityCol.setCellValueFactory(cellData ->
-                new SimpleIntegerProperty(cellData.getValue().getIlosc()).asObject());
+                new SimpleIntegerProperty(cellData.getValue().getQuantity()).asObject());
 
         TableColumn<Order, String> supplierCol = new TableColumn<>("Pracownik");
         supplierCol.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getPracownik().getLogin()));
+                new SimpleStringProperty(cellData.getValue().getEmployee().getLogin()));
         supplierCol.setPrefWidth(150);
 
         TableColumn<Order, String> dateCol = new TableColumn<>("Data zamówienia");
         dateCol.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getData().toString()));
+                new SimpleStringProperty(cellData.getValue().getDate().toString()));
 
         TableColumn<Order, String> priceCol = new TableColumn<>("Cena");
         priceCol.setCellValueFactory(cellData ->
-                new SimpleStringProperty(String.format("%.2f zł", cellData.getValue().getCena())));
+                new SimpleStringProperty(String.format("%.2f zł", cellData.getValue().getPrice())));
 
         ordersTable.getColumns().addAll(idCol, productCol, quantityCol, supplierCol, dateCol, priceCol);
 

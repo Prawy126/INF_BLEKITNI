@@ -37,7 +37,7 @@ class WarehouseRepositoryTest {
         testWarehouse = new Warehouse(testProduct, 120);
         assertDoesNotThrow(() -> warehouseRepo.dodajStanMagazynowy(testWarehouse),
                 "Should add warehouse record without exception");
-        // no generated ID here (uses product PK), so ensure getProdukt().getId() matches
+        // no generated ID here (uses product PK), so ensure getProduct().getId() matches
         assertEquals(testProduct.getId(), testWarehouse.getProdukt().getId());
     }
 

@@ -113,7 +113,7 @@ public class Logistician {
      *
      * @param orderId ID zamówienia do przydzielenia
      */
-    public void przydzielZamowienie(int orderId) {
+    public void assignOrder(int orderId) {
         // tutaj można dodać logikę przydziału zamówienia
         System.out.println("Logistyk " + employee.getName() + " przydzielił zam" +
                 "ówienie o ID: " + orderId);

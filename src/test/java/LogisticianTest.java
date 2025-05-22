@@ -77,6 +77,6 @@ class LogisticianTest {
 
     @Test
     void testAssignOrder() {
-        assertDoesNotThrow(() -> logistician.przydzielZamowienie(123));
+        assertDoesNotThrow(() -> logistician.assignOrder(123));
     }
 }

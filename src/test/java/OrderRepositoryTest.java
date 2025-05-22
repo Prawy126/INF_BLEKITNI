@@ -30,11 +30,11 @@ public class OrderRepositoryTest {
 
             // === 2. Dodanie nowego zamówienia ===
             Order order = new Order();
-            order.setProdukt(produkt);
-            order.setPracownik(pracownik);
-            order.setIlosc(10);
-            order.setCena(new BigDecimal("59.90"));
-            order.setData(sdf.parse("2025-05-12"));
+            order.setProduct(produkt);
+            order.setEmployee(pracownik);
+            order.setQuantity(10);
+            order.setPrice(new BigDecimal("59.90"));
+            order.setDate(sdf.parse("2025-05-12"));
 
             orderRepo.dodajZamowienie(order);
             System.out.println(">>> Dodano zamówienie.");
@@ -44,8 +44,8 @@ public class OrderRepositoryTest {
             wypiszZamowienia(orderRepo.pobierzWszystkieZamowienia());
 
             // === 4. Aktualizacja ===
-            order.setIlosc(20);
-            order.setCena(new BigDecimal("119.80"));
+            order.setQuantity(20);
+            order.setPrice(new BigDecimal("119.80"));
             orderRepo.aktualizujZamowienie(order);
             System.out.println(">>> Zaktualizowano zamówienie.");
 
@@ -77,10 +77,10 @@ public class OrderRepositoryTest {
             for (Order z : zamowienia) {
                 System.out.printf("ID: %-3d | Produkt: %-20s | Ilość: %-3d | Cena: %-7.2f | Data: %s%n",
                         z.getId(),
-                        z.getProdukt().getName(), // poprawiono z getNazwa()
-                        z.getIlosc(),
-                        z.getCena(),
-                        z.getData().toString()
+                        z.getProduct().getName(), // poprawiono z getNazwa()
+                        z.getQuantity(),
+                        z.getPrice(),
+                        z.getDate().toString()
                 );
             }
         }
