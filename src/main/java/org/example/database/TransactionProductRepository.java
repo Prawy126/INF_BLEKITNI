@@ -1,6 +1,6 @@
 /*
  * Classname: TransactionProductRepository
- * Version information: 1.4
+ * Version information: 1.5
  * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
@@ -42,17 +42,17 @@ public class TransactionProductRepository {
      *
      * @param tp obiekt TransactionProduct do zapisania
      */
-    public void dodajTransactionProduct(TransactionProduct tp) {
-        logger.debug("dodajTransactionProduct() – start, tp={}", tp);
+    public void addTransactionProduct(TransactionProduct tp) {
+        logger.debug("addTransactionProduct() – start, tp={}", tp);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             em.persist(tp);
             tx.commit();
-            logger.info("dodajTransactionProduct() – dodano: {}", tp);
+            logger.info("addTransactionProduct() – dodano: {}", tp);
         } catch (Exception e) {
-            logger.error("dodajTransactionProduct() – błąd podczas dodawania tp", e);
+            logger.error("addTransactionProduct() – błąd podczas dodawania tp", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
@@ -66,7 +66,7 @@ public class TransactionProductRepository {
      * @param productId     identyfikator produktu
      * @return obiekt TransactionProduct lub null, jeśli nie znaleziono
      */
-    public TransactionProduct znajdzPoId(int transactionId, int productId) {
+    public TransactionProduct findById(int transactionId, int productId) {
         logger.debug("findById() – start, txId={}, prodId={}", transactionId, productId);
         EntityManager em = emf.createEntityManager();
         try {
@@ -88,8 +88,8 @@ public class TransactionProductRepository {
      * @param transactionId identyfikator transakcji
      * @return lista obiektów TransactionProduct lub pusta lista
      */
-    public List<TransactionProduct> pobierzPoTransakcji(int transactionId) {
-        logger.debug("pobierzPoTransakcji() – start, txId={}", transactionId);
+    public List<TransactionProduct> getByTransaction(int transactionId) {
+        logger.debug("getByTransaction() – start, txId={}", transactionId);
         EntityManager em = emf.createEntityManager();
         try {
             TypedQuery<TransactionProduct> q = em.createQuery(
@@ -97,10 +97,10 @@ public class TransactionProductRepository {
                     TransactionProduct.class);
             q.setParameter("txId", transactionId);
             List<TransactionProduct> list = q.getResultList();
-            logger.info("pobierzPoTransakcji() – zwrócono {} pozycji", list.size());
+            logger.info("getByTransaction() – zwrócono {} pozycji", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("pobierzPoTransakcji() – błąd podczas zapytania", e);
+            logger.error("getByTransaction() – błąd podczas zapytania", e);
             return List.of();
         } finally {
             em.close();
@@ -113,8 +113,8 @@ public class TransactionProductRepository {
      * @param productId identyfikator produktu
      * @return lista obiektów TransactionProduct lub pusta lista
      */
-    public List<TransactionProduct> pobierzPoProdukcie(int productId) {
-        logger.debug("pobierzPoProdukcie() – start, prodId={}", productId);
+    public List<TransactionProduct> getByProduct(int productId) {
+        logger.debug("getByProduct() – start, prodId={}", productId);
         EntityManager em = emf.createEntityManager();
         try {
             TypedQuery<TransactionProduct> q = em.createQuery(
@@ -122,10 +122,10 @@ public class TransactionProductRepository {
                     TransactionProduct.class);
             q.setParameter("prodId", productId);
             List<TransactionProduct> list = q.getResultList();
-            logger.info("pobierzPoProdukcie() – zwrócono {} pozycji", list.size());
+            logger.info("getByProduct() – zwrócono {} pozycji", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("pobierzPoProdukcie() – błąd podczas zapytania", e);
+            logger.error("getByProduct() – błąd podczas zapytania", e);
             return List.of();
         } finally {
             em.close();
@@ -137,17 +137,17 @@ public class TransactionProductRepository {
      *
      * @return lista wszystkich obiektów TransactionProduct lub pusta lista
      */
-    public List<TransactionProduct> pobierzWszystkie() {
-        logger.debug("pobierzWszystkie() – start");
+    public List<TransactionProduct> getAllTransactionProducts() {
+        logger.debug("getAllTransactionProducts() – start");
         EntityManager em = emf.createEntityManager();
         try {
             List<TransactionProduct> list = em.createQuery(
                             "SELECT tp FROM TransactionProduct tp", TransactionProduct.class)
                     .getResultList();
-            logger.info("pobierzWszystkie() – zwrócono {} pozycji", list.size());
+            logger.info("getAllTransactionProducts() – zwrócono {} pozycji", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("pobierzWszystkie() – błąd podczas zapytania", e);
+            logger.error("getAllTransactionProducts() – błąd podczas zapytania", e);
             return List.of();
         } finally {
             em.close();
@@ -159,17 +159,17 @@ public class TransactionProductRepository {
      *
      * @param tp obiekt TransactionProduct do zaktualizowania
      */
-    public void aktualizujTransactionProduct(TransactionProduct tp) {
-        logger.debug("aktualizujTransactionProduct() – start, tp={}", tp);
+    public void updateTransactionProduct(TransactionProduct tp) {
+        logger.debug("updateTransactionProduct() – start, tp={}", tp);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             em.merge(tp);
             tx.commit();
-            logger.info("aktualizujTransactionProduct() – zaktualizowano: {}", tp);
+            logger.info("updateTransactionProduct() – zaktualizowano: {}", tp);
         } catch (Exception e) {
-            logger.error("aktualizujTransactionProduct() – błąd podczas aktualizacji", e);
+            logger.error("updateTransactionProduct() – błąd podczas aktualizacji", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
@@ -181,8 +181,8 @@ public class TransactionProductRepository {
      *
      * @param tp obiekt TransactionProduct do usunięcia
      */
-    public void usunTransactionProduct(TransactionProduct tp) {
-        logger.debug("usunTransactionProduct() – start, tp={}", tp);
+    public void removeTransactionProduct(TransactionProduct tp) {
+        logger.debug("removeTransactionProduct() – start, tp={}", tp);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -190,13 +190,13 @@ public class TransactionProductRepository {
             TransactionProduct managed = em.find(TransactionProduct.class, tp.getId());
             if (managed != null) {
                 em.remove(managed);
-                logger.info("usunTransactionProduct() – usunięto: {}", tp);
+                logger.info("removeTransactionProduct() – usunięto: {}", tp);
             } else {
-                logger.warn("usunTransactionProduct() – nie znaleziono: {}", tp);
+                logger.warn("removeTransactionProduct() – nie znaleziono: {}", tp);
             }
             tx.commit();
         } catch (Exception e) {
-            logger.error("usunTransactionProduct() – błąd podczas usuwania", e);
+            logger.error("removeTransactionProduct() – błąd podczas usuwania", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
