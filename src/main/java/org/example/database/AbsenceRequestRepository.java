@@ -1,10 +1,9 @@
 /*
  * Classname: AbsenceRequestRepository
- * Version information: 1.3
- * Date: 2025-05-21
+ * Version information: 1.4
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
-
 
 package org.example.database;
 
@@ -27,11 +26,17 @@ public class AbsenceRequestRepository {
     private static final Logger logger = LogManager.getLogger(AbsenceRequestRepository.class);
     private final EntityManagerFactory emf;
 
+    /** Konstruktor inicjalizujący EntityManagerFactory. */
     public AbsenceRequestRepository() {
         this.emf = Persistence.createEntityManagerFactory("myPU");
         logger.info("Utworzono AbsenceRequestRepository, EMF={}", emf);
     }
 
+    /**
+     * Dodaje nowy wniosek o nieobecność.
+     *
+     * @param request obiekt wniosku do dodania
+     */
     public void dodajWniosek(AbsenceRequest request) {
         logger.debug("dodajWniosek() - start, request={}", request);
         EntityManager em = emf.createEntityManager();
@@ -50,6 +55,12 @@ public class AbsenceRequestRepository {
         }
     }
 
+    /**
+     * Pobiera wniosek o nieobecność po jego ID.
+     *
+     * @param id identyfikator wniosku
+     * @return znaleziony wniosek lub null
+     */
     public AbsenceRequest znajdzWniosekPoId(int id) {
         logger.debug("znajdzWniosekPoId() - start, id={}", id);
         EntityManager em = emf.createEntityManager();
@@ -66,6 +77,11 @@ public class AbsenceRequestRepository {
         }
     }
 
+    /**
+     * Pobiera wszystkie wnioski o nieobecność.
+     *
+     * @return lista wniosków (może być pusta)
+     */
     public List<AbsenceRequest> pobierzWszystkieWnioski() {
         logger.debug("pobierzWszystkieWnioski() - start");
         EntityManager em = emf.createEntityManager();
@@ -84,6 +100,11 @@ public class AbsenceRequestRepository {
         }
     }
 
+    /**
+     * Usuwa wniosek o nieobecność o podanym ID.
+     *
+     * @param id identyfikator wniosku do usunięcia
+     */
     public void usunWniosek(int id) {
         logger.debug("usunWniosek() - start, id={}", id);
         EntityManager em = emf.createEntityManager();
@@ -107,6 +128,11 @@ public class AbsenceRequestRepository {
         }
     }
 
+    /**
+     * Aktualizuje istniejący wniosek o nieobecność.
+     *
+     * @param request obiekt wniosku z zmienionymi danymi
+     */
     public void aktualizujWniosek(AbsenceRequest request) {
         logger.debug("aktualizujWniosek() - start, request={}", request);
         EntityManager em = emf.createEntityManager();
@@ -127,6 +153,12 @@ public class AbsenceRequestRepository {
 
     // --- metody wyszukiwania ---
 
+    /**
+     * Pobiera wszystkie wnioski danego pracownika.
+     *
+     * @param pracownik obiekt pracownika
+     * @return lista wniosków przypisanych do pracownika
+     */
     public List<AbsenceRequest> znajdzWnioskiPracownika(Employee pracownik) {
         logger.debug("znajdzWnioskiPracownika() - pracownik={}", pracownik);
         EntityManager em = emf.createEntityManager();
@@ -149,6 +181,12 @@ public class AbsenceRequestRepository {
         }
     }
 
+    /**
+     * Pobiera wnioski pracownika na podstawie jego ID.
+     *
+     * @param idPracownika identyfikator pracownika
+     * @return lista wniosków
+     */
     public List<AbsenceRequest> znajdzWnioskiPracownikaPoId(int idPracownika) {
         logger.debug("znajdzWnioskiPracownikaPoId() - idPracownika={}", idPracownika);
         EntityManager em = emf.createEntityManager();
@@ -171,6 +209,12 @@ public class AbsenceRequestRepository {
         }
     }
 
+    /**
+     * Pobiera wnioski o danym typie.
+     *
+     * @param typWniosku typ wniosku (np. "Urlop wypoczynkowy")
+     * @return lista wniosków
+     */
     public List<AbsenceRequest> znajdzWnioskiPoTypie(String typWniosku) {
         logger.debug("znajdzWnioskiPoTypie() - typWniosku={}", typWniosku);
         EntityManager em = emf.createEntityManager();
@@ -193,6 +237,12 @@ public class AbsenceRequestRepository {
         }
     }
 
+    /**
+     * Pobiera wnioski o danym statusie.
+     *
+     * @param status status wniosku (enum AbsenceRequest.StatusWniosku)
+     * @return lista wniosków
+     */
     public List<AbsenceRequest> znajdzWnioskiPoStatusie(AbsenceRequest.StatusWniosku status) {
         logger.debug("znajdzWnioskiPoStatusie() - status={}", status);
         EntityManager em = emf.createEntityManager();
@@ -215,6 +265,12 @@ public class AbsenceRequestRepository {
         }
     }
 
+    /**
+     * Pobiera wnioski rozpoczynające się w lub po podanej dacie.
+     *
+     * @param dataOd data początkowa
+     * @return lista wniosków
+     */
     public List<AbsenceRequest> znajdzWnioskiOdDaty(Date dataOd) {
         logger.debug("znajdzWnioskiOdDaty() - dataOd={}", dataOd);
         EntityManager em = emf.createEntityManager();
@@ -237,6 +293,12 @@ public class AbsenceRequestRepository {
         }
     }
 
+    /**
+     * Pobiera wnioski kończące się w lub przed podaną datą.
+     *
+     * @param dataDo data końcowa
+     * @return lista wniosków
+     */
     public List<AbsenceRequest> znajdzWnioskiDoDaty(Date dataDo) {
         logger.debug("znajdzWnioskiDoDaty() - dataDo={}", dataDo);
         EntityManager em = emf.createEntityManager();
@@ -259,6 +321,13 @@ public class AbsenceRequestRepository {
         }
     }
 
+    /**
+     * Pobiera wnioski mieszczące się w przedziale dat.
+     *
+     * @param dataOd data początkowa
+     * @param dataDo data końcowa
+     * @return lista wniosków
+     */
     public List<AbsenceRequest> znajdzWnioskiWZakresieDat(Date dataOd, Date dataDo) {
         logger.debug("znajdzWnioskiWZakresieDat() - dataOd={}, dataDo={}", dataOd, dataDo);
         EntityManager em = emf.createEntityManager();
@@ -282,6 +351,13 @@ public class AbsenceRequestRepository {
         }
     }
 
+    /**
+     * Pobiera wnioski nachodzące na podany przedział dat.
+     *
+     * @param dataOd data początkowa
+     * @param dataDo data końcowa
+     * @return lista wniosków
+     */
     public List<AbsenceRequest> znajdzWnioskiNachodzaceNaZakresDat(Date dataOd, Date dataDo) {
         logger.debug("znajdzWnioskiNachodzaceNaZakresDat() - dataOd={}, dataDo={}", dataOd, dataDo);
         EntityManager em = emf.createEntityManager();
@@ -305,6 +381,7 @@ public class AbsenceRequestRepository {
         }
     }
 
+    /** Zamyka fabrykę EntityManagerFactory. */
     public void close() {
         logger.debug("close() - start");
         if (emf.isOpen()) {

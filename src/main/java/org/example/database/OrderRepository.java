@@ -1,10 +1,9 @@
 /*
  * Classname: OrderRepository
- * Version information: 1.3
- * Date: 2025-05-21
+ * Version information: 1.4
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
-
 
 package org.example.database;
 
@@ -26,11 +25,13 @@ public class OrderRepository {
     private static final Logger logger = LogManager.getLogger(OrderRepository.class);
     private final EntityManagerFactory emf;
 
+    /** Konstruktor inicjalizujący EntityManagerFactory. */
     public OrderRepository() {
         this.emf = Persistence.createEntityManagerFactory("myPU");
         logger.info("Utworzono OrderRepository, EMF={}", emf);
     }
 
+    /** Dodaje nowe zamówienie. */
     public void dodajZamowienie(Order zamowienie) {
         logger.debug("dodajZamowienie() - start, zamowienie={}", zamowienie);
         EntityManager em = emf.createEntityManager();
@@ -49,6 +50,7 @@ public class OrderRepository {
         }
     }
 
+    /** Pobiera zamówienie po ID. */
     public Order znajdzZamowieniePoId(int id) {
         logger.debug("znajdzZamowieniePoId() - start, id={}", id);
         EntityManager em = emf.createEntityManager();
@@ -65,6 +67,7 @@ public class OrderRepository {
         }
     }
 
+    /** Pobiera wszystkie zamówienia. */
     public List<Order> pobierzWszystkieZamowienia() {
         logger.debug("pobierzWszystkieZamowienia() - start");
         EntityManager em = emf.createEntityManager();
@@ -82,6 +85,7 @@ public class OrderRepository {
         }
     }
 
+    /** Usuwa zamówienie o podanym ID. */
     public void usunZamowienie(int id) {
         logger.debug("usunZamowienie() - start, id={}", id);
         EntityManager em = emf.createEntityManager();
@@ -105,6 +109,7 @@ public class OrderRepository {
         }
     }
 
+    /** Aktualizuje istniejące zamówienie. */
     public void aktualizujZamowienie(Order zamowienie) {
         logger.debug("aktualizujZamowienie() - start, zamowienie={}", zamowienie);
         EntityManager em = emf.createEntityManager();
@@ -123,6 +128,7 @@ public class OrderRepository {
         }
     }
 
+    /** Pobiera zamówienia po ID produktu. */
     public List<Order> znajdzZamowieniaPoIdProduktu(int idProduktu) {
         logger.debug("znajdzZamowieniaPoIdProduktu() - idProduktu={}", idProduktu);
         EntityManager em = emf.createEntityManager();
@@ -142,6 +148,7 @@ public class OrderRepository {
         }
     }
 
+    /** Pobiera zamówienia po ID pracownika. */
     public List<Order> znajdzZamowieniaPoIdPracownika(int idPracownika) {
         logger.debug("znajdzZamowieniaPoIdPracownika() - idPracownika={}", idPracownika);
         EntityManager em = emf.createEntityManager();
@@ -161,6 +168,7 @@ public class OrderRepository {
         }
     }
 
+    /** Pobiera zamówienia dokonane w danym dniu. */
     public List<Order> znajdzZamowieniaPoDacie(LocalDate data) {
         logger.debug("znajdzZamowieniaPoDacie() - data={}", data);
         EntityManager em = emf.createEntityManager();
@@ -180,6 +188,7 @@ public class OrderRepository {
         }
     }
 
+    /** Pobiera zamówienia w podanym przedziale dat. */
     public List<Order> znajdzZamowieniaWZakresieDat(LocalDate dataOd, LocalDate dataDo) {
         logger.debug("znajdzZamowieniaWZakresieDat() - dataOd={}, dataDo={}", dataOd, dataDo);
         EntityManager em = emf.createEntityManager();
@@ -200,13 +209,14 @@ public class OrderRepository {
         }
     }
 
+    /** Pobiera zamówienia z minimalną ilością większą lub równą podanej. */
     public List<Order> znajdzZamowieniaZMinimalnaIloscia(int minimalnaIlosc) {
         logger.debug("znajdzZamowieniaZMinimalnaIloscia() - minimalnaIlosc={}", minimalnaIlosc);
         EntityManager em = emf.createEntityManager();
         try {
             List<Order> list = em.createQuery(
                             "SELECT o FROM Order o WHERE o.ilosc >= :minimalnaIlosc", Order.class)
-                    .setParameter("minimalnaIlosc", minimalnaIlosc)
+                    .setParameter("minimalnaIloscia", minimalnaIlosc)
                     .getResultList();
             logger.info("znajdzZamowieniaZMinimalnaIloscia() - znaleziono {} zamówień", list.size());
             return list;
@@ -219,6 +229,7 @@ public class OrderRepository {
         }
     }
 
+    /** Pobiera zamówienia o cenie mieszczącej się w podanym przedziale. */
     public List<Order> znajdzZamowieniaWPrzedzialeCenowym(BigDecimal minCena, BigDecimal maxCena) {
         logger.debug("znajdzZamowieniaWPrzedzialeCenowym() - minCena={}, maxCena={}", minCena, maxCena);
         EntityManager em = emf.createEntityManager();
@@ -239,6 +250,7 @@ public class OrderRepository {
         }
     }
 
+    /** Zamyka fabrykę EntityManagerFactory. */
     public void close() {
         logger.debug("close() - start");
         if (emf.isOpen()) {

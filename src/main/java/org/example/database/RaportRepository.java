@@ -24,16 +24,27 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Repozytorium zarządzające encjami Raport w bazie danych.
+ * Umożliwia tworzenie, odczyt, aktualizację oraz usuwanie raportów.
+ */
 public class RaportRepository {
     private static final Logger logger = LogManager.getLogger(RaportRepository.class);
     private final EntityManagerFactory emf;
 
+    /**
+     * Konstruktor inicjalizujący EntityManagerFactory dla persistence unit "myPU".
+     */
     public RaportRepository() {
         this.emf = Persistence.createEntityManagerFactory("myPU");
         logger.info("Utworzono RaportRepository, EMF={}", emf);
     }
 
-    /** Dodaje nowy raport. */
+    /**
+     * Dodaje nowy raport do bazy.
+     *
+     * @param raport obiekt Raport do zapisania
+     */
     public void dodajRaport(Raport raport) {
         logger.debug("dodajRaport() – start, raport={}", raport);
         EntityManager em = emf.createEntityManager();
@@ -52,7 +63,12 @@ public class RaportRepository {
         }
     }
 
-    /** Znajduje raport po ID. */
+    /**
+     * Znajduje raport o podanym identyfikatorze.
+     *
+     * @param id identyfikator raportu
+     * @return znaleziony obiekt Raport lub null, jeśli nie istnieje
+     */
     public Raport znajdzRaportPoId(int id) {
         logger.debug("znajdzRaportPoId() – start, id={}", id);
         EntityManager em = emf.createEntityManager();
@@ -69,7 +85,11 @@ public class RaportRepository {
         }
     }
 
-    /** Pobiera wszystkie raporty. */
+    /**
+     * Pobiera wszystkie raporty z bazy.
+     *
+     * @return lista wszystkich obiektów Raport, lub pusta lista w przypadku błędu
+     */
     public List<Raport> pobierzWszystkieRaporty() {
         logger.debug("pobierzWszystkieRaporty() – start");
         EntityManager em = emf.createEntityManager();
@@ -87,12 +107,13 @@ public class RaportRepository {
         }
     }
 
+
     /**
      * Pobiera raporty danego pracownika przypisane na konkretny dzień.
      *
      * @param pracownikId identyfikator pracownika
-     * @param dzien       dzień do sprawdzenia (bez czasu)
-     * @return lista raportów z tego dnia lub pusta lista
+     * @param dzien        dzień do sprawdzenia (data bez czasu)
+     * @return lista raportów z danego dnia lub pusta lista
      */
     public List<Raport> pobierzRaportyPracownikaDzien(int pracownikId, LocalDate dzien) {
         logger.debug("pobierzRaportyPracownikaDzien() – start, pracownikId={}, dzien={}", pracownikId, dzien);
@@ -102,8 +123,7 @@ public class RaportRepository {
                             "SELECT r FROM Raport r " +
                                     "WHERE r.pracownik.id = :pid " +
                                     "  AND r.dataPoczatku = :data", Raport.class)
-                    .setParameter("pid",  pracownikId)
-                    // użycie java.sql.Date.valueOf dla LocalDate
+                    .setParameter("pid", pracownikId)
                     .setParameter("data", java.sql.Date.valueOf(dzien), TemporalType.DATE)
                     .getResultList();
             logger.info("pobierzRaportyPracownikaDzien() – znaleziono {} raportów", list.size());
@@ -117,7 +137,12 @@ public class RaportRepository {
         }
     }
 
-    /** Aktualizuje raport. */
+
+    /**
+     * Aktualizuje istniejący raport w bazie.
+     *
+     * @param raport obiekt Raport do zaktualizowania
+     */
     public void aktualizujRaport(Raport raport) {
         logger.debug("aktualizujRaport() – start, raport={}", raport);
         EntityManager em = emf.createEntityManager();
@@ -136,8 +161,11 @@ public class RaportRepository {
         }
     }
 
+
     /**
-     * Usuwa raport z bazy oraz (jeśli istnieje) plik na dysku.
+     * Usuwa raport z bazy oraz powiązany plik z dysku (jeśli istnieje).
+     *
+     * @param id identyfikator raportu do usunięcia
      */
     public void usunRaport(int id) {
         logger.debug("usunRaport() – start, id={}", id);
@@ -170,10 +198,17 @@ public class RaportRepository {
         }
     }
 
+
     // =========================================================
-    // === Poniżej metody wyszukiwania raportów po kryteriach ===
+    // === Metody wyszukiwania raportów po różnych kryteriach ===
     // =========================================================
 
+    /**
+     * Wyszukuje raporty zawierające fragment typu raportu.
+     *
+     * @param typFragment fragment ciągu typu raportu (np. "finansowy")
+     * @return lista pasujących raportów lub pusta lista
+     */
     public List<Raport> znajdzPoTypie(String typFragment) {
         logger.debug("znajdzPoTypie() – typFragment={}", typFragment);
         EntityManager em = emf.createEntityManager();
@@ -194,6 +229,13 @@ public class RaportRepository {
         }
     }
 
+    /**
+     * Wyszukuje raporty o dacie rozpoczęcia w podanym przedziale.
+     *
+     * @param startDate data początkowa (włącznie)
+     * @param endDate   data końcowa (włącznie)
+     * @return lista raportów lub pusta lista
+     */
     public List<Raport> znajdzPoDaciePoczatku(Date startDate, Date endDate) {
         logger.debug("znajdzPoDaciePoczatku() – startDate={}, endDate={}", startDate, endDate);
         EntityManager em = emf.createEntityManager();
@@ -215,6 +257,13 @@ public class RaportRepository {
         }
     }
 
+    /**
+     * Wyszukuje raporty o dacie zakończenia w podanym przedziale.
+     *
+     * @param startDate data początku przedziału (włącznie)
+     * @param endDate   data końca przedziału (włącznie)
+     * @return lista raportów lub pusta lista
+     */
     public List<Raport> znajdzPoDacieZakonczenia(Date startDate, Date endDate) {
         logger.debug("znajdzPoDacieZakonczenia() – startDate={}, endDate={}", startDate, endDate);
         EntityManager em = emf.createEntityManager();
@@ -236,6 +285,13 @@ public class RaportRepository {
         }
     }
 
+
+    /**
+     * Wyszukuje raporty przypisane do konkretnego pracownika.
+     *
+     * @param pracownikId identyfikator pracownika
+     * @return lista raportów pracownika lub pusta lista
+     */
     public List<Raport> znajdzPoPracowniku(int pracownikId) {
         logger.debug("znajdzPoPracowniku() – pracownikId={}", pracownikId);
         EntityManager em = emf.createEntityManager();

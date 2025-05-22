@@ -1,10 +1,9 @@
 /*
  * Classname: AddressRepository
- * Version information: 1.3
- * Date: 2025-05-21
+ * Version information: 1.4
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
-
 
 package org.example.database;
 
@@ -19,15 +18,23 @@ import org.example.sys.Address;
 
 import java.util.List;
 
-public class AddressRepository {
+public class AddressRepository implements AutoCloseable {
     private static final Logger logger = LogManager.getLogger(AddressRepository.class);
     private final EntityManagerFactory emf;
 
+    /**
+     * Tworzy repozytorium i inicjalizuje EntityManagerFactory.
+     */
     public AddressRepository() {
         this.emf = Persistence.createEntityManagerFactory("myPU");
         logger.info("Utworzono AddressRepository, EMF={}", emf);
     }
 
+    /**
+     * Dodaje nowy adres do bazy.
+     *
+     * @param address obiekt Address do zapisania
+     */
     public void dodajAdres(Address address) {
         logger.debug("dodajAdres() - start, address={}", address);
         EntityManager em = emf.createEntityManager();
@@ -46,6 +53,12 @@ public class AddressRepository {
         }
     }
 
+    /**
+     * Pobiera adres o podanym identyfikatorze.
+     *
+     * @param id identyfikator Address
+     * @return znaleziony Address lub null, jeśli brak
+     */
     public Address znajdzAdresPoId(int id) {
         logger.debug("znajdzAdresPoId() - start, id={}", id);
         EntityManager em = emf.createEntityManager();
@@ -62,6 +75,11 @@ public class AddressRepository {
         }
     }
 
+    /**
+     * Pobiera listę wszystkich adresów w bazie.
+     *
+     * @return lista obiektów Address (może być pusta)
+     */
     public List<Address> pobierzWszystkieAdresy() {
         logger.debug("pobierzWszystkieAdresy() - start");
         EntityManager em = emf.createEntityManager();
@@ -79,6 +97,11 @@ public class AddressRepository {
         }
     }
 
+    /**
+     * Usuwa adres o podanym identyfikatorze.
+     *
+     * @param id identyfikator Address do usunięcia
+     */
     public void usunAdres(int id) {
         logger.debug("usunAdres() - start, id={}", id);
         EntityManager em = emf.createEntityManager();
@@ -102,6 +125,12 @@ public class AddressRepository {
         }
     }
 
+    /**
+     * Wyszukuje adresy po fragmencie nazwy miejscowości (case-insensitive).
+     *
+     * @param miejscowosc fragment nazwy miejscowości
+     * @return lista pasujących Address (może być pusta)
+     */
     public List<Address> znajdzPoMiejscowosci(String miejscowosc) {
         logger.debug("znajdzPoMiejscowosci() - miejscowosc={}", miejscowosc);
         EntityManager em = emf.createEntityManager();
@@ -122,6 +151,12 @@ public class AddressRepository {
         }
     }
 
+    /**
+     * Wyszukuje adresy po numerze domu.
+     *
+     * @param numerDomu numer domu
+     * @return lista pasujących Address
+     */
     public List<Address> znajdzPoNumerzeDomu(String numerDomu) {
         logger.debug("znajdzPoNumerzeDomu() - numerDomu={}", numerDomu);
         EntityManager em = emf.createEntityManager();
@@ -142,6 +177,12 @@ public class AddressRepository {
         }
     }
 
+    /**
+     * Wyszukuje adresy po numerze mieszkania.
+     *
+     * @param numerMieszkania numer mieszkania
+     * @return lista pasujących Address
+     */
     public List<Address> znajdzPoNumerzeMieszkania(String numerMieszkania) {
         logger.debug("znajdzPoNumerzeMieszkania() - numerMieszkania={}", numerMieszkania);
         EntityManager em = emf.createEntityManager();
@@ -162,6 +203,12 @@ public class AddressRepository {
         }
     }
 
+    /**
+     * Wyszukuje adresy po kodzie pocztowym.
+     *
+     * @param kodPocztowy kod pocztowy
+     * @return lista pasujących Address
+     */
     public List<Address> znajdzPoKodPocztowym(String kodPocztowy) {
         logger.debug("znajdzPoKodPocztowym() - kodPocztowy={}", kodPocztowy);
         EntityManager em = emf.createEntityManager();
@@ -182,6 +229,12 @@ public class AddressRepository {
         }
     }
 
+    /**
+     * Wyszukuje adresy po mieście (case-insensitive).
+     *
+     * @param miasto nazwa miasta
+     * @return lista pasujących Address
+     */
     public List<Address> znajdzPoMiescie(String miasto) {
         logger.debug("znajdzPoMiescie() - miasto={}", miasto);
         EntityManager em = emf.createEntityManager();
@@ -202,6 +255,10 @@ public class AddressRepository {
         }
     }
 
+    /**
+     * Zamyka fabrykę EntityManagerFactory.
+     */
+    @Override
     public void close() {
         logger.debug("close() - zamykanie EMF");
         if (emf.isOpen()) {

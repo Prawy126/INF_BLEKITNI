@@ -1,7 +1,7 @@
 /*
  * Classname: DatabaseInitializer
- * Version information: 1.1
- * Date: 2025-04-11
+ * Version information: 1.2
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -18,9 +18,18 @@ import java.sql.Statement;
 public class DatabaseInitializer implements ILacz {
     private static final Logger logger = LogManager.getLogger(DatabaseInitializer.class);
 
+    /**
+     * Tworzy bazę danych (jeśli nie istnieje) i importuje do niej struktury oraz dane
+     * na podstawie pliku SQL.
+     * <p>
+     * Najpierw łączy się z serwerem MySQL bez wskazania konkretnej bazy,
+     * tworzy bazę (DB_NAME), a następnie ponownie łączy się już z nią i
+     * importuje zawartość pliku Stonka.sql.
+     * </p>
+     */
     public static void initialize() {
-        // Połączenie do serwera MySQL (bez wskazania konkretnej bazy)
         logger.info("Rozpoczynam inicjalizację bazy danych");
+        // Połączenie do serwera MySQL (bez wskazania konkretnej bazy)
         try (Connection conn = DriverManager.getConnection(MYSQL_SERVER_URL, MYSQL_USER, MYSQL_PASSWORD)) {
             logger.debug("Połączenie do serwera MySQL nawiązane: {}", MYSQL_SERVER_URL);
             logger.info("Tworzenie bazy danych: {}", DB_NAME);
@@ -47,11 +56,11 @@ public class DatabaseInitializer implements ILacz {
     }
 
     /**
-     * Wykonuje skrypt SQL wczytany z pliku.
+     * Wczytuje i wykonuje kolejne polecenia SQL zawarte w podanym pliku.
      *
-     * @param conn     Połączenie z bazą danych
-     * @param filePath Ścieżka do pliku SQL
-     * @throws Exception w przypadku błędu odczytu lub wykonania zapytania
+     * @param conn     aktywne połączenie do bazy, w której mają zostać wykonane zapytania
+     * @param filePath ścieżka do pliku SQL zawierającego skrypt DDL i DML
+     * @throws Exception gdy odczyt pliku lub wykonanie zapytań zakończy się niepowodzeniem
      */
     private static void executeSqlScript(Connection conn, String filePath) throws Exception {
         logger.debug("Wczytywanie skryptu SQL z pliku: {}", filePath);

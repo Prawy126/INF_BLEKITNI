@@ -1,7 +1,7 @@
 /*
  * Classname: ProductRepository
- * Version information: 1.3
- * Date: 2025-05-21
+ * Version information: 1.4
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -25,12 +25,19 @@ public class ProductRepository {
     private static final Logger logger = LogManager.getLogger(ProductRepository.class);
     private final EntityManagerFactory emf;
 
+    /**
+     * Konstruktor inicjalizujący fabrykę EntityManagerFactory.
+     */
     public ProductRepository() {
         this.emf = Persistence.createEntityManagerFactory("myPU");
         logger.info("Utworzono ProductRepository, EMF={}", emf);
     }
 
-    /** Dodaje nowy produkt. */
+    /**
+     * Dodaje nowy produkt do bazy.
+     *
+     * @param produkt obiekt produktu do zapisania
+     */
     public void dodajProdukt(Product produkt) {
         logger.debug("dodajProdukt() – start, produkt={}", produkt);
         EntityManager em = emf.createEntityManager();
@@ -49,7 +56,12 @@ public class ProductRepository {
         }
     }
 
-    /** Znajduje produkt po ID. */
+    /**
+     * Znajduje produkt o podanym identyfikatorze.
+     *
+     * @param id identyfikator produktu
+     * @return znaleziony produkt lub null, jeśli nie istnieje
+     */
     public Product znajdzProduktPoId(int id) {
         logger.debug("znajdzProduktPoId() – start, id={}", id);
         EntityManager em = emf.createEntityManager();
@@ -66,7 +78,11 @@ public class ProductRepository {
         }
     }
 
-    /** Pobiera wszystkie produkty. */
+    /**
+     * Pobiera wszystkie produkty z bazy.
+     *
+     * @return lista wszystkich produktów, pusta lista w razie błędu
+     */
     public List<Product> pobierzWszystkieProdukty() {
         logger.debug("pobierzWszystkieProdukty() – start");
         EntityManager em = emf.createEntityManager();
@@ -84,7 +100,12 @@ public class ProductRepository {
         }
     }
 
-    /** Pobiera produkty z danej kategorii. */
+    /**
+     * Pobiera produkty z określonej kategorii.
+     *
+     * @param kategoria nazwa kategorii
+     * @return lista produktów w danej kategorii, pusta lista w razie błędu
+     */
     public List<Product> pobierzProduktyPoKategorii(String kategoria) {
         logger.debug("pobierzProduktyPoKategorii() – start, kategoria={}", kategoria);
         EntityManager em = emf.createEntityManager();
@@ -103,8 +124,11 @@ public class ProductRepository {
             logger.debug("pobierzProduktyPoKategorii() – EntityManager zamknięty");
         }
     }
-
-    /** Usuwa produkt po ID. */
+    /**
+     * Usuwa produkt o wskazanym identyfikatorze.
+     *
+     * @param id identyfikator produktu do usunięcia
+     */
     public void usunProdukt(int id) {
         logger.debug("usunProdukt() – start, id={}", id);
         EntityManager em = emf.createEntityManager();
@@ -128,7 +152,11 @@ public class ProductRepository {
         }
     }
 
-    /** Aktualizuje cały obiekt produktu. */
+    /**
+     * Aktualizuje istniejący produkt.
+     *
+     * @param produkt obiekt produktu z nowymi danymi
+     */
     public void aktualizujProdukt(Product produkt) {
         logger.debug("aktualizujProdukt() – start, produkt={}", produkt);
         EntityManager em = emf.createEntityManager();
@@ -147,7 +175,12 @@ public class ProductRepository {
         }
     }
 
-    /** Aktualizuje cenę produktu. */
+    /**
+     * Aktualizuje cenę produktu.
+     *
+     * @param id       identyfikator produktu
+     * @param nowaCena nowa cena ≥ 0
+     */
     public void aktualizujCeneProduktu(int id, BigDecimal nowaCena) {
         logger.debug("aktualizujCeneProduktu() – start, id={}, nowaCena={}", id, nowaCena);
         EntityManager em = emf.createEntityManager();
@@ -172,7 +205,12 @@ public class ProductRepository {
         }
     }
 
-    /** Usuwa wszystkie produkty z danej kategorii i zwraca ich liczbę. */
+    /**
+     * Usuwa wszystkie produkty z danej kategorii.
+     *
+     * @param kategoria nazwa kategorii
+     * @return liczba usuniętych rekordów
+     */
     public int usunProduktyZKategorii(String kategoria) {
         logger.debug("usunProduktyZKategorii() – start, kategoria={}", kategoria);
         EntityManager em = emf.createEntityManager();
@@ -196,9 +234,13 @@ public class ProductRepository {
         }
     }
 
-    // === istniejąca metoda pracująca na BigDecimalach ===
-
-    /** Pobiera produkty w przedziale cenowym [minCena, maxCena]. */
+    /**
+     * Pobiera produkty w zadanym przedziale cenowym.
+     *
+     * @param minCena cena minimalna
+     * @param maxCena cena maksymalna
+     * @return lista produktów, pusta lista w razie błędu
+     */
     public List<Product> pobierzProduktyWZakresieCenowym(BigDecimal minCena, BigDecimal maxCena) {
         logger.debug("pobierzProduktyWZakresieCenowym() – start, minCena={}, maxCena={}", minCena, maxCena);
         EntityManager em = emf.createEntityManager();
@@ -220,7 +262,11 @@ public class ProductRepository {
         }
     }
 
-    /** Zwraca listę wszystkich unikalnych kategorii produktów. */
+    /**
+     * Zwraca listę wszystkich unikalnych kategorii produktów.
+     *
+     * @return lista kategorii lub pusta lista w razie błędu
+     */
     public List<String> pobierzKategorie() {
         logger.debug("pobierzKategorie() – start");
         EntityManager em = emf.createEntityManager();
@@ -241,7 +287,12 @@ public class ProductRepository {
 
     // === DODATKOWE METODY WYSZUKIWANIA ===
 
-    /** Znajduje produkty, których nazwa zawiera fragment. */
+    /**
+     * Znajduje produkty zawierające dany fragment w nazwie.
+     *
+     * @param fragName fragment nazwy
+     * @return lista produktów, pusta lista w razie błędu
+     */
     public List<Product> znajdzPoNazwie(String fragName) {
         logger.debug("znajdzPoNazwie() – start, fragName={}", fragName);
         EntityManager em = emf.createEntityManager();
@@ -262,7 +313,12 @@ public class ProductRepository {
         }
     }
 
-    /** Znajduje produkty o dokładnej cenie. */
+    /**
+     * Znajduje produkty o dokładnej cenie.
+     *
+     * @param cena dokładna wartość ceny
+     * @return lista produktów, pusta lista w razie błędu
+     */
     public List<Product> znajdzPoCenieDokladnej(BigDecimal cena) {
         logger.debug("znajdzPoCenieDokladnej() – cena={}", cena);
         EntityManager em = emf.createEntityManager();
@@ -282,7 +338,12 @@ public class ProductRepository {
         }
     }
 
-    /** Znajduje produkty o cenie ≥ minCena. */
+    /**
+     * Znajduje produkty o cenie nie mniejszej niż podana.
+     *
+     * @param minCena minimalna cena
+     * @return lista produktów, pusta lista w razie błędu
+     */
     public List<Product> znajdzPoCenieMin(BigDecimal minCena) {
         logger.debug("znajdzPoCenieMin() – minCena={}", minCena);
         EntityManager em = emf.createEntityManager();
@@ -302,7 +363,12 @@ public class ProductRepository {
         }
     }
 
-    /** Znajduje produkty o cenie ≤ maxCena. */
+    /**
+     * Znajduje produkty o cenie nie większej niż podana.
+     *
+     * @param maxCena maksymalna cena
+     * @return lista produktów, pusta lista w razie błędu
+     */
     public List<Product> znajdzPoCenieMax(BigDecimal maxCena) {
         logger.debug("znajdzPoCenieMax() – maxCena={}", maxCena);
         EntityManager em = emf.createEntityManager();
@@ -322,7 +388,9 @@ public class ProductRepository {
         }
     }
 
-    /** Zamyka EntityManagerFactory. */
+    /**
+     * Zamyka fabrykę EntityManagerFactory.
+     */
     public void close() {
         logger.debug("close() – zamykanie EMF");
         if (emf.isOpen()) {
