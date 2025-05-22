@@ -14,36 +14,36 @@ public class AbsenceRequest {
     private int id;
 
     @Column(name = "Typ_wniosku", length = 100, nullable = false)
-    private String typWniosku;
+    private String applicationType;
 
     @Column(name = "Data_rozpoczecia", nullable = false)
     @Temporal(TemporalType.DATE)
-    private Date dataRozpoczecia;
+    private Date startDate;
 
     @Column(name = "Data_zakonczenia", nullable = false)
     @Temporal(TemporalType.DATE)
-    private Date dataZakonczenia;
+    private Date endDate;
 
     @Column(name = "Opis", columnDefinition = "TEXT")
-    private String opis;
+    private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false)
-    private StatusWniosku status = StatusWniosku.OCZEKUJE; // domyślna wartość
+    private ApplicationStatus status = ApplicationStatus.PENDING; // domyślna wartość
 
     @ManyToOne
     @JoinColumn(name = "Id_pracownika", nullable = false)
-    private Employee pracownik;
+    private Employee employee;
 
     // Enum odpowiadający możliwym statusom w tabeli SQL
-    public enum StatusWniosku {
-        OCZEKUJE("Oczekuje"),
-        NIEPRZYJETY("Nie przyjęty"),
-        PRZYJETY("Przyjęty");
+    public enum ApplicationStatus {
+        PENDING("Oczekuje"),
+        NOTACCEPTED("Nie przyjęty"),
+        ACCEPTED("Przyjęty");
 
         private final String value;
 
-        StatusWniosku(String value) {
+        ApplicationStatus(String value) {
             this.value = value;
         }
 
@@ -59,13 +59,13 @@ public class AbsenceRequest {
 
     public AbsenceRequest() {}
 
-    public AbsenceRequest(String typWniosku, Date dataRozpoczecia, Date dataZakonczenia,
-                          String opis, Employee pracownik, StatusWniosku status) {
-        this.typWniosku = typWniosku;
-        this.dataRozpoczecia = dataRozpoczecia;
-        this.dataZakonczenia = dataZakonczenia;
-        this.opis = opis;
-        this.pracownik = pracownik;
+    public AbsenceRequest(String applicationType, Date startDate, Date endDate,
+                          String description, Employee employee, ApplicationStatus status) {
+        this.applicationType = applicationType;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.description = description;
+        this.employee = employee;
         this.status = status;
     }
 
@@ -74,61 +74,61 @@ public class AbsenceRequest {
         return id;
     }
 
-    public String getTypWniosku() {
-        return typWniosku;
+    public String getApplicationType() {
+        return applicationType;
     }
 
-    public void setTypWniosku(String typWniosku) {
-        this.typWniosku = typWniosku;
+    public void setApplicationType(String applicationType) {
+        this.applicationType = applicationType;
     }
 
-    public Date getDataRozpoczecia() {
-        return dataRozpoczecia;
+    public Date getStartDate() {
+        return startDate;
     }
 
-    public void setDataRozpoczecia(Date dataRozpoczecia) {
-        this.dataRozpoczecia = dataRozpoczecia;
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
-    public Date getDataZakonczenia() {
-        return dataZakonczenia;
+    public Date getEndDate() {
+        return endDate;
     }
 
-    public void setDataZakonczenia(Date dataZakonczenia) {
-        this.dataZakonczenia = dataZakonczenia;
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 
-    public String getOpis() {
-        return opis;
+    public String getDescription() {
+        return description;
     }
 
-    public void setOpis(String opis) {
-        this.opis = opis;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public Employee getPracownik() {
-        return pracownik;
+    public Employee getEmployee() {
+        return employee;
     }
 
-    public void setPracownik(Employee pracownik) {
-        this.pracownik = pracownik;
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 
-    public StatusWniosku getStatus() {
+    public ApplicationStatus getStatus() {
         return status;
     }
 
-    public void setStatus(StatusWniosku status) {
+    public void setStatus(ApplicationStatus status) {
         this.status = status;
     }
 
     @Override
     public String toString() {
         return String.format(
-                "AbsenceRequest{id=%d, typ='%s', od=%s, do=%s, opis='%s', status='%s', pracownik=%s %s}",
-                id, typWniosku, dataRozpoczecia, dataZakonczenia, opis, status,
-                pracownik != null ? pracownik.getName() : "null",
-                pracownik != null ? pracownik.getSurname() : ""
+                "AbsenceRequest{id=%d, typ='%s', od=%s, do=%s, description='%s', status='%s', employee=%s %s}",
+                id, applicationType, startDate, endDate, description, status,
+                employee != null ? employee.getName() : "null",
+                employee != null ? employee.getSurname() : ""
         );
     }
 }

@@ -33,35 +33,35 @@ public class AbsenceRequestRepositoryTest {
 
             // === 2. Dodanie nowego wniosku ===
             AbsenceRequest request = new AbsenceRequest();
-            request.setTypWniosku("Urlop wypoczynkowy");
-            request.setDataRozpoczecia(start);
-            request.setDataZakonczenia(end);
-            request.setOpis("Testowy urlop");
-            request.setPracownik(testEmployee);
+            request.setApplicationType("Urlop wypoczynkowy");
+            request.setStartDate(start);
+            request.setEndDate(end);
+            request.setDescription("Testowy urlop");
+            request.setEmployee(testEmployee);
 
-            absenceRepo.dodajWniosek(request);
+            absenceRepo.addApplication(request);
             System.out.println(">>> Dodano wniosek o nieobecność.");
 
             // === 3. Pobranie wszystkich wniosków ===
             System.out.println("\n>>> Lista wszystkich wniosków:");
-            wypiszWnioski(absenceRepo.pobierzWszystkieWnioski());
+            wypiszWnioski(absenceRepo.downloadAllApplications());
 
             // === 4. Aktualizacja ===
-            request.setOpis("Zmieniony opis urlopu");
-            absenceRepo.aktualizujWniosek(request);
+            request.setDescription("Zmieniony opis urlopu");
+            absenceRepo.updateApplication(request);
             System.out.println(">>> Zaktualizowano wniosek.");
 
             // === 5. Odczyt po ID ===
-            AbsenceRequest loaded = absenceRepo.znajdzWniosekPoId(request.getId());
+            AbsenceRequest loaded = absenceRepo.findApplicationById(request.getId());
             System.out.println(">>> Wniosek po ID: " + loaded);
 
             // === 6. Usunięcie ===
-            absenceRepo.usunWniosek(loaded.getId());
+            absenceRepo.deleteApplication(loaded.getId());
             System.out.println(">>> Usunięto wniosek.");
 
             // === 7. Lista po usunięciu ===
             System.out.println("\n>>> Lista po usunięciu:");
-            wypiszWnioski(absenceRepo.pobierzWszystkieWnioski());
+            wypiszWnioski(absenceRepo.downloadAllApplications());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -83,11 +83,11 @@ public class AbsenceRequestRepositoryTest {
             for (AbsenceRequest r : lista) {
                 System.out.printf("ID: %-3d | Typ: %-25s | Pracownik: %-20s | Od: %s | Do: %s | Opis: %s%n",
                         r.getId(),
-                        r.getTypWniosku(),
-                        r.getPracownik().getName() + " " + r.getPracownik().getSurname(),
-                        r.getDataRozpoczecia(),
-                        r.getDataZakonczenia(),
-                        r.getOpis()
+                        r.getApplicationType(),
+                        r.getEmployee().getName() + " " + r.getEmployee().getSurname(),
+                        r.getStartDate(),
+                        r.getEndDate(),
+                        r.getDescription()
                 );
             }
         }

@@ -1,6 +1,6 @@
 /*
  * Classname: AbsenceRequestRepository
- * Version information: 1.4
+ * Version information: 1.5
  * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
@@ -37,21 +37,21 @@ public class AbsenceRequestRepository {
      *
      * @param request obiekt wniosku do dodania
      */
-    public void dodajWniosek(AbsenceRequest request) {
-        logger.debug("dodajWniosek() - start, request={}", request);
+    public void addApplication(AbsenceRequest request) {
+        logger.debug("addApplication() - start, request={}", request);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             em.persist(request);
             tx.commit();
-            logger.info("dodajWniosek() - wniosek dodany: {}", request);
+            logger.info("addApplication() - wniosek dodany: {}", request);
         } catch (Exception e) {
-            logger.error("dodajWniosek() - błąd podczas dodawania wniosku", e);
+            logger.error("addApplication() - błąd podczas dodawania wniosku", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("dodajWniosek() - EM zamknięty");
+            logger.debug("addApplication() - EM zamknięty");
         }
     }
 
@@ -61,19 +61,19 @@ public class AbsenceRequestRepository {
      * @param id identyfikator wniosku
      * @return znaleziony wniosek lub null
      */
-    public AbsenceRequest znajdzWniosekPoId(int id) {
-        logger.debug("znajdzWniosekPoId() - start, id={}", id);
+    public AbsenceRequest findApplicationById(int id) {
+        logger.debug("findApplicationById() - start, id={}", id);
         EntityManager em = emf.createEntityManager();
         try {
             AbsenceRequest w = em.find(AbsenceRequest.class, id);
-            logger.info("znajdzWniosekPoId() - znaleziono: {}", w);
+            logger.info("findApplicationById() - znaleziono: {}", w);
             return w;
         } catch (Exception e) {
-            logger.error("znajdzWniosekPoId() - błąd podczas pobierania wniosku o id={}", id, e);
+            logger.error("findApplicationById() - błąd podczas pobierania wniosku o id={}", id, e);
             return null;
         } finally {
             em.close();
-            logger.debug("znajdzWniosekPoId() - EM zamknięty");
+            logger.debug("findApplicationById() - EM zamknięty");
         }
     }
 
@@ -82,21 +82,21 @@ public class AbsenceRequestRepository {
      *
      * @return lista wniosków (może być pusta)
      */
-    public List<AbsenceRequest> pobierzWszystkieWnioski() {
-        logger.debug("pobierzWszystkieWnioski() - start");
+    public List<AbsenceRequest> downloadAllApplications() {
+        logger.debug("downloadAllApplications() - start");
         EntityManager em = emf.createEntityManager();
         try {
             List<AbsenceRequest> list = em
                     .createQuery("SELECT w FROM AbsenceRequest w", AbsenceRequest.class)
                     .getResultList();
-            logger.info("pobierzWszystkieWnioski() - pobrano {} wniosków", list.size());
+            logger.info("downloadAllApplications() - pobrano {} wniosków", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("pobierzWszystkieWnioski() - błąd podczas pobierania wszystkich wniosków", e);
+            logger.error("downloadAllApplications() - błąd podczas pobierania wszystkich wniosków", e);
             return Collections.emptyList();
         } finally {
             em.close();
-            logger.debug("pobierzWszystkieWnioski() - EM zamknięty");
+            logger.debug("downloadAllApplications() - EM zamknięty");
         }
     }
 
@@ -105,8 +105,8 @@ public class AbsenceRequestRepository {
      *
      * @param id identyfikator wniosku do usunięcia
      */
-    public void usunWniosek(int id) {
-        logger.debug("usunWniosek() - start, id={}", id);
+    public void deleteApplication(int id) {
+        logger.debug("deleteApplication() - start, id={}", id);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -114,17 +114,17 @@ public class AbsenceRequestRepository {
             AbsenceRequest w = em.find(AbsenceRequest.class, id);
             if (w != null) {
                 em.remove(w);
-                logger.info("usunWniosek() - usunięto wniosek: {}", w);
+                logger.info("deleteApplication() - usunięto wniosek: {}", w);
             } else {
-                logger.warn("usunWniosek() - brak wniosku o id={}", id);
+                logger.warn("deleteApplication() - brak wniosku o id={}", id);
             }
             tx.commit();
         } catch (Exception e) {
-            logger.error("usunWniosek() - błąd podczas usuwania wniosku o id={}", id, e);
+            logger.error("deleteApplication() - błąd podczas usuwania wniosku o id={}", id, e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("usunWniosek() - EM zamknięty");
+            logger.debug("deleteApplication() - EM zamknięty");
         }
     }
 
@@ -133,21 +133,21 @@ public class AbsenceRequestRepository {
      *
      * @param request obiekt wniosku z zmienionymi danymi
      */
-    public void aktualizujWniosek(AbsenceRequest request) {
-        logger.debug("aktualizujWniosek() - start, request={}", request);
+    public void updateApplication(AbsenceRequest request) {
+        logger.debug("updateApplication() - start, request={}", request);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             em.merge(request);
             tx.commit();
-            logger.info("aktualizujWniosek() - zaktualizowano wniosek: {}", request);
+            logger.info("updateApplication() - zaktualizowano wniosek: {}", request);
         } catch (Exception e) {
-            logger.error("aktualizujWniosek() - błąd podczas aktualizacji wniosku", e);
+            logger.error("updateApplication() - błąd podczas aktualizacji wniosku", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("aktualizujWniosek() - EM zamknięty");
+            logger.debug("updateApplication() - EM zamknięty");
         }
     }
 
@@ -156,39 +156,39 @@ public class AbsenceRequestRepository {
     /**
      * Pobiera wszystkie wnioski danego pracownika.
      *
-     * @param pracownik obiekt pracownika
+     * @param employee obiekt pracownika
      * @return lista wniosków przypisanych do pracownika
      */
-    public List<AbsenceRequest> znajdzWnioskiPracownika(Employee pracownik) {
-        logger.debug("znajdzWnioskiPracownika() - pracownik={}", pracownik);
+    public List<AbsenceRequest> findEmployeeApplications(Employee employee) {
+        logger.debug("findEmployeeApplications() - employee={}", employee);
         EntityManager em = emf.createEntityManager();
         try {
             List<AbsenceRequest> list = em
                     .createQuery(
-                            "SELECT w FROM AbsenceRequest w WHERE w.pracownik = :pracownik",
+                            "SELECT w FROM AbsenceRequest w WHERE w.pracownik = :employee",
                             AbsenceRequest.class
                     )
-                    .setParameter("pracownik", pracownik)
+                    .setParameter("employee", employee)
                     .getResultList();
-            logger.info("znajdzWnioskiPracownika() - znaleziono {} wniosków", list.size());
+            logger.info("findEmployeeApplications() - znaleziono {} wniosków", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzWnioskiPracownika() - błąd podczas wyszukiwania", e);
+            logger.error("findEmployeeApplications() - błąd podczas wyszukiwania", e);
             return Collections.emptyList();
         } finally {
             em.close();
-            logger.debug("znajdzWnioskiPracownika() - EM zamknięty");
+            logger.debug("findEmployeeApplications() - EM zamknięty");
         }
     }
 
     /**
      * Pobiera wnioski pracownika na podstawie jego ID.
      *
-     * @param idPracownika identyfikator pracownika
+     * @param employeeId identyfikator pracownika
      * @return lista wniosków
      */
-    public List<AbsenceRequest> znajdzWnioskiPracownikaPoId(int idPracownika) {
-        logger.debug("znajdzWnioskiPracownikaPoId() - idPracownika={}", idPracownika);
+    public List<AbsenceRequest> findEmployeeApplicationsById(int employeeId) {
+        logger.debug("findEmployeeApplicationsById() - employeeId={}", employeeId);
         EntityManager em = emf.createEntityManager();
         try {
             List<AbsenceRequest> list = em
@@ -196,44 +196,44 @@ public class AbsenceRequestRepository {
                             "SELECT w FROM AbsenceRequest w WHERE w.pracownik.id = :id",
                             AbsenceRequest.class
                     )
-                    .setParameter("id", idPracownika)
+                    .setParameter("id", employeeId)
                     .getResultList();
-            logger.info("znajdzWnioskiPracownikaPoId() - znaleziono {} wniosków", list.size());
+            logger.info("findEmployeeApplicationsById() - znaleziono {} wniosków", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzWnioskiPracownikaPoId() - błąd podczas wyszukiwania", e);
+            logger.error("findEmployeeApplicationsById() - błąd podczas wyszukiwania", e);
             return Collections.emptyList();
         } finally {
             em.close();
-            logger.debug("znajdzWnioskiPracownikaPoId() - EM zamknięty");
+            logger.debug("findEmployeeApplicationsById() - EM zamknięty");
         }
     }
 
     /**
      * Pobiera wnioski o danym typie.
      *
-     * @param typWniosku typ wniosku (np. "Urlop wypoczynkowy")
+     * @param applicationType typ wniosku (np. "Urlop wypoczynkowy")
      * @return lista wniosków
      */
-    public List<AbsenceRequest> znajdzWnioskiPoTypie(String typWniosku) {
-        logger.debug("znajdzWnioskiPoTypie() - typWniosku={}", typWniosku);
+    public List<AbsenceRequest> findApplicationsByType(String applicationType) {
+        logger.debug("findApplicationsByType() - applicationType={}", applicationType);
         EntityManager em = emf.createEntityManager();
         try {
             List<AbsenceRequest> list = em
                     .createQuery(
-                            "SELECT w FROM AbsenceRequest w WHERE w.typWniosku = :typ",
+                            "SELECT w FROM AbsenceRequest w WHERE w.typWniosku = :type",
                             AbsenceRequest.class
                     )
-                    .setParameter("typ", typWniosku)
+                    .setParameter("type", applicationType)
                     .getResultList();
-            logger.info("znajdzWnioskiPoTypie() - znaleziono {} wniosków", list.size());
+            logger.info("findApplicationsByType() - znaleziono {} wniosków", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzWnioskiPoTypie() - błąd podczas wyszukiwania", e);
+            logger.error("findApplicationsByType() - błąd podczas wyszukiwania", e);
             return Collections.emptyList();
         } finally {
             em.close();
-            logger.debug("znajdzWnioskiPoTypie() - EM zamknięty");
+            logger.debug("findApplicationsByType() - EM zamknięty");
         }
     }
 
@@ -243,8 +243,8 @@ public class AbsenceRequestRepository {
      * @param status status wniosku (enum AbsenceRequest.StatusWniosku)
      * @return lista wniosków
      */
-    public List<AbsenceRequest> znajdzWnioskiPoStatusie(AbsenceRequest.StatusWniosku status) {
-        logger.debug("znajdzWnioskiPoStatusie() - status={}", status);
+    public List<AbsenceRequest> findApplicationsByStatus(AbsenceRequest.ApplicationStatus status) {
+        logger.debug("findApplicationsByStatus() - status={}", status);
         EntityManager em = emf.createEntityManager();
         try {
             List<AbsenceRequest> list = em
@@ -254,130 +254,130 @@ public class AbsenceRequestRepository {
                     )
                     .setParameter("status", status)
                     .getResultList();
-            logger.info("znajdzWnioskiPoStatusie() - znaleziono {} wniosków", list.size());
+            logger.info("findApplicationsByStatus() - znaleziono {} wniosków", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzWnioskiPoStatusie() - błąd podczas wyszukiwania", e);
+            logger.error("findApplicationsByStatus() - błąd podczas wyszukiwania", e);
             return Collections.emptyList();
         } finally {
             em.close();
-            logger.debug("znajdzWnioskiPoStatusie() - EM zamknięty");
+            logger.debug("findApplicationsByStatus() - EM zamknięty");
         }
     }
 
     /**
      * Pobiera wnioski rozpoczynające się w lub po podanej dacie.
      *
-     * @param dataOd data początkowa
+     * @param fromDate data początkowa
      * @return lista wniosków
      */
-    public List<AbsenceRequest> znajdzWnioskiOdDaty(Date dataOd) {
-        logger.debug("znajdzWnioskiOdDaty() - dataOd={}", dataOd);
+    public List<AbsenceRequest> findApplicationsFromDate(Date fromDate) {
+        logger.debug("findApplicationsFromDate() - fromDate={}", fromDate);
         EntityManager em = emf.createEntityManager();
         try {
             List<AbsenceRequest> list = em
                     .createQuery(
-                            "SELECT w FROM AbsenceRequest w WHERE w.dataRozpoczecia >= :dataOd",
+                            "SELECT w FROM AbsenceRequest w WHERE w.dataRozpoczecia >= :fromDate",
                             AbsenceRequest.class
                     )
-                    .setParameter("dataOd", dataOd)
+                    .setParameter("fromDate", fromDate)
                     .getResultList();
-            logger.info("znajdzWnioskiOdDaty() - znaleziono {} wniosków", list.size());
+            logger.info("findApplicationsFromDate() - znaleziono {} wniosków", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzWnioskiOdDaty() - błąd podczas wyszukiwania", e);
+            logger.error("findApplicationsFromDate() - błąd podczas wyszukiwania", e);
             return Collections.emptyList();
         } finally {
             em.close();
-            logger.debug("znajdzWnioskiOdDaty() - EM zamknięty");
+            logger.debug("findApplicationsFromDate() - EM zamknięty");
         }
     }
 
     /**
      * Pobiera wnioski kończące się w lub przed podaną datą.
      *
-     * @param dataDo data końcowa
+     * @param toDate data końcowa
      * @return lista wniosków
      */
-    public List<AbsenceRequest> znajdzWnioskiDoDaty(Date dataDo) {
-        logger.debug("znajdzWnioskiDoDaty() - dataDo={}", dataDo);
+    public List<AbsenceRequest> findApplicationsToDate(Date toDate) {
+        logger.debug("findApplicationsToDate() - toDate={}", toDate);
         EntityManager em = emf.createEntityManager();
         try {
             List<AbsenceRequest> list = em
                     .createQuery(
-                            "SELECT w FROM AbsenceRequest w WHERE w.dataZakonczenia <= :dataDo",
+                            "SELECT w FROM AbsenceRequest w WHERE w.dataZakonczenia <= :toDate",
                             AbsenceRequest.class
                     )
-                    .setParameter("dataDo", dataDo)
+                    .setParameter("toDate", toDate)
                     .getResultList();
-            logger.info("znajdzWnioskiDoDaty() - znaleziono {} wniosków", list.size());
+            logger.info("findApplicationsToDate() - znaleziono {} wniosków", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzWnioskiDoDaty() - błąd podczas wyszukiwania", e);
+            logger.error("findApplicationsToDate() - błąd podczas wyszukiwania", e);
             return Collections.emptyList();
         } finally {
             em.close();
-            logger.debug("znajdzWnioskiDoDaty() - EM zamknięty");
+            logger.debug("findApplicationsToDate() - EM zamknięty");
         }
     }
 
     /**
      * Pobiera wnioski mieszczące się w przedziale dat.
      *
-     * @param dataOd data początkowa
-     * @param dataDo data końcowa
+     * @param fromDate data początkowa
+     * @param toDate data końcowa
      * @return lista wniosków
      */
-    public List<AbsenceRequest> znajdzWnioskiWZakresieDat(Date dataOd, Date dataDo) {
-        logger.debug("znajdzWnioskiWZakresieDat() - dataOd={}, dataDo={}", dataOd, dataDo);
+    public List<AbsenceRequest> findDateRangeApplications(Date fromDate, Date toDate) {
+        logger.debug("findDateRangeApplications() - fromDate={}, toDate={}", fromDate, toDate);
         EntityManager em = emf.createEntityManager();
         try {
             List<AbsenceRequest> list = em
                     .createQuery(
-                            "SELECT w FROM AbsenceRequest w WHERE w.dataRozpoczecia >= :dataOd AND w.dataZakonczenia <= :dataDo",
+                            "SELECT w FROM AbsenceRequest w WHERE w.dataRozpoczecia >= :fromDate AND w.dataZakonczenia <= :toDate",
                             AbsenceRequest.class
                     )
-                    .setParameter("dataOd", dataOd)
-                    .setParameter("dataDo", dataDo)
+                    .setParameter("fromDate", fromDate)
+                    .setParameter("toDate", toDate)
                     .getResultList();
-            logger.info("znajdzWnioskiWZakresieDat() - znaleziono {} wniosków", list.size());
+            logger.info("findDateRangeApplications() - znaleziono {} wniosków", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzWnioskiWZakresieDat() - błąd podczas wyszukiwania", e);
+            logger.error("findDateRangeApplications() - błąd podczas wyszukiwania", e);
             return Collections.emptyList();
         } finally {
             em.close();
-            logger.debug("znajdzWnioskiWZakresieDat() - EM zamknięty");
+            logger.debug("findDateRangeApplications() - EM zamknięty");
         }
     }
 
     /**
      * Pobiera wnioski nachodzące na podany przedział dat.
      *
-     * @param dataOd data początkowa
-     * @param dataDo data końcowa
+     * @param fromDate data początkowa
+     * @param toDate data końcowa
      * @return lista wniosków
      */
-    public List<AbsenceRequest> znajdzWnioskiNachodzaceNaZakresDat(Date dataOd, Date dataDo) {
-        logger.debug("znajdzWnioskiNachodzaceNaZakresDat() - dataOd={}, dataDo={}", dataOd, dataDo);
+    public List<AbsenceRequest> findApplicationsOverlappingDateRange(Date fromDate, Date toDate) {
+        logger.debug("findApplicationsOverlappingDateRange() - fromDate={}, toDate={}", fromDate, toDate);
         EntityManager em = emf.createEntityManager();
         try {
             List<AbsenceRequest> list = em
                     .createQuery(
-                            "SELECT w FROM AbsenceRequest w WHERE w.dataRozpoczecia <= :dataDo AND w.dataZakonczenia >= :dataOd",
+                            "SELECT w FROM AbsenceRequest w WHERE w.dataRozpoczecia <= :toDate AND w.dataZakonczenia >= :fromDate",
                             AbsenceRequest.class
                     )
-                    .setParameter("dataDo", dataDo)
-                    .setParameter("dataOd", dataOd)
+                    .setParameter("toDate", toDate)
+                    .setParameter("fromDate", fromDate)
                     .getResultList();
-            logger.info("znajdzWnioskiNachodzaceNaZakresDat() - znaleziono {} wniosków", list.size());
+            logger.info("findApplicationsOverlappingDateRange() - znaleziono {} wniosków", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzWnioskiNachodzaceNaZakresDat() - błąd podczas wyszukiwania", e);
+            logger.error("findApplicationsOverlappingDateRange() - błąd podczas wyszukiwania", e);
             return Collections.emptyList();
         } finally {
             em.close();
-            logger.debug("znajdzWnioskiNachodzaceNaZakresDat() - EM zamknięty");
+            logger.debug("findApplicationsOverlappingDateRange() - EM zamknięty");
         }
     }
 
