@@ -166,7 +166,7 @@ public class TechnicalIssueRepository {
      * @return lista dopasowanych zgłoszeń lub pusta lista
      */
     public List<TechnicalIssue> znajdzPoTypie(String typFragment) {
-        logger.debug("znajdzPoTypie() – typFragment={}", typFragment);
+        logger.debug("findByType() – typFragment={}", typFragment);
         EntityManager em = emf.createEntityManager();
         try {
             List<TechnicalIssue> list = em.createQuery(
@@ -174,14 +174,14 @@ public class TechnicalIssueRepository {
                             TechnicalIssue.class)
                     .setParameter("frag", typFragment)
                     .getResultList();
-            logger.info("znajdzPoTypie() – znaleziono {} zgłoszeń", list.size());
+            logger.info("findByType() – znaleziono {} zgłoszeń", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoTypie() – błąd podczas wyszukiwania", e);
+            logger.error("findByType() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoTypie() – EntityManager zamknięty");
+            logger.debug("findByType() – EntityManager zamknięty");
         }
     }
 
@@ -246,7 +246,7 @@ public class TechnicalIssueRepository {
      * @return lista dopasowanych zgłoszeń lub pusta lista
      */
     public List<TechnicalIssue> znajdzPoPracowniku(int pracownikId) {
-        logger.debug("znajdzPoPracowniku() – pracownikId={}", pracownikId);
+        logger.debug("findByEmployee() – pracownikId={}", pracownikId);
         EntityManager em = emf.createEntityManager();
         try {
             List<TechnicalIssue> list = em.createQuery(
@@ -254,14 +254,14 @@ public class TechnicalIssueRepository {
                             TechnicalIssue.class)
                     .setParameter("pid", pracownikId)
                     .getResultList();
-            logger.info("znajdzPoPracowniku() – znaleziono {} zgłoszeń", list.size());
+            logger.info("findByEmployee() – znaleziono {} zgłoszeń", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoPracowniku() – błąd podczas wyszukiwania", e);
+            logger.error("findByEmployee() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoPracowniku() – EntityManager zamknięty");
+            logger.debug("findByEmployee() – EntityManager zamknięty");
         }
     }
 

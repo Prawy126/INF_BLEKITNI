@@ -1,7 +1,7 @@
 /*
  * Classname: Report
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.1
+ * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -28,51 +28,51 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "Raporty")
 @Access(AccessType.FIELD)
-public class Raport {
+public class Report {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
     private int id;
 
     @Column(name = "Typ_raportu", nullable = false)
-    private String typRaportu;
+    private String reportType;
 
     @Column(name = "Data_poczatku", nullable = false)
-    private LocalDate dataPoczatku;
+    private LocalDate startDate;
 
     @Column(name = "Data_zakonczenia", nullable = false)
-    private LocalDate dataZakonczenia;
+    private LocalDate endTime;
 
     @ManyToOne @JoinColumn(name = "Id_pracownika", nullable = false)
-    private Employee pracownik;
+    private Employee employee;
 
     @Column(name = "Plik", nullable = false)
-    private String sciezkaPliku;
+    private String filePath;
 
     /**
      * Domyślny konstruktor.
      * Używany przez Hibernate do tworzenia instancji klasy.
      */
-    public Raport() {}
+    public Report() {}
 
     /**
      * Konstruktor z parametrami.
      * Umożliwia ustawienie typu raportu, daty początkowej, daty zakończenia,
      * pracownika oraz ścieżki do pliku raportu.
      *
-     * @param typRaportu      Typ raportu
-     * @param dataPoczatku    Data początkowa
-     * @param dataZakonczenia Data zakończenia
-     * @param pracownik       Pracownik
-     * @param sciezkaPliku    Ścieżka do pliku raportu
+     * @param reportType   Typ raportu
+     * @param startDate    Data początkowa
+     * @param endTime      Data zakończenia
+     * @param employee     Pracownik
+     * @param filePath     Ścieżka do pliku raportu
      */
-    public Raport(String typRaportu, LocalDate dataPoczatku,
-                  LocalDate dataZakonczenia, Employee pracownik, String sciezkaPliku) {
-        this.typRaportu = typRaportu;
-        this.dataPoczatku = dataPoczatku;
-        this.dataZakonczenia = dataZakonczenia;
-        this.pracownik = pracownik;
-        this.sciezkaPliku = sciezkaPliku;
+    public Report(String reportType, LocalDate startDate,
+                  LocalDate endTime, Employee employee, String filePath) {
+        this.reportType = reportType;
+        this.startDate = startDate;
+        this.endTime = endTime;
+        this.employee = employee;
+        this.filePath = filePath;
     }
 
     /* --- gettery / settery --- */
@@ -90,16 +90,16 @@ public class Raport {
      *
      * @return Typ raportu
      */
-    public String getTypRaportu(){
-        return typRaportu;
+    public String getReportType(){
+        return reportType;
     }
     /**
      * Ustawia typ raportu.
      *
      * @param t Typ raportu
      */
-    public void setTypRaportu(String t){
-        this.typRaportu = t;
+    public void setReportType(String t){
+        this.reportType = t;
     }
 
     /**
@@ -107,8 +107,8 @@ public class Raport {
      *
      * @return Data początkowa
      */
-    public LocalDate getDataPoczatku(){
-        return dataPoczatku;
+    public LocalDate getStartDate(){
+        return startDate;
     }
 
     /**
@@ -116,8 +116,8 @@ public class Raport {
      *
      * @param d Data początkowa
      */
-    public void setDataPoczatku(LocalDate d){
-        this.dataPoczatku = d;
+    public void setStartDate(LocalDate d){
+        this.startDate = d;
     }
 
     /**
@@ -125,8 +125,8 @@ public class Raport {
      *
      * @return Data zakończenia
      */
-    public LocalDate getDataZakonczenia(){
-        return dataZakonczenia;
+    public LocalDate getEndTime(){
+        return endTime;
     }
 
     /**
@@ -134,8 +134,8 @@ public class Raport {
      *
      * @param d Data zakończenia
      */
-    public void setDataZakonczenia(LocalDate d){
-        this.dataZakonczenia = d;
+    public void setEndTime(LocalDate d){
+        this.endTime = d;
     }
 
     /**
@@ -143,8 +143,8 @@ public class Raport {
      *
      * @return Pracownik
      */
-    public Employee getPracownik(){
-        return pracownik;
+    public Employee getEmployee(){
+        return employee;
     }
 
     /**
@@ -152,8 +152,8 @@ public class Raport {
      *
      * @param p Pracownik
      */
-    public void setPracownik(Employee p){
-        this.pracownik = p;
+    public void setEmployee(Employee p){
+        this.employee = p;
     }
 
     /**
@@ -161,8 +161,8 @@ public class Raport {
      *
      * @return Ścieżka do pliku
      */
-    public String getSciezkaPliku(){
-        return sciezkaPliku;
+    public String getFilePath(){
+        return filePath;
     }
 
     /**
@@ -170,8 +170,8 @@ public class Raport {
      *
      * @param p Ścieżka do pliku
      */
-    public void setSciezkaPliku(String p){
-        this.sciezkaPliku = p;
+    public void setFilePath(String p){
+        this.filePath = p;
     }
 }
 

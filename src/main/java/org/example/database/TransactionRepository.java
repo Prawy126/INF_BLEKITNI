@@ -291,21 +291,21 @@ public class TransactionRepository {
      * @return lista obiektów Transaction lub pusta lista
      */
     public List<Transaction> znajdzPoPracowniku(int pracownikId) {
-        logger.debug("znajdzPoPracowniku() – pracownikId={}", pracownikId);
+        logger.debug("findByEmployee() – pracownikId={}", pracownikId);
         EntityManager em = emf.createEntityManager();
         try {
             List<Transaction> list = em.createQuery(
                             "SELECT t FROM Transaction t WHERE t.pracownik.id = :pid", Transaction.class)
                     .setParameter("pid", pracownikId)
                     .getResultList();
-            logger.info("znajdzPoPracowniku() – znaleziono {} transakcji", list.size());
+            logger.info("findByEmployee() – znaleziono {} transakcji", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoPracowniku() – błąd podczas wyszukiwania", e);
+            logger.error("findByEmployee() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoPracowniku() – EntityManager zamknięty");
+            logger.debug("findByEmployee() – EntityManager zamknięty");
         }
     }
 

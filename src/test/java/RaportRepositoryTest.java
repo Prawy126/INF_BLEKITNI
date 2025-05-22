@@ -5,10 +5,10 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-import org.example.database.RaportRepository;
+import org.example.database.ReportRepository;
 import org.example.database.UserRepository;
 import org.example.sys.Employee;
-import org.example.sys.Raport;
+import org.example.sys.Report;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.List;
 public class RaportRepositoryTest {
 
     public static void main(String[] args) {
-        RaportRepository raportRepo = new RaportRepository();
+        ReportRepository raportRepo = new ReportRepository();
         UserRepository userRepo = new UserRepository(); // aby pobrać pracownika
 
         try {
@@ -32,7 +32,7 @@ public class RaportRepositoryTest {
             Employee pracownik = pracownicy.get(0);
 
             // === 2. Dodawanie raportów ===
-            Raport r1 = new Raport(
+            Report r1 = new Report(
                     "Raport sprzedaży",
                     LocalDate.of(2025, 4, 1),
                     LocalDate.of(2025, 4, 30),
@@ -40,7 +40,7 @@ public class RaportRepositoryTest {
                     "raporty/sprzedaz_0425.pdf"
             );
 
-            Raport r2 = new Raport(
+            Report r2 = new Report(
                     "Raport pracowników",
                     LocalDate.of(2025, 5, 1),
                     LocalDate.of(2025, 5, 10),
@@ -48,31 +48,31 @@ public class RaportRepositoryTest {
                     "raporty/pracownicy_0525.pdf"
             );
 
-            raportRepo.dodajRaport(r1);
-            raportRepo.dodajRaport(r2);
+            raportRepo.addReport(r1);
+            raportRepo.addReport(r2);
             System.out.println(">>> Dodano raporty.");
 
             // === 3. Pobieranie wszystkich raportów ===
             System.out.println("\n>>> Lista wszystkich raportów:");
-            wypiszRaporty(raportRepo.pobierzWszystkieRaporty());
+            wypiszRaporty(raportRepo.getAllReports());
 
             // === 4. Aktualizacja ===
-            r1.setTypRaportu("Raport sprzedaży — zmodyfikowany");
-            r1.setSciezkaPliku("raporty/zmieniony_sprzedaz.pdf");
-            raportRepo.aktualizujRaport(r1);
+            r1.setReportType("Raport sprzedaży — zmodyfikowany");
+            r1.setFilePath("raporty/zmieniony_sprzedaz.pdf");
+            raportRepo.updateReport(r1);
             System.out.println(">>> Zaktualizowano raport r1.");
 
             // === 5. Pobranie po ID ===
-            Raport znaleziony = raportRepo.znajdzRaportPoId(r1.getId());
-            System.out.println(">>> Raport po ID: " + znaleziony.getTypRaportu() + " | " + znaleziony.getSciezkaPliku());
+            Report znaleziony = raportRepo.findReportById(r1.getId());
+            System.out.println(">>> Raport po ID: " + znaleziony.getReportType() + " | " + znaleziony.getFilePath());
 
             // === 6. Usunięcie ===
-            raportRepo.usunRaport(r2.getId());
+            raportRepo.removeReport(r2.getId());
             System.out.println(">>> Usunięto raport r2.");
 
             // === 7. Lista po usunięciu ===
             System.out.println("\n>>> Raporty po usunięciu:");
-            wypiszRaporty(raportRepo.pobierzWszystkieRaporty());
+            wypiszRaporty(raportRepo.getAllReports());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -87,16 +87,16 @@ public class RaportRepositoryTest {
      *
      * @param raporty lista raportów
      */
-    private static void wypiszRaporty(List<Raport> raporty) {
+    private static void wypiszRaporty(List<Report> raporty) {
         if (raporty.isEmpty()) {
             System.out.println("(Brak raportów)");
         } else {
-            for (Raport r : raporty) {
+            for (Report r : raporty) {
                 System.out.println("[" + r.getId() + "] "
-                        + r.getTypRaportu()
-                        + " | " + r.getDataPoczatku()
-                        + " → " + r.getDataZakonczenia()
-                        + " | plik: " + r.getSciezkaPliku());
+                        + r.getReportType()
+                        + " | " + r.getStartDate()
+                        + " → " + r.getEndTime()
+                        + " | plik: " + r.getFilePath());
             }
         }
         System.out.println("-----------------------------");
