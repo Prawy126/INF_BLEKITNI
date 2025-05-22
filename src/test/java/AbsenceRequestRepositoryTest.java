@@ -33,35 +33,35 @@ public class AbsenceRequestRepositoryTest {
 
             // === 2. Dodanie nowego wniosku ===
             AbsenceRequest request = new AbsenceRequest();
-            request.setApplicationType("Urlop wypoczynkowy");
+            request.setRequestType("Urlop wypoczynkowy");
             request.setStartDate(start);
             request.setEndDate(end);
             request.setDescription("Testowy urlop");
             request.setEmployee(testEmployee);
 
-            absenceRepo.addApplication(request);
+            absenceRepo.addRequest(request);
             System.out.println(">>> Dodano wniosek o nieobecność.");
 
             // === 3. Pobranie wszystkich wniosków ===
             System.out.println("\n>>> Lista wszystkich wniosków:");
-            wypiszWnioski(absenceRepo.downloadAllApplications());
+            wypiszWnioski(absenceRepo.downloadAllRequests());
 
             // === 4. Aktualizacja ===
             request.setDescription("Zmieniony opis urlopu");
-            absenceRepo.updateApplication(request);
+            absenceRepo.updateRequest(request);
             System.out.println(">>> Zaktualizowano wniosek.");
 
             // === 5. Odczyt po ID ===
-            AbsenceRequest loaded = absenceRepo.findApplicationById(request.getId());
+            AbsenceRequest loaded = absenceRepo.findRequestById(request.getId());
             System.out.println(">>> Wniosek po ID: " + loaded);
 
             // === 6. Usunięcie ===
-            absenceRepo.deleteApplication(loaded.getId());
+            absenceRepo.deleteRequest(loaded.getId());
             System.out.println(">>> Usunięto wniosek.");
 
             // === 7. Lista po usunięciu ===
             System.out.println("\n>>> Lista po usunięciu:");
-            wypiszWnioski(absenceRepo.downloadAllApplications());
+            wypiszWnioski(absenceRepo.downloadAllRequests());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -83,7 +83,7 @@ public class AbsenceRequestRepositoryTest {
             for (AbsenceRequest r : lista) {
                 System.out.printf("ID: %-3d | Typ: %-25s | Pracownik: %-20s | Od: %s | Do: %s | Opis: %s%n",
                         r.getId(),
-                        r.getApplicationType(),
+                        r.getRequestType(),
                         r.getEmployee().getName() + " " + r.getEmployee().getSurname(),
                         r.getStartDate(),
                         r.getEndDate(),

@@ -14,7 +14,7 @@ public class AbsenceRequest {
     private int id;
 
     @Column(name = "Typ_wniosku", length = 100, nullable = false)
-    private String applicationType;
+    private String requestType;
 
     @Column(name = "Data_rozpoczecia", nullable = false)
     @Temporal(TemporalType.DATE)
@@ -29,21 +29,21 @@ public class AbsenceRequest {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false)
-    private ApplicationStatus status = ApplicationStatus.PENDING; // domyślna wartość
+    private RequestStatus status = RequestStatus.PENDING; // domyślna wartość
 
     @ManyToOne
     @JoinColumn(name = "Id_pracownika", nullable = false)
     private Employee employee;
 
     // Enum odpowiadający możliwym statusom w tabeli SQL
-    public enum ApplicationStatus {
+    public enum RequestStatus {
         PENDING("Oczekuje"),
         NOTACCEPTED("Nie przyjęty"),
         ACCEPTED("Przyjęty");
 
         private final String value;
 
-        ApplicationStatus(String value) {
+        RequestStatus(String value) {
             this.value = value;
         }
 
@@ -59,9 +59,9 @@ public class AbsenceRequest {
 
     public AbsenceRequest() {}
 
-    public AbsenceRequest(String applicationType, Date startDate, Date endDate,
-                          String description, Employee employee, ApplicationStatus status) {
-        this.applicationType = applicationType;
+    public AbsenceRequest(String requestType, Date startDate, Date endDate,
+                          String description, Employee employee, RequestStatus status) {
+        this.requestType = requestType;
         this.startDate = startDate;
         this.endDate = endDate;
         this.description = description;
@@ -74,12 +74,12 @@ public class AbsenceRequest {
         return id;
     }
 
-    public String getApplicationType() {
-        return applicationType;
+    public String getRequestType() {
+        return requestType;
     }
 
-    public void setApplicationType(String applicationType) {
-        this.applicationType = applicationType;
+    public void setRequestType(String requestType) {
+        this.requestType = requestType;
     }
 
     public Date getStartDate() {
@@ -114,19 +114,19 @@ public class AbsenceRequest {
         this.employee = employee;
     }
 
-    public ApplicationStatus getStatus() {
+    public RequestStatus getStatus() {
         return status;
     }
 
-    public void setStatus(ApplicationStatus status) {
+    public void setStatus(RequestStatus status) {
         this.status = status;
     }
 
     @Override
     public String toString() {
         return String.format(
-                "AbsenceRequest{id=%d, typ='%s', od=%s, do=%s, description='%s', status='%s', employee=%s %s}",
-                id, applicationType, startDate, endDate, description, status,
+                "AbsenceRequest{id=%d, type='%s', from=%s, to=%s, description='%s', status='%s', employee=%s %s}",
+                id, requestType, startDate, endDate, description, status,
                 employee != null ? employee.getName() : "null",
                 employee != null ? employee.getSurname() : ""
         );

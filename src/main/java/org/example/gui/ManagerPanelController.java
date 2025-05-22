@@ -240,7 +240,7 @@ public class ManagerPanelController {
         // Kolumna typu wniosku
         TableColumn<AbsenceRequest, String> typeColumn = new TableColumn<>("Typ wniosku");
         typeColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
-                data.getValue().getApplicationType()));
+                data.getValue().getRequestType()));
         typeColumn.setPrefWidth(150);
 
         // Kolumna pracownika
@@ -300,7 +300,7 @@ public class ManagerPanelController {
 
         // Pobranie wszystkich wniosków
         try {
-            absenceTable.getItems().addAll(absenceRepository.downloadAllApplications());
+            absenceTable.getItems().addAll(absenceRepository.downloadAllRequests());
         } catch (Exception e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Błąd",
@@ -332,10 +332,10 @@ public class ManagerPanelController {
                     selectedRequest.setDescription(newOpis);
 
                     // Aktualizacja wniosku
-                    absenceRepository.updateApplication(selectedRequest);
+                    absenceRepository.updateRequest(selectedRequest);
 
                     // Aktualizacja statusu pracownika, jeśli to urlop chorobowy
-                    if (selectedRequest.getApplicationType().toLowerCase().contains("chorob")) {
+                    if (selectedRequest.getRequestType().toLowerCase().contains("chorob")) {
                         Employee pracownik = selectedRequest.getEmployee();
                         pracownik.startSickLeave(selectedRequest.getStartDate());
                         userRepository.aktualizujPracownika(pracownik);
@@ -346,7 +346,7 @@ public class ManagerPanelController {
 
                     // Odświeżenie tabeli
                     absenceTable.getItems().clear();
-                    absenceTable.getItems().addAll(absenceRepository.downloadAllApplications());
+                    absenceTable.getItems().addAll(absenceRepository.downloadAllRequests());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     showAlert(Alert.AlertType.ERROR, "Błąd",
@@ -369,13 +369,13 @@ public class ManagerPanelController {
                             : "[ODRZUCONY]";
                     selectedRequest.setDescription(newOpis);
 
-                    absenceRepository.updateApplication(selectedRequest);
+                    absenceRepository.updateRequest(selectedRequest);
                     showAlert(Alert.AlertType.INFORMATION, "Sukces",
                             "Wniosek został odrzucony.");
 
                     // Odświeżenie tabeli
                     absenceTable.getItems().clear();
-                    absenceTable.getItems().addAll(absenceRepository.downloadAllApplications());
+                    absenceTable.getItems().addAll(absenceRepository.downloadAllRequests());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     showAlert(Alert.AlertType.ERROR, "Błąd",
@@ -391,7 +391,7 @@ public class ManagerPanelController {
         refreshButton.setOnAction(e -> {
             try {
                 absenceTable.getItems().clear();
-                absenceTable.getItems().addAll(absenceRepository.downloadAllApplications());
+                absenceTable.getItems().addAll(absenceRepository.downloadAllRequests());
                 showAlert(Alert.AlertType.INFORMATION, "Sukces",
                         "Lista wniosków została odświeżona.");
             } catch (Exception ex) {
