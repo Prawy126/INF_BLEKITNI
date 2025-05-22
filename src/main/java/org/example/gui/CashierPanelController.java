@@ -769,7 +769,7 @@ public class CashierPanelController {
             Transaction transaction = new Transaction();
             transaction.setEmployee(currentEmployee);
             transaction.setDate(new Date());
-            transactionRepository.dodajTransakcje(transaction);
+            transactionRepository.addTransaction(transaction);
 
             // Pobierz ID zapisanej transakcji
             int transactionId = transaction.getId();

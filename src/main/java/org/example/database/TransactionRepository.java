@@ -1,6 +1,6 @@
 /*
  * Classname: TransactionRepository
- * Version information: 1.2
+ * Version information: 1.3
  * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
@@ -50,23 +50,23 @@ public class TransactionRepository {
     /**
      * Dodaje nową transakcję do bazy.
      *
-     * @param transakcja obiekt Transaction do zapisania
+     * @param transaction obiekt Transaction do zapisania
      */
-    public void dodajTransakcje(Transaction transakcja) {
-        logger.debug("dodajTransakcje() – start, transakcja={}", transakcja);
+    public void addTransaction(Transaction transaction) {
+        logger.debug("addTransaction() – start, transaction={}", transaction);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            em.persist(transakcja);
+            em.persist(transaction);
             tx.commit();
-            logger.info("dodajTransakcje() – transakcja dodana: {}", transakcja);
+            logger.info("addTransaction() – transaction dodana: {}", transaction);
         } catch (Exception e) {
-            logger.error("dodajTransakcje() – błąd podczas dodawania transakcji", e);
+            logger.error("addTransaction() – błąd podczas dodawania transakcji", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("dodajTransakcje() – EntityManager zamknięty");
+            logger.debug("addTransaction() – EntityManager zamknięty");
         }
     }
 
@@ -76,19 +76,19 @@ public class TransactionRepository {
      * @param id identyfikator transakcji
      * @return obiekt Transaction lub null, jeśli nie istnieje
      */
-    public Transaction znajdzTransakcjePoId(int id) {
-        logger.debug("znajdzTransakcjePoId() – start, id={}", id);
+    public Transaction findTransactionById(int id) {
+        logger.debug("findTransactionById() – start, id={}", id);
         EntityManager em = emf.createEntityManager();
         try {
             Transaction t = em.find(Transaction.class, id);
-            logger.info("znajdzTransakcjePoId() – znaleziono: {}", t);
+            logger.info("findTransactionById() – znaleziono: {}", t);
             return t;
         } catch (Exception e) {
-            logger.error("znajdzTransakcjePoId() – błąd podczas pobierania id={}", id, e);
+            logger.error("findTransactionById() – błąd podczas pobierania id={}", id, e);
             return null;
         } finally {
             em.close();
-            logger.debug("znajdzTransakcjePoId() – EntityManager zamknięty");
+            logger.debug("findTransactionById() – EntityManager zamknięty");
         }
     }
 
@@ -97,20 +97,20 @@ public class TransactionRepository {
      *
      * @return lista obiektów Transaction lub pusta lista w przypadku błędu
      */
-    public List<Transaction> pobierzWszystkieTransakcje() {
-        logger.debug("pobierzWszystkieTransakcje() – start");
+    public List<Transaction> getAllTransactions() {
+        logger.debug("getAllTransactions() – start");
         EntityManager em = emf.createEntityManager();
         try {
             List<Transaction> list = em.createQuery("SELECT t FROM Transaction t", Transaction.class)
                     .getResultList();
-            logger.info("pobierzWszystkieTransakcje() – pobrano {} transakcji", list.size());
+            logger.info("getAllTransactions() – pobrano {} transakcji", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("pobierzWszystkieTransakcje() – błąd podczas pobierania transakcji", e);
+            logger.error("getAllTransactions() – błąd podczas pobierania transakcji", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("pobierzWszystkieTransakcje() – EntityManager zamknięty");
+            logger.debug("getAllTransactions() – EntityManager zamknięty");
         }
     }
 
@@ -119,8 +119,8 @@ public class TransactionRepository {
      *
      * @param id identyfikator transakcji do usunięcia
      */
-    public void usunTransakcje(int id) {
-        logger.debug("usunTransakcje() – start, id={}", id);
+    public void removeTransactions(int id) {
+        logger.debug("removeTransactions() – start, id={}", id);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -128,40 +128,40 @@ public class TransactionRepository {
             Transaction t = em.find(Transaction.class, id);
             if (t != null) {
                 em.remove(t);
-                logger.info("usunTransakcje() – usunięto transakcję: {}", t);
+                logger.info("removeTransactions() – usunięto transakcję: {}", t);
             } else {
-                logger.warn("usunTransakcje() – brak transakcji o id={}", id);
+                logger.warn("removeTransactions() – brak transakcji o id={}", id);
             }
             tx.commit();
         } catch (Exception e) {
-            logger.error("usunTransakcje() – błąd podczas usuwania id={}", id, e);
+            logger.error("removeTransactions() – błąd podczas usuwania id={}", id, e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("usunTransakcje() – EntityManager zamknięty");
+            logger.debug("removeTransactions() – EntityManager zamknięty");
         }
     }
 
     /**
      * Aktualizuje istniejącą transakcję w bazie.
      *
-     * @param transakcja obiekt Transaction do zaktualizowania
+     * @param transaction obiekt Transaction do zaktualizowania
      */
-    public void aktualizujTransakcje(Transaction transakcja) {
-        logger.debug("aktualizujTransakcje() – start, transakcja={}", transakcja);
+    public void updateTransaction(Transaction transaction) {
+        logger.debug("updateTransaction() – start, transaction={}", transaction);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            em.merge(transakcja);
+            em.merge(transaction);
             tx.commit();
-            logger.info("aktualizujTransakcje() – transakcja zaktualizowana: {}", transakcja);
+            logger.info("updateTransaction() – transaction zaktualizowana: {}", transaction);
         } catch (Exception e) {
-            logger.error("aktualizujTransakcje() – błąd podczas aktualizacji transakcji", e);
+            logger.error("updateTransaction() – błąd podczas aktualizacji transakcji", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("aktualizujTransakcje() – EntityManager zamknięty");
+            logger.debug("updateTransaction() – EntityManager zamknięty");
         }
     }
 
@@ -172,28 +172,28 @@ public class TransactionRepository {
     /**
      * Zwraca liczbę sztuk danego produktu sprzedanych w określonym dniu.
      *
-     * @param produkt encja Product
+     * @param product encja Product
      * @param date    dzień sprzedaży (LocalDate, bez czasu)
      * @return liczba sprzedanych sztuk lub 0 w przypadku błędu/braku danych
      */
-    public int getSoldQuantityForProductOnDate(Product produkt, LocalDate date) {
-        logger.debug("getSoldQuantityForProductOnDate() – start, produkt={}, date={}", produkt, date);
+    public int getSoldQuantityForProductOnDate(Product product, LocalDate date) {
+        logger.debug("getSoldQuantityForProductOnDate() – start, product={}, date={}", product, date);
         EntityManager em = emf.createEntityManager();
         try {
             Date sqlDate = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
             Long total = em.createQuery(
-                            "SELECT COALESCE(SUM(z.ilosc),0) FROM Zamowienie z " +
-                                    "WHERE z.produkt = :produkt AND z.data = :data", Long.class)
-                    .setParameter("produkt", produkt)
+                            "SELECT COALESCE(SUM(z.quantity),0) FROM Transaction z " +
+                                    "WHERE z.product = :product AND z.data = :data", Long.class)
+                    .setParameter("product", product)
                     .setParameter("data", sqlDate, TemporalType.DATE)
                     .getSingleResult();
             int result = total.intValue();
             logger.info("getSoldQuantityForProductOnDate() – sprzedano {} sztuk produktu {} w dniu {}",
-                    result, produkt, date);
+                    result, product, date);
             return result;
         } catch (Exception e) {
             logger.error("getSoldQuantityForProductOnDate() – błąd liczenia sprzedaży produktu {} w dniu {}",
-                    produkt, date, e);
+                    product, date, e);
             return 0;
         } finally {
             em.close();
@@ -239,8 +239,8 @@ public class TransactionRepository {
      * @param product     obiekt Product
      * @param quantity    żądana ilość produktu
      */
-    public void dodajProduktDoTransakcji(Transaction transaction, Product product, int quantity) {
-        logger.debug("dodajProduktDoTransakcji() – start, transactionId={}, productId={}, quantity={}",
+    public void addProductToTransaction(Transaction transaction, Product product, int quantity) {
+        logger.debug("addProductToTransaction() – start, transactionId={}, productId={}, quantity={}",
                 transaction.getId(), product.getId(), quantity);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -261,42 +261,42 @@ public class TransactionRepository {
                     tp.setProduct(managedPr);
                     tp.setQuantity(quantity);
                     em.persist(tp);
-                    logger.info("dodajProduktDoTransakcji() – utworzono relację (tx={}, prod={}, qty={})",
+                    logger.info("addProductToTransaction() – utworzono relację (tx={}, prod={}, qty={})",
                             managedTx.getId(), managedPr.getId(), quantity);
                 } else {
                     TransactionProduct tp = existing.get(0);
                     tp.setQuantity(quantity);
                     em.merge(tp);
-                    logger.info("dodajProduktDoTransakcji() – zaktualizowano qty w relacji (tx={}, prod={}, qty={})",
+                    logger.info("addProductToTransaction() – zaktualizowano qty w relacji (tx={}, prod={}, qty={})",
                             managedTx.getId(), managedPr.getId(), quantity);
                 }
             } else {
-                logger.warn("dodajProduktDoTransakcji() – nie znaleziono transakcji ({}) lub produktu ({})",
+                logger.warn("addProductToTransaction() – nie znaleziono transakcji ({}) lub produktu ({})",
                         transaction.getId(), product.getId());
             }
             tx.commit();
         } catch (Exception e) {
-            logger.error("dodajProduktDoTransakcji() – błąd podczas operacji relacji", e);
+            logger.error("addProductToTransaction() – błąd podczas operacji relacji", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("dodajProduktDoTransakcji() – EntityManager zamknięty");
+            logger.debug("addProductToTransaction() – EntityManager zamknięty");
         }
     }
 
     /**
      * Znajduje wszystkie transakcje wykonane przez danego pracownika.
      *
-     * @param pracownikId identyfikator pracownika
+     * @param employeeId identyfikator pracownika
      * @return lista obiektów Transaction lub pusta lista
      */
-    public List<Transaction> znajdzPoPracowniku(int pracownikId) {
-        logger.debug("findByEmployee() – pracownikId={}", pracownikId);
+    public List<Transaction> findByEmployee(int employeeId) {
+        logger.debug("findByEmployee() – employeeId={}", employeeId);
         EntityManager em = emf.createEntityManager();
         try {
             List<Transaction> list = em.createQuery(
-                            "SELECT t FROM Transaction t WHERE t.pracownik.id = :pid", Transaction.class)
-                    .setParameter("pid", pracownikId)
+                            "SELECT t FROM Transaction t WHERE t.employee.id = :pid", Transaction.class)
+                    .setParameter("pid", employeeId)
                     .getResultList();
             logger.info("findByEmployee() – znaleziono {} transakcji", list.size());
             return list;
@@ -312,16 +312,16 @@ public class TransactionRepository {
     /**
      * Znajduje transakcje dokonane dokładnie w danym dniu.
      *
-     * @param data data transakcji (bez czasu)
+     * @param date date transakcji (bez czasu)
      * @return lista obiektów Transaction lub pusta lista
      */
-    public List<Transaction> znajdzPoDacie(Date data) {
-        logger.debug("findByDate() – data={}", data);
+    public List<Transaction> findByDate(Date date) {
+        logger.debug("findByDate() – date={}", date);
         EntityManager em = emf.createEntityManager();
         try {
             List<Transaction> list = em.createQuery(
-                            "SELECT t FROM Transaction t WHERE t.data = :data", Transaction.class)
-                    .setParameter("data", data, TemporalType.DATE)
+                            "SELECT t FROM Transaction t WHERE t.date = :date", Transaction.class)
+                    .setParameter("date", date, TemporalType.DATE)
                     .getResultList();
             logger.info("findByDate() – znaleziono {} transakcji", list.size());
             return list;
@@ -341,8 +341,8 @@ public class TransactionRepository {
      * @param toDate   data końcowa (inclusive)
      * @return lista obiektów Transaction lub pusta lista
      */
-    public List<Transaction> znajdzPoZakresieDat(Date fromDate, Date toDate) {
-        logger.debug("znajdzPoZakresieDat() – from={}, to={}", fromDate, toDate);
+    public List<Transaction> findByDateRange(Date fromDate, Date toDate) {
+        logger.debug("findByDateRange() – from={}, to={}", fromDate, toDate);
         EntityManager em = emf.createEntityManager();
         try {
             List<Transaction> list = em.createQuery(
@@ -350,14 +350,14 @@ public class TransactionRepository {
                     .setParameter("from", fromDate, TemporalType.DATE)
                     .setParameter("to", toDate,   TemporalType.DATE)
                     .getResultList();
-            logger.info("znajdzPoZakresieDat() – znaleziono {} transakcji", list.size());
+            logger.info("findByDateRange() – znaleziono {} transakcji", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("znajdzPoZakresieDat() – błąd podczas wyszukiwania", e);
+            logger.error("findByDateRange() – błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("znajdzPoZakresieDat() – EntityManager zamknięty");
+            logger.debug("findByDateRange() – EntityManager zamknięty");
         }
     }
 

@@ -35,24 +35,24 @@ public class TransactionRepositoryTest {
             transakcja.setDate(data);
             transakcja.setEmployee(employee);
 
-            transactionRepo.dodajTransakcje(transakcja);
+            transactionRepo.addTransaction(transakcja);
             System.out.println(">>> Dodano transakcję!");
 
             // === 3. Wyświetlenie wszystkich transakcji ===
             System.out.println("\n>>> Lista wszystkich transakcji:");
-            wypiszTransakcje(transactionRepo.pobierzWszystkieTransakcje());
+            wypiszTransakcje(transactionRepo.getAllTransactions());
 
             // === 4. Odczyt po ID ===
-            Transaction loaded = transactionRepo.znajdzTransakcjePoId(transakcja.getId());
+            Transaction loaded = transactionRepo.findTransactionById(transakcja.getId());
             System.out.println(">>> Transakcja po ID: " + loaded);
 
             // === 5. Usunięcie ===
-            transactionRepo.usunTransakcje(loaded.getId());
+            transactionRepo.removeTransactions(loaded.getId());
             System.out.println(">>> Usunięto transakcję.");
 
             // === 6. Lista po usunięciu ===
             System.out.println("\n>>> Lista transakcji po usunięciu:");
-            wypiszTransakcje(transactionRepo.pobierzWszystkieTransakcje());
+            wypiszTransakcje(transactionRepo.getAllTransactions());
 
         } catch (Exception e) {
             e.printStackTrace();
