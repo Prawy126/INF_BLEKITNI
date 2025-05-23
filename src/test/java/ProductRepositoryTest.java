@@ -1,100 +1,138 @@
 /*
- * Classname: TestProductRepository
+ * Classname: ProductRepositoryTest
  * Version information: 1.2
  * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
+
 import org.example.database.ProductRepository;
 import org.example.sys.Product;
+import org.junit.jupiter.api.*;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-/**
- * Klasa testująca działanie ProductRepository.
- */
-public class ProductRepositoryTest {
+import static org.junit.jupiter.api.Assertions.*;
 
-    public static void main(String[] args) {
-        ProductRepository productRepo = new ProductRepository();
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class ProductRepositoryTest {
 
-        try {
-            // === 1. Dodanie produktu ===
-            Product product1 = new Product("Masło", "Nabiał", 6.99);
-            productRepo.addProduct(product1);
-            System.out.println(">>> Dodano produkt: Masło");
+    private static ProductRepository repo;
+    private static Product p1, p2, p3;
 
-            Product product2 = new Product("Szampon", "Kosmetyki", 12.49);
-            productRepo.addProduct(product2);
-            System.out.println(">>> Dodano produkt: Szampon");
+    @BeforeAll
+    static void setup() {
+        repo = new ProductRepository();
+        // create three products
+        p1 = new Product("Masło",   "Nabiał",      6.99);
+        p2 = new Product("Szampon", "Kosmetyki",  12.49);
+        p3 = new Product("Mleko",   "Nabiał",      4.50);
 
-            // === 2. Pobranie wszystkich produktów ===
-            System.out.println("\n>>> Wszystkie produkty:");
-            writeProducts(productRepo.getAllProducts());
+        assertDoesNotThrow(() -> {
+            repo.addProduct(p1);
+            repo.addProduct(p2);
+            repo.addProduct(p3);
+        }, "Should add three products without exception");
 
-            // === 3. Pobranie produktu po ID ===
-            Product found = productRepo.findProductById(product1.getId());
-            System.out.println(">>> Znaleziony po ID: " + found);
-
-            // === 4. Pobranie po kategorii ===
-            System.out.println("\n>>> Produkty w kategorii 'Nabiał':");
-            writeProducts(productRepo.getProductsByCategory("Nabiał"));
-
-            // === 5. Aktualizacja obiektu produkt ===
-            found.setCategory("Produkty spożywcze");
-            productRepo.updateProduct(found);
-            System.out.println(">>> Zmieniono kategorię produktu.");
-
-            // === 6. Aktualizacja ceny ===
-            productRepo.updateProductPrice(product2.getId(), BigDecimal.valueOf(10.99));
-            System.out.println(">>> Zmieniono cenę produktu Szampon.");
-
-            // === 7. Produkty w zakresie cenowym ===
-            System.out.println("\n>>> Produkty w zakresie cenowym 5.00 - 11.00:");
-            List<Product> list = productRepo.getPriceRangeProducts(
-                    BigDecimal.valueOf(5.00),
-                    BigDecimal.valueOf(11.00)
-            );
-            writeProducts(list);
-
-            // === 8. Usunięcie produktów po kategorii ===
-            int removed = productRepo.removeProductsFromCategory("Produkty spożywcze");
-            System.out.println(">>> Usunięto produktów z kategorii 'Produkty spożywcze': " + removed);
-
-            // === 9. Usunięcie konkretnego produktu ===
-            productRepo.removeProduct(product2.getId());
-            System.out.println(">>> Usunięto produkt: Szampon");
-
-            // === 10. Lista końcowa ===
-            System.out.println("\n>>> Lista produktów po usunięciach:");
-            writeProducts(productRepo.getAllProducts());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            productRepo.close();
-        }
+        assertTrue(p1.getId() > 0, "p1 should have an ID");
+        assertTrue(p2.getId() > 0, "p2 should have an ID");
+        assertTrue(p3.getId() > 0, "p3 should have an ID");
     }
 
-    /**
-     * Pomocnicza metoda wypisująca products.
-     *
-     * @param products lista produktów
-     */
-    private static void writeProducts(List<Product> products) {
-        if (products.isEmpty()) {
-            System.out.println("(Brak produktów)");
-        } else {
-            for (Product p : products) {
-                System.out.printf("ID: %-3d | Nazwa: %-20s | Kategoria: %-15s | Cena: %.2f zł%n",
-                        p.getId(),
-                        p.getName(),
-                        p.getCategory(),
-                        p.getPrice()
-                );
-            }
-        }
-        System.out.println("-----------------------------");
+    @Test
+    @Order(1)
+    void testFindAll() {
+        List<Product> all = repo.getAllProducts();
+        // we should have at least our three
+        assertTrue(all.size() >= 3, "Should find at least 3 products");
+        assertTrue(all.stream().anyMatch(p -> p.getId() == p1.getId()));
+        assertTrue(all.stream().anyMatch(p -> p.getId() == p2.getId()));
+        assertTrue(all.stream().anyMatch(p -> p.getId() == p3.getId()));
+    }
+
+    @Test
+    @Order(2)
+    void testFindByIdAndUpdate() {
+        Product found = repo.findProductById(p1.getId());
+        assertNotNull(found, "Should find p1 by its ID");
+        assertEquals("Masło", found.getName());
+
+        // update its category
+        found.setCategory("Produkty spożywcze");
+        assertDoesNotThrow(() -> repo.updateProduct(found));
+        Product reloaded = repo.findProductById(p1.getId());
+        assertEquals("Produkty spożywcze", reloaded.getCategory());
+    }
+
+    @Test
+    @Order(3)
+    void testUpdatePrice() {
+        // update price of p2
+        assertDoesNotThrow(() ->
+                repo.updateProductPrice(p2.getId(), BigDecimal.valueOf(10.99))
+        );
+        Product reloaded = repo.findProductById(p2.getId());
+        assertEquals(BigDecimal.valueOf(10.99), reloaded.getPrice());
+    }
+
+
+    @Test
+    @Order(4)
+    void testQueries() {
+        // exact category match "Nabiał"
+        List<Product> dairy = repo.getProductsByCategory("Nabiał");
+        assertTrue(dairy.stream().anyMatch(p -> p.getId() == p3.getId()));
+        assertFalse(dairy.stream().anyMatch(p -> p.getId() == p1.getId()));
+
+        // price range [5.00, 11.00]
+        List<Product> range = repo.getPriceRangeProducts(
+                BigDecimal.valueOf(5.00),
+                BigDecimal.valueOf(11.00)
+        );
+        assertTrue(range.stream().anyMatch(p -> p.getId() == p1.getId()));
+        assertTrue(range.stream().anyMatch(p -> p.getId() == p2.getId()));
+        assertFalse(range.stream().anyMatch(p -> p.getId() == p3.getId()));
+
+        // delete by category
+        int removed = repo.removeProductsFromCategory("Produkty spożywcze");
+        assertTrue(removed >= 1, "Should remove at least the p1 retagged earlier");
+
+        // delete single p2
+        assertDoesNotThrow(() -> repo.removeProduct(p2.getId()));
+        assertNull(repo.findProductById(p2.getId()), "p2 should be deleted");
+    }
+
+
+    @Test
+    @Order(5)
+    void testAdditionalSearches() {
+        // name contains "M"
+        List<Product> nameM = repo.findByName("m");
+        assertTrue(nameM.stream().anyMatch(p -> p.getId() == p3.getId()));
+
+        // exact price 4.50
+        List<Product> priceExact = repo.findByExactPrice(BigDecimal.valueOf(4.50));
+        assertTrue(priceExact.stream().anyMatch(p -> p.getId() == p3.getId()));
+
+        // price >= 6.00
+        List<Product> priceMin = repo.findByMinPrice(BigDecimal.valueOf(6.00));
+        assertTrue(
+                priceMin.stream()
+                        .anyMatch(p -> p.getPrice().compareTo(BigDecimal.valueOf(6.00)) >= 0)
+        );
+
+        // price <= 11.00
+        List<Product> priceMax = repo.findByMaxPrice(BigDecimal.valueOf(11.00));
+        assertTrue(
+                priceMax.stream()
+                        .allMatch(p -> p.getPrice().compareTo(BigDecimal.valueOf(11.00)) <= 0)
+        );
+    }
+
+
+    @AfterAll
+    static void tearDown() {
+        repo.close();
     }
 }

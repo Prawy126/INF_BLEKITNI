@@ -1,3 +1,11 @@
+/*
+ * Classname: DatabaseInitializerTest
+ * Version information: 1.2
+ * Date: 2025-05-22
+ * Copyright notice: © BŁĘKITNI
+ */
+
+
 import org.example.database.DatabaseInitializer;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;

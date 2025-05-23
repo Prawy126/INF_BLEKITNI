@@ -1,100 +1,119 @@
 /*
- * Classname: TestTaskRepository
+ * Classname: TaskRepositoryTest
  * Version information: 1.1
  * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI
  */
 
+
 import org.example.database.TaskRepository;
 import org.example.sys.Task;
-
+import org.junit.jupiter.api.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
+import java.util.Date;
 import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Klasa testująca działanie TaskRepository.
- */
-public class TaskRepositoryTest {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class TaskRepositoryTest {
 
-    public static void main(String[] args) throws Exception {
-        TaskRepository taskRepo = new TaskRepository();
+    private static TaskRepository taskRepo;
+    private static SimpleDateFormat sdf;
 
-        try {
-            // === 1. Dodawanie nowych zadań ===
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            LocalTime defaultShiftTime = LocalTime.of(8, 0); // np. zmiana zaczyna się o 08:00
+    private static Task zad1;
+    private static Task zad2;
+    private static Task zad3;
 
-            Task task1 = new Task(
-                    "Przyjęcie dostawy",
-                    sdf.parse("2025-05-01"),
-                    "Nowe",
-                    "Przyjąć dostawę mleka.",
-                    defaultShiftTime
-            );
+    @BeforeAll
+    static void setup() throws Exception {
+        taskRepo = new TaskRepository();
+        sdf      = new SimpleDateFormat("yyyy-MM-dd");
 
-            Task task2 = new Task(
-                    "Sprawdzenie stanów",
-                    sdf.parse("2025-05-03"),
-                    "Nowe",
-                    "Sprawdzić ilość jogurtów.",
-                    defaultShiftTime
-            );
+        // prepare three tasks
+        Date d1 = sdf.parse("2025-05-01");
+        Date d2 = sdf.parse("2025-05-03");
+        Date d3 = sdf.parse("2025-05-05");
 
-            Task task3 = new Task(
-                    "Aktualizacja cen",
-                    sdf.parse("2025-05-05"),
-                    "W trakcie",
-                    "Aktualizacja cen nabiału.",
-                    defaultShiftTime
-            );
+        zad1 = new Task("Przyjęcie dostawy", d1, "Nowe", "Przyjąć dostawę mleka.", LocalTime.of(2, 30));
+        zad2 = new Task("Sprawdzenie stanów", d2, "Nowe", "Sprawdzić ilość jogurtów.",    LocalTime.of(1, 0));
+        zad3 = new Task("Aktualizacja cen",  d3, "W trakcie", "Aktualizacja cen nabiału.",  null);
 
-            taskRepo.addTask(task1);
-            taskRepo.addTask(task2);
-            taskRepo.addTask(task3);
+        // persist them
+        assertDoesNotThrow(() -> taskRepo.addTask(zad1), "Should add zad1");
+        assertDoesNotThrow(() -> taskRepo.addTask(zad2), "Should add zad2");
+        assertDoesNotThrow(() -> taskRepo.addTask(zad3), "Should add zad3");
 
-            System.out.println(">>> Dodano zadania!");
-
-            // === 2. Pobieranie wszystkich zadań ===
-            System.out.println("\n>>> Lista wszystkich zadań:");
-            writeTasks(taskRepo.getAllTasks());
-
-            // === 3. Aktualizacja istniejącego zadania ===
-            task1.setStatus("W trakcie");
-            task1.setDescription("Dostawa mleka zrealizowana w połowie.");
-            taskRepo.updateTask(task1);
-            System.out.println("\n>>> Zaktualizowano zadanie 1.");
-
-            // === 4. Pobieranie zadania po ID ===
-            Task znalezione = taskRepo.findTaskById(task1.getId());
-            System.out.println(">>> Zadanie po ID: " + znalezione);
-
-            // === 5. Usuwanie zadania ===
-            taskRepo.removeTask(task2);
-            System.out.println("\n>>> Usunięto zadanie 2.");
-
-            // === 6. Lista zadań po usunięciu ===
-            System.out.println("\n>>> Lista zadań po usunięciu:");
-            writeTasks(taskRepo.getAllTasks());
-
-        } finally {
-            taskRepo.close();
-        }
+        // make sure they got IDs
+        assertTrue(zad1.getId() > 0);
+        assertTrue(zad2.getId() > 0);
+        assertTrue(zad3.getId() > 0);
     }
 
-    /**
-     * Pomocnicza metoda wypisująca tasks.
-     *
-     * @param tasks lista zadań do wypisania
-     */
-    private static void writeTasks(List<Task> tasks) {
-        if (tasks.isEmpty()) {
-            System.out.println("(Brak zadań)");
-        } else {
-            for (Task z : tasks) {
-                System.out.println(z);
-            }
-        }
-        System.out.println("-----------------------------");
+    @Test
+    @Order(1)
+    void testFindAllAndSearch() {
+        List<Task> all = taskRepo.getAllTasks();
+        assertTrue(all.size() >= 3, "Should have at least 3 tasks");
+
+        // by name fragment
+        List<Task> byName = taskRepo.findByName("Sprawdzenie");
+        assertTrue(byName.stream().allMatch(t -> t.getName().contains("Sprawdzenie")));
+
+        // by exact date
+        List<Task> byDate = taskRepo.findByDate(assertDoesNotThrow(() -> sdf.parse("2025-05-03")));
+        assertTrue(byDate.stream().allMatch(t -> sdf.format(t.getDate()).equals("2025-05-03")));
+
+        // by status
+        List<Task> byStatus = taskRepo.findByStatus("Nowe");
+        assertTrue(byStatus.stream().allMatch(t -> t.getStatus().equals("Nowe")));
+
+        // by description fragment
+        List<Task> byDesc = taskRepo.findByDescription("mleka");
+        assertTrue(byDesc.stream().allMatch(t -> t.getDescription().toLowerCase().contains("mleka")));
+
+        // by shift duration between 01:00 and 03:00
+        List<Task> byTime = taskRepo.findByTimeShiftDuration(
+                LocalTime.of(1, 0), LocalTime.of(3, 0));
+        assertTrue(
+                byTime.stream().allMatch(t -> {
+                    LocalTime ct = t.getDurationOfTheShift();
+                    return ct != null
+                            && !ct.isBefore(LocalTime.of(1, 0))
+                            && !ct.isAfter (LocalTime.of(3, 0));
+                })
+        );
+    }
+
+    @Test
+    @Order(2)
+    void testUpdate() {
+        // change status of zad1
+        zad1.setStatus("Zakończone");
+        assertDoesNotThrow(() -> taskRepo.updateTask(zad1));
+
+        Task reloaded = taskRepo.findTaskById(zad1.getId());
+        assertNotNull(reloaded);
+        assertEquals("Zakończone", reloaded.getStatus());
+    }
+
+    @Test
+    @Order(3)
+    void testDelete() {
+        // delete zad2
+        assertDoesNotThrow(() -> taskRepo.removeTask(zad2));
+
+        // confirm it's gone
+        Task shouldBeNull = taskRepo.findTaskById(zad2.getId());
+        assertNull(shouldBeNull);
+
+        // remaining list
+        List<Task> remaining = taskRepo.getAllTasks();
+        assertTrue(remaining.stream().noneMatch(t -> t.getId() == zad2.getId()));
+    }
+
+    @AfterAll
+    static void tearDown() {
+        taskRepo.close();
     }
 }

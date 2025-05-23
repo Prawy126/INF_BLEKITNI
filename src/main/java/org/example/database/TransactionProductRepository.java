@@ -38,6 +38,14 @@ public class TransactionProductRepository {
     }
 
     /**
+     * Konstruktor testowy – wstrzykuje zewnętrzne EMF (np. H2 in-memory).
+     */
+    public TransactionProductRepository(EntityManagerFactory emf) {
+        this.emf = emf;
+        logger.info("Utworzono TransactionProductRepository (test), EMF={}", emf);
+    }
+
+    /**
      * Dodaje nową pozycję produktu do transakcji.
      *
      * @param tp obiekt TransactionProduct do zapisania

@@ -1,8 +1,15 @@
+/*
+ * Classname: WarehouseRepositoryTest
+ * Version information: 1.1
+ * Date: 2025-05-22
+ * Copyright notice: © BŁĘKITNI
+ */
+
+
 import org.example.database.ProductRepository;
 import org.example.database.WarehouseRepository;
 import org.example.sys.Product;
 import org.example.sys.Warehouse;
-
 import org.junit.jupiter.api.*;
 
 import java.util.List;
