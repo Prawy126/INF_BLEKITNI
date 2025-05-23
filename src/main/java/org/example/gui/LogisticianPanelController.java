@@ -20,7 +20,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.database.ProductRepository;
 import org.example.database.WarehouseRepository;
-import sys.Product;
 import pdf.WarehouseRaport;
 
 import java.io.File;
@@ -235,8 +234,10 @@ public class LogisticianPanelController {
         }
 
         try {
+            // Pobierz produkty z repozytorium
             List<org.example.sys.Product> products = productRepository.getAllProducts();
 
+            // Pobierz stany magazynowe
             Map<Integer, Integer> qtyById = warehouseRepository
                     .getAllStates()
                     .stream()
@@ -245,22 +246,42 @@ public class LogisticianPanelController {
                             org.example.sys.Warehouse::getQuantity
                     ));
 
-            List<Product> pdfProducts = products.stream()
+            // Filtruj produkty według wybranych kategorii
+            List<org.example.sys.Product> filteredProducts = products.stream()
                     .filter(p ->
                             selectedCategories.isEmpty() ||
                                     selectedCategories.contains(p.getCategory()))
-                    .map(p -> new Product(
-                            p.getName(),
-                            p.getCategory(),
-                            qtyById.getOrDefault(p.getId(), 0),
-                            (int) Math.round(p.getPrice().doubleValue())  // <- BigDecimal → double
-                    ))
                     .collect(Collectors.toList());
 
+            // Utwórz ekstraktor danych dla klasy Product z projektu
+            WarehouseRaport.ProductDataExtractor<org.example.sys.Product> extractor =
+                    new WarehouseRaport.ProductDataExtractor<org.example.sys.Product>() {
+                        @Override
+                        public String getName(org.example.sys.Product product) {
+                            return product.getName();
+                        }
+
+                        @Override
+                        public String getCategory(org.example.sys.Product product) {
+                            return product.getCategory();
+                        }
+
+                        @Override
+                        public double getPrice(org.example.sys.Product product) {
+                            return product.getPrice().doubleValue();
+                        }
+
+                        @Override
+                        public int getQuantity(org.example.sys.Product product) {
+                            return qtyById.getOrDefault(product.getId(), 0);
+                        }
+                    };
+
+            // Generuj raport używając nowej wersji API
             WarehouseRaport raport = new WarehouseRaport();
             raport.setLogoPath("src/main/resources/logo.png");
             raport.setLowStockThreshold(lowStockThreshold);
-            raport.generateReport(outputPath.getText(), pdfProducts, selectedCategories);
+            raport.generateReport(outputPath.getText(), filteredProducts, extractor, selectedCategories);
 
             showAlert(Alert.AlertType.INFORMATION, "Sukces",
                     "Raport wygenerowany pomyślnie!");
@@ -271,51 +292,6 @@ public class LogisticianPanelController {
             showAlert(Alert.AlertType.ERROR, "Błąd",
                     "Generowanie raportu nie powiodło się: " + ex.getMessage());
         }
-    }
-
-
-    private void runLibraryTest() {
-        try {
-            WarehouseRaport generator = new WarehouseRaport();
-            generator.setLogoPath("src/main/resources/logo.png");
-            generator.setLowStockThreshold(3);
-
-            String testPath = System.getProperty("user.dir") + "/test_report.pdf";
-            generator.generateReport(
-                    testPath,
-                    (List<sys.Product>) (List<?>) getSampleProducts(),
-                    Arrays.asList("Elektronika", "Żywność")
-            );
-
-            showAlert(Alert.AlertType.INFORMATION,
-                    "Test powiódł się",
-                    "Wygenerowano testowy raport:\n" + testPath);
-        } catch (Exception ex) {
-            showAlert(Alert.AlertType.ERROR,
-                    "Test nie powiódł się",
-                    "Błąd: " + ex.getMessage());
-        }
-    }
-
-    // Metody pomocnicze
-    private List<String> getAllCategories() {
-        return Arrays.asList(
-                "Elektronika",
-                "Odzież",
-                "Akcesoria",
-                "Żywność"
-        );
-    }
-
-    private List<Product> getSampleProducts() {
-        return Arrays.asList(
-                new Product("Laptop HP Pavilion", "Elektronika", 8, 3499),
-                new Product("Mysz Logitech MX", "Elektronika", 2, 299),
-                new Product("Kurtka zimowa", "Odzież", 15, 199),
-                new Product("Powerbank Xiaomi", "Akcesoria", 4, 89),
-                new Product("Kawa Arabica 1kg", "Żywność", 1, 39),
-                new Product("Słuchawki Sony", "Elektronika", 6, 599)
-        );
     }
 
     /**

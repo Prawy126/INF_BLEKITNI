@@ -9,6 +9,10 @@ package org.example.database;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
@@ -48,7 +52,7 @@ public class DatabaseInitializer implements ILacz {
         try (Connection conn = DriverManager.getConnection(MYSQL_DB_URL, MYSQL_USER, MYSQL_PASSWORD)) {
             logger.debug("Połączenie do bazy '{}' nawiązane: {}", DB_NAME, MYSQL_DB_URL);
             logger.info("Importowanie pliku SQL: src/main/resources/Stonka.sql");
-            executeSqlScript(conn, "src/main/resources/Stonka.sql");
+            executeSqlScript(conn, "Stonka.sql");
             logger.info("Import danych zakończony pomyślnie. Baza '{}' gotowa.", DB_NAME);
         } catch (Exception e) {
             logger.error("Błąd podczas importowania danych do bazy '{}'", DB_NAME, e);
@@ -63,19 +67,24 @@ public class DatabaseInitializer implements ILacz {
      * @throws Exception gdy odczyt pliku lub wykonanie zapytań zakończy się niepowodzeniem
      */
     private static void executeSqlScript(Connection conn, String filePath) throws Exception {
-        logger.debug("Wczytywanie skryptu SQL z pliku: {}", filePath);
-        String sql = new String(Files.readAllBytes(Paths.get(filePath)));
-        String[] statements = sql.split(";");
+        logger.debug("Wczytywanie skryptu SQL z zasobów: {}", filePath);
+        try (InputStream is = DatabaseInitializer.class.getResourceAsStream("/" + filePath)) {
+            if (is == null) {
+                throw new FileNotFoundException("Plik " + filePath + " nie został znaleziony w zasobach!");
+            }
+            String sql = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            String[] statements = sql.split(";");
 
-        try (Statement stmt = conn.createStatement()) {
-            for (String s : statements) {
-                String trimmed = s.trim();
-                if (!trimmed.isEmpty()) {
-                    logger.trace("Wykonuję zapytanie SQL: {}", trimmed.replaceAll("\\s+", " "));
-                    stmt.execute(trimmed);
+            try (Statement stmt = conn.createStatement()) {
+                for (String s : statements) {
+                    String trimmed = s.trim();
+                    if (!trimmed.isEmpty()) {
+                        logger.trace("Wykonuję zapytanie SQL: {}", trimmed.replaceAll("\\s+", " "));
+                        stmt.execute(trimmed);
+                    }
                 }
             }
         }
-        logger.debug("Wszystkie polecenia SQL z pliku {} zostały wykonane", filePath);
+        logger.debug("Wykonano wszystkie polecenia SQL z pliku {}", filePath);
     }
 }
