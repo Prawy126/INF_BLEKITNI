@@ -15,6 +15,7 @@ import javafx.geometry.Pos;
 import javafx.scene.CacheHint;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -28,10 +29,15 @@ import org.example.wyjatki.SalaryException;
 
 import java.io.File;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.example.database.AddressRepository;
 import org.example.sys.Address;
+import pdf.StatsRaportGenerator;
+import pdf.TaskRaportGenerator;
+import pdf.WorkloadReportGenerator;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -724,49 +730,178 @@ public class AdminPanelController {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
 
-        Label titleLabel = new Label("Wybierz rodzaj raportu");
+        Label titleLabel = new Label("Generowanie raportów");
+        titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
-        ComboBox<String> reportType = new ComboBox<>();
-        reportType.getItems().addAll(
-                "Raport sprzedaży",
-                "Raport pracowników",
-                "Raport zgłoszeń"
-        );
-        reportType.setPrefWidth(200);
+        Button statsBtn = new Button("Raport KPI (Statystyki)");
+        Button taskBtn  = new Button("Raport zadań");
+        Button loadBtn  = new Button("Raport obciążenia");
 
-        Label dateLabel = new Label("Wybierz zakres dat");
-        DatePicker startDatePicker = new DatePicker();
-        startDatePicker.setPromptText("Data początkowa");
+        statsBtn.setOnAction(e -> showStatsReportDialog());
+        taskBtn.setOnAction(e  -> showTaskReportDialog());
+        loadBtn.setOnAction(e  -> showWorkloadReportDialog());
 
-        DatePicker endDatePicker = new DatePicker();
-        endDatePicker.setPromptText("Data końcowa");
-
-        Button generateButton = new Button("Generuj raport");
-        generateButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
-        generateButton.setOnAction(e -> {
-            String selected = reportType.getValue();
-            LocalDate from  = startDatePicker.getValue();
-            LocalDate to    = endDatePicker.getValue();
-
-            if (selected == null || from == null || to == null) {
-                showAlert(Alert.AlertType.WARNING, "Brak danych",
-                        "Wybierz typ raportu oraz zakres dat.");
-                return;
-            }
-            showFilterDialogForReport(selected, from, to);
-        });
-
-        layout.getChildren().addAll(
-                titleLabel,
-                reportType,
-                dateLabel,
-                startDatePicker,
-                endDatePicker,
-                generateButton
-        );
-
+        layout.getChildren().addAll(titleLabel, statsBtn, taskBtn, loadBtn);
         return layout;
     }
+
+    private void showStatsReportDialog() {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Raport KPI – filtry");
+
+        // Zakres dat
+        DatePicker start = new DatePicker();
+        DatePicker end   = new DatePicker();
+
+        // Lista stanowisk – multi‑select
+        ListView<String> positionsList = new ListView<>();
+        positionsList.setPrefSize(200, 100);
+        positionsList.getItems().addAll("Kasjer", "Logistyk", "Pracownik");
+        positionsList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        // Lista priorytetów
+        ListView<StatsRaportGenerator.Priority> prioList = new ListView<>();
+        prioList.setPrefSize(200, 100);
+        prioList.getItems().addAll(StatsRaportGenerator.Priority.values());
+        prioList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10); grid.setVgap(10);
+        grid.addRow(0, new Label("Data od:"), start, new Label("Data do:"), end);
+        grid.addRow(1, new Label("Stanowiska:"), positionsList);
+        grid.addRow(2, new Label("Priorytety:"), prioList);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(bt -> {
+            if (bt == ButtonType.OK) {
+                generateStatsPDF(start.getValue(), end.getValue(),
+                        new ArrayList<>(positionsList.getSelectionModel().getSelectedItems()),
+                        new ArrayList<>(prioList.getSelectionModel().getSelectedItems()));
+            }
+            return null;
+        });
+        dialog.showAndWait();
+    }
+
+    private void generateStatsPDF(LocalDate from, LocalDate to,
+                                  List<String> positions,
+                                  List<StatsRaportGenerator.Priority> priors) {
+        try {
+            StatsRaportGenerator gen = new StatsRaportGenerator();
+            gen.setTaskData(fetchTaskStatsData(from, to)); // TODO: zaimplementuj
+            String out = ConfigManager.getReportPath() + "/stats-" + System.currentTimeMillis() + ".pdf";
+            gen.generateReport(out, to, StatsRaportGenerator.PeriodType.DAILY, positions, priors);
+            showAlert(Alert.AlertType.INFORMATION, "Raport wygenerowany", out);
+        } catch (Exception ex) {
+            showAlert(Alert.AlertType.ERROR, "Błąd", ex.getMessage());
+        }
+    }
+
+    private void showTaskReportDialog() {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Raport zadań – filtry");
+
+        // Okres (ComboBox)
+        ComboBox<TaskRaportGenerator.PeriodType> period = new ComboBox<>();
+        period.getItems().addAll(TaskRaportGenerator.PeriodType.values());
+
+        // Statusy
+        ListView<String> statusList = new ListView<>();
+        statusList.setPrefSize(200, 100);
+        statusList.getItems().addAll("Zakończone", "W trakcie", "Opóźnione");
+        statusList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        GridPane g = new GridPane();
+        g.setHgap(10); g.setVgap(10);
+        g.addRow(0, new Label("Okres:"), period);
+        g.addRow(1, new Label("Statusy:"), statusList);
+
+        dialog.getDialogPane().setContent(g);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(bt -> {
+            if (bt == ButtonType.OK) {
+                generateTaskPDF(period.getValue(),
+                        new ArrayList<>(statusList.getSelectionModel().getSelectedItems()));
+            }
+            return null;
+        });
+        dialog.showAndWait();
+    }
+
+    private void generateTaskPDF(TaskRaportGenerator.PeriodType period,
+                                 List<String> statuses) {
+        try {
+            TaskRaportGenerator gen = new TaskRaportGenerator();
+            gen.setTaskData(fetchTaskSimpleData(period)); // TODO: zaimplementuj
+            String out = ConfigManager.getReportPath() + "/tasks-" + System.currentTimeMillis() + ".pdf";
+            gen.generateReport(out, period, statuses);
+            showAlert(Alert.AlertType.INFORMATION, "Raport wygenerowany", out);
+        } catch (Exception ex) {
+            showAlert(Alert.AlertType.ERROR, "Błąd", ex.getMessage());
+        }
+    }
+
+    private void showWorkloadReportDialog() {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Raport obciążenia – filtry");
+
+        DatePicker start = new DatePicker();
+        DatePicker end   = new DatePicker();
+
+        ListView<String> positionsList = new ListView<>();
+        positionsList.setPrefSize(200, 100);
+        positionsList.getItems().addAll("Kasjer", "Logistyk", "Pracownik");
+        positionsList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        ListView<String> statusList = new ListView<>();
+        statusList.setPrefSize(200, 100);
+        statusList.getItems().addAll("Przeciążenie", "Niedociążenie", "Optymalne");
+        statusList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        GridPane g = new GridPane();
+        g.setHgap(10); g.setVgap(10);
+        g.addRow(0, new Label("Data od:"), start, new Label("Data do:"), end);
+        g.addRow(1, new Label("Stanowiska:"), positionsList);
+        g.addRow(2, new Label("Statusy:"), statusList);
+
+        dialog.getDialogPane().setContent(g);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(bt -> {
+            if (bt == ButtonType.OK) {
+                generateWorkloadPDF(start.getValue(), end.getValue(),
+                        new ArrayList<>(positionsList.getSelectionModel().getSelectedItems()),
+                        new ArrayList<>(statusList.getSelectionModel().getSelectedItems()));
+            }
+            return null;
+        });
+        dialog.showAndWait();
+    }
+
+    private void generateWorkloadPDF(LocalDate from, LocalDate to,
+                                     List<String> positions,
+                                     List<String> statuses) {
+        try {
+            WorkloadReportGenerator gen = new WorkloadReportGenerator();
+            gen.setWorkloadData(fetchWorkloadData(from, to)); // TODO: zaimplementuj
+            String out = ConfigManager.getReportPath() + "/workload-" + System.currentTimeMillis() + ".pdf";
+            gen.generateReport(out, from, to, positions, statuses);
+            showAlert(Alert.AlertType.INFORMATION, "Raport wygenerowany", out);
+        } catch (Exception ex) {
+            showAlert(Alert.AlertType.ERROR, "Błąd", ex.getMessage());
+        }
+    }
+
+
+    //TODO: TO JEST DO ZAIMPLEMENTOWANIA
+    // Poniższe metody musisz uzupełnić, by zwracały odpowiednie dane z repozytoriów.
+    private List<StatsRaportGenerator.TaskRecord> fetchTaskStatsData(LocalDate from, LocalDate to) { return List.of(); }
+    private List<TaskRaportGenerator.TaskRecord>  fetchTaskSimpleData(TaskRaportGenerator.PeriodType p) { return List.of(); }
+    private List<WorkloadReportGenerator.EmployeeWorkload> fetchWorkloadData(LocalDate from, LocalDate to) { return List.of(); }
+
 
 
     /**

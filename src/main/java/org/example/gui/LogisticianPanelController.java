@@ -20,9 +20,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.database.ProductRepository;
 import org.example.database.WarehouseRepository;
+import org.example.pdflib.ConfigManager;
 import pdf.WarehouseRaport;
 
 import java.io.File;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -182,15 +185,17 @@ public class LogisticianPanelController {
         Label thresholdLabel = new Label("Próg niskiego stanu magazynowego:");
         Spinner<Integer> thresholdSpinner = new Spinner<>(1, 100, 5);
 
-        Label outputLabel = new Label("Ścieżka zapisu:");
-        TextField outputPath = new TextField();
-        Button browseButton = new Button("Przeglądaj");
-        browseButton.setOnAction(e -> handleBrowseButton(stage, outputPath));
+        // Informacja o docelowej ścieżce (tylko do odczytu)
+        Label pathInfoLabel = new Label("Plik zostanie zapisany w katalogu:");
+        TextField pathDisplay = new TextField();
+        pathDisplay.setEditable(false);
+        pathDisplay.setFocusTraversable(false);
+        pathDisplay.setPrefWidth(400);
+        pathDisplay.setText(ConfigManager.getReportPath());
 
         Button generate = new Button("Generuj");
         generate.setOnAction(e ->
                 handleGenerateButton(
-                        outputPath,
                         new ArrayList<>(categoriesList.getSelectionModel().getSelectedItems()),
                         thresholdSpinner.getValue(),
                         stage
@@ -201,12 +206,9 @@ public class LogisticianPanelController {
         grid.add(categoriesList, 1, 0);
         grid.add(thresholdLabel, 0, 1);
         grid.add(thresholdSpinner, 1, 1);
-        grid.add(outputLabel, 0, 2);
-        grid.add(outputPath, 1, 2);
-        grid.add(browseButton, 2, 2);
+        grid.add(pathInfoLabel, 0, 2);
+        grid.add(pathDisplay, 1, 2);
         grid.add(generate, 1, 3);
-
-        GridPane.setHgrow(outputPath, Priority.ALWAYS);
 
         stage.setScene(new Scene(grid, 600, 350));
         stage.show();
@@ -222,16 +224,20 @@ public class LogisticianPanelController {
         }
     }
 
-    private void handleGenerateButton(TextField outputPath,
-                                      List<String> selectedCategories,
+    private void handleGenerateButton(List<String> selectedCategories,
                                       int lowStockThreshold,
                                       Stage stage) {
 
-        if (outputPath.getText().isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Uwaga",
-                    "Wybierz ścieżkę zapisu raportu.");
+        String basePath = ConfigManager.getReportPath();
+        if (basePath == null || basePath.isBlank()) {
+            showAlert(Alert.AlertType.WARNING, "Brak ścieżki",
+                    "Ustaw domyślną ścieżkę zapisu raportów w ustawieniach administratora.");
             return;
         }
+
+        // Generujemy unikalną nazwę pliku
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        File targetFile = new File(basePath, "warehouse-report-" + timestamp + ".pdf");
 
         try {
             // Pobierz produkty z repozytorium
@@ -253,38 +259,21 @@ public class LogisticianPanelController {
                                     selectedCategories.contains(p.getCategory()))
                     .collect(Collectors.toList());
 
-            // Utwórz ekstraktor danych dla klasy Product z projektu
             WarehouseRaport.ProductDataExtractor<org.example.sys.Product> extractor =
-                    new WarehouseRaport.ProductDataExtractor<org.example.sys.Product>() {
-                        @Override
-                        public String getName(org.example.sys.Product product) {
-                            return product.getName();
-                        }
-
-                        @Override
-                        public String getCategory(org.example.sys.Product product) {
-                            return product.getCategory();
-                        }
-
-                        @Override
-                        public double getPrice(org.example.sys.Product product) {
-                            return product.getPrice().doubleValue();
-                        }
-
-                        @Override
-                        public int getQuantity(org.example.sys.Product product) {
-                            return qtyById.getOrDefault(product.getId(), 0);
-                        }
+                    new WarehouseRaport.ProductDataExtractor<>() {
+                        public String getName(org.example.sys.Product p)     { return p.getName(); }
+                        public String getCategory(org.example.sys.Product p) { return p.getCategory(); }
+                        public double getPrice(org.example.sys.Product p)    { return p.getPrice().doubleValue(); }
+                        public int getQuantity(org.example.sys.Product p)    { return qtyById.getOrDefault(p.getId(), 0); }
                     };
 
-            // Generuj raport używając nowej wersji API
             WarehouseRaport raport = new WarehouseRaport();
             raport.setLogoPath("src/main/resources/logo.png");
             raport.setLowStockThreshold(lowStockThreshold);
-            raport.generateReport(outputPath.getText(), filteredProducts, extractor, selectedCategories);
+            raport.generateReport(targetFile.getAbsolutePath(), filteredProducts, extractor, selectedCategories);
 
             showAlert(Alert.AlertType.INFORMATION, "Sukces",
-                    "Raport wygenerowany pomyślnie!");
+                    "Raport zapisany: " + targetFile.getAbsolutePath());
             stage.close();
 
         } catch (Exception ex) {
