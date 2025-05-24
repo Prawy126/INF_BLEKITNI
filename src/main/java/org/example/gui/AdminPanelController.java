@@ -366,7 +366,7 @@ public class AdminPanelController {
         Task<List<Employee>> task = new Task<>() {
             @Override
             protected List<Employee> call() throws Exception {
-                return userRepository.getAllEmployess();
+                return userRepository.getAllEmployees();
             }
         };
 

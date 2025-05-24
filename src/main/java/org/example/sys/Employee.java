@@ -1,7 +1,7 @@
 /*
  * Classname: Employee
- * Version information: 1.1
- * Date: 2025-05-22
+ * Version information: 1.2
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -165,6 +165,16 @@ public class Employee extends Person {
      */
     public int getId() {
         return id;
+    }
+
+    /**
+     * Ustawia identyfikator pracownika.
+     * Używane głównie w testach jednostkowych.
+     *
+     * @param id Identyfikator do ustawienia
+     */
+    public void setId(int id) {
+        this.id = id;
     }
 
     /**

@@ -1,6 +1,21 @@
+/*
+ * Classname: Warehouse
+ * Version information: 1.0
+ * Date: 2025-05-24
+ * Copyright notice: © BŁĘKITNI
+ */
+
+
 package org.example.sys;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "StanyMagazynowe")

@@ -1,9 +1,10 @@
 /*
  * Classname: Transaction
- * Version information: 1.1
- * Date: 2025-05-22
+ * Version information: 1.2
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
+
 
 package org.example.sys;
 
@@ -51,6 +52,11 @@ public class Transaction {
     public int getId() {
         return id;
     }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
 
     public Employee getEmployee() {
         return employee;

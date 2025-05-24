@@ -1,7 +1,7 @@
 /*
  * Classname: Order
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.2
+ * Date: 2025-05-23
  * Copyright notice: © BŁĘKITNI
  */
 

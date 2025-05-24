@@ -1,7 +1,7 @@
 /*
  * Classname: ConfigPdf
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.1
+ * Date: 2025-05-23
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -24,7 +24,7 @@ public class ConfigPdf {
      * @param pathPdf  Ścieżka do pliku PDF.
      * @param sort     Obiekt Sort definiujący sposób sortowania.
      */
-    public void setAll(String pathLogo, String pathPdf, Sort sort) {
+    public static void setAll(String pathLogo, String pathPdf, Sort sort) {
         ConfigPdf.pathLogo = pathLogo;
         ConfigPdf.pathPdf = pathPdf;
         ConfigPdf.sort = sort;

@@ -32,7 +32,7 @@ class ReportRepositoryTest {
         userRepo   = new UserRepository();
 
         // pick an existing employee
-        List<Employee> emps = userRepo.getAllEmployess();  // userRepo methods still in Polish
+        List<Employee> emps = userRepo.getAllEmployees();  // userRepo methods still in Polish
         assertFalse(emps.isEmpty(), "Must have at least one employee");
         employee = emps.get(0);
 

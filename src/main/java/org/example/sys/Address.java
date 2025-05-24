@@ -1,7 +1,24 @@
+/*
+ * Classname: OrderRepositoryTest
+ * Version information: 1.2
+ * Date: 2025-05-23
+ * Copyright notice: © BŁĘKITNI
+ */
+
+
 package org.example.sys;
 
-import jakarta.persistence.*;
 import java.util.List;
+
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Adresy")

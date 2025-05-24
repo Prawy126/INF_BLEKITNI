@@ -1,3 +1,11 @@
+/*
+ * Classname: CashierTest
+ * Version information: 1.2
+ * Date: 2025-05-24
+ * Copyright notice: © BŁĘKITNI
+ */
+
+
 import org.example.sys.Employee;
 import org.example.sys.Cashier;
 import org.example.sys.Address;

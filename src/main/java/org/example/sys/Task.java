@@ -75,6 +75,14 @@ public class Task {
         return id;
     }
 
+    /**
+     * Ustawia identyfikator zadania.
+     * (Potrzebne do testów jednostkowych)
+     */
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }

@@ -1,7 +1,30 @@
+/*
+ * Classname: OrderRepositoryTest
+ * Version information: 1.0
+ * Date: 2025-05-23
+ * Copyright notice: © BŁĘKITNI
+ */
+
+
 package org.example.sys;
 
-import jakarta.persistence.*;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 @Entity
 @Table(name = "Wnioski_o_nieobecnosc")
@@ -124,9 +147,14 @@ public class AbsenceRequest {
 
     @Override
     public String toString() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return String.format(
                 "AbsenceRequest{id=%d, type='%s', from=%s, to=%s, description='%s', status='%s', employee=%s %s}",
-                id, requestType, startDate, endDate, description, status,
+                id, requestType,
+                startDate != null ? dateFormat.format(startDate) : "null",
+                endDate != null ? dateFormat.format(endDate) : "null",
+                description,
+                status,
                 employee != null ? employee.getName() : "null",
                 employee != null ? employee.getSurname() : ""
         );

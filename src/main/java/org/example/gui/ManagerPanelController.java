@@ -442,7 +442,7 @@ public class ManagerPanelController {
 
         Label employeeLabel = new Label("Wybierz pracownika:");
         ComboBox<String> employeeComboBox = new ComboBox<>();
-        userRepository.getAllEmployess().forEach(p ->
+        userRepository.getAllEmployees().forEach(p ->
                 employeeComboBox.getItems().add(p.getName() + " " + p.getSurname())
         );
 

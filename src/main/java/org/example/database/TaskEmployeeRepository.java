@@ -1,7 +1,7 @@
 /*
  * Classname: TaskEmployeeRepository
- * Version information: 1.4
- * Date: 2025-05-22
+ * Version information: 1.2
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -28,11 +28,20 @@ public class TaskEmployeeRepository {
     private final EntityManagerFactory emf;
 
     /**
-     * Konstruktor inicjalizujący EntityManagerFactory dla persistence unit "myPU".
+     * Produkcyjny konstruktor inicjalizujący EMF dla persistence unit "myPU".
      */
     public TaskEmployeeRepository() {
-        this.emf = Persistence.createEntityManagerFactory("myPU");
-        logger.info("Utworzono TaskEmployeeRepository, EMF={}", emf);
+        this("myPU");
+    }
+
+    /**
+     * Konstruktor pozwalający wskazać dowolną jednostkę persistence (np. "testPU" w testach).
+     *
+     * @param persistenceUnitName nazwa persistence-unit z persistence.xml
+     */
+    public TaskEmployeeRepository(String persistenceUnitName) {
+        this.emf = Persistence.createEntityManagerFactory(persistenceUnitName);
+        logger.info("Utworzono TaskEmployeeRepository, PU={}, EMF={}", persistenceUnitName, emf);
     }
 
     /**

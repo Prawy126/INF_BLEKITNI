@@ -1,11 +1,11 @@
 /*
  * Classname: Report
- * Version information: 1.1
- * Date: 2025-05-22
+ * Version information: 1.2
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
 
-// src/main/java/org/example/sys/Report.java
+
 package org.example.sys;
 
 import jakarta.persistence.Entity;

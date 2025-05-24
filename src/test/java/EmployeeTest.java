@@ -1,3 +1,11 @@
+/*
+ * Classname: EmployeeTest
+ * Version information: 1.1
+ * Date: 2025-05-24
+ * Copyright notice: © BŁĘKITNI
+ */
+
+
 import org.example.sys.Address;
 import org.example.sys.Employee;
 import org.example.wyjatki.AgeException;
@@ -96,6 +104,17 @@ class EmployeeTest {
         assertNull(employee.getAddress());
         assertFalse(employee.isOnSickLeave());
         assertNull(employee.getSickLeaveStartDate());
+    }
+
+    /**
+     * Testuje ustawianie i odczyt identyfikatora przez setId/getId.
+     * Wymaga, żeby w klasie Employee istniała metoda public void setId(int).
+     */
+    @Test
+    void testSetAndGetId() {
+        Employee employee = new Employee();
+        employee.setId(99);
+        assertEquals(99, employee.getId(), "setId/getId powinny działać poprawnie");
     }
 
     @Test

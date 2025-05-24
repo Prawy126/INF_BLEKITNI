@@ -42,7 +42,7 @@ public class UserRepository {
      *
      * @return lista aktywnych pracowników lub pusta lista w przypadku błędu
      */
-    public List<Employee> getAllEmployess() {
+    public List<Employee> getAllEmployees() {
         logger.debug("getAllEmployess() – start");
         EntityManager em = emf.createEntityManager();
         try {

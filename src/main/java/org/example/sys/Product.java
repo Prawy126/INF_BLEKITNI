@@ -1,3 +1,11 @@
+/*
+ * Classname: Product
+ * Version information: 1.1
+ * Date: 2025-05-24
+ * Copyright notice: © BŁĘKITNI
+ */
+
+
 package org.example.sys;
 
 import jakarta.persistence.*;
@@ -44,6 +52,10 @@ public class Product {
 
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {

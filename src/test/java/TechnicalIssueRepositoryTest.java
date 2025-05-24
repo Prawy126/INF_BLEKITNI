@@ -33,7 +33,7 @@ class TechnicalIssueRepositoryTest {
         userRepo  = new UserRepository();
 
         // pick an existing employee
-        List<Employee> emps = userRepo.getAllEmployess();
+        List<Employee> emps = userRepo.getAllEmployees();
         assertFalse(emps.isEmpty(), "At least one Employee must exist");
         employee = emps.get(0);
 

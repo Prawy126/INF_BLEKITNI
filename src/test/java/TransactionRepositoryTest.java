@@ -40,7 +40,7 @@ class TransactionRepositoryTest {
         toDate    = sdf.parse("2025-05-15");
 
         // pick an existing employee
-        List<Employee> emps = userRepo.getAllEmployess();
+        List<Employee> emps = userRepo.getAllEmployees();
         assertFalse(emps.isEmpty(), "At least one employee must exist");
         employee = emps.get(0);
     }

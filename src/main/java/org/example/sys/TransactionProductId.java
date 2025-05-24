@@ -1,9 +1,10 @@
 /*
  * Classname: TransactionProductId
- * Version information: 1.0
- * Date: 2025-05-20
+ * Version information: 1.1
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
+
 
 package org.example.sys;
 
