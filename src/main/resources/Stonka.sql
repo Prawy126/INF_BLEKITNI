@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS Wnioski_o_nieobecnosc (
     Data_rozpoczecia   DATE,
     Data_zakonczenia   DATE,
     Opis               TEXT,
-    Status             ENUM('Oczekuje', 'Nie przyjęty', 'Przyjęty') DEFAULT 'Oczekuje',
+    Status             ENUM('PENDING','ACCEPTED','REJECTED') DEFAULT 'PENDING',
     Id_pracownika      INT,
     FOREIGN KEY (Id_pracownika) REFERENCES Pracownicy(Id) ON DELETE CASCADE
 );
@@ -228,11 +228,11 @@ INSERT INTO Zadania_Pracownicy (Id_pracownika, Id_zadania) VALUES
 
 -- Wnioski o nieobecność
 INSERT INTO Wnioski_o_nieobecnosc (Typ_wniosku, Data_rozpoczecia, Data_zakonczenia, Opis, Id_pracownika, Status) VALUES
-('Urlop wypoczynkowy', '2025-05-01', '2025-05-10', 'Wakacje w górach',    1, 'Oczekuje'),
-('Zwolnienie lekarskie','2025-04-20','2025-04-25', 'Przeziębienie',       2, 'Oczekuje'),
-('Urlop bezpłatny',     '2025-06-01','2025-06-15', 'Wyjazd zagraniczny',  3, 'Oczekuje'),
-('Urlop na żądanie',    '2025-04-22','2025-04-22', 'Sprawy rodzinne',     4, 'Oczekuje'),
-('Opieka nad dzieckiem','2025-05-05','2025-05-07', 'Chore dziecko',       5, 'Oczekuje');
+('Urlop wypoczynkowy', '2025-05-01', '2025-05-10', 'Wakacje w górach',    1, 'PENDING'),
+('Zwolnienie lekarskie','2025-04-20','2025-04-25', 'Przeziębienie',       2, 'PENDING'),
+('Urlop bezpłatny',     '2025-06-01','2025-06-15', 'Wyjazd zagraniczny',  3, 'PENDING'),
+('Urlop na żądanie',    '2025-04-22','2025-04-22', 'Sprawy rodzinne',     4, 'PENDING'),
+('Opieka nad dzieckiem','2025-05-05','2025-05-07', 'Chore dziecko',       5, 'PENDING');
 
 -- Zamówienia
 INSERT INTO Zamowienia (Id_produktu, Id_pracownika, Ilosc, Cena, Data) VALUES
