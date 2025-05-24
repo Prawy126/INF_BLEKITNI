@@ -1,7 +1,7 @@
 /*
  * Classname: TechnicalIssueRepositoryTest
- * Version information: 1.1
- * Date: 2025-05-22
+ * Version information: 1.3
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -10,12 +10,23 @@ import org.example.database.TechnicalIssueRepository;
 import org.example.database.UserRepository;
 import org.example.sys.Employee;
 import org.example.sys.TechnicalIssue;
-import org.junit.jupiter.api.*;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.AfterAll;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class TechnicalIssueRepositoryTest {

@@ -5,30 +5,50 @@
  * Copyright notice: © BŁĘKITNI
  */
 
+
 package org.example.gui;
 
-import javafx.animation.*;
+import javafx.animation.FadeTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
+import javafx.animation.Interpolator;
+
+import javafx.util.Duration;
+
 import javafx.application.Application;
 import javafx.application.Platform;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.*;
+
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Duration;
+
 import org.example.sys.ConfigPdf;
 import org.example.sys.Login;
 
 import java.io.File;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**

@@ -5,6 +5,7 @@
  * Copyright notice: © BŁĘKITNI
  */
 
+
 package org.example.sys;
 
 import jakarta.persistence.Column;

@@ -1,19 +1,31 @@
 /*
  * Classname: TaskRepositoryTest
- * Version information: 1.1
- * Date: 2025-05-22
+ * Version information: 1.2
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
 
 
 import org.example.database.TaskRepository;
 import org.example.sys.Task;
-import org.junit.jupiter.api.*;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.AfterAll;
+
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class TaskRepositoryTest {

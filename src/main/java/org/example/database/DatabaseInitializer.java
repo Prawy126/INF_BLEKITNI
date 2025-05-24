@@ -5,6 +5,7 @@
  * Copyright notice: © BŁĘKITNI
  */
 
+
 package org.example.database;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,8 +14,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;

@@ -1,9 +1,16 @@
+/*
+ * Classname: TaskEmployeeIdTest
+ * Version information: 1.3
+ * Date: 2025-05-24
+ * Copyright notice: © BŁĘKITNI
+ */
 
 
 import org.example.sys.TaskEmployeeId;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * Testy jednostkowe dla klasy TaskEmployeeId.

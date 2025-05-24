@@ -1,10 +1,10 @@
 /*
  * Classname: Admin
  * Version information: 1.1
- * Date: 2025-05-22
- * Copy
-
+ * Date: 2025-05-24
+ * Copyright notice: © BŁĘKITNI
  */
+
 
 package org.example.sys;
 

@@ -1,9 +1,10 @@
 /*
  * Classname: UserRepositoryTest
- * Version information: 1.2
+ * Version information: 1.4
  * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
+
 
 import org.example.database.AddressRepository;
 import org.example.database.UserRepository;
@@ -11,14 +12,24 @@ import org.example.sys.Address;
 import org.example.sys.Employee;
 import org.example.wyjatki.SalaryException;
 import org.example.wyjatki.PasswordException;
-import org.junit.jupiter.api.*;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.AfterAll;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class UserRepositoryTest {

@@ -1,9 +1,10 @@
 /*
  * Classname: AdminPanelController
- * Version information: 1.4
- * Date: 2025-05-22
+ * Version information: 1.5
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
+
 
 package org.example.gui;
 
@@ -13,8 +14,25 @@ import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.CacheHint;
-import javafx.scene.control.*;
+
+import javafx.scene.control.Dialog;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -30,7 +48,6 @@ import org.example.wyjatki.SalaryException;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 
 import org.example.database.AddressRepository;

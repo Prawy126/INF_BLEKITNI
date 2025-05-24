@@ -1,7 +1,7 @@
 /*
  * Classname: OrderRepositoryTest
- * Version information: 1.4
- * Date: 2025-05-23
+ * Version information: 1.5
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -26,7 +26,12 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class OrderRepositoryTest {

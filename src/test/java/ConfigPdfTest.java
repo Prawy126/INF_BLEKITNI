@@ -1,6 +1,6 @@
 /*
  * Classname: ConfigPdfTest
- * Version information: 1.2
+ * Version information: 1.3
  * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
@@ -11,7 +11,8 @@ import org.example.sys.Sort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ConfigPdfTest {
 

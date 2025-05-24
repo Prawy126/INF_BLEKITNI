@@ -1,22 +1,29 @@
 /*
  * Classname: TechnicalIssuesPanel
- * Version information: 1.1
- * Date: 2025-05-16
+ * Version information: 1.2
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
 
 
 package org.example.gui;
 
-import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.layout.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Separator;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.geometry.Insets;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 public class TechnicalIssuesPanel extends VBox {
 

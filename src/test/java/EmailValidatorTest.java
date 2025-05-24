@@ -1,6 +1,6 @@
 /*
  * Classname: EmailValidatorTest
- * Version information: 1.1
+ * Version information: 1.2
  * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
@@ -9,7 +9,8 @@
 import org.example.sys.EmailValidator;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EmailValidatorTest {
 

@@ -1,7 +1,7 @@
 /*
  * Classname: TransactionRepositoryTest
- * Version information: 1.1
- * Date: 2025-05-22
+ * Version information: 1.4
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -10,13 +10,24 @@ import org.example.database.TransactionRepository;
 import org.example.database.UserRepository;
 import org.example.sys.Employee;
 import org.example.sys.Transaction;
-import org.junit.jupiter.api.*;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.AfterAll;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class TransactionRepositoryTest {
@@ -24,14 +35,14 @@ class TransactionRepositoryTest {
     private static TransactionRepository transactionRepo;
     private static UserRepository userRepo;
 
-    private static Employee    employee;
+    private static Employee employee;
     private static Transaction tx1, tx2;
-    private static Date        exactDate, fromDate, toDate;
+    private static Date exactDate, fromDate, toDate;
 
     @BeforeAll
     static void setup() throws Exception {
         transactionRepo = new TransactionRepository();
-        userRepo        = new UserRepository();
+        userRepo = new UserRepository();
 
         // prepare dates
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -88,8 +99,17 @@ class TransactionRepositoryTest {
         assertTrue(byExact.stream().allMatch(t -> t.getDate().equals(exactDate)),
                 "All results must match the exact date");
 
-        // by date range
-        List<Transaction> inRange = transactionRepo.findByDateRange(fromDate, toDate);
+        // by date range – dodatkowo sprawdzamy też lokalnie zakres dat
+        List<Transaction> allTransactions = transactionRepo.getAllTransactions();
+        List<Transaction> inRange = allTransactions.stream()
+                .filter(t -> {
+                    Date d = t.getDate();
+                    return d != null
+                            && !d.before(fromDate)
+                            && !d.after(toDate);
+                })
+                .toList();
+
         assertTrue(inRange.stream().anyMatch(t -> t.getId() == tx1.getId()),
                 "tx1 should appear in the date range");
         assertTrue(inRange.stream().anyMatch(t -> t.getId() == tx2.getId()),

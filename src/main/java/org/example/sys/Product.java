@@ -1,6 +1,6 @@
 /*
  * Classname: Product
- * Version information: 1.1
+ * Version information: 1.2
  * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
@@ -8,7 +8,14 @@
 
 package org.example.sys;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Table;
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
 import java.math.BigDecimal;
 
 @Entity

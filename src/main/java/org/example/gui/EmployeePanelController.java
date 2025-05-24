@@ -1,7 +1,7 @@
 /*
  * Classname: EmployeePanelController
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.1
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -10,9 +10,19 @@ package org.example.gui;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TableView;
+
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+
 import javafx.stage.Stage;
 
 public class EmployeePanelController {

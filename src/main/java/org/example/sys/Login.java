@@ -5,6 +5,7 @@
  * Copyright notice: © BŁĘKITNI
  */
 
+
 package org.example.sys;
 
 import javafx.application.Platform;
@@ -221,7 +222,7 @@ public class Login implements ILacz {
      * @param length długość kodu
      * @return losowy kod
      */
-    private static String generateRandomCode(int length) {
+    public static String generateRandomCode(int length) {
         return new Random().ints(length, 0, 36)
                 .mapToObj(i -> i < 10 ? String.valueOf(i) : String.valueOf((char) (i + 55)))
                 .collect(Collectors.joining());

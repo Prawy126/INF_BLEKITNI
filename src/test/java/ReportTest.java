@@ -1,3 +1,11 @@
+/*
+ * Classname: ReportTest
+ * Version information: 1.3
+ * Date: 2025-05-24
+ * Copyright notice: © BŁĘKITNI
+ */
+
+
 import org.example.sys.Address;
 import org.example.sys.Employee;
 import org.example.sys.Report;
@@ -6,7 +14,9 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class ReportTest {
 

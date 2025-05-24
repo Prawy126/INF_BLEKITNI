@@ -1,29 +1,44 @@
 /*
  * Classname: ManagerPanelController
- * Version information: 1.3
- * Date: 2025-05-22
+ * Version information: 1.4
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
+
 
 package org.example.gui;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 import org.example.database.AbsenceRequestRepository;
 import org.example.database.TaskRepository;
 import org.example.database.UserRepository;
+
 import org.example.sys.AbsenceRequest;
 import org.example.sys.Employee;
 import org.example.sys.Task;
 
-import java.time.LocalTime;
 import java.sql.Date;
-
+import java.time.LocalTime;
 
 /**
  * Kontroler logiki interfejsu użytkownika dla panelu kierownika.

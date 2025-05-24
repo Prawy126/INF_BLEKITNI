@@ -1,3 +1,9 @@
+/*
+ * Classname: ProductTest
+ * Version information: 1.2
+ * Date: 2025-05-24
+ * Copyright notice: © BŁĘKITNI
+ */
 
 
 import org.example.sys.Product;
@@ -6,7 +12,9 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * Testy jednostkowe dla klasy Product.

@@ -1,3 +1,10 @@
+/*
+ * Classname: TaskTest
+ * Version information: 1.2
+ * Date: 2025-05-24
+ * Copyright notice: © BŁĘKITNI
+ */
+
 
 import org.example.sys.Task;
 import org.junit.jupiter.api.BeforeEach;

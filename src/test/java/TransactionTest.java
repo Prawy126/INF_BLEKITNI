@@ -1,3 +1,9 @@
+/*
+ * Classname: TransactionTest
+ * Version information: 1.2
+ * Date: 2025-05-24
+ * Copyright notice: © BŁĘKITNI
+ */
 
 
 import org.example.sys.Product;
@@ -10,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Testy jednostkowe dla klasy Transaction.

@@ -1,10 +1,17 @@
+/*
+ * Classname: TransactionProductIdTest
+ * Version information: 1.2
+ * Date: 2025-05-24
+ * Copyright notice: © BŁĘKITNI
+ */
 
 
 import org.example.sys.TransactionProductId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * Testy jednostkowe dla klasy TransactionProductId.

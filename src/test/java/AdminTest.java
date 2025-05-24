@@ -1,6 +1,6 @@
 /*
  * Classname: AdminTest
- * Version information: 1.2
+ * Version information: 1.3
  * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
@@ -15,7 +15,9 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 class AdminTest {
 

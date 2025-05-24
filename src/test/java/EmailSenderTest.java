@@ -1,6 +1,6 @@
 /*
  * Classname: EmailSenderTest
- * Version information: 1.1
+ * Version information: 1.2
  * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
@@ -12,7 +12,9 @@ import org.junit.jupiter.api.Test;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class EmailSenderTest {
 

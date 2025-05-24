@@ -1,22 +1,29 @@
 /*
  * Classname: ClientPanelController
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.1
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
 
 
 package org.example.gui;
 
+import javafx.beans.property.ReadOnlyStringWrapper;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+
+import javafx.scene.layout.VBox;
+
 import javafx.stage.Stage;
-import javafx.beans.property.ReadOnlyStringWrapper;
 
 public class ClientPanelController {
     private final ClientPanel clientPanel;

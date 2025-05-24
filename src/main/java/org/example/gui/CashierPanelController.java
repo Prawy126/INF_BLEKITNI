@@ -1,14 +1,16 @@
 /*
  * Classname: CashierPanelController
- * Version information: 1.7
- * Date: 2025-05-22
+ * Version information: 1.8
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
 
 
 package org.example.gui;
 
-import javafx.animation.*;
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.TranslateTransition;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -16,27 +18,38 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Separator;
+import javafx.scene.control.Spinner;
+
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.layout.*;
-import javafx.stage.*;
+
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.converter.IntegerStringConverter;
-import org.example.database.*;
-import org.example.sys.*;
-import org.example.database.ReportRepository;
-import org.example.sys.Report;
-import org.example.sys.PeriodType;
-import org.hibernate.Session;
-import pdf.SalesReportGenerator;
 
-
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
@@ -44,9 +57,28 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.*;
 import java.util.List;
+
+import java.util.Optional;
+
+import org.example.database.ProductRepository;
+import org.example.database.ReportRepository;
+import org.example.database.TransactionRepository;
+import org.example.database.UserRepository;
+import org.example.database.WarehouseRepository;
+import org.example.gui.CashierPanel;
+import org.example.sys.Employee;
+import org.example.sys.PeriodType;
+import org.example.sys.Report;
+import org.example.sys.Product;
+import org.example.sys.Warehouse;
+import org.example.sys.Transaction;
+import org.example.sys.TransactionProduct;
+
+import org.hibernate.Session;
+import pdf.SalesReportGenerator;
 
 public class CashierPanelController {
 

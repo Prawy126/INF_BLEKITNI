@@ -1,6 +1,6 @@
 /*
  * Classname: EmployeeTest
- * Version information: 1.1
+ * Version information: 1.2
  * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
@@ -19,7 +19,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EmployeeTest {
 

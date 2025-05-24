@@ -1,15 +1,24 @@
 /*
  * Classname: ReportsPanel
- * Version information: 0.9
- * Date: 2025-05-16
+ * Version information: 1.2
+ * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
  */
 
 
 package org.example.gui;
 
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.Separator;
+
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+
 import javafx.geometry.Insets;
 
 import java.time.LocalDate;

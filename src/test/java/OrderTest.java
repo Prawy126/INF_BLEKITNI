@@ -1,3 +1,11 @@
+/*
+ * Classname: OrderTest
+ * Version information: 1.2
+ * Date: 2025-05-24
+ * Copyright notice: © BŁĘKITNI
+ */
+
+
 import org.example.sys.Order;
 import org.example.sys.Employee;
 import org.example.sys.Product;
@@ -6,7 +14,8 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OrderTest {
 
