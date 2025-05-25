@@ -624,21 +624,15 @@ public class AdminPanelController {
 
         // bezpieczne pobieranie wartości z ConfigManager
         boolean loggingEnabled;
-        boolean notificationsEnabled;
         try {
             loggingEnabled       = ConfigManager.isLoggingEnabled();
-            notificationsEnabled = ConfigManager.isNotificationsEnabled();
         } catch (Exception ex) {
             // gdyby plik properties był uszkodzony
             loggingEnabled = false;
-            notificationsEnabled = false;
         }
 
         CheckBox logsCheckbox = new CheckBox("Włącz logi systemowe");
         logsCheckbox.setSelected(loggingEnabled);
-
-        CheckBox notificationsCheckbox = new CheckBox("Włącz powiadomienia");
-        notificationsCheckbox.setSelected(notificationsEnabled);
 
         Button configurePDF = new Button("Konfiguruj raporty PDF");
         configurePDF.setOnAction(e -> showPDFConfigPanel());
@@ -651,7 +645,6 @@ public class AdminPanelController {
         saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
         saveButton.setOnAction(e -> {
             ConfigManager.setLoggingEnabled(logsCheckbox.isSelected());
-            ConfigManager.setNotificationsEnabled(notificationsCheckbox.isSelected());
             showAlert(Alert.AlertType.INFORMATION, "Zapisano",
                     "Ustawienia zostały zachowane.");
         });
@@ -659,7 +652,6 @@ public class AdminPanelController {
         layout.getChildren().addAll(
                 titleLabel,
                 logsCheckbox,
-                notificationsCheckbox,
                 configurePDF,
                 backupButton,
                 saveButton
@@ -912,14 +904,11 @@ public class AdminPanelController {
         }
     }
 
-
     //TODO: TO JEST DO ZAIMPLEMENTOWANIA
     // Poniższe metody musisz uzupełnić, by zwracały odpowiednie dane z repozytoriów.
     private List<StatsRaportGenerator.TaskRecord> fetchTaskStatsData(LocalDate from, LocalDate to) { return List.of(); }
     private List<TaskRaportGenerator.TaskRecord>  fetchTaskSimpleData(TaskRaportGenerator.PeriodType p) { return List.of(); }
     private List<WorkloadReportGenerator.EmployeeWorkload> fetchWorkloadData(LocalDate from, LocalDate to) { return List.of(); }
-
-
 
     /**
      * Wyświetla panel zgłoszeń technicznych.
@@ -1088,6 +1077,7 @@ public class AdminPanelController {
         );
         a.showAndWait();
     }
+
     /**
      * Wylogowuje użytkownika i uruchamia okno logowania.
      */
@@ -1117,6 +1107,7 @@ public class AdminPanelController {
 
     /**
      * Wykonuje backup bazy danych MySQL do pliku .sql.
+     * Obsługuje zarówno XAMPP, jak i standardową instalację MySQL na Windows, Linux i Mac OS.
      */
     private void performDatabaseBackup() {
         try {
@@ -1136,7 +1127,22 @@ public class AdminPanelController {
 
             if (os.contains("win")) {
                 // Ścieżka dla Windows
-                mysqldumpPath = "C:\\xampp\\mysql\\bin\\mysqldump.exe";
+                File programFiles = new File("C:\\Program Files\\MySQL");
+                File found = searchForMysqlDump(programFiles, "mysqldump.exe");
+
+                if (found != null && found.exists()) {
+                    mysqldumpPath = found.getAbsolutePath();
+                } else {
+                    // Próba z XAMPP
+                    File xamppPath = new File("C:\\xampp\\mysql\\bin\\mysqldump.exe");
+                    if (xamppPath.exists()) {
+                        mysqldumpPath = xamppPath.getAbsolutePath();
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Nie znaleziono mysqldump.exe",
+                                "Nie znaleziono mysqldump ani w C:\\Program Files\\MySQL, ani w C:\\xampp.");
+                        return;
+                    }
+                }
             } else if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {
                 // Ścieżka dla Linux/Unix/Mac
                 File[] possiblePaths = {
@@ -1166,6 +1172,16 @@ public class AdminPanelController {
             ProcessBuilder pb = new ProcessBuilder(
                     mysqldumpPath,
                     "-u", org.example.database.ILacz.MYSQL_USER,
+                    "--password=" + org.example.database.ILacz.MYSQL_PASSWORD,
+                    "--routines",
+                    "--events",
+                    "--triggers",
+                    "--single-transaction",
+                    "--quick",
+                    "--skip-lock-tables",
+                    "--add-drop-database",
+                    "--add-drop-table",
+                    "--complete-insert",
                     "--databases", org.example.database.ILacz.DB_NAME
             );
 
@@ -1194,6 +1210,31 @@ public class AdminPanelController {
             showAlert(Alert.AlertType.ERROR, "Wyjątek",
                     "Wystąpił błąd podczas backupu:\n" + e.getMessage());
         }
+    }
+
+    /**
+     * Przeszukuje rekurencyjnie podany katalog w poszukiwaniu pliku o nazwie targetName.
+     * Zatrzymuje się po znalezieniu pierwszego pasującego pliku.
+     *
+     * @param dir        Katalog początkowy, od którego rozpoczyna się przeszukiwanie
+     * @param targetName Nazwa szukanego pliku (np. "mysqldump.exe"), bez względu na wielkość liter
+     */
+    private File searchForMysqlDump(File dir, String targetName) {
+        File[] files = dir.listFiles();
+        if (files == null) return null;
+
+        for (File file : files) {
+            try {
+                if (file.isDirectory() && !file.isHidden()) {
+                    File result = searchForMysqlDump(file, targetName);
+                    if (result != null) return result;
+                } else if (file.getName().equalsIgnoreCase(targetName)) {
+                    return file;
+                }
+            } catch (SecurityException ignored) {
+            }
+        }
+        return null;
     }
 
     /**
