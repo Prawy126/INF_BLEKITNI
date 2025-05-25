@@ -8,6 +8,7 @@
 
 package org.example.gui;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -27,6 +28,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import org.example.database.OrderRepository;
+import org.example.sys.Order;
 
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
@@ -44,9 +47,11 @@ import org.example.pdflib.ConfigManager;
 import pdf.WarehouseRaport;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -110,21 +115,27 @@ public class LogisticianPanelController {
         tableView.setMinHeight(200);
 
         TableColumn<Order, Integer> idCol = new TableColumn<>("Id");
-        TableColumn<Order, Integer> productIdCol = new TableColumn<>("Id_produktu");
-        TableColumn<Order, Integer> employeeIdCol = new TableColumn<>("Id_pracownika");
-        TableColumn<Order, Integer> qtyCol = new TableColumn<>("Ilosc");
-        TableColumn<Order, Double> priceCol = new TableColumn<>("Cena");
-        TableColumn<Order, String> dateCol = new TableColumn<>("Data");
+        TableColumn<Order, String> productCol = new TableColumn<>("Produkt");
+        TableColumn<Order, String> employeeCol = new TableColumn<>("Pracownik");
+        TableColumn<Order, Integer> qtyCol = new TableColumn<>("Ilość");
+        TableColumn<Order, BigDecimal> priceCol = new TableColumn<>("Cena");
+        TableColumn<Order, Date> dateCol = new TableColumn<>("Data");
 
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        productIdCol.setCellValueFactory(new PropertyValueFactory<>("productId"));
-        employeeIdCol.setCellValueFactory(new PropertyValueFactory<>("employeeId"));
+        productCol.setCellValueFactory(cellData -> new SimpleStringProperty(
+                cellData.getValue().getProduct() != null ? cellData.getValue().getProduct().getName() : ""));
+        employeeCol.setCellValueFactory(cellData -> new SimpleStringProperty(
+                cellData.getValue().getEmployee() != null ? cellData.getValue().getEmployee().getLogin() : ""));
         qtyCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
         dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
 
-        tableView.getColumns().addAll(idCol, productIdCol, employeeIdCol, qtyCol, priceCol, dateCol);
-        tableView.setItems(getSampleOrders());
+        tableView.getColumns().addAll(idCol, productCol, employeeCol, qtyCol, priceCol, dateCol);
+
+        // Ładowanie danych z bazy
+        OrderRepository orderRepo = new OrderRepository();
+        List<Order> orders = orderRepo.getAllOrders();
+        tableView.setItems(FXCollections.observableArrayList(orders));
 
         Button addOrderButton = new Button("Dodaj zamówienie");
         addOrderButton.setOnAction(e -> showAddOrderForm());
@@ -556,45 +567,6 @@ public class LogisticianPanelController {
         Scene scene = new Scene(grid, 350, 250);
         stage.setScene(scene);
         stage.show();
-    }
-
-    /**
-     * Zwraca przykładową listę zamówień.
-     */
-    private ObservableList<Order> getSampleOrders() {
-        return FXCollections.observableArrayList(
-                new Order(1, 101, 201, 10, 99.99, "2025-04-01"),
-                new Order(2, 102, 202, 5, 49.50, "2025-04-03"),
-                new Order(3, 103, 203, 12, 135.00, "2025-04-10")
-        );
-    }
-
-    /**
-     * Wewnętrzna klasa reprezentująca dane zamówienia.
-     */
-    public static class Order {
-        private final int id;
-        private final int productId;
-        private final int employeeId;
-        private final int quantity;
-        private final double price;
-        private final String date;
-
-        public Order(int id, int productId, int employeeId, int quantity, double price, String date) {
-            this.id = id;
-            this.productId = productId;
-            this.employeeId = employeeId;
-            this.quantity = quantity;
-            this.price = price;
-            this.date = date;
-        }
-
-        public int getId() { return id; }
-        public int getProductId() { return productId; }
-        public int getEmployeeId() { return employeeId; }
-        public int getQuantity() { return quantity; }
-        public double getPrice() { return price; }
-        public String getDate() { return date; }
     }
 
     /**
