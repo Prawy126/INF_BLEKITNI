@@ -1,7 +1,7 @@
 /*
  * Classname: EmployeePanelController
- * Version information: 1.1
- * Date: 2025-05-24
+ * Version information: 1.2
+ * Date: 2025-05-25
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -10,31 +10,34 @@ package org.example.gui;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TableView;
-
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
 import javafx.stage.Stage;
 
+/**
+ * Kontroler odpowiedzialny za logikę widoku panelu pracownika.
+ * Obsługuje interakcje związane z zadaniami, zgłoszeniami oraz wylogowaniem.
+ */
 public class EmployeePanelController {
 
     private final EmployeePanel employeePanel;
     private final Stage primaryStage;
 
+    /**
+     * Konstruktor klasy kontrolera.
+     *
+     * @param employeePanel główny panel pracownika
+     */
     public EmployeePanelController(EmployeePanel employeePanel) {
         this.employeePanel = employeePanel;
         this.primaryStage = employeePanel.getPrimaryStage();
     }
 
+    /**
+     * Wyświetla główny panel pracownika z listą zadań i przyciskami akcji.
+     */
     public void showEmployeePanel() {
         VBox layout = new VBox(20);
         layout.setPadding(new Insets(20));
@@ -48,12 +51,6 @@ public class EmployeePanelController {
 
         Button updateStatusButton = new Button("Zaktualizuj status");
 
-        // Powiadomienia
-        Label notifLabel = new Label("Powiadomienia");
-        ListView<String> notifications = new ListView<>();
-        notifications.getItems().addAll("Nowe zadanie przydzielone", "Zmiana w harmonogramie");
-        notifications.setPrefHeight(100);
-
         // Zgłoś problem i wyloguj
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER_LEFT);
@@ -66,10 +63,14 @@ public class EmployeePanelController {
 
         buttonBox.getChildren().addAll(reportProblemButton, logoutButton);
 
-        layout.getChildren().addAll(taskLabel, taskTable, updateStatusButton, notifLabel, notifications, buttonBox);
+        layout.getChildren().addAll(taskLabel, taskTable, updateStatusButton, buttonBox);
         employeePanel.setCenterPane(layout);
     }
 
+    /**
+     * Wyświetla okno do zgłoszenia problemu przez pracownika.
+     * Użytkownik może opisać problem i przypisać mu kategorię.
+     */
     public void showReportIssueWindow() {
         Stage issueStage = new Stage();
         issueStage.setTitle("Panel pracownika - Zgłoszenie problemu");
@@ -112,7 +113,10 @@ public class EmployeePanelController {
         issueStage.show();
     }
 
-
+    /**
+     * Wylogowuje użytkownika i uruchamia ponownie ekran logowania.
+     * Zamyka bieżące okno i uruchamia nowe z aplikacją startową.
+     */
     public void logout() {
         primaryStage.close();
         Stage loginStage = new Stage();

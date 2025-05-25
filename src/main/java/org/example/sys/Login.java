@@ -1,7 +1,7 @@
 /*
  * Classname: Login
- * Version information: 1.2
- * Date: 2025-05-22
+ * Version information: 1.3
+ * Date: 2025-05-25
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -15,11 +15,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.database.ILacz;
 import org.example.database.UserRepository;
-import org.example.gui.AdminPanel;
-import org.example.gui.CashierPanel;
-import org.example.gui.HelloApplication;
-import org.example.gui.ManagerPanel;
-import org.example.gui.LogisticianPanel;
+import org.example.gui.*;
+
 import javax.mail.MessagingException;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -163,6 +160,7 @@ public class Login implements ILacz {
                         }
                     }
                     case "logistyk" -> new LogisticianPanel(nextStage);
+                    case "pracownik" -> new EmployeePanel(nextStage);
                     default -> showUnknownPositionAlert(position);
                 }
             }
