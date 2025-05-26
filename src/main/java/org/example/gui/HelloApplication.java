@@ -12,15 +12,11 @@ import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
 import javafx.animation.Interpolator;
-
 import javafx.util.Duration;
-
 import javafx.application.Application;
 import javafx.application.Platform;
-
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -30,25 +26,25 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
+import org.example.database.UserRepository;
 import org.example.sys.ConfigPdf;
+import org.example.sys.Employee;
 import org.example.sys.Login;
+import org.example.sys.PasswordHasher;
 
 import java.io.File;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -911,7 +907,31 @@ public class HelloApplication extends Application {
                 System.out.println("DEBUG: Ustawiono flagę błędu krytycznego: " + criticalErrorOccurred.get());
             }
 
-            // Dodajmy handler zamknięcia dla całej aplikacji
+            // --- TU DODAJEMY MIGRACJĘ HASEŁ ---
+            try {
+                System.out.println("DEBUG: Rozpoczynam migrację haseł pracowników");
+                UserRepository userRepo = new UserRepository();
+                List<Employee> all = userRepo.getAllEmployees();
+                for (Employee emp : all) {
+                    String raw = emp.getPassword();
+                    // jeżeli nie wygląda jak 64-znakowy hex, to migrujemy
+                    if (raw != null && !raw.matches("[0-9a-f]{64}")) {
+                        String hashed = PasswordHasher.hashPassword(raw, emp.getId());
+                        emp.setPassword(hashed);
+                        userRepo.updateEmployee(emp);
+                        System.out.println("DEBUG: Zhashowano i zaktualizowano pracownika id=" + emp.getId());
+                    }
+                }
+                userRepo.close();
+                System.out.println("DEBUG: Migracja haseł zakończona");
+            } catch (Exception ex) {
+                System.err.println("BŁĄD podczas migracji haseł: " + ex.getMessage());
+                ex.printStackTrace();
+                // możesz tu zdecydować, czy przerwać start, czy kontynuować
+            }
+            // --- KONIEC MIGRACJI ---
+
+            // Dodajemy handler zamknięcia dla całej aplikacji
             Platform.setImplicitExit(true);
 
             System.out.println("DEBUG: Uruchamianie aplikacji JavaFX");
@@ -922,7 +942,6 @@ public class HelloApplication extends Application {
             System.err.println("BŁĄD KRYTYCZNY w main(): " + e.getMessage());
             e.printStackTrace();
 
-            // W przypadku błędu, który uniemożliwia uruchomienie JavaFX, wyświetl komunikat w konsoli
             System.err.println("\n=== BŁĄD KRYTYCZNY ===");
             System.err.println("Aplikacja nie może zostać uruchomiona z powodu błędu:");
             System.err.println(e.getMessage());
@@ -931,6 +950,7 @@ public class HelloApplication extends Application {
 
         System.out.println("DEBUG: Koniec metody main()");
     }
+
 
     /**
      * Formatuje wyjątek SQLException do czytelnej postaci.
