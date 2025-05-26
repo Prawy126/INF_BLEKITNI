@@ -30,7 +30,7 @@ public class TaskEmployee {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("taskId")
     @JoinColumn(name = "Id_zadania")
-    private Task task;
+    private EmpTask task;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("employeeId")
@@ -47,7 +47,7 @@ public class TaskEmployee {
      * @param task     encja Zadanie
      * @param employee encja Pracownik
      */
-    public TaskEmployee(Task task, Employee employee) {
+    public TaskEmployee(EmpTask task, Employee employee) {
         this.id = new TaskEmployeeId(task.getId(), employee.getId());
         this.task = task;
         this.employee = employee;
@@ -64,12 +64,12 @@ public class TaskEmployee {
     }
 
     /** Zwraca powiązane zadanie. */
-    public Task getTask() {
+    public EmpTask getTask() {
         return task;
     }
 
     /** Ustawia powiązane zadanie. */
-    public void setTask(Task task) {
+    public void setTask(EmpTask task) {
         this.task = task;
     }
 

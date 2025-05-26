@@ -30,12 +30,12 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import org.example.database.AbsenceRequestRepository;
-import org.example.database.TaskRepository;
+import org.example.database.EmpTaskRepository;
 import org.example.database.UserRepository;
 
 import org.example.sys.AbsenceRequest;
 import org.example.sys.Employee;
-import org.example.sys.Task;
+import org.example.sys.EmpTask;
 
 import java.sql.Date;
 import java.time.LocalTime;
@@ -48,7 +48,7 @@ public class ManagerPanelController {
     private final ManagerPanel managerPanel;
     private final Stage primaryStage;
     private final UserRepository userRepository;
-    private final TaskRepository taskRepository;
+    private final EmpTaskRepository taskRepository;
     private TableView<String> absenceTable;
 
     /**
@@ -60,7 +60,7 @@ public class ManagerPanelController {
         this.managerPanel = managerPanel;
         this.primaryStage = managerPanel.getPrimaryStage();
         this.userRepository = new UserRepository();
-        this.taskRepository = new TaskRepository();
+        this.taskRepository = new EmpTaskRepository();
     }
 
     /**
@@ -72,17 +72,17 @@ public class ManagerPanelController {
 
         Label taskLabel = new Label("Lista zadań");
 
-        TableView<Task> taskTable = new TableView<>();
+        TableView<EmpTask> taskTable = new TableView<>();
         taskTable.setMinHeight(200);
 
-        TableColumn<Task, String> nameCol = new TableColumn<>("Zadanie");
+        TableColumn<EmpTask, String> nameCol = new TableColumn<>("Zadanie");
         nameCol.setCellValueFactory(
                 data -> new javafx.beans.property.SimpleStringProperty(
                         data.getValue().getName()
                 )
         );
 
-        TableColumn<Task, String> dateCol = new TableColumn<>("Termin");
+        TableColumn<EmpTask, String> dateCol = new TableColumn<>("Termin");
         dateCol.setCellValueFactory(
                 data -> new javafx.beans.property.SimpleStringProperty(
                         data.getValue().getDate() != null
@@ -107,7 +107,7 @@ public class ManagerPanelController {
         Button deleteButton = new Button("Usuń zadanie");
 
         editButton.setOnAction(e -> {
-            Task selectedTask = taskTable.getSelectionModel().getSelectedItem();
+            EmpTask selectedTask = taskTable.getSelectionModel().getSelectedItem();
             if (selectedTask != null) {
                 showEditTaskDialog(selectedTask);
             } else {
@@ -116,7 +116,7 @@ public class ManagerPanelController {
         });
 
         deleteButton.setOnAction(e -> {
-            Task selectedTask = taskTable.getSelectionModel().getSelectedItem();
+            EmpTask selectedTask = taskTable.getSelectionModel().getSelectedItem();
             if (selectedTask != null) {
                 taskRepository.removeTask(selectedTask);
                 showAlert(Alert.AlertType.INFORMATION, "Sukces", "Usunięto zadanie.");
@@ -204,7 +204,7 @@ public class ManagerPanelController {
                 }
 
                 // teraz konstruktor pięcio-argumentowy
-                Task newTask = new Task(name, date, status, description, timeOfShift);
+                EmpTask newTask = new EmpTask(name, date, status, description, timeOfShift);
                 taskRepository.addTask(newTask);
 
                 showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zadanie dodane!");
@@ -499,7 +499,7 @@ public class ManagerPanelController {
      *
      * @param task zadanie do edycji
      */
-    private void showEditTaskDialog(Task task) {
+    private void showEditTaskDialog(EmpTask task) {
         Stage dialogStage = new Stage();
         dialogStage.initModality(Modality.APPLICATION_MODAL);
         dialogStage.setTitle("Edycja zadania");

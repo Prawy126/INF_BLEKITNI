@@ -8,29 +8,33 @@
 
 package org.example.sys;
 
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.Temporal;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Column;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.CascadeType;
+
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Reprezentuje zadanie w systemie.
  */
-@Entity
+@Entity(name = "Task")
 @Table(name = "Zadania")
 @Access(AccessType.FIELD)
-public class Task {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class EmpTask {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     private String name;
@@ -49,8 +53,16 @@ public class Task {
     @Column(name = "czas_trwania_zmiany")
     private LocalTime durationOfTheShift;
 
+    /** zamiast osobnego pola employee: lista rekordów z tabeli łączącej */
+    @OneToMany(mappedBy = "task", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<TaskEmployee> taskEmployees = new ArrayList<>();
+
+    public List<TaskEmployee> getTaskEmployees() {
+        return taskEmployees;
+    }
+
     /** Konstruktor bezparametrowy wymagany przez JPA. */
-    public Task() {
+    public EmpTask() {
     }
 
     /**
@@ -62,7 +74,7 @@ public class Task {
      * @param description                description zadania
      * @param durationOfTheShift   czas trwania zmiany przy zadaniu
      */
-    public Task(String name, Date date, String status, String description, LocalTime durationOfTheShift) {
+    public EmpTask(String name, Date date, String status, String description, LocalTime durationOfTheShift) {
         this.name = name;
         this.date = date;
         this.status = status;
@@ -135,5 +147,12 @@ public class Task {
                 date != null ? date.toString() : "brak daty",
                 durationOfTheShift != null ? durationOfTheShift.toString() : "brak"
         );
+    }
+
+    /** Wygodna do użycia metoda, gdy zawsze jest dokładnie jeden assignee: */
+    public Employee getSingleAssignee() {
+        return taskEmployees.isEmpty()
+                ? null
+                : taskEmployees.get(0).getEmployee();
     }
 }

@@ -19,7 +19,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Access;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.AccessType;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.FetchType;
 import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
 import org.example.wyjatki.NameException;
@@ -30,6 +33,8 @@ import jakarta.persistence.SqlResultSetMapping;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
 
 @SqlResultSetMapping(
         name = "EmployeeWorkloadMapping",
@@ -82,6 +87,10 @@ public class Employee extends Person {
     // Dodane pole do usuwania miękkiego
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
+
+    /** lista powiązań do zadań przez tabelę łączącą */
+    @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<TaskEmployee> taskEmployees = new ArrayList<>();
 
     /*
      * Konstruktor domyślny
@@ -322,5 +331,12 @@ public class Employee extends Person {
     public void endSickLeave() {
         this.onSickLeave = false;
         this.sickLeaveStartDate = null;
+    }
+
+    // Metoda dla pojedynczych zadań
+    public List<EmpTask> getTasks() {
+        return taskEmployees.stream()
+                .map(TaskEmployee::getTask)
+                .toList();
     }
 }

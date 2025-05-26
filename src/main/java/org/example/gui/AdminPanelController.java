@@ -37,6 +37,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.example.database.EmpTaskRepository;
 import org.example.database.TechnicalIssueRepository;
 import org.example.database.UserRepository;
 import org.example.pdflib.ConfigManager;
@@ -47,11 +48,15 @@ import org.example.wyjatki.SalaryException;
 
 import java.io.File;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Map;
 
 import org.example.database.AddressRepository;
 import org.example.sys.Address;
+import org.example.sys.EmpTask;
 import pdf.StatsRaportGenerator;
 import pdf.TaskRaportGenerator;
 import pdf.WorkloadReportGenerator;
@@ -60,6 +65,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /**
  * Kontroler odpowiedzialny za obsługę logiki
@@ -906,9 +912,109 @@ public class AdminPanelController {
 
     //TODO: TO JEST DO ZAIMPLEMENTOWANIA
     // Poniższe metody musisz uzupełnić, by zwracały odpowiednie dane z repozytoriów.
-    private List<StatsRaportGenerator.TaskRecord> fetchTaskStatsData(LocalDate from, LocalDate to) { return List.of(); }
-    private List<TaskRaportGenerator.TaskRecord>  fetchTaskSimpleData(TaskRaportGenerator.PeriodType p) { return List.of(); }
-    private List<WorkloadReportGenerator.EmployeeWorkload> fetchWorkloadData(LocalDate from, LocalDate to) { return List.of(); }
+
+    /* ------------------------------------------------------------ */
+    /* KPI – StatsRaportGenerator                                   */
+    /* ------------------------------------------------------------ */
+    private List<StatsRaportGenerator.TaskRecord> fetchTaskStatsData(LocalDate from, LocalDate to) {
+        EmpTaskRepository repo = new EmpTaskRepository();
+
+        return repo.getAllTasks().stream()
+                .filter(t -> inRange(t.getDate(), from, to))
+                .map(t -> {
+                    Employee assignee = t.getSingleAssignee();
+                    return new StatsRaportGenerator.TaskRecord(
+                            t.getName(),                                       // taskName
+                            assignee != null
+                                    ? assignee.getPosition()
+                                    : "Brak",                                      // position
+                            null,                                              // priority – nieużywane
+                            toLocalDate(t.getDate()),                          // dueDate
+                            null,                                              // completionDate – brak
+                            assignee != null
+                                    ? assignee.getLogin()
+                                    : "Brak"                                      // assignee
+                    );
+                })
+                .toList();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* Raport zadań – TaskRaportGenerator                           */
+    /* ------------------------------------------------------------ */
+    private List<TaskRaportGenerator.TaskRecord> fetchTaskSimpleData(LocalDate from,
+                                                                     LocalDate to) {
+        EmpTaskRepository repo = new EmpTaskRepository();
+
+        return repo.getAllTasks().stream()
+                .filter(t -> inRange(t.getDate(), from, to))
+                .map(t -> {
+                    Employee assignee = t.getSingleAssignee();
+                    return new TaskRaportGenerator.TaskRecord(
+                            t.getName(),                                      // taskName
+                            assignee != null
+                                    ? assignee.getPosition()
+                                    : "Brak",                                     // position
+                            null,                                             // priority (nieużywane)
+                            toLocalDate(t.getDate()),                         // dueDate
+                            null,                                             // completionDate – brak
+                            assignee != null
+                                    ? assignee.getLogin()
+                                    : "Brak"                                     // assignee
+                    );
+                })
+                .toList();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* Obciążenie – WorkloadReportGenerator                         */
+    /* ------------------------------------------------------------ */
+    private List<WorkloadReportGenerator.EmployeeWorkload> fetchWorkloadData(LocalDate from,
+                                                                             LocalDate to) {
+        EmpTaskRepository repo = new EmpTaskRepository();
+
+        return repo.getAllTasks().stream()
+                // 1) tylko taski, które mają przypisanego pracownika przez TaskEmployee, czas zmiany i są w zakresie dat
+                .filter(t -> !t.getTaskEmployees().isEmpty()
+                        && t.getDurationOfTheShift() != null
+                        && inRange(t.getDate(), from, to))
+                // 2) grupujemy po pracowniku i sumujemy godziny
+                .collect(Collectors.groupingBy(
+                        t -> t.getSingleAssignee(),
+                        Collectors.summingDouble(t -> hours(t.getDurationOfTheShift()))
+                ))
+                // 3) konwertujemy na rekord raportu
+                .entrySet().stream()
+                .map(e -> {
+                    Employee emp = e.getKey();
+                    return new WorkloadReportGenerator.EmployeeWorkload(
+                            emp.getLogin(),       // employeeName
+                            emp.getPosition(),    // department
+                            e.getValue()          // totalHours
+                    );
+                })
+                .toList();
+    }
+
+    // =====================  METODY POMOCNICZE  ====================
+    private static boolean inRange(Date d, LocalDate from, LocalDate to) {
+        if (d == null) return false;
+        LocalDate ld = toLocalDate(d);
+        return (from == null || !ld.isBefore(from))
+                && (to   == null || !ld.isAfter(to));
+    }
+
+    private static LocalDate toLocalDate(Date d) {
+        return d.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+    }
+
+    /** LocalTime → liczba godzin, np. 02:30 ⇒ 2.5 */
+    private static double hours(LocalTime t) {
+        return t.getHour() + t.getMinute() / 60d;
+    }
+
 
     /**
      * Wyświetla panel zgłoszeń technicznych.

@@ -6,7 +6,7 @@
  */
 
 
-import org.example.sys.Task;
+import org.example.sys.EmpTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,9 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Testy jednostkowe dla klasy Task.
  */
-public class TaskTest {
+public class EmpTaskTest {
 
-    private Task task;
+    private EmpTask task;
     private Date today;
     private LocalTime shiftTime;
 
@@ -34,7 +34,7 @@ public class TaskTest {
     void setUp() {
         today     = new Date();
         shiftTime = LocalTime.of(8, 30);
-        task = new Task(
+        task = new EmpTask(
                 "Report",
                 today,
                 "OPEN",
@@ -145,7 +145,7 @@ public class TaskTest {
     @Test
     @DisplayName("toString obsługuje null")
     void toStringShouldHandleNullValues() {
-        Task empty = new Task();
+        EmpTask empty = new EmpTask();
         String text = empty.toString();
         assertTrue(
                 text.contains("brak daty"),

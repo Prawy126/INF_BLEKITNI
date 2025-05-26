@@ -15,7 +15,7 @@ import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.sys.Task;
+import org.example.sys.EmpTask;
 
 import java.time.LocalTime;
 import java.util.Date;
@@ -25,14 +25,14 @@ import java.util.List;
  * Repozytorium zarządzające zadaniami w bazie danych.
  * Umożliwia tworzenie, odczyt, aktualizację, usuwanie oraz wyszukiwanie zadań.
  */
-public class TaskRepository {
-    private static final Logger logger = LogManager.getLogger(TaskRepository.class);
+public class EmpTaskRepository {
+    private static final Logger logger = LogManager.getLogger(EmpTaskRepository.class);
     private final EntityManagerFactory emf;
 
     /**
      * Konstruktor inicjalizujący EntityManagerFactory dla persistence unit "myPU".
      */
-    public TaskRepository() {
+    public EmpTaskRepository() {
         this.emf = Persistence.createEntityManagerFactory("myPU");
         logger.info("Utworzono TaskRepository, EMF={}", emf);
     }
@@ -42,7 +42,7 @@ public class TaskRepository {
      *
      * @param task obiekt Task do zapisania
      */
-    public void addTask(Task task) {
+    public void addTask(EmpTask task) {
         logger.debug("addTask() – start, task={}", task);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -66,11 +66,11 @@ public class TaskRepository {
      * @param id identyfikator zadania
      * @return obiekt Task lub null, jeśli nie istnieje
      */
-    public Task findTaskById(int id) {
+    public EmpTask findTaskById(int id) {
         logger.debug("findTaskById() – start, id={}", id);
         EntityManager em = emf.createEntityManager();
         try {
-            Task t = em.find(Task.class, id);
+            EmpTask t = em.find(EmpTask.class, id);
             logger.info("findTaskById() – znaleziono: {}", t);
             return t;
         } catch (Exception e) {
@@ -87,11 +87,11 @@ public class TaskRepository {
      *
      * @return lista wszystkich zadań lub pusta lista w przypadku błędu
      */
-    public List<Task> getAllTasks() {
+    public List<EmpTask> getAllTasks() {
         logger.debug("getAllTasks() – start");
         EntityManager em = emf.createEntityManager();
         try {
-            List<Task> list = em.createQuery("SELECT t FROM Task t", Task.class)
+            List<EmpTask> list = em.createQuery("SELECT t FROM Task t", EmpTask.class)
                     .getResultList();
             logger.info("getAllTasks() – pobrano {} zadań", list.size());
             return list;
@@ -109,7 +109,7 @@ public class TaskRepository {
      *
      * @param task obiekt Task do zaktualizowania
      */
-    public void updateTask(Task task) {
+    public void updateTask(EmpTask task) {
         logger.debug("updateTask() – start, task={}", task);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
@@ -133,13 +133,13 @@ public class TaskRepository {
      *
      * @param task obiekt Task do usunięcia
      */
-    public void removeTask(Task task) {
+    public void removeTask(EmpTask task) {
         logger.debug("removeTask() – start, task={}", task);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            Task managed = em.find(Task.class, task.getId());
+            EmpTask managed = em.find(EmpTask.class, task.getId());
             if (managed != null) {
                 em.remove(managed);
                 logger.info("removeTask() – usunięto zadanie: {}", managed);
@@ -162,13 +162,13 @@ public class TaskRepository {
      * @param nameFragment fragment tekstu nazwy
      * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
      */
-    public List<Task> findByName(String nameFragment) {
+    public List<EmpTask> findByName(String nameFragment) {
         logger.debug("findByName() – nameFragment={}", nameFragment);
         EntityManager em = emf.createEntityManager();
         try {
-            List<Task> list = em.createQuery(
+            List<EmpTask> list = em.createQuery(
                             "SELECT t FROM Task t WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :frag, '%'))",
-                            Task.class)
+                            EmpTask.class)
                     .setParameter("frag", nameFragment)
                     .getResultList();
             logger.info("findByName() – znaleziono {} zadań", list.size());
@@ -188,12 +188,12 @@ public class TaskRepository {
      * @param date date zadania (bez czasu)
      * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
      */
-    public List<Task> findByDate(Date date) {
+    public List<EmpTask> findByDate(Date date) {
         logger.debug("findByDate() – date={}", date);
         EntityManager em = emf.createEntityManager();
         try {
-            List<Task> list = em.createQuery(
-                            "SELECT t FROM Task t WHERE t.date = :date", Task.class)
+            List<EmpTask> list = em.createQuery(
+                            "SELECT t FROM Task t WHERE t.date = :date", EmpTask.class)
                     .setParameter("date", date, TemporalType.DATE)
                     .getResultList();
             logger.info("findByDate() – znaleziono {} zadań", list.size());
@@ -213,12 +213,12 @@ public class TaskRepository {
      * @param status status zadania
      * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
      */
-    public List<Task> findByStatus(String status) {
+    public List<EmpTask> findByStatus(String status) {
         logger.debug("findByStatus() – status={}", status);
         EntityManager em = emf.createEntityManager();
         try {
-            List<Task> list = em.createQuery(
-                            "SELECT t FROM Task t WHERE t.status = :status", Task.class)
+            List<EmpTask> list = em.createQuery(
+                            "SELECT t FROM Task t WHERE t.status = :status", EmpTask.class)
                     .setParameter("status", status)
                     .getResultList();
             logger.info("findByStatus() – znaleziono {} zadań", list.size());
@@ -238,13 +238,13 @@ public class TaskRepository {
      * @param descriptionFragment fragment tekstu opisu
      * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
      */
-    public List<Task> findByDescription(String descriptionFragment) {
+    public List<EmpTask> findByDescription(String descriptionFragment) {
         logger.debug("findByDescription() – descriptionFragment={}", descriptionFragment);
         EntityManager em = emf.createEntityManager();
         try {
-            List<Task> list = em.createQuery(
+            List<EmpTask> list = em.createQuery(
                             "SELECT t FROM Task t WHERE LOWER(t.description) LIKE LOWER(CONCAT('%', :frag, '%'))",
-                            Task.class)
+                            EmpTask.class)
                     .setParameter("frag", descriptionFragment)
                     .getResultList();
             logger.info("findByDescription() – znaleziono {} zadań", list.size());
@@ -265,13 +265,13 @@ public class TaskRepository {
      * @param toTime   koniec przedziału czasu (inclusive)
      * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
      */
-    public List<Task> findByTimeShiftDuration(LocalTime from, LocalTime toTime) {
+    public List<EmpTask> findByTimeShiftDuration(LocalTime from, LocalTime toTime) {
         logger.debug("findByTimeShiftDuration() – from={}, toTime={}", from, toTime);
         EntityManager em = emf.createEntityManager();
         try {
-            List<Task> list = em.createQuery(
+            List<EmpTask> list = em.createQuery(
                             "SELECT t FROM Task t WHERE t.durationOfTheShift BETWEEN :from AND :toTime",
-                            Task.class)
+                            EmpTask.class)
                     .setParameter("from", from)
                     .setParameter("toTime", toTime)
                     .getResultList();

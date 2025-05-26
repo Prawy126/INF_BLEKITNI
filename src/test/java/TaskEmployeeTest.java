@@ -7,7 +7,7 @@
 
 
 import org.example.sys.Employee;
-import org.example.sys.Task;
+import org.example.sys.EmpTask;
 import org.example.sys.TaskEmployee;
 import org.example.sys.TaskEmployeeId;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,13 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 class TaskEmployeeTest {
 
     private TaskEmployee te;
-    private Task task;
+    private EmpTask task;
     private Employee employee;
 
     @BeforeEach
     void setUp() {
         te = new TaskEmployee();
-        task = new Task();
+        task = new EmpTask();
         task.setId(100);
         employee = new Employee();
         employee.setId(200);
