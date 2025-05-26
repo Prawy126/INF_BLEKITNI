@@ -42,16 +42,32 @@ public class Login implements ILacz {
      */
     public static void attemptLogin(String username, String password, VBox root) {
         if (username.isBlank() || password.isBlank()) {
-            showAlert(Alert.AlertType.WARNING, "Brak danych", "Proszę wypełnić " +
-                    "wszystkie pola");
+            showAlert(Alert.AlertType.WARNING, "Brak danych", "Proszę wypełnić wszystkie pola");
             return;
         }
 
-        Task<Employee> loginTask = createLoginTask(username, password, root);
+        Task<Employee> loginTask = new Task<>() {
+            @Override
+            protected Employee call() throws Exception {
+                UserRepository repo = new UserRepository();
+                Employee user = repo.findByLogin(username);
+                repo.close();
+
+                if (user == null) {
+                    throw new Exception("Nie znaleziono użytkownika o podanym loginie");
+                }
+
+                boolean correct = PasswordHasher.verifyPassword(user.getPassword(), password, user.getId());
+                if (!correct) {
+                    throw new Exception("Nieprawidłowe hasło");
+                }
+
+                return user;
+            }
+        };
         setupTaskHandlers(loginTask, root);
         executor.execute(loginTask);
     }
-
     /**
      * Tworzy zadanie do logowania użytkownika.
      *
