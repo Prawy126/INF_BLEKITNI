@@ -31,16 +31,20 @@ public class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Id")
     private int id;
 
+    @Column(name = "Nazwa")
     private String name;
 
     @Temporal(TemporalType.DATE)
+    @Column(name = "Data")
     private Date date;
 
+    @Column(name = "Status")
     private String status;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "Opis", columnDefinition = "TEXT")
     private String description;
 
     /**
