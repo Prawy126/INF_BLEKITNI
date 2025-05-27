@@ -473,7 +473,7 @@ public class AdminPanelController {
         HBox buttons = new HBox(10, saveButton, cancelButton);
         buttons.setAlignment(Pos.CENTER);
 
-        // składamy wszystko w formLayout
+        // formLayout
         formLayout.getChildren().addAll(
                 titleLabel,
                 nameField,
@@ -493,7 +493,7 @@ public class AdminPanelController {
 
         saveButton.setOnAction(e -> {
             try {
-                // sprawdzamy, czy nie ma pustych pól
+                // sprawdzenie czy nie ma pustych pól
                 if (nameField.getText().isEmpty()
                         || surnameField.getText().isEmpty()
                         || loginField.getText().isEmpty()
@@ -562,8 +562,8 @@ public class AdminPanelController {
 
     /**
      * Usuwa zaznaczonego użytkownika asynchronicznie.
-     */
-    /**
+     *
+     *
      * Usuwa zaznaczonego użytkownika asynchronicznie.
      * Zabezpiecza przed usunięciem użytkownika z rolą "root".
      * Usuwa zaznaczonego użytkownika (soft-delete) i odświeża tabelę.
@@ -895,7 +895,7 @@ public class AdminPanelController {
                 case YEARLY  -> TaskRaportGenerator.PeriodType.LAST_QUARTER;
             };
 
-            // 3) generujemy raport
+            // 3) generowanie raportu
             String out = ConfigManager.getReportPath()
                     + "/tasks-" + System.currentTimeMillis() + ".pdf";
             gen.generateReport(out, pdfPeriod, statuses);
@@ -1029,7 +1029,7 @@ public class AdminPanelController {
             case YEARLY  -> start = end.minusYears(1);
             default      -> throw new IllegalArgumentException("Nieznany okres: " + period);
         }
-        return fetchTaskSimpleData(start, end);                     // wywołujemy wersję bazową
+        return fetchTaskSimpleData(start, end);                     // wywołanie wersji bazowej
     }
 
     /* ------------------------------------------------------------ */
@@ -1045,12 +1045,12 @@ public class AdminPanelController {
                 .filter(t -> !t.getTaskEmployees().isEmpty()
                         && t.getDurationOfTheShift() != null
                         && inRange(t.getDate(), from, to))
-                // 2) grupujemy po pierwszym assignee i sumujemy godziny
+                // 2) grupowanie po pierwszym assignee i sumowanie godzin
                 .collect(Collectors.groupingBy(
                         EmpTask::getSingleAssignee,
                         Collectors.summingDouble(t -> hours(t.getDurationOfTheShift()))
                 ))
-                // 3) konwertujemy na rekord raportu
+                // 3) konwertowanie na rekord raportu
                 .entrySet().stream()
                 .map(e -> new WorkloadReportGenerator.EmployeeWorkload(
                         e.getKey().getLogin(),       // employeeName
@@ -1094,7 +1094,7 @@ public class AdminPanelController {
             };
             task.setOnSucceeded(e -> {
                 issuesPanelView = task.getValue();
-                // Na FX-thread ustawiamy widok i odświeżamy dane
+                // Na FX-thread następuje ustawienie widoku, a następnie odświeżenie danych
                 Platform.runLater(() -> {
                     adminPanel.setCenterPane(issuesPanelView);
                     @SuppressWarnings("unchecked")
