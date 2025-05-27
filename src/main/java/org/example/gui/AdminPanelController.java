@@ -562,9 +562,6 @@ public class AdminPanelController {
 
     /**
      * Usuwa zaznaczonego użytkownika asynchronicznie.
-     *
-     *
-     * Usuwa zaznaczonego użytkownika asynchronicznie.
      * Zabezpiecza przed usunięciem użytkownika z rolą "root".
      * Usuwa zaznaczonego użytkownika (soft-delete) i odświeża tabelę.
      */
