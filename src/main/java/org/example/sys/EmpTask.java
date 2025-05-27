@@ -1,5 +1,5 @@
 /*
- * Classname: Task
+ * Classname: EmpTask
  * Version information: 1.1
  * Date: 2025-05-22
  * Copyright notice: © BŁĘKITNI

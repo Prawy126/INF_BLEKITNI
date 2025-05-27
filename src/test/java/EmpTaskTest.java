@@ -1,5 +1,5 @@
 /*
- * Classname: TaskTest
+ * Classname: EmpTaskTest
  * Version information: 1.2
  * Date: 2025-05-24
  * Copyright notice: © BŁĘKITNI
@@ -7,6 +7,8 @@
 
 
 import org.example.sys.EmpTask;
+import org.example.sys.Employee;
+import org.example.sys.TaskEmployee;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -156,4 +158,18 @@ public class EmpTaskTest {
                 "toString() powinien wspominać o braku czasu zmiany"
         );
     }
+
+    @Test
+    @DisplayName("getSingleAssignee zwraca poprawnie pracownika")
+    void shouldReturnSingleAssignee() {
+        EmpTask task = new EmpTask("T", new Date(), "S", "D", LocalTime.of(1, 0));
+        Employee emp = new Employee(/* wypełnij parametry */);
+        // symulujemy powiązanie
+        TaskEmployee link = new TaskEmployee(task, emp);
+        task.getTaskEmployees().add(link);
+
+        assertSame(emp, task.getSingleAssignee(),
+                "getSingleAssignee() powinien zwrócić dokładnie tego pracownika");
+    }
+
 }

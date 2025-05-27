@@ -1,7 +1,7 @@
 /*
  * Classname: AdminPanelController
- * Version information: 1.5
- * Date: 2025-05-24
+ * Version information: 1.6
+ * Date: 2025-05-26
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -43,6 +43,7 @@ import org.example.database.UserRepository;
 import org.example.pdflib.ConfigManager;
 import org.example.sys.Employee;
 import org.example.sys.TechnicalIssue;
+import org.example.sys.PeriodType;
 import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
 
@@ -51,6 +52,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -760,6 +762,10 @@ public class AdminPanelController {
         return layout;
     }
 
+    /**
+     * Otwiera okno dialogowe z filtrami do generowania raportu KPI (StatsRaportGenerator).
+     * Umożliwia wybór zakresu dat, stanowisk oraz priorytetów.
+     */
     private void showStatsReportDialog() {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Raport KPI – filtry");
@@ -800,12 +806,20 @@ public class AdminPanelController {
         dialog.showAndWait();
     }
 
+    /**
+     * Generuje PDF z KPI (StatsRaportGenerator) na podstawie wybranych filtrów.
+     *
+     * @param from       początek okresu (inclusive)
+     * @param to         koniec okresu (inclusive)
+     * @param positions  lista nazw stanowisk, które mają się znaleźć w raporcie
+     * @param priors     lista priorytetów (HIGH/MEDIUM/LOW), do filtrowania zadań
+     */
     private void generateStatsPDF(LocalDate from, LocalDate to,
                                   List<String> positions,
                                   List<StatsRaportGenerator.Priority> priors) {
         try {
             StatsRaportGenerator gen = new StatsRaportGenerator();
-            gen.setTaskData(fetchTaskStatsData(from, to)); // TODO: zaimplementuj
+            gen.setTaskData(fetchTaskStatsData(from, to));
             String out = ConfigManager.getReportPath() + "/stats-" + System.currentTimeMillis() + ".pdf";
             gen.generateReport(out, to, StatsRaportGenerator.PeriodType.DAILY, positions, priors);
             showAlert(Alert.AlertType.INFORMATION, "Raport wygenerowany", out);
@@ -814,19 +828,20 @@ public class AdminPanelController {
         }
     }
 
+    /**
+     * Otwiera okno dialogowe z filtrami do generowania raportu zadań (TaskRaportGenerator).
+     * Umożliwia wybór okresu (enum PeriodType) oraz statusów zadań.
+     */
     private void showTaskReportDialog() {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Raport zadań – filtry");
 
-        // Okres (ComboBox)
-        ComboBox<TaskRaportGenerator.PeriodType> period = new ComboBox<>();
-        period.getItems().addAll(TaskRaportGenerator.PeriodType.values());
+        // Okres (domenowy enum)
+        ComboBox<PeriodType> period = new ComboBox<>();
+        period.getItems().addAll(PeriodType.values());
 
         // Statusy
         ListView<String> statusList = new ListView<>();
-        statusList.setPrefSize(200, 100);
-        statusList.getItems().addAll("Zakończone", "W trakcie", "Opóźnione");
-        statusList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         GridPane g = new GridPane();
         g.setHgap(10); g.setVgap(10);
@@ -838,27 +853,56 @@ public class AdminPanelController {
 
         dialog.setResultConverter(bt -> {
             if (bt == ButtonType.OK) {
-                generateTaskPDF(period.getValue(),
-                        new ArrayList<>(statusList.getSelectionModel().getSelectedItems()));
+                generateTaskPDF(
+                        period.getValue(),
+                        new ArrayList<>(statusList.getSelectionModel().getSelectedItems())
+                );
             }
             return null;
         });
         dialog.showAndWait();
     }
 
-    private void generateTaskPDF(TaskRaportGenerator.PeriodType period,
-                                 List<String> statuses) {
+    /**
+     * Generuje PDF z raportem zadań (TaskRaportGenerator).
+     *
+     * @param period    domenowy typ okresu (enum PeriodType) – będzie zmapowany na wewnętrzny TaskRaportGenerator.PeriodType
+     * @param statuses  lista statusów zadań do uwzględnienia w raporcie
+     */
+    private void generateTaskPDF(PeriodType period, List<String> statuses) {
         try {
             TaskRaportGenerator gen = new TaskRaportGenerator();
-            gen.setTaskData(fetchTaskSimpleData(period)); // TODO: zaimplementuj
-            String out = ConfigManager.getReportPath() + "/tasks-" + System.currentTimeMillis() + ".pdf";
-            gen.generateReport(out, period, statuses);
-            showAlert(Alert.AlertType.INFORMATION, "Raport wygenerowany", out);
+
+            // 1) przygotowanie danych
+            gen.setTaskData(fetchTaskSimpleData(period));
+
+            // 2) mapowanie enum na ten wymagany przez TaskRaportGenerator
+            TaskRaportGenerator.PeriodType pdfPeriod = switch (period) {
+                case DAILY   -> TaskRaportGenerator.PeriodType.LAST_WEEK;
+                case MONTHLY -> TaskRaportGenerator.PeriodType.LAST_MONTH;
+                case YEARLY  -> TaskRaportGenerator.PeriodType.LAST_QUARTER;
+            };
+
+            // 3) generujemy raport
+            String out = ConfigManager.getReportPath()
+                    + "/tasks-" + System.currentTimeMillis() + ".pdf";
+            gen.generateReport(out, pdfPeriod, statuses);
+
+            showAlert(Alert.AlertType.INFORMATION,
+                    "Raport wygenerowany",
+                    out);
+
         } catch (Exception ex) {
-            showAlert(Alert.AlertType.ERROR, "Błąd", ex.getMessage());
+            showAlert(Alert.AlertType.ERROR,
+                    "Błąd",
+                    ex.getMessage());
         }
     }
 
+    /**
+     * Otwiera okno dialogowe z filtrami do generowania raportu obciążenia (WorkloadReportGenerator).
+     * Pozwala wybrać zakres dat, stanowiska i statusy obciążenia.
+     */
     private void showWorkloadReportDialog() {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Raport obciążenia – filtry");
@@ -896,12 +940,20 @@ public class AdminPanelController {
         dialog.showAndWait();
     }
 
+    /**
+     * Generuje PDF z raportem obciążenia pracowników (WorkloadReportGenerator).
+     *
+     * @param from       początek okresu raportowania (inclusive)
+     * @param to         koniec okresu raportowania (inclusive)
+     * @param positions  lista stanowisk do uwzględnienia
+     * @param statuses   lista statusów obciążenia ("Przeciążenie", "Niedociążenie", "Optymalne")
+     */
     private void generateWorkloadPDF(LocalDate from, LocalDate to,
                                      List<String> positions,
                                      List<String> statuses) {
         try {
             WorkloadReportGenerator gen = new WorkloadReportGenerator();
-            gen.setWorkloadData(fetchWorkloadData(from, to)); // TODO: zaimplementuj
+            gen.setWorkloadData(fetchWorkloadData(from, to));
             String out = ConfigManager.getReportPath() + "/workload-" + System.currentTimeMillis() + ".pdf";
             gen.generateReport(out, from, to, positions, statuses);
             showAlert(Alert.AlertType.INFORMATION, "Raport wygenerowany", out);
@@ -910,13 +962,12 @@ public class AdminPanelController {
         }
     }
 
-    //TODO: TO JEST DO ZAIMPLEMENTOWANIA
-    // Poniższe metody musisz uzupełnić, by zwracały odpowiednie dane z repozytoriów.
-
     /* ------------------------------------------------------------ */
     /* KPI – StatsRaportGenerator                                   */
     /* ------------------------------------------------------------ */
-    private List<StatsRaportGenerator.TaskRecord> fetchTaskStatsData(LocalDate from, LocalDate to) {
+    private List<StatsRaportGenerator.TaskRecord> fetchTaskStatsData(LocalDate from,
+                                                                     LocalDate to) {
+
         EmpTaskRepository repo = new EmpTaskRepository();
 
         return repo.getAllTasks().stream()
@@ -924,16 +975,12 @@ public class AdminPanelController {
                 .map(t -> {
                     Employee assignee = t.getSingleAssignee();
                     return new StatsRaportGenerator.TaskRecord(
-                            t.getName(),                                       // taskName
-                            assignee != null
-                                    ? assignee.getPosition()
-                                    : "Brak",                                      // position
-                            null,                                              // priority – nieużywane
-                            toLocalDate(t.getDate()),                          // dueDate
-                            null,                                              // completionDate – brak
-                            assignee != null
-                                    ? assignee.getLogin()
-                                    : "Brak"                                      // assignee
+                            t.getName(),                                        // taskName
+                            assignee != null ? assignee.getPosition() : "Brak", // position
+                            null,                                               // priority – nieużywane
+                            toLocalDate(t.getDate()),                           // dueDate
+                            null,                                               // completionDate – brak
+                            assignee != null ? assignee.getLogin() : "Brak"     // assignee
                     );
                 })
                 .toList();
@@ -949,21 +996,28 @@ public class AdminPanelController {
         return repo.getAllTasks().stream()
                 .filter(t -> inRange(t.getDate(), from, to))
                 .map(t -> {
-                    Employee assignee = t.getSingleAssignee();
+                    Employee assignee = t.getSingleAssignee();          // może być null
                     return new TaskRaportGenerator.TaskRecord(
-                            t.getName(),                                      // taskName
-                            assignee != null
-                                    ? assignee.getPosition()
-                                    : "Brak",                                     // position
-                            null,                                             // priority (nieużywane)
-                            toLocalDate(t.getDate()),                         // dueDate
-                            null,                                             // completionDate – brak
-                            assignee != null
-                                    ? assignee.getLogin()
-                                    : "Brak"                                     // assignee
+                            t.getName(),                                    // taskName
+                            toLocalDate(t.getDate()),                       // dueDate
+                            null,                                           // completionDate – nieużywane
+                            assignee != null ? assignee.getLogin() : "Brak" // assignee
                     );
                 })
                 .toList();
+    }
+
+    /* ─────────  (wrapper na enum)  ───────── */
+    private List<TaskRaportGenerator.TaskRecord> fetchTaskSimpleData(PeriodType period) {
+        LocalDate end   = LocalDate.now();
+        LocalDate start;
+        switch (period) {
+            case DAILY   -> start = end;
+            case MONTHLY -> start = end.with(TemporalAdjusters.firstDayOfMonth());
+            case YEARLY  -> start = end.minusYears(1);
+            default      -> throw new IllegalArgumentException("Nieznany okres: " + period);
+        }
+        return fetchTaskSimpleData(start, end);                     // wywołujemy wersję bazową
     }
 
     /* ------------------------------------------------------------ */
@@ -971,28 +1025,26 @@ public class AdminPanelController {
     /* ------------------------------------------------------------ */
     private List<WorkloadReportGenerator.EmployeeWorkload> fetchWorkloadData(LocalDate from,
                                                                              LocalDate to) {
+
         EmpTaskRepository repo = new EmpTaskRepository();
 
         return repo.getAllTasks().stream()
-                // 1) tylko taski, które mają przypisanego pracownika przez TaskEmployee, czas zmiany i są w zakresie dat
+                // 1) tylko taski z co najmniej jednym pracownikiem, czasem zmiany i w zakresie dat
                 .filter(t -> !t.getTaskEmployees().isEmpty()
                         && t.getDurationOfTheShift() != null
                         && inRange(t.getDate(), from, to))
-                // 2) grupujemy po pracowniku i sumujemy godziny
+                // 2) grupujemy po pierwszym assignee i sumujemy godziny
                 .collect(Collectors.groupingBy(
-                        t -> t.getSingleAssignee(),
+                        EmpTask::getSingleAssignee,
                         Collectors.summingDouble(t -> hours(t.getDurationOfTheShift()))
                 ))
                 // 3) konwertujemy na rekord raportu
                 .entrySet().stream()
-                .map(e -> {
-                    Employee emp = e.getKey();
-                    return new WorkloadReportGenerator.EmployeeWorkload(
-                            emp.getLogin(),       // employeeName
-                            emp.getPosition(),    // department
-                            e.getValue()          // totalHours
-                    );
-                })
+                .map(e -> new WorkloadReportGenerator.EmployeeWorkload(
+                        e.getKey().getLogin(),       // employeeName
+                        e.getKey().getPosition(),    // department
+                        e.getValue()                 // totalHours
+                ))
                 .toList();
     }
 
@@ -1057,14 +1109,121 @@ public class AdminPanelController {
         }
     }
 
-    // w dowolnym miejscu klasy AdminPanelController (np. po metodzie showReportsPanel)
-    private void showFilterDialogForReport(String reportType, LocalDate from, LocalDate to) {
-        // TODO: tutaj wyświetl dialog wyboru dodatkowych filtrów
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Filtruj raport");
-        alert.setHeaderText("Typ: " + reportType
-                + "\nOkres: " + from + " – " + to);
-        alert.showAndWait();
+    /**
+     * Pokazuje dialog z filtrami dla wskazanego raportu i okresu.
+     * Po wybraniu filtrów wywołuje odpowiednią metodę generującą PDF.
+     *
+     * @param reportType  typ raportu: "KPI", "Zadania" lub "Obciążenie"
+     * @param from        początek okresu (inclusive)
+     * @param to          koniec okresu (inclusive)
+     */
+    private void showFilterDialogForReport(String reportType,
+                                           LocalDate from,
+                                           LocalDate to) {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Filtruj raport: " + reportType);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        switch (reportType) {
+            case "KPI" -> {
+                // --- KPI: daty, stanowiska, priorytety ---
+                DatePicker dpFrom = new DatePicker(from);
+                DatePicker dpTo   = new DatePicker(to);
+                ListView<String> positionsList = new ListView<>(
+                        FXCollections.observableArrayList("Kasjer", "Logistyk", "Pracownik")
+                );
+                positionsList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+                ListView<StatsRaportGenerator.Priority> prioList = new ListView<>(
+                        FXCollections.observableArrayList(StatsRaportGenerator.Priority.values())
+                );
+                prioList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+                grid.addRow(0, new Label("Data od:"), dpFrom, new Label("Data do:"), dpTo);
+                grid.addRow(1, new Label("Stanowiska:"), positionsList);
+                grid.addRow(2, new Label("Priorytety:"), prioList);
+
+                dialog.getDialogPane().setContent(grid);
+                dialog.setResultConverter(bt -> {
+                    if (bt == ButtonType.OK) {
+                        generateStatsPDF(
+                                dpFrom.getValue(),
+                                dpTo.getValue(),
+                                new ArrayList<>(positionsList.getSelectionModel().getSelectedItems()),
+                                new ArrayList<>(prioList.getSelectionModel().getSelectedItems())
+                        );
+                    }
+                    return null;
+                });
+            }
+            case "Zadania" -> {
+                // --- Zadania: okres + statusy ---
+                ComboBox<PeriodType> periodCombo = new ComboBox<>();
+                periodCombo.getItems().addAll(PeriodType.values());
+                periodCombo.setValue(PeriodType.fromDisplay(reportType)); // albo po prostu PeriodType.DAILY
+
+                ListView<String> statusList = new ListView<>(
+                        FXCollections.observableArrayList("Zakończone", "W trakcie", "Opóźnione")
+                );
+                statusList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+                grid.addRow(0, new Label("Okres:"), periodCombo);
+                grid.addRow(1, new Label("Statusy:"), statusList);
+
+                dialog.getDialogPane().setContent(grid);
+                dialog.setResultConverter(bt -> {
+                    if (bt == ButtonType.OK) {
+                        generateTaskPDF(
+                                periodCombo.getValue(),
+                                new ArrayList<>(statusList.getSelectionModel().getSelectedItems())
+                        );
+                    }
+                    return null;
+                });
+            }
+            case "Obciążenie" -> {
+                // --- Obciążenie: daty, stanowiska, rodzaje obciążenia ---
+                DatePicker dpFrom = new DatePicker(from);
+                DatePicker dpTo   = new DatePicker(to);
+                ListView<String> positionsList = new ListView<>(
+                        FXCollections.observableArrayList("Kasjer", "Logistyk", "Pracownik")
+                );
+                positionsList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+                ListView<String> loadStatusList = new ListView<>(
+                        FXCollections.observableArrayList("Przeciążenie", "Niedociążenie", "Optymalne")
+                );
+                loadStatusList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+                grid.addRow(0, new Label("Data od:"), dpFrom, new Label("Data do:"), dpTo);
+                grid.addRow(1, new Label("Stanowiska:"), positionsList);
+                grid.addRow(2, new Label("Statusy obciążenia:"), loadStatusList);
+
+                dialog.getDialogPane().setContent(grid);
+                dialog.setResultConverter(bt -> {
+                    if (bt == ButtonType.OK) {
+                        generateWorkloadPDF(
+                                dpFrom.getValue(),
+                                dpTo.getValue(),
+                                new ArrayList<>(positionsList.getSelectionModel().getSelectedItems()),
+                                new ArrayList<>(loadStatusList.getSelectionModel().getSelectedItems())
+                        );
+                    }
+                    return null;
+                });
+            }
+            default -> {
+                // w razie nieznanego typu
+                showAlert(Alert.AlertType.ERROR,
+                        "Nieznany typ raportu",
+                        "ReportType = " + reportType);
+                return;
+            }
+        }
+
+        dialog.showAndWait();
     }
 
 

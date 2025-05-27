@@ -332,11 +332,4 @@ public class Employee extends Person {
         this.onSickLeave = false;
         this.sickLeaveStartDate = null;
     }
-
-    // Metoda dla pojedynczych zadań
-    public List<EmpTask> getTasks() {
-        return taskEmployees.stream()
-                .map(TaskEmployee::getTask)
-                .toList();
-    }
 }
