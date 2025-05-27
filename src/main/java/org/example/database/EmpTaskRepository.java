@@ -91,7 +91,7 @@ public class EmpTaskRepository {
         logger.debug("getAllTasks() – start");
         EntityManager em = emf.createEntityManager();
         try {
-            List<EmpTask> list = em.createQuery("SELECT t FROM Task t", EmpTask.class)
+            List<EmpTask> list = em.createQuery("SELECT t FROM EmpTask t", EmpTask.class)
                     .getResultList();
             logger.info("getAllTasks() – pobrano {} zadań", list.size());
             return list;

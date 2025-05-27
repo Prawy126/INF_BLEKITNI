@@ -1,7 +1,7 @@
 /*
  * Classname: HelloApplication
- * Version information: 1.3
- * Date: 2025-05-17
+ * Version information: 1.4
+ * Date: 2025-05-27
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -240,24 +240,6 @@ public class HelloApplication extends Application {
             HBox bottomButtonBox = new HBox(15);
             bottomButtonBox.setAlignment(Pos.CENTER);
 
-            Button cvButton = new Button("Złóż CV");
-            styleButton(cvButton, "#1F618D");
-            cvButton.setOnAction(e -> {
-                System.out.println("DEBUG: Kliknięto przycisk Złóż CV");
-                try {
-                    showCVForm();
-                } catch (Exception ex) {
-                    System.err.println("BŁĄD podczas otwierania formularza CV: " + ex.getMessage());
-                    ex.printStackTrace();
-                    showAlert(
-                            Alert.AlertType.ERROR,
-                            "Błąd",
-                            "Nie można otworzyć formularza CV",
-                            ex.getMessage()
-                    );
-                }
-            });
-
             Button exitButton = new Button("Wyjście");
             styleButton(exitButton, "#E74C3C");
             exitButton.setOnAction(e -> {
@@ -265,7 +247,7 @@ public class HelloApplication extends Application {
                 exitApplication();
             });
 
-            bottomButtonBox.getChildren().addAll(cvButton, exitButton);
+            bottomButtonBox.getChildren().addAll(exitButton);
 
             System.out.println("DEBUG: Dodawanie elementów do głównego kontenera");
             root.getChildren().addAll(

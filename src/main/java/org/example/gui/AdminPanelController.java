@@ -1,7 +1,7 @@
 /*
  * Classname: AdminPanelController
- * Version information: 1.6
- * Date: 2025-05-26
+ * Version information: 1.7
+ * Date: 2025-05-27
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -208,6 +208,10 @@ public class AdminPanelController {
         Button addUserButton = new Button("Dodaj użytkownika");
         Button editUserButton = new Button("Edytuj użytkownika");
         Button deleteUserButton = new Button("Usuń użytkownika");
+
+        styleAdminButton(addUserButton,"#2980B9");
+        styleAdminButton(editUserButton,"#3498DB");
+        styleAdminButton(deleteUserButton,"#E74C3C");
 
         addUserButton.setOnAction(e -> addNewUser());
         editUserButton.setOnAction(e -> editSelectedUser());
@@ -643,14 +647,15 @@ public class AdminPanelController {
         logsCheckbox.setSelected(loggingEnabled);
 
         Button configurePDF = new Button("Konfiguruj raporty PDF");
+        styleAdminButton(configurePDF,"#2980B9");
         configurePDF.setOnAction(e -> showPDFConfigPanel());
 
         Button backupButton = new Button("Wykonaj backup bazy danych");
-        backupButton.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white;");
+        styleAdminButton(backupButton,"#27AE60");
         backupButton.setOnAction(e -> performDatabaseBackup());
 
         Button saveButton = new Button("Zapisz");
-        saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+        styleAdminButton(saveButton,"#3498DB");
         saveButton.setOnAction(e -> {
             ConfigManager.setLoggingEnabled(logsCheckbox.isSelected());
             showAlert(Alert.AlertType.INFORMATION, "Zapisano",
@@ -683,6 +688,7 @@ public class AdminPanelController {
         TextField logoField = new TextField();
 
         Button updateLogoButton = new Button("Aktualizuj logo");
+        styleAdminButton(updateLogoButton,"#2980B9");
 
         Label sortingLabel = new Label("Sortowanie domyślne:");
         ComboBox<String> sortingComboBox = new ComboBox<>();
@@ -694,7 +700,7 @@ public class AdminPanelController {
         pathField.setText(ConfigManager.getReportPath());
 
         Button saveButton = new Button("Zapisz konfigurację");
-        saveButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+        styleAdminButton(saveButton,"#3498DB");
 
         saveButton.setOnAction(e -> {
             String path = pathField.getText().trim();
@@ -715,6 +721,7 @@ public class AdminPanelController {
         });
 
         Button backButton = new Button("Wróć");
+        styleAdminButton(backButton,"#E74C3C");
         backButton.setOnAction(e -> showConfigPanel());
 
         layout.getChildren().addAll(
@@ -751,8 +758,13 @@ public class AdminPanelController {
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
         Button statsBtn = new Button("Raport KPI (Statystyki)");
+        styleAdminButton(statsBtn,"#2980B9");
+
         Button taskBtn  = new Button("Raport zadań");
+        styleAdminButton(taskBtn,"#3498DB");
+
         Button loadBtn  = new Button("Raport obciążenia");
+        styleAdminButton(loadBtn,"#27AE60");
 
         statsBtn.setOnAction(e -> showStatsReportDialog());
         taskBtn.setOnAction(e  -> showTaskReportDialog());
@@ -1288,9 +1300,11 @@ public class AdminPanelController {
 
         // --- przyciski poniżej tabeli ---
         Button details = new Button("Pokaż szczegóły");
+        styleAdminButton(details,"#2980B9");
         details.setOnAction(e -> showIssueDetails(tbl));
 
         Button refresh = new Button("Odśwież listę");
+        styleAdminButton(refresh,"#3498DB");
         refresh.setOnAction(e -> refreshIssuesTable(tbl));
 
         HBox btnBox = new HBox(10, details, refresh);
@@ -1586,4 +1600,22 @@ public class AdminPanelController {
         stage.show();
     }
 
+    /**
+     * Wspólny styl dla przycisków w panelu admina.
+     */
+    private void styleAdminButton(Button button, String color) {
+        button.setStyle(
+                "-fx-background-color: " + color + "; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-font-weight: bold;"
+        );
+        button.setOnMouseEntered(e -> {
+            button.setScaleX(1.05);
+            button.setScaleY(1.05);
+        });
+        button.setOnMouseExited(e -> {
+            button.setScaleX(1);
+            button.setScaleY(1);
+        });
+    }
 }

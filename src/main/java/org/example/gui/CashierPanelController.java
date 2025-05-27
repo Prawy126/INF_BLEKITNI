@@ -1,7 +1,7 @@
 /*
  * Classname: CashierPanelController
- * Version information: 1.8
- * Date: 2025-05-24
+ * Version information: 1.9
+ * Date: 2025-05-27
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -843,15 +843,41 @@ public class CashierPanelController {
         }
     }
 
-
     // Zgłoszenie problemu
     public void showIssueReportPanel() {
-        Stage dialog = createStyledDialog("Zgłoszenie problemu");
-        ComboBox<String> typeBox = createStyledComboBox("Awaria sprzętu", "Błąd oprogramowania", "Inne");
-        TextArea description = createStyledTextArea("Opisz problem...");
+        Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle("Zgłoszenie problemu");
 
-        Button sendButton = cashierPanel.createStyledButton("Wyślij", "#27AE60");
-        Button cancelButton = cashierPanel.createStyledButton("Anuluj", "#E74C3C");
+        Label typeLabel = new Label("Typ zgłoszenia:");
+        ComboBox<String> typeBox = new ComboBox<>();
+        typeBox.getItems().addAll("Awaria sprzętu", "Błąd oprogramowania", "Inne");
+
+        Label descLabel = new Label("Opis:");
+        TextArea description = new TextArea();
+        description.setPromptText("Opisz problem...");
+
+        Button sendButton = new Button("Wyślij");
+        sendButton.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white; -fx-font-weight: bold;");
+        sendButton.setOnMouseEntered(e -> {
+            sendButton.setScaleX(1.05);
+            sendButton.setScaleY(1.05);
+        });
+        sendButton.setOnMouseExited(e -> {
+            sendButton.setScaleX(1);
+            sendButton.setScaleY(1);
+        });
+
+        Button cancelButton = new Button("Anuluj");
+        cancelButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-font-weight: bold;");
+        cancelButton.setOnMouseEntered(e -> {
+            cancelButton.setScaleX(1.05);
+            cancelButton.setScaleY(1.05);
+        });
+        cancelButton.setOnMouseExited(e -> {
+            cancelButton.setScaleX(1);
+            cancelButton.setScaleY(1);
+        });
 
         sendButton.setOnAction(e -> {
             if (typeBox.getValue() == null || description.getText().trim().isEmpty()) {
@@ -861,21 +887,16 @@ public class CashierPanelController {
             showNotification("Sukces", "Zgłoszenie wysłane.");
             dialog.close();
         });
-
         cancelButton.setOnAction(e -> dialog.close());
 
-        HBox buttons = new HBox(10, sendButton, cancelButton);
-        buttons.setAlignment(Pos.CENTER_RIGHT);
+        HBox buttonBox = new HBox(10, sendButton, cancelButton);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
 
-        VBox root = new VBox(20);
+        VBox root = new VBox(15, typeLabel, typeBox, descLabel, description, buttonBox);
         root.setPadding(new Insets(20));
-        root.getChildren().addAll(
-                new Label("Typ zgłoszenia:"), typeBox,
-                new Label("Opis:"), description,
-                buttons
-        );
 
-        setupDialog(dialog, root);
+        dialog.setScene(new Scene(root));
+        dialog.showAndWait();
     }
 
     public void showCloseShiftPanel() {

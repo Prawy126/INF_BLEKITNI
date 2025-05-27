@@ -1,10 +1,9 @@
 /*
  * Classname: EmployeePanelController
- * Version information: 1.2
- * Date: 2025-05-25
+ * Version information: 1.3
+ * Date: 2025-05-27
  * Copyright notice: © BŁĘKITNI
  */
-
 
 package org.example.gui;
 
@@ -39,31 +38,71 @@ public class EmployeePanelController {
      * Wyświetla główny panel pracownika z listą zadań i przyciskami akcji.
      */
     public void showEmployeePanel() {
-        VBox layout = new VBox(20);
+        VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
         layout.setStyle("-fx-background-color: white;");
 
-        // Lista zadań
         Label taskLabel = new Label("Lista zadań");
+        taskLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;"); // jak w AdminPanel
+
         TableView<String> taskTable = new TableView<>();
-        taskTable.setMinHeight(120);
+        taskTable.setMinHeight(200);
         taskTable.setPlaceholder(new Label("Brak przypisanych zadań."));
 
         Button updateStatusButton = new Button("Zaktualizuj status");
+        updateStatusButton.setStyle(
+                "-fx-background-color: #2980B9; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-font-weight: bold;"
+        );
 
-        // Zgłoś problem i wyloguj
+        updateStatusButton.setOnMouseEntered(e -> {
+            updateStatusButton.setScaleX(1.1);
+            updateStatusButton.setScaleY(1.1);
+        });
+        updateStatusButton.setOnMouseExited(e -> {
+            updateStatusButton.setScaleX(1);
+            updateStatusButton.setScaleY(1);
+        });
+
         HBox buttonBox = new HBox(10);
-        buttonBox.setAlignment(Pos.CENTER_LEFT);
+        buttonBox.setAlignment(Pos.CENTER);
 
         Button reportProblemButton = new Button("Zgłoś problem");
-        Button logoutButton = new Button("Wyloguj się");
-
+        reportProblemButton.setStyle(
+                "-fx-background-color: #2980B9; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-font-weight: bold;"
+        );
+        reportProblemButton.setOnMouseEntered(e -> {
+            reportProblemButton.setScaleX(1.1);
+            reportProblemButton.setScaleY(1.1);
+        });
+        reportProblemButton.setOnMouseExited(e -> {
+            reportProblemButton.setScaleX(1);
+            reportProblemButton.setScaleY(1);
+        });
         reportProblemButton.setOnAction(e -> showReportIssueWindow());
+
+        Button logoutButton = new Button("Wyloguj się");
+        logoutButton.setStyle(
+                "-fx-background-color: #E74C3C; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-font-weight: bold;"
+        );
+        logoutButton.setOnMouseEntered(e -> {
+            logoutButton.setScaleX(1.1);
+            logoutButton.setScaleY(1.1);
+        });
+        logoutButton.setOnMouseExited(e -> {
+            logoutButton.setScaleX(1);
+            logoutButton.setScaleY(1);
+        });
         logoutButton.setOnAction(e -> logout());
 
-        buttonBox.getChildren().addAll(reportProblemButton, logoutButton);
+        buttonBox.getChildren().addAll(updateStatusButton, reportProblemButton, logoutButton);
 
-        layout.getChildren().addAll(taskLabel, taskTable, updateStatusButton, buttonBox);
+        layout.getChildren().addAll(taskLabel, taskTable, buttonBox);
         employeePanel.setCenterPane(layout);
     }
 
@@ -77,8 +116,10 @@ public class EmployeePanelController {
 
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
+        layout.setStyle("-fx-background-color: white;");
 
         Label descLabel = new Label("Opis problemu");
+        descLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
         TextArea descriptionArea = new TextArea();
         descriptionArea.setPrefRowCount(4);
 
@@ -87,6 +128,19 @@ public class EmployeePanelController {
         categoryBox.getItems().addAll("Techniczny", "Zadanie", "Inny");
 
         Button submitButton = new Button("Wyślij");
+        submitButton.setStyle(
+                "-fx-background-color: #2980B9; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-font-weight: bold;"
+        );
+        submitButton.setOnMouseEntered(e -> {
+            submitButton.setScaleX(1.1);
+            submitButton.setScaleY(1.1);
+        });
+        submitButton.setOnMouseExited(e -> {
+            submitButton.setScaleX(1);
+            submitButton.setScaleY(1);
+        });
         submitButton.setOnAction(e -> {
             String desc = descriptionArea.getText();
             String category = categoryBox.getValue();
@@ -107,7 +161,13 @@ public class EmployeePanelController {
             }
         });
 
-        layout.getChildren().addAll(descLabel, descriptionArea, categoryLabel, categoryBox, submitButton);
+        layout.getChildren().addAll(
+                descLabel,
+                descriptionArea,
+                categoryLabel,
+                categoryBox,
+                submitButton
+        );
         Scene scene = new Scene(layout, 350, 300);
         issueStage.setScene(scene);
         issueStage.show();

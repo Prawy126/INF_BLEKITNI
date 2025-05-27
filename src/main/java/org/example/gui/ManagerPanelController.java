@@ -1,7 +1,7 @@
 /*
  * Classname: ManagerPanelController
- * Version information: 1.4
- * Date: 2025-05-24
+ * Version information: 1.5
+ * Date: 2025-05-27
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -98,13 +98,26 @@ public class ManagerPanelController {
         taskButtons.setAlignment(Pos.CENTER);
 
         Button addTaskButton = new Button("Dodaj zadanie");
+        addTaskButton.setStyle("-fx-background-color: #2980B9; -fx-text-fill: white; -fx-font-weight: bold;");
+        addTaskButton.setOnMouseEntered(e -> { addTaskButton.setScaleX(1.1); addTaskButton.setScaleY(1.1); });
+        addTaskButton.setOnMouseExited(e -> { addTaskButton.setScaleX(1); addTaskButton.setScaleY(1); });
         addTaskButton.setOnAction(e -> showAddTaskPanel());
 
         Button assignEmployeeButton = new Button("Przypisz pracownika");
+        assignEmployeeButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white; -fx-font-weight: bold;");
+        assignEmployeeButton.setOnMouseEntered(e -> { assignEmployeeButton.setScaleX(1.1); assignEmployeeButton.setScaleY(1.1); });
+        assignEmployeeButton.setOnMouseExited(e -> { assignEmployeeButton.setScaleX(1); assignEmployeeButton.setScaleY(1); });
         assignEmployeeButton.setOnAction(e -> showAssignEmployeeDialog());
 
         Button editButton = new Button("Edytuj zadanie");
+        editButton.setStyle("-fx-background-color: #F39C12; -fx-text-fill: white; -fx-font-weight: bold;");
+        editButton.setOnMouseEntered(e -> { editButton.setScaleX(1.1); editButton.setScaleY(1.1); });
+        editButton.setOnMouseExited(e -> { editButton.setScaleX(1); editButton.setScaleY(1); });
+
         Button deleteButton = new Button("Usuń zadanie");
+        deleteButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-font-weight: bold;");
+        deleteButton.setOnMouseEntered(e -> { deleteButton.setScaleX(1.1); deleteButton.setScaleY(1.1); });
+        deleteButton.setOnMouseExited(e -> { deleteButton.setScaleX(1); deleteButton.setScaleY(1); });
 
         editButton.setOnAction(e -> {
             EmpTask selectedTask = taskTable.getSelectionModel().getSelectedItem();

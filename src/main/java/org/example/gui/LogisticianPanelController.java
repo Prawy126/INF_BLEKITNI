@@ -1,10 +1,9 @@
 /*
  * Classname: LogisticianPanelController
- * Version information: 1.3
- * Date: 2025-05-24
+ * Version information: 1.4
+ * Date: 2025-05-27
  * Copyright notice: © BŁĘKITNI
  */
-
 
 package org.example.gui;
 
@@ -13,6 +12,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 
 import javafx.scene.Scene;
 
@@ -28,10 +28,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import org.example.database.*;
-import org.example.sys.*;
 
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import javafx.stage.FileChooser;
@@ -40,7 +39,10 @@ import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import org.example.database.*;
 import org.example.pdflib.ConfigManager;
+import org.example.sys.*;
+
 import pdf.WarehouseRaport;
 
 import java.io.File;
@@ -97,20 +99,26 @@ public class LogisticianPanelController {
         TableColumn<StockRow,Integer> qtyCol = new TableColumn<>("Ilość");
         qtyCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
 
-        table.getColumns().addAll(idCol,nameCol,qtyCol);
-        refreshStockTable(table);                           // <-- ładowanie
+        table.getColumns().addAll(idCol, nameCol, qtyCol);
+        refreshStockTable(table);
 
         /* -------- przyciski -------- */
         Button filterBtn  = new Button("Filtruj");
+        styleLogisticButton(filterBtn, "#2980B9");
         filterBtn.setOnAction(e -> showFilterStockDialog(table));
 
         Button refreshBtn = new Button("Odśwież");
+        styleLogisticButton(refreshBtn, "#3498DB");
         refreshBtn.setOnAction(e -> refreshStockTable(table));
 
         Button reportsBtn = new Button("Raporty");
+        styleLogisticButton(reportsBtn, "#27AE60");
         reportsBtn.setOnAction(e -> showInventoryReports());
 
-        layout.getChildren().addAll(title, table, filterBtn, refreshBtn, reportsBtn);
+        HBox btnBox = new HBox(10, filterBtn, refreshBtn, reportsBtn);
+        btnBox.setAlignment(Pos.CENTER_RIGHT);
+
+        layout.getChildren().addAll(title, table, btnBox);
         logisticianPanel.setCenterPane(layout);
     }
 
@@ -127,7 +135,7 @@ public class LogisticianPanelController {
                             Warehouse::getQuantity));
 
             List<StockRow> rows = productRepository.getAllProducts().stream()
-                    .filter(p -> qtyById.containsKey(p.getId()))        // tylko produkty mające stan
+                    .filter(p -> qtyById.containsKey(p.getId()))
                     .map(p -> new StockRow(
                             p.getId(),
                             p.getName(),
@@ -140,7 +148,6 @@ public class LogisticianPanelController {
             showAlert(ERROR,"Błąd","Nie udało się pobrać stanów magazynowych");
         }
     }
-
 
     /**
      * Otwiera panel „Zamówienia” z tabelą wszystkich zamówień.
@@ -174,27 +181,28 @@ public class LogisticianPanelController {
 
         tableView.getColumns().addAll(idCol, productCol, employeeCol, qtyCol, priceCol, dateCol);
 
-        // Ładowanie danych z bazy
         OrderRepository orderRepo = new OrderRepository();
         List<Order> orders = orderRepo.getAllOrders();
         tableView.setItems(FXCollections.observableArrayList(orders));
 
         Button addOrderButton = new Button("Dodaj zamówienie");
+        styleLogisticButton(addOrderButton, "#27AE60");
         addOrderButton.setOnAction(e -> showAddOrderForm());
 
         Button filterButton = new Button("Filtruj");
+        styleLogisticButton(filterButton, "#2980B9");
         filterButton.setOnAction(e -> showFilterOrderDialog(tableView));
 
         Button refreshBtn = new Button("Odśwież");
+        styleLogisticButton(refreshBtn, "#3498DB");
         refreshBtn.setOnAction(e ->
-                tableView.setItems(
-                        FXCollections.observableArrayList(
-                                new OrderRepository().getAllOrders()
-                        )
-                )
+                tableView.setItems(FXCollections.observableArrayList(new OrderRepository().getAllOrders()))
         );
 
-        layout.getChildren().addAll(titleLabel, tableView, addOrderButton, filterButton, refreshBtn);
+        HBox btnBox = new HBox(10, addOrderButton, filterButton, refreshBtn);
+        btnBox.setAlignment(Pos.CENTER_RIGHT);
+
+        layout.getChildren().addAll(titleLabel, tableView, btnBox);
         logisticianPanel.setCenterPane(layout);
     }
 
@@ -220,16 +228,11 @@ public class LogisticianPanelController {
         TextField productIdField = new TextField();
 
         Button filterButton = new Button("Filtruj");
+        styleLogisticButton(filterButton, "#27AE60");
         filterButton.setOnAction(ev -> {
-            // ← TUTAJ ZASTĄP OBECNĄ LAMBDA PONIŻSZYM KODEM
-
-            // 1) pobierz pełną listę z repo
             ObservableList<Order> base =
-                    FXCollections.observableArrayList(
-                            new OrderRepository().getAllOrders()
-                    );
+                    FXCollections.observableArrayList(new OrderRepository().getAllOrders());
 
-            // 2) filtruj
             ObservableList<Order> out = base.filtered(o -> {
                 if (!idField.getText().isBlank()) {
                     try {
@@ -241,8 +244,7 @@ public class LogisticianPanelController {
                 }
                 if (!productIdField.getText().isBlank()) {
                     try {
-                        if (o.getProduct().getId() !=
-                                Integer.parseInt(productIdField.getText().trim()))
+                        if (o.getProduct().getId() != Integer.parseInt(productIdField.getText().trim()))
                             return false;
                     } catch (NumberFormatException ex) {
                         return false;
@@ -251,14 +253,14 @@ public class LogisticianPanelController {
                 return true;
             });
 
-            // 3) pokaż wyfiltrowane i zamknij okno
             tableView.setItems(out);
             stage.close();
         });
 
-        // ustawienie w GridPane
-        grid.add(idLabel, 0, 0);               grid.add(idField, 1, 0);
-        grid.add(productIdLabel, 0, 1);        grid.add(productIdField, 1, 1);
+        grid.add(idLabel, 0, 0);
+        grid.add(idField, 1, 0);
+        grid.add(productIdLabel, 0, 1);
+        grid.add(productIdField, 1, 1);
         grid.add(filterButton, 1, 2);
 
         stage.setScene(new Scene(grid, 320, 180));
@@ -277,6 +279,7 @@ public class LogisticianPanelController {
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
         Button generateButton = new Button("Generuj raport");
+        styleLogisticButton(generateButton, "#27AE60");
         generateButton.setOnAction(e -> showReportDialog());
 
         layout.getChildren().addAll(titleLabel, generateButton);
@@ -308,7 +311,6 @@ public class LogisticianPanelController {
         Label thresholdLabel = new Label("Próg niskiego stanu magazynowego:");
         Spinner<Integer> thresholdSpinner = new Spinner<>(1, 100, 5);
 
-        // Informacja o docelowej ścieżce (tylko do odczytu)
         Label pathInfoLabel = new Label("Plik zostanie zapisany w katalogu:");
         TextField pathDisplay = new TextField();
         pathDisplay.setEditable(false);
@@ -317,6 +319,7 @@ public class LogisticianPanelController {
         pathDisplay.setText(ConfigManager.getReportPath());
 
         Button generate = new Button("Generuj");
+        styleLogisticButton(generate, "#27AE60");
         generate.setOnAction(e ->
                 handleGenerateButton(
                         new ArrayList<>(categoriesList.getSelectionModel().getSelectedItems()),
@@ -372,29 +375,23 @@ public class LogisticianPanelController {
             return;
         }
 
-        // Generujemy unikalną nazwę pliku
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
         File targetFile = new File(basePath, "warehouse-report-" + timestamp + ".pdf");
 
         try {
-            // Pobierz produkty z repozytorium
             List<org.example.sys.Product> products = productRepository.getAllProducts();
-
-            // Pobierz stany magazynowe
-            Map<Integer, Integer> qtyById = warehouseRepository
-                    .getAllStates()
+            Map<Integer, Integer> qtyById = warehouseRepository.getAllStates()
                     .stream()
                     .collect(Collectors.toMap(
                             org.example.sys.Warehouse::getProductId,
                             org.example.sys.Warehouse::getQuantity
                     ));
 
-            // Filtruj produkty według wybranych kategorii
             List<org.example.sys.Product> filteredProducts = products.stream()
                     .filter(p ->
                             selectedCategories.isEmpty() ||
                                     selectedCategories.contains(p.getCategory()))
-                    .collect(Collectors.toList());
+                    .toList();
 
             WarehouseRaport.ProductDataExtractor<org.example.sys.Product> extractor =
                     new WarehouseRaport.ProductDataExtractor<>() {
@@ -446,6 +443,7 @@ public class LogisticianPanelController {
         DatePicker datePicker = new DatePicker();
 
         Button submit = new Button("Zapisz");
+        styleLogisticButton(submit, "#27AE60");
         submit.setOnAction(ev -> {
             if (productId.getText().isBlank()  || employeeId.getText().isBlank()
                     || quantity.getText().isBlank() || price.getText().isBlank()
@@ -454,13 +452,11 @@ public class LogisticianPanelController {
                         "Uzupełnij wszystkie pola");
                 return;
             }
-
             try {
                 OrderRepository or = new OrderRepository();
                 ProductRepository pr = new ProductRepository();
-                UserRepository    ur = new UserRepository();
+                UserRepository ur = new UserRepository();
 
-                /* ── budujemy encję Order ───────────────────────────── */
                 Order ord = new Order();
 
                 Product prod = pr.findProductById(Integer.parseInt(productId.getText().trim()));
@@ -477,20 +473,17 @@ public class LogisticianPanelController {
                 ord.setProduct(prod);
                 ord.setEmployee(empl);
                 ord.setQuantity(Integer.parseInt(quantity.getText().trim()));
-                ord.setPrice   (new BigDecimal(price.getText().replace(",",".")));
-                ord.setDate    (java.sql.Date.valueOf(datePicker.getValue()));
+                ord.setPrice(new BigDecimal(price.getText().replace(",",".")));
+                ord.setDate(java.sql.Date.valueOf(datePicker.getValue()));
 
                 or.addOrder(ord);
-
                 showAlert(Alert.AlertType.INFORMATION, "Sukces",
                         "Zapisano zamówienie (id = " + ord.getId() + ")");
                 stage.close();
-                showOrdersPanel();                                   // odśwież całą zakładkę
-
+                showOrdersPanel();
             } catch (Exception ex) {
                 logger.error("Błąd dodawania zamówienia", ex);
-                showAlert(ERROR, "Błąd",
-                        "Nie udało się dodać zamówienia");
+                showAlert(ERROR, "Błąd","Nie udało się dodać zamówienia");
             }
         });
 
@@ -532,14 +525,10 @@ public class LogisticianPanelController {
         g.addRow(2,new Label("Min. ilość:"),   qtyF);
 
         Button filt = new Button("Filtruj");
+        styleLogisticButton(filt, "#2980B9");
         filt.setOnAction(ev -> {
-            // 1) odśwież pełne dane
             refreshStockTable(table);
-
-            // 2) weź je jako bazę do filtrowania
             ObservableList<StockRow> base = table.getItems();
-
-            // 3) filtruj
             ObservableList<StockRow> out = base.filtered(r -> {
                 if (!idF.getText().isBlank()) {
                     try {
@@ -550,8 +539,7 @@ public class LogisticianPanelController {
                     }
                 }
                 if (!nameF.getText().isBlank() &&
-                        !r.getName().toLowerCase().contains(nameF.getText().toLowerCase()))
-                {
+                        !r.getName().toLowerCase().contains(nameF.getText().toLowerCase())) {
                     return false;
                 }
                 if (!qtyF.getText().isBlank()) {
@@ -564,8 +552,6 @@ public class LogisticianPanelController {
                 }
                 return true;
             });
-
-            // 4) ustaw wyfiltrowane i zamknij dialog
             table.setItems(out);
             st.close();
         });
@@ -603,19 +589,16 @@ public class LogisticianPanelController {
         TextField stockField = new TextField();
 
         Button filterButton = new Button("Filtruj");
-        filterButton.setOnAction(e -> {
-            stage.close(); // symulacja filtrowania — tylko zamyka okno
-        });
+        styleLogisticButton(filterButton, "#2980B9");
+        filterButton.setOnAction(e -> stage.close());
 
-        // Ustawienie pól w siatce (etykiety po lewej stronie)
         grid.add(idLabel, 0, 0);       grid.add(idField, 1, 0);
         grid.add(nameLabel, 0, 1);     grid.add(nameField, 1, 1);
         grid.add(priceLabel, 0, 2);    grid.add(priceField, 1, 2);
         grid.add(stockLabel, 0, 3);    grid.add(stockField, 1, 3);
         grid.add(filterButton, 1, 4);
 
-        Scene scene = new Scene(grid, 360, 250);
-        stage.setScene(scene);
+        stage.setScene(new Scene(grid, 360, 250));
         stage.show();
     }
 
@@ -641,6 +624,7 @@ public class LogisticianPanelController {
         DatePicker toDatePicker = new DatePicker();
 
         Button submitButton = new Button("Złóż wniosek");
+        styleLogisticButton(submitButton, "#27AE60");
         submitButton.setOnAction(ev -> {
             if (reasonField.getText().isBlank()
                     || fromDatePicker.getValue() == null
@@ -651,23 +635,21 @@ public class LogisticianPanelController {
             }
 
             try {
-                /* ── pobierz aktualnie zalogowanego ──────────────────── */
                 UserRepository ur = new UserRepository();
-                Employee emp = ur.getCurrentEmployee();      //  ◄─ to istnieje w repo
+                Employee emp = ur.getCurrentEmployee();
                 if (emp == null) {
                     showAlert(ERROR,"Błąd","Brak zalogowanego pracownika");
                     return;
                 }
 
-                /* ── budujemy wniosek ────────────────────────────────── */
                 AbsenceRequest ar = new AbsenceRequest();
-                ar.setRequestType("Inny");                           // typ ­– dowolny
+                ar.setRequestType("Inny");
                 ar.setDescription(reasonField.getText());
                 ar.setStartDate(java.sql.Date.valueOf(fromDatePicker.getValue()));
                 ar.setEndDate  (java.sql.Date.valueOf(toDatePicker.getValue()));
                 ar.setEmployee(emp);
 
-                new AbsenceRequestRepository().addRequest(ar);      // zapis
+                new AbsenceRequestRepository().addRequest(ar);
                 showAlert(Alert.AlertType.INFORMATION, "Sukces", "Wniosek zapisany");
                 stage.close();
 
@@ -682,8 +664,7 @@ public class LogisticianPanelController {
         grid.add(toDateLabel, 0, 2);   grid.add(toDatePicker, 1, 2);
         grid.add(submitButton, 1, 3);
 
-        Scene scene = new Scene(grid, 350, 250);
-        stage.setScene(scene);
+        stage.setScene(new Scene(grid, 350, 250));
         stage.show();
     }
 
@@ -726,5 +707,24 @@ public class LogisticianPanelController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Wspólny styl dla przycisków w panelu logistyka.
+     */
+    private void styleLogisticButton(Button button, String color) {
+        button.setStyle(
+                "-fx-background-color: " + color + ";" +
+                        " -fx-text-fill: white;" +
+                        " -fx-font-weight: bold;"
+        );
+        button.setOnMouseEntered(e -> {
+            button.setScaleX(1.05);
+            button.setScaleY(1.05);
+        });
+        button.setOnMouseExited(e -> {
+            button.setScaleX(1);
+            button.setScaleY(1);
+        });
     }
 }
