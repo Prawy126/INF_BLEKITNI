@@ -47,7 +47,9 @@ import org.example.sys.PeriodType;
 import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
 
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -610,7 +612,6 @@ public class AdminPanelController {
      */
     public void showConfigPanel() {
         if (configPanelView == null) {
-            // bez asynchronicznego Task – budowa UI jest lekka
             configPanelView = createConfigPanelView();
         }
         adminPanel.setCenterPane(configPanelView);
@@ -631,45 +632,57 @@ public class AdminPanelController {
         Label titleLabel = new Label("Opcje konfiguracyjne");
         titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
-        // bezpieczne pobieranie wartości z ConfigManager
-        boolean loggingEnabled;
-        try {
-            loggingEnabled       = ConfigManager.isLoggingEnabled();
-        } catch (Exception ex) {
-            // gdyby plik properties był uszkodzony
-            loggingEnabled = false;
-        }
-
-        CheckBox logsCheckbox = new CheckBox("Włącz logi systemowe");
-        logsCheckbox.setSelected(loggingEnabled);
+        // Przycisk do otwierania folderu z logami
+        Button openLogsButton = new Button("Otwórz folder z logami");
+        styleAdminButton(openLogsButton, "#9B59B6");  // Fioletowy dla odróżnienia
+        openLogsButton.setOnAction(e -> openLogsDirectory());
 
         Button configurePDF = new Button("Konfiguruj raporty PDF");
-        styleAdminButton(configurePDF,"#2980B9");
+        styleAdminButton(configurePDF, "#2980B9");
         configurePDF.setOnAction(e -> showPDFConfigPanel());
 
         Button backupButton = new Button("Wykonaj backup bazy danych");
-        styleAdminButton(backupButton,"#27AE60");
+        styleAdminButton(backupButton, "#27AE60");
         backupButton.setOnAction(e -> performDatabaseBackup());
-
-        Button saveButton = new Button("Zapisz");
-        styleAdminButton(saveButton,"#3498DB");
-        saveButton.setOnAction(e -> {
-            ConfigManager.setLoggingEnabled(logsCheckbox.isSelected());
-            showAlert(Alert.AlertType.INFORMATION, "Zapisano",
-                    "Ustawienia zostały zachowane.");
-        });
 
         layout.getChildren().addAll(
                 titleLabel,
-                logsCheckbox,
+                openLogsButton,
                 configurePDF,
-                backupButton,
-                saveButton
+                backupButton
         );
 
-        adminPanel.setCenterPane(layout);
-
         return layout;
+    }
+
+    private void openLogsDirectory() {
+        File logsDir = new File("logs");
+        try {
+            if (!logsDir.exists()) {
+                if (logsDir.mkdirs()) {
+                    showAlert(Alert.AlertType.INFORMATION, "Utworzono folder",
+                            "Folder z logami został utworzony: " + logsDir.getAbsolutePath());
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Błąd",
+                            "Nie można utworzyć folderu z logami!");
+                    return;
+                }
+            }
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(logsDir);
+            } else {
+                showAlert(Alert.AlertType.WARNING, "Nieobsługiwana operacja",
+                        "Bezpośrednie otwieranie folderu nie jest wspierane w tym systemie.\n\n" +
+                                "Logi znajdują się w: " + logsDir.getAbsolutePath());
+            }
+        } catch (IOException ex) {
+            showAlert(Alert.AlertType.ERROR, "Błąd",
+                    "Nie można otworzyć folderu: " + ex.getMessage());
+        } catch (Exception ex) {
+            showAlert(Alert.AlertType.ERROR, "Krytyczny błąd",
+                    "Wystąpił nieoczekiwany problem: " + ex.getMessage());
+        }
     }
 
     /**
