@@ -1,12 +1,14 @@
 /*
  * Classname: Order
  * Version information: 1.2
- * Date: 2025-05-23
+ * Date: 2025-05-29
  * Copyright notice: © BŁĘKITNI
  */
 
-
 package org.example.sys;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -31,6 +33,9 @@ import java.util.Date;
 @Table(name = "Zamowienia")
 @Access(AccessType.FIELD)
 public class Order {
+
+    // Inicjalizacja logera
+    private static final Logger logger = LogManager.getLogger(Order.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,6 +64,7 @@ public class Order {
      * Domyślny konstruktor.
      */
     public Order() {
+        logger.debug("Utworzono nowe zamówienie (domyślny konstruktor).");
     }
 
     /**
@@ -66,117 +72,90 @@ public class Order {
      *
      * @param product  Produkt zamówienia
      * @param employee Pracownik realizujący zamówienie
-     * @param quantity    Ilość zamówionego produktu
-     * @param price     Cena zamówienia
+     * @param quantity Ilość zamówionego produktu
+     * @param price    Cena zamówienia
      * @param date     Data zamówienia
      */
     public Order(Product product, Employee employee, int quantity, BigDecimal price, Date date) {
-        this.product = product;
-        this.employee = employee;
-        this.quantity = quantity;
-        this.price = price;
-        this.date = date;
+        try {
+            if (quantity <= 0) {
+                throw new IllegalArgumentException("Ilość musi być większa od zera.");
+            }
+            if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Cena musi być większa od zera.");
+            }
+
+            this.product = product;
+            this.employee = employee;
+            this.quantity = quantity;
+            this.price = price;
+            this.date = date;
+
+            logger.info("Utworzono zamówienie dla produktu: {}, ilość: {}, cena: {}",
+                    product != null ? product.getName() : "null", quantity, price);
+        } catch (IllegalArgumentException e) {
+            logger.error("Błąd podczas tworzenia zamówienia: {}", e.getMessage(), e);
+            throw e; // Rzuć wyjątek ponownie, jeśli to krytyczne
+        }
     }
 
     // === Gettery i settery ===
 
-    /**
-     * Zwraca id zamówienia.
-     *
-     * @return Identyfikator zamówienia
-     */
     public int getId() {
         return id;
     }
 
-    /**
-     * Zwraca product zamówienia.
-     *
-     * @return product Produkt zamówienia
-     */
     public Product getProduct() {
         return product;
     }
 
-    /**
-     * Ustawia product zamówienia.
-     *
-     * @param product Produkt zamówienia
-     */
     public void setProduct(Product product) {
         this.product = product;
+        logger.debug("Ustawiono produkt: {}", product != null ? product.getName() : "null");
     }
 
-    /**
-     * Zwraca pracownika realizującego zamówienie.
-     *
-     * @return employee Pracownik realizujący zamówienie
-     */
     public Employee getEmployee() {
         return employee;
     }
 
-    /**
-     * Ustawia pracownika realizującego zamówienie.
-     *
-     * @param employee Pracownik realizujący zamówienie
-     */
     public void setEmployee(Employee employee) {
         this.employee = employee;
+        logger.debug("Ustawiono pracownika: {}", employee != null ? employee.getLogin() : "null");
     }
 
-    /**
-     * Zwraca ilość zamówionego produktu.
-     *
-     * @return quantity Ilość zamówionego produktu
-     */
     public int getQuantity() {
         return quantity;
     }
 
-    /**
-     * Ustawia ilość zamówionego produktu.
-     *
-     * @param quantity Ilość zamówionego produktu
-     */
     public void setQuantity(int quantity) {
+        if (quantity <= 0) {
+            logger.warn("Próba ustawienia nieprawidłowej ilości: {}", quantity);
+            throw new IllegalArgumentException("Ilość musi być większa od zera.");
+        }
         this.quantity = quantity;
+        logger.info("Zaktualizowano ilość produktu na: {}", quantity);
     }
 
-    /**
-     * Zwraca cenę zamówienia.
-     *
-     * @return price Cena zamówienia
-     */
     public BigDecimal getPrice() {
         return price;
     }
 
-    /**
-     * Ustawia cenę zamówienia.
-     *
-     * @param price Cena zamówienia
-     */
     public void setPrice(BigDecimal price) {
+        if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
+            logger.warn("Próba ustawienia nieprawidłowej ceny: {}", price);
+            throw new IllegalArgumentException("Cena musi być większa od zera.");
+        }
         this.price = price;
+        logger.info("Zaktualizowano cenę zamówienia na: {}", price);
     }
 
-    /**
-     * Zwraca datę zamówienia.
-     *
-     * @return date Data zamówienia
-     */
     public Date getDate() {
         return date;
     }
 
-    /**
-     * Ustawia datę zamówienia.
-     *
-     * @param date Data zamówienia
-     */
     public void setDate(Date date) {
         this.date = date;
+        logger.debug("Zaktualizowano datę zamówienia na: {}", date);
     }
 
     /**

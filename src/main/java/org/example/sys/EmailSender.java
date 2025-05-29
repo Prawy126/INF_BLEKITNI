@@ -1,7 +1,7 @@
 /*
  * Classname: EmailSender
- * Version information: 1.0
- * Date: 2025-05-24
+ * Version information: 1.1
+ * Date: 2025-05-29
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -19,6 +19,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+// Importy Log4j2
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,6 +28,7 @@ import org.apache.logging.log4j.Logger;
  * Używa protokołu SMTP do wysyłania wiadomości.
  */
 public class EmailSender {
+
     private static final Logger log = LogManager.getLogger(EmailSender.class);
 
     /**
@@ -45,44 +47,42 @@ public class EmailSender {
                                  String subject,
                                  String bodyText)
             throws MessagingException {
-        log.debug("sendEmail() – start, to='{}', from='{}', subject='{}'",
-                toEmailAddress, fromEmailAddress, subject);
+        log.debug("Rozpoczynanie wysyłania e-maila – start");
+        log.debug("Parametry: do='{}', od='{}', temat='{}'", toEmailAddress, fromEmailAddress, subject);
+        log.trace("Treść wiadomości: {}", bodyText);
 
-        // Konfiguracja serwera SMTP (Gmail)
         Properties props = new Properties();
-        props.put("mail.smtp.auth",           "true");
-        props.put("mail.smtp.starttls.enable","true");
-        props.put("mail.smtp.host",           "smtp.gmail.com");
-        props.put("mail.smtp.port",           "587");
-        log.debug("SMTP properties: {}", props);
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
 
-        // Utworzenie sesji
+        log.info("Ustawiono konfigurację SMTP");
+
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                log.debug("Providing credentials for '{}'", fromEmailAddress);
+                log.debug("Autoryzacja SMTP dla użytkownika: '{}'", fromEmailAddress);
                 return new PasswordAuthentication(fromEmailAddress, password);
             }
         });
 
-        // Utworzenie wiadomości
-        MimeMessage email = new MimeMessage(session);
-        email.setFrom(new InternetAddress(fromEmailAddress));
-        email.addRecipient(Message.RecipientType.TO, new InternetAddress(toEmailAddress));
-        email.setSubject(subject);
-        email.setText(bodyText);
-        log.info("Email built: from='{}', to='{}', subject='{}'",
-                fromEmailAddress, toEmailAddress, subject);
+        MimeMessage message = new MimeMessage(session);
+        message.setFrom(new InternetAddress(fromEmailAddress));
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress(toEmailAddress));
+        message.setSubject(subject);
+        message.setText(bodyText);
 
-        // Wysłanie wiadomości
+        log.info("Wiadomość utworzona – wyślij do: {}", toEmailAddress);
+
         try {
-            Transport.send(email);
-            log.info("sendEmail() – wysłano poprawnie");
+            Transport.send(message);
+            log.info("E-mail został pomyślnie wysłany do: {}", toEmailAddress);
         } catch (MessagingException e) {
-            log.error("sendEmail() – błąd podczas wysyłania", e);
+            log.error("Błąd podczas wysyłania wiadomości do {}: {}", toEmailAddress, e.getMessage(), e);
             throw e;
         } finally {
-            log.debug("sendEmail() – koniec");
+            log.debug("Zakończono proces wysyłania e-maila");
         }
     }
 
@@ -93,19 +93,16 @@ public class EmailSender {
      * @param resetCode kod resetowania hasła
      */
     public static void sendResetEmail(String email, String resetCode) {
-        log.debug("sendResetEmail() – start, email='{}'", email);
+        log.info("Wysyłanie e-maila z kodem resetowania hasła do: {}", email);
 
         String subject = "Kod resetowania hasła";
-        String body    = "Twój kod resetowania hasła to: " + resetCode;
-        log.info("Reset email: subject='{}', body='[skrócone]'", subject);
+        String body = "Twój kod resetowania hasła to: " + resetCode;
 
         try {
-            sendEmail(email, email, /* dummy pass */ "", subject, body);
-            log.info("sendResetEmail() – wywołano sendEmail()");
+            sendEmail(email, "noreply@twojaaplikacja.pl", "dummyPassword", subject, body);
+            log.debug("sendResetEmail() – wywołano sendEmail()");
         } catch (MessagingException e) {
-            log.error("sendResetEmail() – nie udało się wysłać", e);
-        } finally {
-            log.debug("sendResetEmail() – koniec");
+            log.error("Nie udało się wysłać e-maila z kodem resetowania do {}: {}", email, e.getMessage(), e);
         }
     }
 }

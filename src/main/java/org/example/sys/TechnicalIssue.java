@@ -1,12 +1,15 @@
 /*
  * Classname: TechnicalIssue
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.1
+ * Date: 2025-05-29
  * Copyright notice: © BŁĘKITNI
  */
 
 
 package org.example.sys;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -26,6 +29,10 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "Zgloszenia_techniczne")
 public class TechnicalIssue {
+
+    // Inicjalizacja logera
+    private static final Logger logger = LogManager.getLogger(TechnicalIssue.class);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -47,34 +54,18 @@ public class TechnicalIssue {
     private String status = "Nowe"; // Domyślnie "Nowe"
 
     // Konstruktor bez ID (dla nowych zgłoszeń)
-
-    /**
-     *
-     * @param type
-     * @param description
-     * @param dateSubmitted
-     * @param employee
-     * @param status
-     */
     public TechnicalIssue(String type, String description, LocalDate dateSubmitted, Employee employee, String status) {
         this.type = type;
         this.description = description;
         this.dateSubmitted = dateSubmitted;
         this.employee = employee;
         this.status = status;
+
+        logger.info("Utworzono nowe zgłoszenie techniczne: typ={}, pracownik={}, data={}",
+                type, employee.getLogin(), dateSubmitted);
     }
 
     // Konstruktor z ID (dla istniejących zgłoszeń)
-    /**
-     * Konstruktor z ID (dla istniejących zgłoszeń)
-     *
-     * @param id
-     * @param type
-     * @param description
-     * @param dateSubmitted
-     * @param employee
-     * @param status
-     */
     public TechnicalIssue(int id, String type, String description, LocalDate dateSubmitted, Employee employee, String status) {
         this.id = id;
         this.type = type;
@@ -82,92 +73,80 @@ public class TechnicalIssue {
         this.dateSubmitted = dateSubmitted;
         this.employee = employee;
         this.status = status;
+
+        logger.info("Wczytano istniejące zgłoszenie techniczne: ID={}, typ={}, status={}", id, type, status);
     }
 
     // Konstruktor domyślny (wymagany przez JPA)
-    /**
-     * Domyślny konstruktor wymagany przez JPA.
-     * Używany do tworzenia instancji klasy przez Hibernate.
-     */
-    public TechnicalIssue() {}
+    public TechnicalIssue() {
+        logger.debug("Utworzono nową instancję TechnicalIssue (domyślny konstruktor).");
+    }
 
     // Gettery i settery
-    /**
-     * Zwraca identyfikator zgłoszenia.
-     *
-     * @return Identyfikator zgłoszenia
-     */
-    public int getId() { return id; }
 
-    /**
-     * Ustawia identyfikator zgłoszenia.
-     *
-     * @param id Identyfikator zgłoszenia
-     */
-    public void setId(int id) { this.id = id; }
+    public int getId() {
+        return id;
+    }
 
-    public String getType() { return type; }
+    public void setId(int id) {
+        this.id = id;
+        logger.debug("Zaktualizowano ID zgłoszenia na: {}", id);
+    }
 
-    /**
-     * Ustawia typ zgłoszenia.
-     *
-     * @param type Typ zgłoszenia
-     */
-    public void setType(String type) { this.type = type; }
+    public String getType() {
+        return type;
+    }
 
-    /**
-     * Zwraca opis zgłoszenia.
-     *
-     * @return Opis zgłoszenia
-     */
-    public String getDescription() { return description; }
+    public void setType(String type) {
+        this.type = type;
+        logger.debug("Zaktualizowano typ zgłoszenia na: {}", type);
+    }
 
-    /**
-     * Ustawia opis zgłoszenia.
-     *
-     * @param description Opis zgłoszenia
-     */
-    public void setDescription(String description) { this.description = description; }
+    public String getDescription() {
+        return description;
+    }
 
-    /**
-     * Zwraca datę zgłoszenia.
-     *
-     * @return Data zgłoszenia
-     */
-    public LocalDate getDateSubmitted() { return dateSubmitted; }
+    public void setDescription(String description) {
+        this.description = description;
+        logger.debug("Zaktualizowano opis zgłoszenia.");
+    }
 
-    /**
-     * Ustawia datę zgłoszenia.
-     *
-     * @param dateSubmitted Data zgłoszenia
-     */
-    public void setDateSubmitted(LocalDate dateSubmitted) { this.dateSubmitted = dateSubmitted; }
+    public LocalDate getDateSubmitted() {
+        return dateSubmitted;
+    }
 
-    /**
-     * Zwraca pracownika zgłaszającego problem.
-     *
-     * @return Pracownik zgłaszający problem
-     */
-    public Employee getEmployee() { return employee; }
+    public void setDateSubmitted(LocalDate dateSubmitted) {
+        this.dateSubmitted = dateSubmitted;
+        logger.debug("Zaktualizowano datę zgłoszenia na: {}", dateSubmitted);
+    }
 
-    /**
-     * Ustawia pracownika zgłaszającego problem.
-     *
-     * @param employee Pracownik zgłaszający problem
-     */
-    public void setEmployee(Employee employee) { this.employee = employee; }
+    public Employee getEmployee() {
+        return employee;
+    }
 
-    /**
-     * Zwraca status zgłoszenia.
-     *
-     * @return Status zgłoszenia
-     */
-    public String getStatus() { return status; }
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
+        logger.debug("Zaktualizowano pracownika zgłaszającego problem: {}", employee.getLogin());
+    }
 
-    /**
-     * Ustawia status zgłoszenia.
-     *
-     * @param status Status zgłoszenia
-     */
-    public void setStatus(String status) { this.status = status; }
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        logger.info("Zmieniono status zgłoszenia z {} na {}", this.status, status);
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "TechnicalIssue{" +
+                "id=" + id +
+                ", type='" + type + '\'' +
+                ", description='" + description + '\'' +
+                ", dateSubmitted=" + dateSubmitted +
+                ", employee=" + (employee != null ? employee.getLogin() : "null") +
+                ", status='" + status + '\'' +
+                '}';
+    }
 }

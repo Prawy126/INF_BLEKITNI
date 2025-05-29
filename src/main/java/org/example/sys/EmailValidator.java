@@ -1,18 +1,24 @@
 /*
  * Classname: EmailValidator
- * Version information: 1.0
- * Date: 2025-05-24
+ * Version information: 1.1
+ * Date: 2025-05-29
  * Copyright notice: © BŁĘKITNI
  */
 
 
 package org.example.sys;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Klasa EmailValidator służy do walidacji adresów e-mail.
  * Zawiera metodę isValid, która sprawdza poprawność adresu e-mail.
  */
 public class EmailValidator {
+
+    private static final Logger logger = LogManager.getLogger(EmailValidator.class);
+
     /**
      * Sprawdza, czy podany adres e-mail jest poprawny.
      *
@@ -20,48 +26,58 @@ public class EmailValidator {
      * @return true, jeśli adres e-mail jest poprawny, false w przeciwnym razie.
      */
     public static boolean isValid(String email) {
-        // Sprawdzenie, czy adres e-mail zawiera znak '@'
-        if (email == null || !email.contains("@")) {
+        logger.debug("Rozpoczynanie walidacji adresu e-mail: {}", email);
+
+        if (email == null) {
+            logger.warn("Adres e-mail jest null");
             return false;
         }
 
-        // Podział adresu e-mail na lokalną część i domenę
+        if (!email.contains("@")) {
+            logger.info("Brak znaku '@' w adresie e-mail: {}", email);
+            return false;
+        }
+
         String[] parts = email.split("@");
         if (parts.length != 2) {
+            logger.info("Nieprawidłowa liczba części po podziale '@': {}", email);
             return false;
         }
 
         String localPart = parts[0];
         String domainPart = parts[1];
 
-        // Sprawdzenie długości lokalnej części
-        if (localPart.length() < 1 || localPart.length() > 64) {
+        logger.trace("Podzielono na lokalną część: '{}', domenę: '{}'", localPart, domainPart);
+
+        if (localPart.isEmpty() || localPart.length() > 64) {
+            logger.info("Nieprawidłowa długość lokalnej części (1–64 znaki): {}", localPart);
             return false;
         }
 
-        // Sprawdzenie długości domeny
         if (domainPart.length() < 3 || domainPart.length() > 253) {
+            logger.info("Nieprawidłowa długość domeny (3–253 znaki): {}", domainPart);
             return false;
         }
 
-        // Sprawdzenie, czy domena zawiera co najmniej jedną kropkę
         if (!domainPart.contains(".")) {
+            logger.info("Domena nie zawiera kropki: {}", domainPart);
             return false;
         }
 
-        // Sprawdzenie, czy domena nie zaczyna się ani nie kończy kropką
         if (domainPart.startsWith(".") || domainPart.endsWith(".")) {
+            logger.info("Domena zaczyna się lub kończy kropką: {}", domainPart);
             return false;
         }
 
-        // Sprawdzenie, czy lokalna część nie zawiera niedozwolonych znaków
         String allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._%+-";
         for (char c : localPart.toCharArray()) {
             if (allowedChars.indexOf(c) == -1) {
+                logger.info("Znaleziono niedozwolony znak w lokalnej części: '{}', znak: '{}'", localPart, c);
                 return false;
             }
         }
 
+        logger.info("Adres e-mail jest poprawny: {}", email);
         return true;
     }
 }

@@ -1,12 +1,15 @@
 /*
  * Classname: Report
- * Version information: 1.2
- * Date: 2025-05-24
+ * Version information: 1.3
+ * Date: 2025-05-29
  * Copyright notice: © BŁĘKITNI
  */
 
 
 package org.example.sys;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -30,7 +33,11 @@ import java.time.LocalDate;
 @Access(AccessType.FIELD)
 public class Report {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // Inicjalizacja logera
+    private static final Logger logger = LogManager.getLogger(Report.class);
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
     private int id;
 
@@ -43,7 +50,8 @@ public class Report {
     @Column(name = "Data_zakonczenia", nullable = false)
     private LocalDate endDate;
 
-    @ManyToOne @JoinColumn(name = "Id_pracownika", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "Id_pracownika", nullable = false)
     private Employee employee;
 
     @Column(name = "Plik", nullable = false)
@@ -53,7 +61,9 @@ public class Report {
      * Domyślny konstruktor.
      * Używany przez Hibernate do tworzenia instancji klasy.
      */
-    public Report() {}
+    public Report() {
+        logger.debug("Utworzono nową instancję Report (domyślny konstruktor).");
+    }
 
     /**
      * Konstruktor z parametrami.
@@ -73,105 +83,59 @@ public class Report {
         this.endDate = endDate;
         this.employee = employee;
         this.filePath = filePath;
+
+        logger.info("Utworzono nowy raport typu: {}, zakres: {} - {}, pracownik: {}, ścieżka: {}",
+                reportType, startDate, endDate, employee.getLogin(), filePath);
     }
 
     /* --- gettery / settery --- */
-    /**
-     * Zwraca identyfikator raportu.
-     *
-     * @return Identyfikator raportu
-     */
-    public int getId(){
+
+    public int getId() {
         return id;
     }
 
-    /**
-     * Zwraca typ raportu.
-     *
-     * @return Typ raportu
-     */
-    public String getReportType(){
+    public String getReportType() {
         return reportType;
     }
-    /**
-     * Ustawia typ raportu.
-     *
-     * @param t Typ raportu
-     */
-    public void setReportType(String t){
+
+    public void setReportType(String t) {
         this.reportType = t;
+        logger.debug("Zaktualizowano typ raportu na: {}", t);
     }
 
-    /**
-     * Zwraca datę początkową raportu.
-     *
-     * @return Data początkowa
-     */
-    public LocalDate getStartDate(){
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    /**
-     * Ustawia datę początkową raportu.
-     *
-     * @param d Data początkowa
-     */
-    public void setStartDate(LocalDate d){
+    public void setStartDate(LocalDate d) {
         this.startDate = d;
+        logger.debug("Zaktualizowano datę początkową raportu na: {}", d);
     }
 
-    /**
-     * Zwraca datę zakończenia raportu.
-     *
-     * @return Data zakończenia
-     */
-    public LocalDate getEndDate(){
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    /**
-     * Ustawia datę zakończenia raportu.
-     *
-     * @param d Data zakończenia
-     */
-    public void setEndDate(LocalDate d){
+    public void setEndDate(LocalDate d) {
         this.endDate = d;
+        logger.debug("Zaktualizowano datę końcową raportu na: {}", d);
     }
 
-    /**
-     * Zwraca pracownika, który wygenerował raport.
-     *
-     * @return Pracownik
-     */
-    public Employee getEmployee(){
+    public Employee getEmployee() {
         return employee;
     }
 
-    /**
-     * Ustawia pracownika, który wygenerował raport.
-     *
-     * @param p Pracownik
-     */
-    public void setEmployee(Employee p){
+    public void setEmployee(Employee p) {
         this.employee = p;
+        logger.debug("Zaktualizowano pracownika generującego raport: {}", p.getLogin());
     }
 
-    /**
-     * Zwraca ścieżkę do pliku raportu.
-     *
-     * @return Ścieżka do pliku
-     */
-    public String getFilePath(){
+    public String getFilePath() {
         return filePath;
     }
 
-    /**
-     * Ustawia ścieżkę do pliku raportu.
-     *
-     * @param p Ścieżka do pliku
-     */
-    public void setFilePath(String p){
+    public void setFilePath(String p) {
         this.filePath = p;
+        logger.debug("Zaktualizowano ścieżkę do pliku raportu na: {}", p);
     }
 }
-

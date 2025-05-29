@@ -5,11 +5,12 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-
 package org.example.pdflib;
 
 import java.io.*;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Prosty menedżer konfiguracji oparty na pliku properties.
@@ -17,44 +18,54 @@ import java.util.Properties;
 public class ConfigManager {
 
     private static final String CONFIG_FILE = "config.properties";
+    private static final Logger logger = LogManager.getLogger(ConfigManager.class);
     private static Properties props = new Properties();
 
     public static String getReportPath() {
         Properties props = new Properties();
         try (InputStream input = new FileInputStream(CONFIG_FILE)) {
             props.load(input);
-            return props.getProperty("pdf.output.path", "");
+            String path = props.getProperty("pdf.output.path", "");
+            logger.debug("Ustawiono ścieżkę raportów: {}", path);
+            return path;
         } catch (IOException e) {
+            logger.error("Nie można wczytać pliku konfiguracyjnego: {}", CONFIG_FILE, e);
             return "";
         }
     }
 
     public static boolean isNotificationsEnabled() {
-        return Boolean.parseBoolean(props.getProperty("notifications.enabled", "true"));
+        String value = props.getProperty("notifications.enabled", "true");
+        logger.trace("Wczytano wartość notifications.enabled: {}", value);
+        return Boolean.parseBoolean(value);
     }
 
     public static void setNotificationsEnabled(boolean on) {
         props.setProperty("notifications.enabled", Boolean.toString(on));
         save();
+        logger.info("Powiadomienia zostały {}.", on ? "włączone" : "wyłączone");
     }
 
     public static boolean isLoggingEnabled() {
-        return Boolean.parseBoolean(props.getProperty("logging.enabled", "true"));
+        String value = props.getProperty("logging.enabled", "true");
+        logger.trace("Wczytano wartość logging.enabled: {}", value);
+        return Boolean.parseBoolean(value);
     }
 
     public static void setLoggingEnabled(boolean on) {
         props.setProperty("logging.enabled", Boolean.toString(on));
         save();
+        logger.info("Logowanie zostało {}.", on ? "włączone" : "wyłączone");
     }
 
     private static void save() {
         try (OutputStream out = new FileOutputStream(CONFIG_FILE)) {
             props.store(out, "Ustawienia aplikacji");
+            logger.debug("Zapisano zmiany w pliku konfiguracyjnym.");
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Nie można zapisać pliku konfiguracyjnego: {}", CONFIG_FILE, e);
         }
     }
-
 
     public static void setReportPath(String path) {
         Properties props = new Properties();
@@ -70,10 +81,11 @@ public class ConfigManager {
 
             try (OutputStream output = new FileOutputStream(CONFIG_FILE)) {
                 props.store(output, null);
+                logger.info("Zaktualizowano ścieżkę wyjściową PDF na: {}", path);
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Nie można ustawić ścieżki wyjściowej PDF.", e);
         }
     }
 }

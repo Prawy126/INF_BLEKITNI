@@ -1,7 +1,7 @@
 /*
- * Classname: OrderRepositoryTest
- * Version information: 1.2
- * Date: 2025-05-23
+ * Classname: Address
+ * Version information: 1.3
+ * Date: 2025-05-29
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -20,10 +20,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+// Importy Log4j2
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 @Entity
 @Table(name = "Adresy")
 @Access(AccessType.FIELD)
 public class Address {
+
+    private static final Logger logger = LogManager.getLogger(Address.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,29 +53,84 @@ public class Address {
     @OneToMany(mappedBy = "address")
     private List<Employee> employees;
 
-    // Gettery i settery
-    public int getId() { return id; }
+    /**
+     * Domyślny konstruktor — logowanie tworzenia nowego obiektu.
+     */
+    public Address() {
+        logger.debug("Utworzono nowy obiekt Address (konstruktor domyślny)");
+    }
 
-    public String getTown() { return town; }
-    public void setTown(String town) { this.town = town; }
+    // Gettery i settery z logowaniem
 
-    public String getHouseNumber() { return houseNumber; }
-    public void setHouseNumber(String houseNumber) { this.houseNumber = houseNumber; }
+    public int getId() {
+        return id;
+    }
 
-    public String getApartmentNumber() { return apartmentNumber; }
-    public void setApartmentNumber(String apartmentNumber) { this.apartmentNumber = apartmentNumber; }
+    public String getTown() {
+        logger.trace("Pobrano miejscowość: {}", town);
+        return town;
+    }
 
-    public String getZipCode() { return zipCode; }
-    public void setZipCode(String zipCode) { this.zipCode = zipCode; }
+    public void setTown(String town) {
+        logger.info("Zmieniono miejscowość na: {}", town);
+        this.town = town;
+    }
 
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
+    public String getHouseNumber() {
+        logger.trace("Pobrano numer domu: {}", houseNumber);
+        return houseNumber;
+    }
 
+    public void setHouseNumber(String houseNumber) {
+        logger.info("Zmieniono numer domu na: {}", houseNumber);
+        this.houseNumber = houseNumber;
+    }
+
+    public String getApartmentNumber() {
+        logger.trace("Pobrano numer mieszkania: {}", apartmentNumber);
+        return apartmentNumber;
+    }
+
+    public void setApartmentNumber(String apartmentNumber) {
+        if (apartmentNumber == null || apartmentNumber.isEmpty()) {
+            logger.warn("Numer mieszkania został usunięty (wartość null lub pusta).");
+        } else {
+            logger.info("Zmieniono numer mieszkania na: {}", apartmentNumber);
+        }
+        this.apartmentNumber = apartmentNumber;
+    }
+
+    public String getZipCode() {
+        logger.trace("Pobrano kod pocztowy: {}", zipCode);
+        return zipCode;
+    }
+
+    public void setZipCode(String zipCode) {
+        logger.info("Zmieniono kod pocztowy na: {}", zipCode);
+        this.zipCode = zipCode;
+    }
+
+    public String getCity() {
+        logger.trace("Pobrano miasto: {}", city);
+        return city;
+    }
+
+    public void setCity(String city) {
+        logger.info("Zmieniono miasto na: {}", city);
+        this.city = city;
+    }
+
+    /**
+     * Przesłonięta metoda toString z logowaniem.
+     */
     @Override
     public String toString() {
         String apartment = (apartmentNumber != null && !apartmentNumber.isEmpty())
                 ? "/" + apartmentNumber
                 : "";
-        return town + ", ul. " + houseNumber + apartment + ", " + zipCode + " " + city;
+        String result = town + ", ul. " + houseNumber + apartment + ", " + zipCode + " " + city;
+
+        logger.trace("Wygenerowano toString(): {}", result);
+        return result;
     }
 }

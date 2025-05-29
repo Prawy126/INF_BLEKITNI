@@ -5,8 +5,10 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-
 package org.example.sys;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -20,6 +22,9 @@ import java.security.NoSuchAlgorithmException;
  * Używa ID użytkownika jako klucza do haszowania.
  */
 public class PasswordHasher {
+
+    // Inicjalizacja logera
+    private static final Logger logger = LogManager.getLogger(PasswordHasher.class);
 
     // Algorytm HMAC do haszowania
     private static final String HMAC_ALGORITHM = "HmacSHA256";
@@ -36,19 +41,33 @@ public class PasswordHasher {
     public static String hashPassword(String password, int userId)
             throws NoSuchAlgorithmException, InvalidKeyException {
 
-        // Konwersja ID użytkownika na bajty (klucz HMAC)
-        byte[] keyBytes = String.valueOf(userId).getBytes(StandardCharsets.UTF_8);
-        SecretKeySpec key = new SecretKeySpec(keyBytes, HMAC_ALGORITHM);
+        if (password == null || password.isEmpty()) {
+            logger.warn("Próba haszowania pustego hasła.");
+            throw new IllegalArgumentException("Hasło nie może być puste.");
+        }
 
-        // Tworzenie instancji MAC
-        Mac mac = Mac.getInstance(HMAC_ALGORITHM);
-        mac.init(key);
+        try {
+            // Konwersja ID użytkownika na bajty (klucz HMAC)
+            byte[] keyBytes = String.valueOf(userId).getBytes(StandardCharsets.UTF_8);
+            SecretKeySpec key = new SecretKeySpec(keyBytes, HMAC_ALGORITHM);
 
-        // Obliczanie HMAC dla hasła
-        byte[] hmacBytes = mac.doFinal(password.getBytes(StandardCharsets.UTF_8));
+            // Tworzenie instancji MAC
+            Mac mac = Mac.getInstance(HMAC_ALGORITHM);
+            mac.init(key);
 
-        // Konwersja wyniku na heksadecymalny string
-        return bytesToHex(hmacBytes);
+            // Obliczanie HMAC dla hasła
+            byte[] hmacBytes = mac.doFinal(password.getBytes(StandardCharsets.UTF_8));
+
+            // Konwersja wyniku na heksadecymalny string
+            String hashedPassword = bytesToHex(hmacBytes);
+
+            logger.info("Zahaszowano hasło dla użytkownika ID: {}", userId);
+            return hashedPassword;
+
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            logger.error("Błąd podczas haszowania hasła dla użytkownika ID: {}", userId, e);
+            throw e;
+        }
     }
 
     /**
@@ -64,12 +83,24 @@ public class PasswordHasher {
     public static boolean verifyPassword(String storedHash, String password, int userId)
             throws NoSuchAlgorithmException, InvalidKeyException {
 
-        // Obliczamy nowy hash i porównujemy bezpiecznie
+        if (storedHash == null || password == null) {
+            logger.warn("Nieprawidłowe dane wejściowe do weryfikacji hasła.");
+            return false;
+        }
+
         String newHash = hashPassword(password, userId);
-        return MessageDigest.isEqual(
+        boolean isEqual = MessageDigest.isEqual(
                 newHash.getBytes(StandardCharsets.UTF_8),
                 storedHash.getBytes(StandardCharsets.UTF_8)
         );
+
+        if (isEqual) {
+            logger.info("Weryfikacja hasła powiodła się dla użytkownika ID: {}", userId);
+        } else {
+            logger.warn("Weryfikacja hasła NIE powiodła się dla użytkownika ID: {}", userId);
+        }
+
+        return isEqual;
     }
 
     // Pomocnicza metoda do konwersji bajtów na hex
@@ -85,30 +116,5 @@ public class PasswordHasher {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
-    }
-
-    // Przykład użycia
-    /**
-     * Przykład użycia klasy PasswordHasher.
-     *
-     * @param args argumenty wiersza poleceń
-     */
-    public static void main(String[] args) {
-        try {
-            int userId = 123;
-            String password = "moje_tajne_haslo";
-
-            // Hashowanie
-            String hash = hashPassword(password, userId);
-            System.out.println("Hasło: " + password);
-            System.out.println("Hash: " + hash);
-
-            // Weryfikacja
-            boolean isValid = verifyPassword(hash, password, userId);
-            System.out.println("Hasło poprawne: " + isValid);  // true
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

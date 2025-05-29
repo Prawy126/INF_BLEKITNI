@@ -1,12 +1,15 @@
 /*
- * Classname: OrderRepositoryTest
- * Version information: 1.1
- * Date: 2025-05-24
+ * Classname: TaskEmployee
+ * Version information: 1.2
+ * Date: 2025-05-29
  * Copyright notice: © BŁĘKITNI
  */
 
 
 package org.example.sys;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -24,6 +27,9 @@ import jakarta.persistence.Table;
 @Table(name = "Zadania_Pracownicy")
 public class TaskEmployee {
 
+    // Inicjalizacja logera
+    private static final Logger logger = LogManager.getLogger(TaskEmployee.class);
+
     @EmbeddedId
     private TaskEmployeeId id;
 
@@ -39,6 +45,7 @@ public class TaskEmployee {
 
     /** Konstruktor bezparametrowy wymagany przez JPA */
     public TaskEmployee() {
+        logger.debug("Utworzono nową instancję TaskEmployee (domyślny konstruktor).");
     }
 
     /**
@@ -51,6 +58,8 @@ public class TaskEmployee {
         this.id = new TaskEmployeeId(task.getId(), employee.getId());
         this.task = task;
         this.employee = employee;
+
+        logger.info("Utworzono powiązanie zadania ID: {} z pracownikiem ID: {}", task.getId(), employee.getId());
     }
 
     /** Zwraca złożony identyfikator (taskId + employeeId). */
@@ -61,6 +70,7 @@ public class TaskEmployee {
     /** Ustawia złożony identyfikator (taskId + employeeId). */
     public void setId(TaskEmployeeId id) {
         this.id = id;
+        logger.debug("Zaktualizowano ID powiązania zadania-pracownika na: {}", id);
     }
 
     /** Zwraca powiązane zadanie. */
@@ -71,6 +81,7 @@ public class TaskEmployee {
     /** Ustawia powiązane zadanie. */
     public void setTask(EmpTask task) {
         this.task = task;
+        logger.debug("Zaktualizowano powiązane zadanie na ID: {}", task != null ? task.getId() : "null");
     }
 
     /** Zwraca powiązanego pracownika. */
@@ -80,6 +91,11 @@ public class TaskEmployee {
 
     /** Ustawia powiązanego pracownika. */
     public void setEmployee(Employee employee) {
-        this.employee = employee;
+        if (employee != null) {
+            this.employee = employee;
+            logger.debug("Zaktualizowano powiązanego pracownika na ID: {}", employee.getId());
+        } else {
+            logger.warn("Próba ustawienia pracownika na wartość null.");
+        }
     }
 }

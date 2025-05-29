@@ -1,12 +1,15 @@
 /*
  * Classname: Registration
- * Version information: 1.1
- * Date: 2025-05-22
+ * Version information: 1.2
+ * Date: 2025-05-29
  * Copyright notice: © BŁĘKITNI
  */
 
 
 package org.example.sys;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.time.LocalDate;
 
@@ -16,6 +19,9 @@ import java.time.LocalDate;
  * dacie oraz statusie rejestracji.
  */
 public class Registration {
+
+    // Inicjalizacja logera
+    private static final Logger logger = LogManager.getLogger(Registration.class);
 
     private String message;
     private String name;
@@ -37,12 +43,12 @@ public class Registration {
      * Umożliwia ustawienie wiadomości, imienia, nazwiska, tytułu,
      * daty oraz statusu rejestracji.
      *
-     * @param message  Wiadomość
-     * @param name     Imię
-     * @param surname  Nazwisko
-     * @param date     Data
-     * @param title    Tytuł
-     * @param status   Status rejestracji
+     * @param message Wiadomość
+     * @param name    Imię
+     * @param surname Nazwisko
+     * @param date    Data
+     * @param title   Tytuł
+     * @param status  Status rejestracji
      */
     public Registration(String message, String name, String surname, LocalDate date, String title, StatusRegistration status) {
         this.message = message;
@@ -51,6 +57,8 @@ public class Registration {
         this.title = title;
         this.date = date;
         this.status = status;
+
+        logger.info("Utworzono nową rejestrację: {} {}, tytuł: {}, data: {}", name, surname, title, date);
     }
 
     /**
@@ -64,6 +72,8 @@ public class Registration {
         this.message = message;
         this.date = date;
         this.status = StatusRegistration.PENDING;
+
+        logger.info("Utworzono nową uproszczoną rejestrację, data: {}", date);
     }
 
     /**
@@ -74,102 +84,53 @@ public class Registration {
         return message;
     }
 
-    /**
-     * Ustawia tytuł rejestracji.
-     *
-     * @return title Tytuł rejestracji
-     */
     public String getTitle() {
         return title;
     }
 
-    /**
-     * Ustawia imię rejestracji.
-     *
-     * @return name Imię rejestracji
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * Ustawia nazwisko rejestracji.
-     *
-     * @return surname Nazwisko rejestracji
-     */
     public String getSurname() {
         return surname;
     }
 
-    /**
-     * Ustawia datę rejestracji.
-     *
-     * @return date Data rejestracji
-     */
     public LocalDate getDate() {
         return date;
     }
 
-    /**
-     * Ustawia status rejestracji.
-     *
-     * @return status Status rejestracji
-     */
     public StatusRegistration getStatus() {
         return status;
     }
 
-    /**
-     * Ustawia wiadomość rejestracji.
-     *
-     * @param message Wiadomość rejestracji
-     */
     public void setMessage(String message) {
         this.message = message;
+        logger.debug("Zaktualizowano wiadomość rejestracji.");
     }
 
-    /**
-     * Ustawia tytuł rejestracji.
-     *
-     * @param title Tytuł rejestracji
-     */
     public void setTitle(String title) {
         this.title = title;
+        logger.debug("Zaktualizowano tytuł rejestracji na: {}", title);
     }
 
-    /**
-     * Ustawia imię rejestracji.
-     *
-     * @param name Imię rejestracji
-     */
     public void setName(String name) {
         this.name = name;
+        logger.debug("Zaktualizowano imię rejestracji na: {}", name);
     }
 
-    /**
-     * Ustawia nazwisko rejestracji.
-     *
-     * @param surname Nazwisko rejestracji
-     */
     public void setSurname(String surname) {
         this.surname = surname;
+        logger.debug("Zaktualizowano nazwisko rejestracji na: {}", surname);
     }
 
-    /**
-     * Ustawia datę rejestracji.
-     *
-     * @param date Data rejestracji
-     */
     public void setDate(LocalDate date) {
         this.date = date;
+        logger.debug("Zaktualizowano datę rejestracji na: {}", date);
     }
 
-    /**
-     * Ustawia status rejestracji.
-     *
-     * @param status Status rejestracji
-     */
     public void setStatus(StatusRegistration status) {
+        logger.info("Zmieniono status rejestracji z {} na {}", this.status, status);
         this.status = status;
     }
 
@@ -177,6 +138,7 @@ public class Registration {
      * Ustawia status rejestracji na zaakceptowany.
      */
     public void accept() {
+        logger.info("Rejestracja została zaakceptowana.");
         this.status = StatusRegistration.ACCEPTED;
     }
 
@@ -184,6 +146,7 @@ public class Registration {
      * Ustawia status rejestracji na odrzucony.
      */
     public void reject() {
+        logger.info("Rejestracja została odrzucona.");
         this.status = StatusRegistration.REJECTED;
     }
 
@@ -191,6 +154,7 @@ public class Registration {
      * Ustawia status rejestracji na zrealizowany.
      */
     public void realize() {
+        logger.info("Rejestracja została zrealizowana.");
         this.status = StatusRegistration.COMPLETED;
     }
 

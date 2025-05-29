@@ -1,12 +1,15 @@
 /*
- * Classname: OrderRepositoryTest
- * Version information: 1.1
- * Date: 2025-05-24
+ * Classname: TaskEmployeeId
+ * Version information: 1.2
+ * Date: 2025-05-29
  * Copyright notice: © BŁĘKITNI
  */
 
 
 package org.example.sys;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -21,6 +24,9 @@ import java.util.Objects;
 @Embeddable
 public class TaskEmployeeId implements Serializable {
 
+    // Inicjalizacja logera
+    private static final Logger logger = LogManager.getLogger(TaskEmployeeId.class);
+
     @Column(name = "Id_zadania")
     private int taskId;
 
@@ -29,12 +35,14 @@ public class TaskEmployeeId implements Serializable {
 
     // Konstruktor bezparametrowy wymagany przez JPA
     public TaskEmployeeId() {
+        logger.debug("Utworzono nową instancję TaskEmployeeId (domyślny konstruktor).");
     }
 
     // Konstruktor wygodny
     public TaskEmployeeId(int taskId, int employeeId) {
         this.taskId = taskId;
         this.employeeId = employeeId;
+        logger.info("Utworzono złożony ID: Id_zadania={}, Id_pracownika={}", taskId, employeeId);
     }
 
     // Gettery i settery
@@ -45,6 +53,7 @@ public class TaskEmployeeId implements Serializable {
 
     public void setTaskId(int taskId) {
         this.taskId = taskId;
+        logger.debug("Zaktualizowano taskId na: {}", taskId);
     }
 
     public int getEmployeeId() {
@@ -53,6 +62,7 @@ public class TaskEmployeeId implements Serializable {
 
     public void setEmployeeId(int employeeId) {
         this.employeeId = employeeId;
+        logger.debug("Zaktualizowano employeeId na: {}", employeeId);
     }
 
     // equals i hashCode – ważne, żeby JPA prawidłowo porównywało identyfikatory
@@ -62,12 +72,25 @@ public class TaskEmployeeId implements Serializable {
         if (this == o) return true;
         if (!(o instanceof TaskEmployeeId)) return false;
         TaskEmployeeId that = (TaskEmployeeId) o;
-        return taskId == that.taskId &&
-                employeeId == that.employeeId;
+        boolean result = taskId == that.taskId && employeeId == that.employeeId;
+        if (!result) {
+            logger.warn("TaskEmployeeId NIE jest równy: {} vs {}", this, that);
+        }
+        return result;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(taskId, employeeId);
+        int hash = Objects.hash(taskId, employeeId);
+        logger.debug("Obliczono hashCode: {}", hash);
+        return hash;
+    }
+
+    @Override
+    public String toString() {
+        return "TaskEmployeeId{" +
+                "taskId=" + taskId +
+                ", employeeId=" + employeeId +
+                '}';
     }
 }

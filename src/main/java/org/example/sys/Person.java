@@ -1,12 +1,15 @@
 /*
  * Classname: Person
- * Version information: 1.0
- * Date: 2025-05-16
+ * Version information: 1.1
+ * Date: 2025-05-29
  * Copyright notice: © BŁĘKITNI
  */
 
 
 package org.example.sys;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
@@ -20,6 +23,9 @@ import org.example.wyjatki.NameException;
  */
 @MappedSuperclass
 public abstract class Person {
+
+    // Inicjalizacja logera
+    private static final Logger logger = LogManager.getLogger(Person.class);
 
     @Column(name = "Imie")
     private String name;
@@ -37,7 +43,9 @@ public abstract class Person {
      * Domyślny konstruktor.
      * Używany przez Hibernate do tworzenia instancji klasy.
      */
-    public Person() {}
+    public Person() {
+        logger.debug("Utworzono nową instancję Person (domyślny konstruktor).");
+    }
 
     /**
      * Konstruktor z parametrami.
@@ -55,7 +63,9 @@ public abstract class Person {
         setName(name);
         setSurname(surname);
         setAge(age);
-        this.email = email;
+        setEmail(email);
+
+        logger.info("Utworzono osobę: {} {}, wiek: {}, email: {}", name, surname, age, email);
     }
 
     /**
@@ -75,11 +85,14 @@ public abstract class Person {
      */
     public void setName(String name) throws NameException {
         if (name == null || name.isEmpty()) {
+            logger.warn("Próba ustawienia pustego imienia.");
             throw new NameException("Imię nie może być puste");
         } else if (name.length() < 2) {
+            logger.warn("Imię za krótkie: {}", name);
             throw new NameException("Imię musi mieć co najmniej 2 znaki");
         }
         this.name = name;
+        logger.debug("Zaktualizowano imię: {}", name);
     }
 
     /**
@@ -99,11 +112,14 @@ public abstract class Person {
      */
     public void setSurname(String surname) throws NameException {
         if (surname == null || surname.isEmpty()) {
+            logger.warn("Próba ustawienia pustego nazwiska.");
             throw new NameException("Nazwisko nie może być puste");
         } else if (surname.length() < 2) {
+            logger.warn("Nazwisko za krótkie: {}", surname);
             throw new NameException("Nazwisko musi mieć co najmniej 2 znaki");
         }
         this.surname = surname;
+        logger.debug("Zaktualizowano nazwisko: {}", surname);
     }
 
     /**
@@ -123,11 +139,14 @@ public abstract class Person {
      */
     public void setAge(int age) throws AgeException {
         if (age < 0 || age > 120) {
+            logger.warn("Nieprawidłowy wiek: {}", age);
             throw new AgeException("Wiek musi być z przedziału 0–120");
         } else if (age < 18) {
+            logger.warn("Osoba młodsza niż 18 lat: {}", age);
             throw new AgeException("Osoba musi mieć co najmniej 18 lat");
         }
         this.age = age;
+        logger.debug("Zaktualizowano wiek: {}", age);
     }
 
     /**
@@ -146,6 +165,7 @@ public abstract class Person {
      */
     public void setEmail(String email) {
         this.email = email;
+        logger.debug("Zaktualizowano email: {}", email);
     }
 
     /**

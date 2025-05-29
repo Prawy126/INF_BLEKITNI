@@ -1,7 +1,7 @@
 /*
  * Classname: Employee
- * Version information: 1.2
- * Date: 2025-05-24
+ * Version information: 1.3
+ * Date: 2025-05-29
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -23,18 +23,24 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.FetchType;
-import org.example.wyjatki.PasswordException;
-import org.example.wyjatki.SalaryException;
-import org.example.wyjatki.NameException;
-import org.example.wyjatki.AgeException;
+import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.ColumnResult;
 import jakarta.persistence.ConstructorResult;
-import jakarta.persistence.SqlResultSetMapping;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
+
+// Importy wyjątków
+import org.example.wyjatki.PasswordException;
+import org.example.wyjatki.SalaryException;
+import org.example.wyjatki.NameException;
+import org.example.wyjatki.AgeException;
+
+// Importy Log4j2
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @SqlResultSetMapping(
         name = "EmployeeWorkloadMapping",
@@ -55,6 +61,8 @@ import java.util.ArrayList;
 @Table(name = "Pracownicy")
 @Access(AccessType.FIELD)
 public class Employee extends Person {
+
+    private static final Logger logger = LogManager.getLogger(Employee.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -84,7 +92,7 @@ public class Employee extends Person {
     @Temporal(TemporalType.DATE)
     private Date sickLeaveStartDate;
 
-    // Dodane pole do usuwania miękkiego
+    // Pole do usuwania miękkiego
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
 
@@ -92,10 +100,12 @@ public class Employee extends Person {
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<TaskEmployee> taskEmployees = new ArrayList<>();
 
-    /*
-     * Konstruktor domyślny
+    /**
+     * Domyślny konstruktor – logowanie tworzenia nowego obiektu.
      */
-    public Employee() {}
+    public Employee() {
+        logger.debug("Utworzono nowego pracownika (konstruktor domyślny)");
+    }
 
     /**
      * Konstruktor z parametrami.
@@ -121,19 +131,11 @@ public class Employee extends Person {
         this.position = position;
         setSalary(salary);
         this.onSickLeave = false;
+        logger.info("Utworzono pracownika: {} {}, stanowisko: {}", name, surname, position);
     }
 
     /**
-     * Konstruktor z parametrami.
-     *
-     * @param name       Imię pracownika
-     * @param surname    Nazwisko pracownika
-     * @param age        Wiek pracownika
-     * @param address      Adres pracownika
-     * @param login      Login pracownika
-     * @param password   Hasło pracownika
-     * @param position Stanowisko pracownika
-     * @param salary    Zarobki pracownika
+     * Alternatywny konstruktor bez adresu e-mail.
      */
     public Employee(String name, String surname, int age, Address address,
                     String login, String password, String position, BigDecimal salary)
@@ -146,190 +148,141 @@ public class Employee extends Person {
         setSalary(salary);
         this.onSickLeave = false;
         this.sickLeaveStartDate = null;
+        logger.info("Utworzono pracownika bez e-maila: {} {}, stanowisko: {}", name, surname, position);
     }
 
-    // Getter i setter dla pola 'deleted'
-    /**
-     * Zwraca informację, czy pracownik został usunięty.
-     *
-     * @return true, jeśli pracownik został usunięty, false w przeciwnym razie
-     */
+    // === Gettery i settery z logowaniem ===
+
     public boolean isDeleted() {
+        logger.trace("Pobrano status usunięcia pracownika: {}", deleted);
         return deleted;
     }
 
-    /**
-     * Ustawia informację, czy pracownik został usunięty.
-     *
-     * @param deleted true, jeśli pracownik został usunięty, false w przeciwnym razie
-     */
     public void setDeleted(boolean deleted) {
+        logger.info("Zmieniono status usunięcia pracownika na: {}", deleted);
         this.deleted = deleted;
     }
 
-    /**
-     * Zwraca identyfikator pracownika.
-     *
-     * @return Identyfikator pracownika
-     */
     public int getId() {
+        logger.trace("Pobrano ID pracownika: {}", id);
         return id;
     }
 
-    /**
-     * Ustawia identyfikator pracownika.
-     * Używane głównie w testach jednostkowych.
-     *
-     * @param id Identyfikator do ustawienia
-     */
     public void setId(int id) {
+        logger.debug("Ustawiono ID pracownika: {}", id);
         this.id = id;
     }
 
-    /**
-     * Zwraca login pracownika.
-     *
-     * @return Login pracownika
-     */
     public String getLogin() {
+        logger.trace("Pobrano login pracownika: {}", login);
         return login;
     }
 
-    /**
-     * Ustawia login pracownika.
-     *
-     * @param login Login do ustawienia
-     * @throws IllegalArgumentException jeśli login jest pusty
-     */
     public void setLogin(String login) {
         if (login == null || login.isEmpty()) {
+            logger.warn("Próbowano ustawić pusty login");
             throw new IllegalArgumentException("Login nie może być pusty");
         }
+        logger.info("Zmieniono login pracownika na: {}", login);
         this.login = login;
     }
 
-    /**
-     * Zwraca hasło pracownika.
-     *
-     * @return Hasło pracownika
-     */
     public String getPassword() {
+        logger.trace("Pobrano hasło pracownika");
         return password;
     }
 
-    /**
-     * Ustawia hasło pracownika.
-     *
-     * @param password Hasło do ustawienia
-     * @throws PasswordException jeśli hasło jest puste lub ma mniej niż 8 znaków
-     */
     public void setPassword(String password) throws PasswordException {
         if (password == null || password.length() < 8) {
+            logger.warn("Próbowano ustawić zbyt krótkie hasło");
             throw new PasswordException("Hasło musi mieć co najmniej 8 znaków");
         }
+        logger.info("Zmieniono hasło pracownika");
         this.password = password;
     }
 
-    /**
-     * Zwraca address pracownika.
-     *
-     * @return Adres pracownika
-     */
     public Address getAddress() {
+        logger.trace("Pobrano adres pracownika");
         return address;
     }
 
-    /**
-     * Ustawia address pracownika.
-     *
-     * @param address Adres do ustawienia
-     */
     public void setAddress(Address address) {
+        logger.info("Zaktualizowano adres pracownika");
         this.address = address;
     }
 
-    /**
-     * Zwraca salary pracownika.
-     *
-     * @return Zarobki pracownika
-     */
     public BigDecimal getSalary() {
+        logger.trace("Pobrano wynagrodzenie pracownika: {}", salary);
         return salary;
     }
 
-    /**
-     * Ustawia salary pracownika.
-     *
-     * @param salary Zarobki do ustawienia
-     * @throws SalaryException jeśli salary są mniejsze lub równe 0
-     */
     public void setSalary(BigDecimal salary) throws SalaryException {
         if (salary == null || salary.compareTo(BigDecimal.ZERO) <= 0) {
+            logger.warn("Próbowano ustawić nieprawidłowe wynagrodzenie: {}", salary);
             throw new SalaryException("Zarobki muszą być większe od zera");
         }
+        logger.info("Zmieniono wynagrodzenie pracownika na: {}", salary);
         this.salary = salary;
     }
 
-    /**
-     * Zwraca position pracownika.
-     *
-     * @return Stanowisko pracownika
-     */
     public String getPosition() {
+        logger.trace("Pobrano stanowisko pracownika: {}", position);
         return position;
     }
 
-    /**
-     * Ustawia position pracownika.
-     *
-     * @param position Stanowisko do ustawienia
-     */
     public void setPosition(String position) {
+        logger.info("Zmieniono stanowisko pracownika na: {}", position);
         this.position = position;
     }
 
-    /**
-     * Zwraca informację, czy pracownik jest na zwolnieniu lekarskim.
-     *
-     * @return true, jeśli pracownik jest na zwolnieniu lekarskim, false w przeciwnym razie
-     */
     public boolean isOnSickLeave() {
+        logger.trace("Sprawdzono czy pracownik jest na zwolnieniu: {}", onSickLeave);
         return onSickLeave;
     }
 
-    /**
-     * Ustawia informację, czy pracownik jest na zwolnieniu lekarskim.
-     *
-     * @param startDate Data rozpoczęcia zwolnienia lekarskiego
-     */
     public void startSickLeave(Date startDate) {
+        logger.info("Rozpoczęto zwolnienie lekarskie, data rozpoczęcia: {}", startDate);
         this.sickLeaveStartDate = startDate;
         this.onSickLeave = true;
     }
 
-    /**
-     * Sprawdza, czy pracownik ma rolę "root".
-     *
-     * @return true jeśli pracownik ma rolę "root", false w przeciwnym przypadku
-     */
     public boolean isRoot() {
-        return "root".equalsIgnoreCase(this.position);
+        boolean isRoot = "root".equalsIgnoreCase(this.position);
+        logger.info("Sprawdzono rolę użytkownika: {}", isRoot ? "root" : "nie root");
+        return isRoot;
     }
 
-    /**
-     * Zwraca datę końca zwolnienia lekarskiego.
-     *
-     * @return Data końca zwolnienia lekarskiego
-     */
     public Date getSickLeaveStartDate() {
+        logger.trace("Pobrano datę rozpoczęcia zwolnienia: {}", sickLeaveStartDate);
         return sickLeaveStartDate;
     }
 
-    /**
-     * Ustawia końca zwolnienia lekarskiego.
-     */
     public void endSickLeave() {
+        logger.info("Zakończono zwolnienie lekarskie");
         this.onSickLeave = false;
         this.sickLeaveStartDate = null;
+    }
+
+    public List<TaskEmployee> getTaskEmployees() {
+        logger.trace("Pobrano listę zadań pracownika (liczba: {})", taskEmployees.size());
+        return taskEmployees;
+    }
+
+    public void addTaskEmployee(TaskEmployee taskEmployee) {
+        if (taskEmployee != null && !taskEmployees.contains(taskEmployee)) {
+            taskEmployees.add(taskEmployee);
+            logger.info("Dodano zadanie do pracownika: {}", taskEmployee.getTask().getName());
+        } else {
+            logger.warn("Próbowano dodać istniejące lub nieprawidłowe powiązanie zadania");
+        }
+    }
+
+    public void removeTaskEmployee(TaskEmployee taskEmployee) {
+        if (taskEmployee != null && taskEmployees.contains(taskEmployee)) {
+            taskEmployees.remove(taskEmployee);
+            logger.info("Usunięto zadanie pracownika: {}", taskEmployee.getTask().getName());
+        } else {
+            logger.warn("Próbowano usunąć nieistniejące powiązanie zadania");
+        }
     }
 }

@@ -47,3 +47,5 @@ config.properties
 backups/
 
 reports/
+
+logs/

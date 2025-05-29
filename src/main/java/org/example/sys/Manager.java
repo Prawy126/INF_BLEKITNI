@@ -1,13 +1,14 @@
 /*
  * Classname: Manager
- * Version information: 1.1
- * Date: 2025-05-22
+ * Version information: 1.2
+ * Date: 2025-05-29
  * Copyright notice: © BŁĘKITNI
  */
 
-
 package org.example.sys;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.wyjatki.AgeException;
 import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
@@ -20,6 +21,9 @@ import java.util.List;
  * Klasa reprezentująca rolę menedżera – logiczną nakładkę na encję Employee.
  */
 public class Manager {
+
+    // Dodanie statycznego pola typu Logger z org.apache.logging.log4j.Logger
+    private static final Logger logger = LogManager.getLogger(Manager.class);
 
     private final Employee employee;
     private final List<Employee> managedEmployees;
@@ -45,7 +49,7 @@ public class Manager {
 
     /**
      * Dodaje pracownika do listy pracowników zarządzanych przez menedżera.
-     * */
+     */
     public void addEmployee(Employee e) {
         if (e != null && !managedEmployees.contains(e)) {
             managedEmployees.add(e);
@@ -73,7 +77,7 @@ public class Manager {
         try {
             employee.setName(newName);
         } catch (Exception e) {
-            System.err.println("Błąd zmiany imienia: " + e.getMessage());
+            logger.error("Błąd zmiany imienia: {}", e.getMessage(), e);
         }
     }
 
@@ -84,7 +88,7 @@ public class Manager {
         try {
             employee.setSurname(newSurname);
         } catch (Exception e) {
-            System.err.println("Błąd zmiany nazwiska: " + e.getMessage());
+            logger.error("Błąd zmiany nazwiska: {}", e.getMessage(), e);
         }
     }
 
@@ -97,7 +101,7 @@ public class Manager {
         try {
             employee.setAge(newAge);
         } catch (AgeException e) {
-            System.err.println("Błąd zmiany wieku: " + e.getMessage());
+            logger.error("Błąd zmiany wieku: {}", e.getMessage(), e);
         }
     }
 
@@ -108,6 +112,7 @@ public class Manager {
      */
     public void updateAddress(Address newAddress) {
         employee.setAddress(newAddress);
+        logger.info("Zaktualizowano adres menedżera.");
     }
 
     /**
@@ -118,7 +123,7 @@ public class Manager {
         try {
             employee.setPassword(newPassword);
         } catch (PasswordException e) {
-            System.err.println("Błąd zmiany hasła: " + e.getMessage());
+            logger.error("Błąd zmiany hasła: {}", e.getMessage(), e);
         }
     }
 
@@ -129,6 +134,7 @@ public class Manager {
      */
     public void updateDepartment(String newDepartment) {
         employee.setPosition(newDepartment);
+        logger.info("Zaktualizowano stanowisko menedżera.");
     }
 
     /**
@@ -140,7 +146,7 @@ public class Manager {
         try {
             employee.setSalary(newSalary);
         } catch (SalaryException e) {
-            System.err.println("Błąd zmiany wynagrodzenia: " + e.getMessage());
+            logger.error("Błąd zmiany wynagrodzenia: {}", e.getMessage(), e);
         }
     }
 
@@ -148,7 +154,6 @@ public class Manager {
      * Generuje raport dla zespołu menedżera.
      */
     public void generateTeamReport() {
-        System.out.println("Menedżer " + employee.getName() + " generuje raport " +
-                "dla " + managedEmployees.size() + " pracowników.");
+        logger.info("Menedżer {} generuje raport dla {} pracowników.", employee.getName(), managedEmployees.size());
     }
 }
