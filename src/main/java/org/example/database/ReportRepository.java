@@ -124,7 +124,7 @@ public class ReportRepository {
                                     "WHERE r.employee.id = :pid " +
                                     "  AND r.startDate = :data", Report.class)
                     .setParameter("pid", employeeId)
-                    .setParameter("data", java.sql.Date.valueOf(day), TemporalType.DATE)
+                    .setParameter("data", day)
                     .getResultList();
             logger.info("getEmployeeDayReport() – znaleziono {} raportów", list.size());
             return list;

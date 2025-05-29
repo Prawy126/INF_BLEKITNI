@@ -5,7 +5,6 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-
 package org.example.database;
 
 import jakarta.persistence.EntityManager;
@@ -13,12 +12,10 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 import jakarta.persistence.TemporalType;
-
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
-
 import org.example.sys.Product;
 import org.example.sys.Transaction;
 import org.example.sys.TransactionProduct;
@@ -39,19 +36,11 @@ public class TransactionRepository {
     private static final Logger logger = LogManager.getLogger(TransactionRepository.class);
     private final EntityManagerFactory emf;
 
-    /**
-     * Konstruktor inicjalizujący EntityManagerFactory dla persistence unit "myPU".
-     */
     public TransactionRepository() {
         this.emf = Persistence.createEntityManagerFactory("myPU");
         logger.info("Utworzono TransactionRepository, EMF={}", emf);
     }
 
-    /**
-     * Dodaje nową transakcję do bazy.
-     *
-     * @param transaction obiekt Transaction do zapisania
-     */
     public void addTransaction(Transaction transaction) {
         logger.debug("addTransaction() – start, transaction={}", transaction);
         EntityManager em = emf.createEntityManager();
@@ -70,12 +59,6 @@ public class TransactionRepository {
         }
     }
 
-    /**
-     * Znajduje transakcję o podanym identyfikatorze.
-     *
-     * @param id identyfikator transakcji
-     * @return obiekt Transaction lub null, jeśli nie istnieje
-     */
     public Transaction findTransactionById(int id) {
         logger.debug("findTransactionById() – start, id={}", id);
         EntityManager em = emf.createEntityManager();
@@ -92,11 +75,6 @@ public class TransactionRepository {
         }
     }
 
-    /**
-     * Pobiera wszystkie transakcje z bazy.
-     *
-     * @return lista obiektów Transaction lub pusta lista w przypadku błędu
-     */
     public List<Transaction> getAllTransactions() {
         logger.debug("getAllTransactions() – start");
         EntityManager em = emf.createEntityManager();
@@ -114,11 +92,6 @@ public class TransactionRepository {
         }
     }
 
-    /**
-     * Usuwa transakcję o podanym identyfikatorze.
-     *
-     * @param id identyfikator transakcji do usunięcia
-     */
     public void removeTransactions(int id) {
         logger.debug("removeTransactions() – start, id={}", id);
         EntityManager em = emf.createEntityManager();
@@ -142,11 +115,6 @@ public class TransactionRepository {
         }
     }
 
-    /**
-     * Aktualizuje istniejącą transakcję w bazie.
-     *
-     * @param transaction obiekt Transaction do zaktualizowania
-     */
     public void updateTransaction(Transaction transaction) {
         logger.debug("updateTransaction() – start, transaction={}", transaction);
         EntityManager em = emf.createEntityManager();
@@ -165,28 +133,22 @@ public class TransactionRepository {
         }
     }
 
-    // =========================================================
-    // === Dodatkowe metody wyszukiwania po różnych kryteriach ===
-    // =========================================================
-
-    /**
-     * Zwraca liczbę sztuk danego produktu sprzedanych w określonym dniu.
-     *
-     * @param product encja Product
-     * @param date    dzień sprzedaży (LocalDate, bez czasu)
-     * @return liczba sprzedanych sztuk lub 0 w przypadku błędu/braku danych
-     */
+    // =============== GŁÓWNE ZMIANY ===============
     public int getSoldQuantityForProductOnDate(Product product, LocalDate date) {
         logger.debug("getSoldQuantityForProductOnDate() – start, product={}, date={}", product, date);
         EntityManager em = emf.createEntityManager();
         try {
             Date sqlDate = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
             Long total = em.createQuery(
-                            "SELECT COALESCE(SUM(z.quantity),0) FROM Transaction z " +
-                                    "WHERE z.product = :product AND z.data = :data", Long.class)
+                            "SELECT COALESCE(SUM(tp.quantity), 0) " +
+                                    "FROM TransactionProduct tp " +
+                                    "JOIN tp.transaction t " +  // Łączenie z transakcją
+                                    "WHERE tp.product = :product AND t.date = :date", Long.class)
                     .setParameter("product", product)
-                    .setParameter("data", sqlDate, TemporalType.DATE)
+                    .setParameter("date", sqlDate, TemporalType.DATE)
                     .getSingleResult();
+
             int result = total.intValue();
             logger.info("getSoldQuantityForProductOnDate() – sprzedano {} sztuk produktu {} w dniu {}",
                     result, product, date);
@@ -201,13 +163,6 @@ public class TransactionRepository {
         }
     }
 
-    /**
-     * Pobiera wszystkie transakcje wraz z powiązanymi produktami między podanymi datami.
-     *
-     * @param startDate data początkowa (inclusive)
-     * @param endDate   data końcowa (inclusive)
-     * @return lista obiektów Transaction lub pusta lista
-     */
     public List<Transaction> getTransactionsBetweenDates(Date startDate, Date endDate) {
         logger.debug("getTransactionsBetweenDates() – start, from={}, to={}", startDate, endDate);
         EntityManager em = emf.createEntityManager();
@@ -216,9 +171,11 @@ public class TransactionRepository {
             CriteriaQuery<Transaction> cq = cb.createQuery(Transaction.class);
             Root<Transaction> root = cq.from(Transaction.class);
             root.fetch("transactionProducts", JoinType.LEFT);
+
             cq.select(root)
-                    .where(cb.between(root.get("data"), startDate, endDate))
-                    .orderBy(cb.asc(root.get("data")));
+                    .where(cb.between(root.get("date"), startDate, endDate))
+                    .orderBy(cb.asc(root.get("date")));
+
             List<Transaction> result = em.createQuery(cq).getResultList();
             logger.info("getTransactionsBetweenDates() – znaleziono {} transakcji", result.size());
             return result;
@@ -232,13 +189,6 @@ public class TransactionRepository {
         }
     }
 
-    /**
-     * Dodaje lub aktualizuje relację TransactionProduct dla podanej transakcji i produktu.
-     *
-     * @param transaction obiekt Transaction
-     * @param product     obiekt Product
-     * @param quantity    żądana ilość produktu
-     */
     public void addProductToTransaction(Transaction transaction, Product product, int quantity) {
         logger.debug("addProductToTransaction() – start, transactionId={}, productId={}, quantity={}",
                 transaction.getId(), product.getId(), quantity);
@@ -284,12 +234,6 @@ public class TransactionRepository {
         }
     }
 
-    /**
-     * Znajduje wszystkie transakcje wykonane przez danego pracownika.
-     *
-     * @param employeeId identyfikator pracownika
-     * @return lista obiektów Transaction lub pusta lista
-     */
     public List<Transaction> findByEmployee(int employeeId) {
         logger.debug("findByEmployee() – employeeId={}", employeeId);
         EntityManager em = emf.createEntityManager();
@@ -309,12 +253,6 @@ public class TransactionRepository {
         }
     }
 
-    /**
-     * Znajduje transakcje dokonane dokładnie w danym dniu.
-     *
-     * @param date date transakcji (bez czasu)
-     * @return lista obiektów Transaction lub pusta lista
-     */
     public List<Transaction> findByDate(Date date) {
         logger.debug("findByDate() – date={}", date);
         EntityManager em = emf.createEntityManager();
@@ -334,19 +272,12 @@ public class TransactionRepository {
         }
     }
 
-    /**
-     * Znajduje transakcje w przedziale dat [fromDate, toDate].
-     *
-     * @param fromDate data początkowa (inclusive)
-     * @param toDate   data końcowa (inclusive)
-     * @return lista obiektów Transaction lub pusta lista
-     */
     public List<Transaction> findByDateRange(Date fromDate, Date toDate) {
         logger.debug("findByDateRange() – from={}, to={}", fromDate, toDate);
         EntityManager em = emf.createEntityManager();
         try {
             List<Transaction> list = em.createQuery(
-                            "SELECT t FROM Transaction t WHERE t.data BETWEEN :from AND :to", Transaction.class)
+                            "SELECT t FROM Transaction t WHERE t.date BETWEEN :from AND :to", Transaction.class)
                     .setParameter("from", fromDate, TemporalType.DATE)
                     .setParameter("to", toDate,   TemporalType.DATE)
                     .getResultList();
@@ -361,11 +292,6 @@ public class TransactionRepository {
         }
     }
 
-    /**
-     * Zwraca sesję Hibernate uzyskaną z EntityManager.
-     *
-     * @return obiekt Session lub wyrzuca wyjątek, jeśli konwersja się nie powiedzie
-     */
     public Session getSession() {
         logger.debug("getSession() – start");
         EntityManager em = emf.createEntityManager();
@@ -374,10 +300,6 @@ public class TransactionRepository {
         return session;
     }
 
-    /**
-     * Zamyka fabrykę EntityManagerFactory, zwalniając wszystkie zasoby.
-     * Po wywołaniu tej metody instancja nie może być używana do dalszych operacji.
-     */
     public void close() {
         logger.debug("close() – zamykanie EMF");
         if (emf.isOpen()) {
@@ -385,5 +307,4 @@ public class TransactionRepository {
             logger.info("close() – EMF zamknięty");
         }
     }
-
 }
