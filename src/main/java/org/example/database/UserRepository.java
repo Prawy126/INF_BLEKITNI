@@ -8,15 +8,12 @@
 
 package org.example.database;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.Persistence;
+import jakarta.persistence.*;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.sys.Employee;
+import org.example.sys.PasswordResetToken;
 
 import java.util.List;
 
@@ -558,6 +555,123 @@ public class UserRepository {
         } finally {
             em.close();
             logger.debug("getNotOnSickLeave() – EM zamknięty");
+        }
+    }
+
+    // W klasie UserRepository
+    public boolean updatePasswordByEmail(String email, String newHashedPassword) {
+        logger.debug("updatePasswordByEmail() – email={}", email);
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+
+            List<Employee> employees = em.createQuery(
+                            "SELECT e FROM Employee e WHERE e.email = :email AND e.deleted = FALSE",
+                            Employee.class)
+                    .setParameter("email", email)
+                    .getResultList();
+
+            if (employees.isEmpty()) {
+                logger.warn("updatePasswordByEmail() – brak użytkownika z emailem: {}", email);
+                return false;
+            }
+
+            Employee employee = employees.get(0);
+            employee.setPassword(newHashedPassword);
+            em.merge(employee);
+            tx.commit();
+
+            logger.info("updatePasswordByEmail() – zaktualizowano hasło dla: {}", email);
+            return true;
+        } catch (Exception ex) {
+            logger.error("updatePasswordByEmail() – błąd", ex);
+            if (tx.isActive()) tx.rollback();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    public boolean savePasswordResetToken(PasswordResetToken token) {
+        logger.debug("savePasswordResetToken() – start");
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(token);
+            tx.commit();
+            logger.info("savePasswordResetToken() – zapisano token dla użytkownika: {}", token.getUserId());
+            return true;
+        } catch (Exception ex) {
+            logger.error("savePasswordResetToken() – błąd", ex);
+            if (tx.isActive()) tx.rollback();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    // Weryfikacja tokenu
+    public PasswordResetToken findValidToken(String email, String codeHash) {
+        logger.debug("findValidToken() – email: {}", email);
+        EntityManager em = emf.createEntityManager();
+        try {
+            Employee employee = em.createQuery(
+                            "SELECT e FROM Employee e WHERE e.email = :email AND e.deleted = FALSE",
+                            Employee.class)
+                    .setParameter("email", email)
+                    .getSingleResult();
+
+            if (employee == null) return null;
+
+            return em.createQuery(
+                            "SELECT t FROM PasswordResetToken t WHERE t.userId = :userId AND t.resetCodeHash = :codeHash AND t.expirationTime > CURRENT_TIMESTAMP AND t.used = false",
+                            PasswordResetToken.class)
+                    .setParameter("userId", (long) employee.getId())
+                    .setParameter("codeHash", codeHash)
+                    .getSingleResult();
+        } catch (Exception ex) {
+            logger.error("findValidToken() – błąd", ex);
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    // Oznaczanie tokenu jako użyty
+    public boolean markTokenAsUsed(PasswordResetToken token) {
+        logger.debug("markTokenAsUsed() – token ID: {}", token.getId());
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            token.setUsed(true);
+            em.merge(token);
+            tx.commit();
+            return true;
+        } catch (Exception ex) {
+            logger.error("markTokenAsUsed() – błąd", ex);
+            if (tx.isActive()) tx.rollback();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    public List<PasswordResetToken> findValidTokensByUserId(long userId) {
+        logger.debug("findValidTokensByUserId() – userId: {}", userId);
+        EntityManager em = emf.createEntityManager();
+        try {
+            String jpql = "SELECT t FROM PasswordResetToken t WHERE t.userId = :userId AND t.expirationTime > CURRENT_TIMESTAMP AND t.used = false";
+            TypedQuery<PasswordResetToken> query = em.createQuery(jpql, PasswordResetToken.class);
+            query.setParameter("userId", userId);
+            return query.getResultList();
+        } catch (Exception ex) {
+            logger.error("findValidTokensByUserId() – błąd", ex);
+            return List.of();
+        } finally {
+            em.close();
         }
     }
 

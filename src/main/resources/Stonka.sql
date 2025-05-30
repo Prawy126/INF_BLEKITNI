@@ -154,6 +154,19 @@ CREATE TABLE IF NOT EXISTS Zadania_Pracownicy (
     FOREIGN KEY (Id_zadania)    REFERENCES Zadania(Id)
 );
 
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+   id BIGINT PRIMARY KEY AUTO_INCREMENT,
+   pracownik_id INT NOT NULL,
+   reset_code_hash VARCHAR(60) NOT NULL,
+    expiration_time DATETIME NOT NULL,
+    used TINYINT(1) NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (pracownik_id) REFERENCES Pracownicy(Id) ON DELETE CASCADE,
+    INDEX idx_pracownik (pracownik_id),
+    INDEX idx_code (reset_code_hash)
+    );
+
 -- =============================================================
 -- WSTAWIANIE DANYCH
 -- =============================================================

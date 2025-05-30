@@ -12,19 +12,14 @@ import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
 import javafx.animation.Interpolator;
+import javafx.scene.control.*;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -33,6 +28,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.util.converter.DefaultStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.database.UserRepository;
@@ -57,6 +53,7 @@ public class HelloApplication extends Application {
     private static final AtomicBoolean criticalErrorOccurred = new AtomicBoolean(false);
     private static final Logger logger = LogManager.getLogger(HelloApplication.class);
     private static String errorMessage = "";
+    private String resetEmail;
 
     /**
      * Punkt wejścia do aplikacji JavaFX.
@@ -500,6 +497,7 @@ public class HelloApplication extends Application {
                         "Proszę podać adres e-mail, na który ma zostać wysłany kod."
                 );
             } else {
+                this.resetEmail = email;
                 try {
                     System.out.println("DEBUG: Wysyłanie kodu resetowania na email: " + email);
                     Login.sendResetCode(email);
@@ -527,49 +525,106 @@ public class HelloApplication extends Application {
         resetStage.show();
     }
 
-    // Funkcja do wyświetlania okna weryfikacyjnego
+    /**
+     * Wyświetla okno weryfikacji kodu resetującego.
+     */
     public void showVerificationWindow() {
         logger.debug("Otwieranie okna weryfikacji kodu");
 
         Stage verificationStage = new Stage();
         verificationStage.setTitle("Weryfikacja kodu");
+        verificationStage.setOnCloseRequest(e -> {
+            logger.debug("Okno weryfikacji zamknięte");
+        });
 
         VBox verificationLayout = new VBox(10);
         verificationLayout.setPadding(new Insets(20));
         verificationLayout.setAlignment(Pos.CENTER);
+        verificationLayout.setStyle("-fx-background-color: #f0f0f0;");
 
-        Label codeLabel = new Label("Podaj kod weryfikacyjny:");
+        Label titleLabel = new Label("Weryfikacja kodu");
+        titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+        titleLabel.setTextFill(Color.DARKBLUE);
+
+        Label instructionLabel = new Label("Podaj 6-znakowy kod, który otrzymałeś na adres:");
+        Label emailLabel = new Label(this.resetEmail);
+        emailLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+        emailLabel.setTextFill(Color.DARKSLATEGRAY);
+
+        // Pole tekstowe umożliwiające wpisanie alfanumerycznego kodu (maks. 6 znaków)
         TextField codeField = new TextField();
-        codeField.setPromptText("Kod");
+        codeField.setPromptText("Wprowadź kod weryfikacyjny");
+        codeField.setMaxWidth(150);
+        codeField.setTextFormatter(new TextFormatter<>(new DefaultStringConverter(), "", change -> {
+            // Pozwól na dowolne znaki, ograniczając długość do 6
+            return change.getControlNewText().length() <= 6 ? change : null;
+        }));
 
         Button verifyButton = new Button("Zweryfikuj");
+        verifyButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;");
         verifyButton.setOnAction(e -> {
             logger.debug("Próba weryfikacji kodu");
-            String code = codeField.getText();
-            if (code.length() == 6) {
-                logger.debug("Kod weryfikacyjny poprawny (długość: 6 znaków)");
+            String code = codeField.getText().trim();
+
+            if (code.isEmpty()) {
+                showAlert(Alert.AlertType.ERROR,
+                        "Błąd",
+                        "Brak kodu",
+                        "Proszę wprowadzić kod weryfikacyjny.");
+                return;
+            }
+
+            if (code.length() != 6) {
+                showAlert(Alert.AlertType.ERROR,
+                        "Błąd",
+                        "Nieprawidłowy kod",
+                        "Kod musi składać się z 6 znaków.");
+                return;
+            }
+
+            if (Login.verifyResetCode(this.resetEmail, code)) {
+                logger.info("Kod weryfikacyjny poprawny");
                 verificationStage.close();
-                showNewPasswordWindow();
+                showNewPasswordWindow(this.resetEmail);
             } else {
-                logger.warn("Niepoprawny kod weryfikacyjny (długość: {} znaków)", code.length());
+                logger.warn("Niepoprawny kod weryfikacyjny");
                 showAlert(Alert.AlertType.ERROR,
                         "Błąd",
                         "Niepoprawny kod",
-                        "Proszę podać poprawny 6-znakowy kod.");
+                        "Podany kod jest nieprawidłowy lub wygasł. Spróbuj ponownie.");
             }
         });
 
-        verificationLayout.getChildren().addAll(codeLabel, codeField, verifyButton);
+        Button resendButton = new Button("Wyślij kod ponownie");
+        resendButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
+        resendButton.setOnAction(e -> {
+            logger.info("Wysyłanie kodu ponownie do: {}", this.resetEmail);
+            Login.sendResetCode(this.resetEmail);
+            showAlert(Alert.AlertType.INFORMATION,
+                    "Kod wysłany",
+                    "Nowy kod został wysłany",
+                    "Sprawdź swoją skrzynkę pocztową.");
+        });
 
-        Scene verificationScene = new Scene(verificationLayout, 300, 200);
+        HBox buttonBox = new HBox(10, verifyButton, resendButton);
+        buttonBox.setAlignment(Pos.CENTER);
+
+        verificationLayout.getChildren().addAll(
+                titleLabel,
+                instructionLabel,
+                emailLabel,
+                codeField,
+                buttonBox
+        );
+
+        Scene verificationScene = new Scene(verificationLayout, 350, 250);
         verificationStage.setScene(verificationScene);
-
-        logger.debug("Wyświetlanie okna weryfikacji kodu");
         verificationStage.show();
     }
 
-    private void showNewPasswordWindow() {
-        logger.debug("Otwieranie okna ustawiania nowego hasła");
+
+    private void showNewPasswordWindow(String userEmail) {
+        logger.debug("Otwieranie okna ustawiania nowego hasła dla: {}", userEmail);
 
         Stage passwordStage = new Stage();
         passwordStage.setTitle("Ustaw nowe hasło");
@@ -594,30 +649,57 @@ public class HelloApplication extends Application {
             String repeatPass = repeatPasswordField.getText();
 
             if (newPass.isEmpty() || repeatPass.isEmpty()) {
-                logger.warn("Puste pola hasła - walidacja nie powiodła się");
+                logger.warn("Puste pola hasła");
                 showAlert(Alert.AlertType.ERROR, "Błąd", "Puste pola", "Proszę wypełnić oba pola hasła.");
             } else if (!newPass.equals(repeatPass)) {
-                logger.warn("Hasła nie są zgodne - walidacja nie powiodła się");
+                logger.warn("Hasła nie są zgodne");
                 showAlert(Alert.AlertType.ERROR, "Błąd", "Hasła nie są zgodne", "Upewnij się, że oba hasła są identyczne.");
             } else if (newPass.length() < 8) {
-                logger.warn("Hasło za krótkie ({} znaków) - walidacja nie powiodła się", newPass.length());
+                logger.warn("Hasło za krótkie: {} znaków", newPass.length());
                 showAlert(Alert.AlertType.ERROR, "Błąd", "Hasło za krótkie", "Hasło musi mieć co najmniej 8 znaków.");
             } else {
-                logger.info("Walidacja hasła pomyślna - długość: {} znaków", newPass.length());
-                logger.debug("Próba aktualizacji hasła w bazie danych");
+                logger.info("Walidacja hasła pomyślna");
 
-                // TODO: Dodać logikę do aktualizacji hasła w bazie danych
+                UserRepository userRepo = new UserRepository();
                 try {
-                    // logika aktualizacji hasła
-                    logger.info("Hasło zostało zaktualizowane pomyślnie");
-                } catch (Exception ex) {
-                    logger.error("Błąd podczas aktualizacji hasła w bazie danych: {}", ex.getMessage(), ex);
-                    showAlert(Alert.AlertType.ERROR, "Błąd", "Problem z bazą danych", "Nie udało się zaktualizować hasła.");
-                    return;
-                }
+                    Employee employee = userRepo.findByEmail(userEmail).stream()
+                            .filter(emp -> !emp.isDeleted())
+                            .findFirst()
+                            .orElse(null);
 
-                showAlert(Alert.AlertType.INFORMATION, "Sukces", "Hasło zmienione", "Twoje hasło zostało zaktualizowane.");
-                passwordStage.close();
+                    if (employee == null) {
+                        showAlert(Alert.AlertType.ERROR,
+                                "Błąd",
+                                "Nie znaleziono użytkownika",
+                                "Adres email nie istnieje w systemie.");
+                        return;
+                    }
+
+                    String hashedPassword = PasswordHasher.hashPassword(newPass, employee.getId());
+                    boolean success = userRepo.updatePasswordByEmail(userEmail, hashedPassword);
+
+                    if (success) {
+                        logger.info("Hasło zaktualizowane pomyślnie");
+                        showAlert(Alert.AlertType.INFORMATION,
+                                "Sukces",
+                                "Hasło zmienione",
+                                "Twoje hasło zostało zaktualizowane.");
+                        passwordStage.close();
+                    } else {
+                        showAlert(Alert.AlertType.ERROR,
+                                "Błąd",
+                                "Problem z aktualizacją",
+                                "Nie udało się zaktualizować hasła.");
+                    }
+                } catch (Exception ex) {
+                    logger.error("Błąd podczas aktualizacji hasła: {}", ex.getMessage(), ex);
+                    showAlert(Alert.AlertType.ERROR,
+                            "Błąd",
+                            "Problem techniczny",
+                            "Wystąpił błąd podczas aktualizacji hasła: " + ex.getMessage());
+                } finally {
+                    userRepo.close();
+                }
             }
         });
 
@@ -629,8 +711,6 @@ public class HelloApplication extends Application {
 
         Scene scene = new Scene(layout, 300, 250);
         passwordStage.setScene(scene);
-
-        logger.debug("Wyświetlanie okna ustawiania nowego hasła");
         passwordStage.show();
     }
 

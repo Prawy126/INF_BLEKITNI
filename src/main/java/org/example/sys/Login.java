@@ -238,9 +238,8 @@ public class Login implements ILacz {
         }
 
         executor.execute(() -> {
-            String resetCode = generateRandomCode(6);
             try {
-                EmailSender.sendResetEmail(email, resetCode);
+                EmailSender.sendResetEmail(email);
                 logger.info("Kod resetujący wysłany na e-mail: {}", email);
                 showSuccessAlert("Kod resetujący wysłany", "Sprawdź swoją skrzynkę pocztową");
             } catch (Exception e) {
@@ -310,5 +309,34 @@ public class Login implements ILacz {
                 "Nieznana rola użytkownika",
                 "Stanowisko: " + position
         );
+    }
+
+    /**
+     * Weryfikuje kod resetujący dla podanego adresu email.
+     *
+     * @param email adres email użytkownika
+     * @param code  kod weryfikacyjny
+     * @return true jeśli kod jest poprawny, false w przeciwnym razie
+     */
+    public static boolean verifyResetCode(String email, String code) {
+        logger.debug("Weryfikacja kodu resetującego dla email: {}", email);
+
+        if (email == null || email.isBlank() || code == null || code.isBlank()) {
+            logger.warn("Nieprawidłowe dane wejściowe do weryfikacji kodu");
+            return false;
+        }
+
+        if (!EmailValidator.isValid(email)) {
+            logger.warn("Nieprawidłowy format email: {}", email);
+            return false;
+        }
+
+        try {
+            // Sprawdź czy kod jest prawidłowy
+            return EmailSender.verifyResetCode(email, code);
+        } catch (Exception e) {
+            logger.error("Błąd podczas weryfikacji kodu dla {}: {}", email, e.getMessage(), e);
+            return false;
+        }
     }
 }
