@@ -1375,8 +1375,6 @@ public class AdminPanelController {
         Task<Void> closeTask = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                technicalIssueRepository.close();
-                userRepository.close();
                 return null;
             }
         };

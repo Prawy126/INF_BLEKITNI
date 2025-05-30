@@ -1,17 +1,7 @@
-/*
- * Classname: AddressRepository
- * Version information: 1.4
- * Date: 2025-05-22
- * Copyright notice: © BŁĘKITNI
- */
-
-
 package org.example.database;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.Persistence;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,14 +11,12 @@ import java.util.List;
 
 public class AddressRepository implements AutoCloseable {
     private static final Logger logger = LogManager.getLogger(AddressRepository.class);
-    private final EntityManagerFactory emf;
 
     /**
-     * Tworzy repozytorium i inicjalizuje EntityManagerFactory.
+     * Domyślny konstruktor – korzysta ze wspólnego EMF z EMFProvider.
      */
     public AddressRepository() {
-        this.emf = Persistence.createEntityManagerFactory("myPU");
-        logger.info("Utworzono AddressRepository, EMF={}", emf);
+        logger.info("Utworzono AddressRepository, EMF={}", EMFProvider.get());
     }
 
     /**
@@ -38,7 +26,7 @@ public class AddressRepository implements AutoCloseable {
      */
     public void addAddress(Address address) {
         logger.debug("addAddress() - start, address={}", address);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -62,13 +50,13 @@ public class AddressRepository implements AutoCloseable {
      */
     public Address findAddressById(int id) {
         logger.debug("findAddressById() - start, id={}", id);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             Address a = em.find(Address.class, id);
             logger.info("findAddressById() - znaleziono: {}", a);
             return a;
         } catch (Exception e) {
-            logger.error("findAddressById() - błąd podczas pobierania adresu o id=" + id, e);
+            logger.error("findAddressById() - błąd podczas pobierania adresu o id={}", id, e);
             return null;
         } finally {
             em.close();
@@ -83,7 +71,7 @@ public class AddressRepository implements AutoCloseable {
      */
     public List<Address> getAllAddresses() {
         logger.debug("getAllAddresses() - start");
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Address> list = em.createQuery("SELECT a FROM Address a", Address.class)
                     .getResultList();
@@ -105,7 +93,7 @@ public class AddressRepository implements AutoCloseable {
      */
     public void removeAddress(int id) {
         logger.debug("removeAddress() - start, id={}", id);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -118,7 +106,7 @@ public class AddressRepository implements AutoCloseable {
             }
             tx.commit();
         } catch (Exception e) {
-            logger.error("removeAddress() - błąd podczas usuwania adresu o id=" + id, e);
+            logger.error("removeAddress() - błąd podczas usuwania adresu o id={}", id, e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
@@ -134,7 +122,7 @@ public class AddressRepository implements AutoCloseable {
      */
     public List<Address> findByTown(String town) {
         logger.debug("findByTown() - town={}", town);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Address> list = em.createQuery(
                             "SELECT a FROM Address a WHERE LOWER(a.town) LIKE LOWER(CONCAT('%', :town, '%'))",
@@ -160,7 +148,7 @@ public class AddressRepository implements AutoCloseable {
      */
     public List<Address> findByHouseNumber(String houseNumber) {
         logger.debug("findByHouseNumber() - houseNumber={}", houseNumber);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Address> list = em.createQuery(
                             "SELECT a FROM Address a WHERE a.houseNumber = :houseNumber",
@@ -186,7 +174,7 @@ public class AddressRepository implements AutoCloseable {
      */
     public List<Address> findByApartmentNumber(String apartmentNumber) {
         logger.debug("findByApartmentNumber() - apartmentNumber={}", apartmentNumber);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Address> list = em.createQuery(
                             "SELECT a FROM Address a WHERE a.apartmentNumber = :apartmentNumber",
@@ -212,7 +200,7 @@ public class AddressRepository implements AutoCloseable {
      */
     public List<Address> findByZipCode(String zipCode) {
         logger.debug("findByZipCode() - zipCode={}", zipCode);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Address> list = em.createQuery(
                             "SELECT a FROM Address a WHERE a.zipCode = :zipCode",
@@ -238,7 +226,7 @@ public class AddressRepository implements AutoCloseable {
      */
     public List<Address> findByCity(String city) {
         logger.debug("findByCity() - city={}", city);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Address> list = em.createQuery(
                             "SELECT a FROM Address a WHERE LOWER(a.city) = LOWER(:city)",
@@ -257,14 +245,9 @@ public class AddressRepository implements AutoCloseable {
     }
 
     /**
-     * Zamyka fabrykę EntityManagerFactory.
+     * Zamyka wspólną fabrykę EMF (na zakończenie działania aplikacji).
      */
     @Override
     public void close() {
-        logger.debug("close() - zamykanie EMF");
-        if (emf.isOpen()) {
-            emf.close();
-            logger.info("close() - EMF zamknięty");
-        }
     }
 }

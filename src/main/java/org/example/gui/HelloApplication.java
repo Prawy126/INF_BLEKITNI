@@ -31,6 +31,7 @@ import javafx.stage.Stage;
 import javafx.util.converter.DefaultStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.database.EMFProvider;
 import org.example.database.UserRepository;
 import org.example.sys.ConfigPdf;
 import org.example.sys.Employee;
@@ -698,7 +699,6 @@ public class HelloApplication extends Application {
                             "Problem techniczny",
                             "Wystąpił błąd podczas aktualizacji hasła: " + ex.getMessage());
                 } finally {
-                    userRepo.close();
                 }
             }
         });
@@ -757,7 +757,6 @@ public class HelloApplication extends Application {
                         logger.debug("Zhashowano i zaktualizowano pracownika id={}", emp.getId());
                     }
                 }
-                userRepo.close();
                 logger.info("Migracja haseł zakończona");
             } catch (Exception ex) {
                 logger.error("BŁĄD podczas migracji haseł: {}", ex.getMessage(), ex);
@@ -773,6 +772,7 @@ public class HelloApplication extends Application {
         }
 
         logger.info("Koniec metody main()");
+        EMFProvider.close();
     }
 
 

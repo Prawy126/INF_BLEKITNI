@@ -639,14 +639,14 @@ public class CashierPanelController {
                 return;
             }
 
-            // Tworzenie i zapis transakcji
+            // 1) Zapisz transakcję
             Transaction tx = new Transaction();
             tx.setEmployee(current);
             tx.setDate(new Date());
             transactionRepository.addTransaction(tx);
             int txId = tx.getId();
 
-            // Zmiana stanu magazynowego i zapis pozycji
+            // 2) Aktualizuj stan magazynowy i zapisuj pozycje
             WarehouseRepository whRepo = new WarehouseRepository();
             for (TransactionItem item : items) {
                 int pid = item.getProduct().getId();
@@ -654,24 +654,24 @@ public class CashierPanelController {
                 int avail = whRepo.findStateByProductId(pid).getQuantity();
                 whRepo.setProductQuantity(pid, avail - qty);
 
-                // Zapis relacji transakcja-produkt po migracji do JPA/Hibernate
                 TransactionProduct tp = new TransactionProduct();
                 tp.setTransaction(transactionRepository.findTransactionById(txId));
                 tp.setProduct(item.getProduct());
                 tp.setQuantity(qty);
+
                 TransactionProductRepository tpRepo = new TransactionProductRepository();
                 tpRepo.addTransactionProduct(tp);
-                tpRepo.close();
             }
-            whRepo.close();
 
             showNotification("Sukces", "Transakcja zapisana pomyślnie.");
             dialog.close();
+
         } catch (Exception e) {
             e.printStackTrace();
             showNotification("Błąd", "Wystąpił błąd podczas zapisu: " + e.getMessage());
         }
     }
+
 
 
     /**

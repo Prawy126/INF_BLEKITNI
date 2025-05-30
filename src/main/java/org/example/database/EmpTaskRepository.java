@@ -1,18 +1,16 @@
 /*
  * Classname: EmpTaskRepository
- * Version information: 1.3
- * Date: 2025-05-22
+ * Version information: 1.1
+ * Date: 2025-05-30
  * Copyright notice: © BŁĘKITNI
  */
-
 
 package org.example.database;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TemporalType;
-import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.Persistence;
+import jakarta.persistence.TemporalType;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.sys.EmpTask;
@@ -25,26 +23,24 @@ import java.util.List;
  * Repozytorium zarządzające zadaniami w bazie danych.
  * Umożliwia tworzenie, odczyt, aktualizację, usuwanie oraz wyszukiwanie zadań.
  */
-public class EmpTaskRepository {
+public class EmpTaskRepository implements AutoCloseable {
     private static final Logger logger = LogManager.getLogger(EmpTaskRepository.class);
-    private final EntityManagerFactory emf;
 
     /**
-     * Konstruktor inicjalizujący EntityManagerFactory dla persistence unit "myPU".
+     * Domyślny konstruktor – korzysta ze wspólnego EMF z EMFProvider.
      */
     public EmpTaskRepository() {
-        this.emf = Persistence.createEntityManagerFactory("myPU");
-        logger.info("Utworzono TaskRepository, EMF={}", emf);
+        logger.info("Utworzono EmpTaskRepository, EMF={}", EMFProvider.get());
     }
 
     /**
      * Dodaje nowe zadanie do bazy.
      *
-     * @param task obiekt Task do zapisania
+     * @param task obiekt EmpTask do zapisania
      */
     public void addTask(EmpTask task) {
         logger.debug("addTask() – start, task={}", task);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -64,11 +60,11 @@ public class EmpTaskRepository {
      * Znajduje zadanie o podanym identyfikatorze.
      *
      * @param id identyfikator zadania
-     * @return obiekt Task lub null, jeśli nie istnieje
+     * @return obiekt EmpTask lub null, jeśli nie istnieje
      */
     public EmpTask findTaskById(int id) {
         logger.debug("findTaskById() – start, id={}", id);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             EmpTask t = em.find(EmpTask.class, id);
             logger.info("findTaskById() – znaleziono: {}", t);
@@ -89,7 +85,7 @@ public class EmpTaskRepository {
      */
     public List<EmpTask> getAllTasks() {
         logger.debug("getAllTasks() – start");
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<EmpTask> list = em.createQuery("SELECT t FROM EmpTask t", EmpTask.class)
                     .getResultList();
@@ -107,11 +103,11 @@ public class EmpTaskRepository {
     /**
      * Aktualizuje istniejące zadanie w bazie.
      *
-     * @param task obiekt Task do zaktualizowania
+     * @param task obiekt EmpTask do zaktualizowania
      */
     public void updateTask(EmpTask task) {
         logger.debug("updateTask() – start, task={}", task);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -129,13 +125,12 @@ public class EmpTaskRepository {
 
     /**
      * Usuwa zadanie z bazy.
-     * TODO: Obsłużyć usuwanie przypisań do pracowników w kontekście więzów integralności.
      *
-     * @param task obiekt Task do usunięcia
+     * @param task obiekt EmpTask do usunięcia
      */
     public void removeTask(EmpTask task) {
         logger.debug("removeTask() – start, task={}", task);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -157,17 +152,17 @@ public class EmpTaskRepository {
     }
 
     /**
-     * Znajduje zadania, których nazwa zawiera podany fragment (bez uwzględniania wielkości liter).
+     * Znajduje zadania, których nazwa zawiera podany fragment (case-insensitive).
      *
      * @param nameFragment fragment tekstu nazwy
-     * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
+     * @return lista obiektów EmpTask lub pusta lista
      */
     public List<EmpTask> findByName(String nameFragment) {
         logger.debug("findByName() – nameFragment={}", nameFragment);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<EmpTask> list = em.createQuery(
-                            "SELECT t FROM Task t WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :frag, '%'))",
+                            "SELECT t FROM EmpTask t WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :frag, '%'))",
                             EmpTask.class)
                     .setParameter("frag", nameFragment)
                     .getResultList();
@@ -183,17 +178,18 @@ public class EmpTaskRepository {
     }
 
     /**
-     * Znajduje zadania o dokładnie podanej dacie.
+     * Znajduje zadania o dokładnie podanej dacie (bez czasu).
      *
-     * @param date date zadania (bez czasu)
-     * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
+     * @param date data zadania
+     * @return lista obiektów EmpTask lub pusta lista
      */
     public List<EmpTask> findByDate(Date date) {
         logger.debug("findByDate() – date={}", date);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<EmpTask> list = em.createQuery(
-                            "SELECT t FROM Task t WHERE t.date = :date", EmpTask.class)
+                            "SELECT t FROM EmpTask t WHERE t.date = :date",
+                            EmpTask.class)
                     .setParameter("date", date, TemporalType.DATE)
                     .getResultList();
             logger.info("findByDate() – znaleziono {} zadań", list.size());
@@ -211,14 +207,15 @@ public class EmpTaskRepository {
      * Znajduje zadania o podanym statusie.
      *
      * @param status status zadania
-     * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
+     * @return lista obiektów EmpTask lub pusta lista
      */
     public List<EmpTask> findByStatus(String status) {
         logger.debug("findByStatus() – status={}", status);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<EmpTask> list = em.createQuery(
-                            "SELECT t FROM Task t WHERE t.status = :status", EmpTask.class)
+                            "SELECT t FROM EmpTask t WHERE t.status = :status",
+                            EmpTask.class)
                     .setParameter("status", status)
                     .getResultList();
             logger.info("findByStatus() – znaleziono {} zadań", list.size());
@@ -233,17 +230,17 @@ public class EmpTaskRepository {
     }
 
     /**
-     * Znajduje zadania, których opis zawiera podany fragment (bez uwzględniania wielkości liter).
+     * Znajduje zadania, których opis zawiera podany fragment (case-insensitive).
      *
      * @param descriptionFragment fragment tekstu opisu
-     * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
+     * @return lista obiektów EmpTask lub pusta lista
      */
     public List<EmpTask> findByDescription(String descriptionFragment) {
         logger.debug("findByDescription() – descriptionFragment={}", descriptionFragment);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<EmpTask> list = em.createQuery(
-                            "SELECT t FROM Task t WHERE LOWER(t.description) LIKE LOWER(CONCAT('%', :frag, '%'))",
+                            "SELECT t FROM EmpTask t WHERE LOWER(t.description) LIKE LOWER(CONCAT('%', :frag, '%'))",
                             EmpTask.class)
                     .setParameter("frag", descriptionFragment)
                     .getResultList();
@@ -261,16 +258,16 @@ public class EmpTaskRepository {
     /**
      * Znajduje zadania, których czas trwania zmiany mieści się w podanym przedziale.
      *
-     * @param from     początek przedziału czasu (inclusive)
-     * @param toTime   koniec przedziału czasu (inclusive)
-     * @return lista obiektów Task lub pusta lista w przypadku błędu lub braków
+     * @param from    początek przedziału czasu (inclusive)
+     * @param toTime  koniec przedziału czasu (inclusive)
+     * @return lista obiektów EmpTask lub pusta lista
      */
     public List<EmpTask> findByTimeShiftDuration(LocalTime from, LocalTime toTime) {
         logger.debug("findByTimeShiftDuration() – from={}, toTime={}", from, toTime);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<EmpTask> list = em.createQuery(
-                            "SELECT t FROM Task t WHERE t.durationOfTheShift BETWEEN :from AND :toTime",
+                            "SELECT t FROM EmpTask t WHERE t.durationOfTheShift BETWEEN :from AND :toTime",
                             EmpTask.class)
                     .setParameter("from", from)
                     .setParameter("toTime", toTime)
@@ -287,14 +284,9 @@ public class EmpTaskRepository {
     }
 
     /**
-     * Zamyka fabrykę EntityManagerFactory, zwalniając wszystkie zasoby.
-     * Po wywołaniu tej metody instancja nie może być używana do dalszych operacji.
+     * Zamyka wspólną fabrykę EMF (na zakończenie działania aplikacji).
      */
+    @Override
     public void close() {
-        logger.debug("close() – zamykanie EMF");
-        if (emf.isOpen()) {
-            emf.close();
-            logger.info("close() – EMF zamknięty");
-        }
     }
 }

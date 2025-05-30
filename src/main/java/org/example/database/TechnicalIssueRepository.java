@@ -1,17 +1,15 @@
 /*
  * Classname: TechnicalIssueRepository
- * Version information: 1.3
- * Date: 2025-05-22
+ * Version information: 2.0
+ * Date: 2025-05-30
  * Copyright notice: © BŁĘKITNI
  */
-
 
 package org.example.database;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.Persistence;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,24 +21,18 @@ import java.util.List;
 /**
  * Repozytorium do obsługi zgłoszeń technicznych.
  * Umożliwia tworzenie, odczyt, aktualizację, usuwanie oraz wyszukiwanie zgłoszeń.
+ *
+ * Korzysta z wspólnego EntityManagerFactory dostarczanego przez {@link EMFProvider}.
  */
 public class TechnicalIssueRepository {
+
     private static final Logger logger = LogManager.getLogger(TechnicalIssueRepository.class);
-    private final EntityManagerFactory emf;
 
-    /**
-     * Konstruktor inicjalizujący EntityManagerFactory dla persistence unit "myPU".
-     */
-    public TechnicalIssueRepository() {
-        this.emf = Persistence.createEntityManagerFactory("myPU");
-        logger.info("Utworzono TechnicalIssueRepository, EMF={}", emf);
-    }
+    /** Wspólna (singleton) fabryka pozyskiwana z EMFProvider. */
+    private static final EntityManagerFactory emf = EMFProvider.get();
 
-    /**
-     * Dodaje nowe zgłoszenie techniczne do bazy.
-     *
-     * @param issue obiekt TechnicalIssue do zapisania
-     */
+    /* =========================  OPERACJE CRUD  ========================= */
+
     public void addIssue(TechnicalIssue issue) {
         logger.debug("addIssue() – start, issue={}", issue);
         EntityManager em = emf.createEntityManager();
@@ -55,85 +47,48 @@ public class TechnicalIssueRepository {
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("addIssue() – EntityManager zamknięty");
         }
     }
 
-    /**
-     * Pobiera zgłoszenie techniczne o podanym identyfikatorze.
-     *
-     * @param id identyfikator zgłoszenia
-     * @return obiekt TechnicalIssue lub null, jeśli nie znaleziono
-     */
     public TechnicalIssue findIssueById(int id) {
-        logger.debug("findIssueById() – start, id={}", id);
+        logger.debug("findIssueById() – id={}", id);
         EntityManager em = emf.createEntityManager();
         try {
-            TechnicalIssue t = em.find(TechnicalIssue.class, id);
-            logger.info("findIssueById() – znaleziono: {}", t);
-            return t;
-        } catch (Exception e) {
-            logger.error("findIssueById() – błąd podczas pobierania zgłoszenia id={}", id, e);
-            return null;
+            return em.find(TechnicalIssue.class, id);
         } finally {
             em.close();
-            logger.debug("findIssueById() – EntityManager zamknięty");
         }
     }
 
-    /**
-     * Pobiera wszystkie zgłoszenia techniczne z bazy.
-     *
-     * @return lista obiektów TechnicalIssue lub pusta lista w przypadku błędu
-     */
     public List<TechnicalIssue> getAllIssues() {
-        logger.debug("getAllIssues() – start");
+        logger.debug("getAllIssues()");
         EntityManager em = emf.createEntityManager();
         try {
-            List<TechnicalIssue> list = em.createQuery(
-                            "SELECT t FROM TechnicalIssue t", TechnicalIssue.class)
+            return em.createQuery("SELECT t FROM TechnicalIssue t", TechnicalIssue.class)
                     .getResultList();
-            logger.info("getAllIssues() – pobrano {} zgłoszeń", list.size());
-            return list;
-        } catch (Exception e) {
-            logger.error("getAllIssues() – błąd podczas pobierania zgłoszeń", e);
-            return List.of();
         } finally {
             em.close();
-            logger.debug("getAllIssues() – EntityManager zamknięty");
         }
     }
 
-    /**
-     * Aktualizuje istniejące zgłoszenie techniczne (np. zmienia status lub opis).
-     *
-     * @param issue obiekt TechnicalIssue do zaktualizowania
-     */
     public void updateIssue(TechnicalIssue issue) {
-        logger.debug("updateIssue() – start, issue={}", issue);
+        logger.debug("updateIssue() – issue={}", issue);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             em.merge(issue);
             tx.commit();
-            logger.info("updateIssue() – zgłoszenie zaktualizowane: {}", issue);
         } catch (Exception e) {
-            logger.error("updateIssue() – błąd podczas aktualizacji zgłoszenia", e);
+            logger.error("updateIssue() – błąd podczas aktualizacji", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("updateIssue() – EntityManager zamknięty");
         }
     }
 
-    /**
-     * Usuwa zgłoszenie techniczne z bazy.
-     *
-     * @param issue obiekt TechnicalIssue do usunięcia
-     */
     public void removeIssue(TechnicalIssue issue) {
-        logger.debug("removeIssue() – start, issue={}", issue);
+        logger.debug("removeIssue() – issue={}", issue);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -141,139 +96,86 @@ public class TechnicalIssueRepository {
             TechnicalIssue managed = em.find(TechnicalIssue.class, issue.getId());
             if (managed != null) {
                 em.remove(managed);
-                logger.info("removeIssue() – usunięto zgłoszenie: {}", managed);
             } else {
-                logger.warn("removeIssue() – brak zgłoszenia o id={}", issue.getId());
+                logger.warn("removeIssue() – brak rekordu o id={}", issue.getId());
             }
             tx.commit();
         } catch (Exception e) {
-            logger.error("removeIssue() – błąd podczas usuwania zgłoszenia", e);
+            logger.error("removeIssue() – błąd podczas usuwania", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
-            logger.debug("removeIssue() – EntityManager zamknięty");
         }
     }
 
-    // =========================================================
-    // === Poniżej metody wyszukiwania po różnych kryteriach ===
-    // =========================================================
+    /* =========================  WYSZUKIWANIE  ========================= */
 
-    /**
-     * Wyszukuje zgłoszenia, których typ zawiera podany fragment (bez uwzględniania wielkości liter).
-     *
-     * @param typeFragment fragment tekstu pola type
-     * @return lista dopasowanych zgłoszeń lub pusta lista
-     */
     public List<TechnicalIssue> findByType(String typeFragment) {
-        logger.debug("findByType() – typeFragment={}", typeFragment);
+        logger.debug("findByType() – fragment={}", typeFragment);
         EntityManager em = emf.createEntityManager();
         try {
-            List<TechnicalIssue> list = em.createQuery(
-                            "SELECT t FROM TechnicalIssue t WHERE LOWER(t.type) LIKE LOWER(CONCAT('%', :frag, '%'))",
+            return em.createQuery(
+                            "SELECT t FROM TechnicalIssue t " +
+                                    "WHERE LOWER(t.type) LIKE LOWER(CONCAT('%', :frag, '%'))",
                             TechnicalIssue.class)
                     .setParameter("frag", typeFragment)
                     .getResultList();
-            logger.info("findByType() – znaleziono {} zgłoszeń", list.size());
-            return list;
-        } catch (Exception e) {
-            logger.error("findByType() – błąd podczas wyszukiwania", e);
-            return List.of();
         } finally {
             em.close();
-            logger.debug("findByType() – EntityManager zamknięty");
         }
     }
 
-    /**
-     * Wyszukuje zgłoszenia z datą zgłoszenia w podanym przedziale.
-     *
-     * @param start początek przedziału (inclusive)
-     * @param end   koniec przedziału (inclusive)
-     * @return lista dopasowanych zgłoszeń lub pusta lista
-     */
     public List<TechnicalIssue> findByDate(LocalDate start, LocalDate end) {
-        logger.debug("findByDate() – start={}, end={}", start, end);
+        logger.debug("findByDate() – {} – {}", start, end);
         EntityManager em = emf.createEntityManager();
         try {
-            List<TechnicalIssue> list = em.createQuery(
-                            "SELECT t FROM TechnicalIssue t WHERE t.dateSubmitted BETWEEN :start AND :end",
+            return em.createQuery(
+                            "SELECT t FROM TechnicalIssue t " +
+                                    "WHERE t.dateSubmitted BETWEEN :start AND :end",
                             TechnicalIssue.class)
                     .setParameter("start", start)
-                    .setParameter("end", end)
+                    .setParameter("end",   end)
                     .getResultList();
-            logger.info("findByDate() – znaleziono {} zgłoszeń", list.size());
-            return list;
-        } catch (Exception e) {
-            logger.error("findByDate() – błąd podczas wyszukiwania", e);
-            return List.of();
         } finally {
             em.close();
-            logger.debug("findByDate() – EntityManager zamknięty");
         }
     }
 
-    /**
-     * Wyszukuje zgłoszenia o dokładnie podanym statusie.
-     *
-     * @param status status zgłoszenia
-     * @return lista dopasowanych zgłoszeń lub pusta lista
-     */
     public List<TechnicalIssue> findByStatus(String status) {
         logger.debug("findByStatus() – status={}", status);
         EntityManager em = emf.createEntityManager();
         try {
-            List<TechnicalIssue> list = em.createQuery(
+            return em.createQuery(
                             "SELECT t FROM TechnicalIssue t WHERE t.status = :status",
                             TechnicalIssue.class)
                     .setParameter("status", status)
                     .getResultList();
-            logger.info("findByStatus() – znaleziono {} zgłoszeń", list.size());
-            return list;
-        } catch (Exception e) {
-            logger.error("findByStatus() – błąd podczas wyszukiwania", e);
-            return List.of();
         } finally {
             em.close();
-            logger.debug("findByStatus() – EntityManager zamknięty");
         }
     }
 
-    /**
-     * Wyszukuje zgłoszenia zgłoszone przez konkretnego pracownika.
-     *
-     * @param employeeId identyfikator pracownika
-     * @return lista dopasowanych zgłoszeń lub pusta lista
-     */
     public List<TechnicalIssue> findByEmployee(int employeeId) {
         logger.debug("findByEmployee() – employeeId={}", employeeId);
         EntityManager em = emf.createEntityManager();
         try {
-            List<TechnicalIssue> list = em.createQuery(
+            return em.createQuery(
                             "SELECT t FROM TechnicalIssue t WHERE t.employee.id = :pid",
                             TechnicalIssue.class)
                     .setParameter("pid", employeeId)
                     .getResultList();
-            logger.info("findByEmployee() – znaleziono {} zgłoszeń", list.size());
-            return list;
-        } catch (Exception e) {
-            logger.error("findByEmployee() – błąd podczas wyszukiwania", e);
-            return List.of();
         } finally {
             em.close();
-            logger.debug("findByEmployee() – EntityManager zamknięty");
         }
     }
 
+    /* =================================================================== */
+
     /**
-     * Zamyka fabrykę EntityManagerFactory, zwalniając wszystkie zasoby.
-     * Po wywołaniu tej metody instancja nie może być używana do dalszych operacji.
+     * Metoda zostaje, by spełnić konwencję, ale **nie** zamyka wspólnej fabryki.
+     * Fabrykę zamykamy raz ― w `EMFProvider.close()` przy wyłączaniu aplikacji.
      */
     public void close() {
-        logger.debug("close() – zamykanie EMF");
-        if (emf.isOpen()) {
-            emf.close();
-            logger.info("close() – EMF zamknięty");
-        }
+        logger.debug("TechnicalIssueRepository.close() – nic do zamknięcia (EMF współdzielone)");
     }
 }

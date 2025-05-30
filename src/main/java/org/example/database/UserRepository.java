@@ -1,76 +1,57 @@
 /*
  * Classname: UserRepository
- * Version information: 1.4
- * Date: 2025-05-22
+ * Version information: 2.0
+ * Date: 2025-05-30
  * Copyright notice: © BŁĘKITNI
  */
 
-
 package org.example.database;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.sys.Employee;
 import org.example.sys.PasswordResetToken;
 
+import java.util.Date;
 import java.util.List;
 
-/**
- * Repozytorium do zarządzania pracownikami (użytkownikami) w systemie.
- * Umożliwia tworzenie, odczyt, aktualizację, usuwanie oraz zaawansowane wyszukiwanie pracowników.
- */
 public class UserRepository {
     private static final Logger logger = LogManager.getLogger(UserRepository.class);
-    private final EntityManagerFactory emf;
     private static int loggedInEmployeeId = -1;
 
-    /**
-     * Konstruktor inicjalizujący fabrykę EntityManagerFactory dla persistence unit "myPU".
-     */
     public UserRepository() {
-        this.emf = Persistence.createEntityManagerFactory("myPU");
-        logger.info("Utworzono UserRepository, EMF = {}", emf);
+        logger.info("Używam wspólnego EMF z EMFProvider");
     }
 
-    /**
-     * Pobiera wszystkich pracowników nieoznaczonych jako usunięci (soft delete = false).
-     *
-     * @return lista aktywnych pracowników lub pusta lista w przypadku błędu
-     */
     public List<Employee> getAllEmployees() {
-        logger.debug("getAllEmployess() – start");
-        EntityManager em = emf.createEntityManager();
+        logger.debug("getAllEmployees() – start");
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Employee> list = em.createQuery(
-                    "SELECT e FROM Employee e WHERE e.deleted = FALSE",
-                    Employee.class
-            ).getResultList();
-            logger.info("getAllEmployess() – znaleziono {} pracowników", list.size());
+                            "SELECT e FROM Employee e WHERE e.deleted = false", Employee.class)
+                    .getResultList();
+            logger.info("getAllEmployees() – znaleziono {} pracowników", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("getAllEmployess() – błąd podczas pobierania pracowników", e);
+            logger.error("getAllEmployees() – błąd podczas pobierania pracowników", e);
             return List.of();
         } finally {
             em.close();
-            logger.debug("getAllEmployess() – EM zamknięty");
+            logger.debug("getAllEmployees() – EM zamknięty");
         }
     }
 
-    /**
-     * Pobiera wszystkich pracowników o stanowisku 'Kasjer', którzy nie są usunięci.
-     *
-     * @return lista pracowników na stanowisku Kasjer lub pusta lista
-     */
     public List<Employee> getCashiers() {
         logger.debug("getCashiers() – start");
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Employee> list = em.createQuery(
-                    "SELECT e FROM Employee e WHERE e.position = 'Kasjer' AND e.deleted = FALSE",
-                    Employee.class
-            ).getResultList();
+                            "SELECT e FROM Employee e WHERE e.position = 'Kasjer' AND e.deleted = false", Employee.class)
+                    .getResultList();
             logger.info("getCashiers() – znaleziono {} kasjerów", list.size());
             return list;
         } catch (Exception e) {
@@ -82,20 +63,12 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Wyszukuje pracownika po unikalnym loginie, pomijając usuniętych.
-     *
-     * @param login login pracownika
-     * @return obiekt Employee lub null, jeśli nie znaleziono lub użytkownik jest usunięty
-     */
     public Employee findByLogin(String login) {
         logger.debug("findByLogin() – start, login={}", login);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             Employee e = em.createQuery(
-                            "SELECT e FROM Employee e WHERE e.login = :login",
-                            Employee.class
-                    )
+                            "SELECT e FROM Employee e WHERE e.login = :login", Employee.class)
                     .setParameter("login", login)
                     .getSingleResult();
             if (e != null && !e.isDeleted()) {
@@ -117,21 +90,12 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Uwierzytelnia pracownika po loginie i haśle; ustawia zalogowanego.
-     *
-     * @param login login
-     * @param password hasło
-     * @return zalogowany obiekt Employee lub null w przypadku niepowodzenia
-     */
     public Employee findByLoginAndPassword(String login, String password) {
         logger.debug("findByLoginAndPassword() – start, login={}", login);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             Employee e = em.createQuery(
-                            "SELECT e FROM Employee e WHERE e.login = :login AND e.password = :password",
-                            Employee.class
-                    )
+                            "SELECT e FROM Employee e WHERE e.login = :login AND e.password = :password", Employee.class)
                     .setParameter("login", login)
                     .setParameter("password", password)
                     .getSingleResult();
@@ -155,15 +119,9 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Pobiera pracownika po jego identyfikatorze, pomijając usuniętych.
-     *
-     * @param id identyfikator pracownika
-     * @return obiekt Employee lub null
-     */
     public Employee findById(int id) {
         logger.debug("findById() – start, id={}", id);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             Employee e = em.find(Employee.class, id);
             if (e != null && !e.isDeleted()) {
@@ -182,14 +140,9 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Dodaje nowego pracownika do bazy.
-     *
-     * @param employee encja Employee do zapisania
-     */
     public void addEmployee(Employee employee) {
         logger.debug("addEmployee() – start, {}", employee);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -205,14 +158,9 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Aktualizuje istniejącego pracownika w bazie.
-     *
-     * @param employee encja Employee do zaktualizowania
-     */
     public void updateEmployee(Employee employee) {
         logger.debug("updateEmployee() – start, {}", employee);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -228,14 +176,9 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Oznacza pracownika jako usuniętego (soft delete).
-     *
-     * @param employee encja Employee do oznaczenia jako usunięta
-     */
     public void removeEmployee(Employee employee) {
         logger.debug("removeEmployee() – start, {}", employee);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -243,7 +186,7 @@ public class UserRepository {
             if (m != null) {
                 m.setDeleted(true);
                 em.merge(m);
-                logger.info("removeEmployee() – ustawiono usuniety dla id={}", m.getId());
+                logger.info("removeEmployee() – ustawiono usunięty dla id={}", m.getId());
             } else {
                 logger.warn("removeEmployee() – brak pracownika id={}", employee.getId());
             }
@@ -257,18 +200,13 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Zwraca obiekt aktualnie zalogowanego pracownika.
-     *
-     * @return obiekt Employee lub null jeśli nikt nie jest zalogowany
-     */
     public Employee getCurrentEmployee() {
         logger.debug("getCurrentEmployee() – currentId={}", loggedInEmployeeId);
         if (loggedInEmployeeId < 0) {
             logger.info("getCurrentEmployee() – brak zalogowanego pracownika");
             return null;
         }
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             Employee e = em.find(Employee.class, loggedInEmployeeId);
             if (e != null && !e.isDeleted()) {
@@ -284,41 +222,25 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Ustawia ID aktualnie zalogowanego pracownika.
-     *
-     * @param employeeId identyfikator pracownika
-     */
     public static void setLoggedInEmployee(int employeeId) {
         logger.debug("setLoggedInEmployee() – {}", employeeId);
         loggedInEmployeeId = employeeId;
     }
 
-
-    /**
-     * Resetuje informację o aktualnie zalogowanym pracowniku.
-     */
     public static void resetCurrentEmployee() {
         logger.debug("resetCurrentEmployee() – reset ID");
         loggedInEmployeeId = -1;
     }
 
-    /**
-     * Wyszukuje pracowników po fragmencie imienia, pomijając usuniętych.
-     *
-     * @param nameFragment fragment imienia do wyszukania
-     * @return lista pasujących pracowników lub pusta lista
-     */
     public List<Employee> findByName(String nameFragment) {
         logger.debug("findByName() – fragment={}", nameFragment);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Employee> list = em.createQuery(
                             "SELECT e FROM Employee e " +
                                     "WHERE LOWER(e.name) LIKE LOWER(CONCAT('%', :frag, '%')) " +
-                                    "AND e.deleted = FALSE",
-                            Employee.class
-                    )
+                                    "  AND e.deleted = FALSE",
+                            Employee.class)
                     .setParameter("frag", nameFragment)
                     .getResultList();
             logger.info("findByName() – znaleziono {} pracowników", list.size());
@@ -332,22 +254,15 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Wyszukuje pracowników po fragmencie nazwiska, pomijając usuniętych.
-     *
-     * @param surnameFragment fragment nazwiska
-     * @return lista pasujących pracowników lub pusta lista
-     */
     public List<Employee> findBySurname(String surnameFragment) {
         logger.debug("findBySurname() – fragment={}", surnameFragment);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Employee> list = em.createQuery(
                             "SELECT e FROM Employee e " +
                                     "WHERE LOWER(e.surname) LIKE LOWER(CONCAT('%', :frag, '%')) " +
-                                    "AND e.deleted = FALSE",
-                            Employee.class
-                    )
+                                    "  AND e.deleted = FALSE",
+                            Employee.class)
                     .setParameter("frag", surnameFragment)
                     .getResultList();
             logger.info("findBySurname() – znaleziono {} pracowników", list.size());
@@ -361,23 +276,15 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Wyszukuje pracowników w podanym przedziale wieku, pomijając usuniętych.
-     *
-     * @param min minimalny wiek
-     * @param max maksymalny wiek
-     * @return lista pracowników spełniających kryterium lub pusta lista
-     */
     public List<Employee> findByAge(int min, int max) {
         logger.debug("findByAge() – min={}, max={}", min, max);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Employee> list = em.createQuery(
                             "SELECT e FROM Employee e " +
                                     "WHERE e.age BETWEEN :min AND :max " +
-                                    "AND e.deleted = FALSE",
-                            Employee.class
-                    )
+                                    "  AND e.deleted = FALSE",
+                            Employee.class)
                     .setParameter("min", min)
                     .setParameter("max", max)
                     .getResultList();
@@ -392,21 +299,14 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Wyszukuje pracowników według identyfikatora adresu, pomijając usuniętych.
-     *
-     * @param addressId identyfikator adresu
-     * @return lista pracowników mieszkających pod danym adresem
-     */
     public List<Employee> findByAddress(int addressId) {
         logger.debug("findByAddress() – addressId={}", addressId);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Employee> list = em.createQuery(
                             "SELECT e FROM Employee e " +
                                     "WHERE e.address.id = :aid AND e.deleted = FALSE",
-                            Employee.class
-                    )
+                            Employee.class)
                     .setParameter("aid", addressId)
                     .getResultList();
             logger.info("findByAddress() – znaleziono {} pracowników", list.size());
@@ -420,22 +320,15 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Wyszukuje pracowników po fragmencie e-maila, pomijając usuniętych.
-     *
-     * @param emailFragment fragment adresu e-mail
-     * @return lista pasujących pracowników lub pusta lista
-     */
     public List<Employee> findByEmail(String emailFragment) {
         logger.debug("findByEmail() – fragment={}", emailFragment);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Employee> list = em.createQuery(
                             "SELECT e FROM Employee e " +
                                     "WHERE LOWER(e.email) LIKE LOWER(CONCAT('%', :frag, '%')) " +
-                                    "AND e.deleted = FALSE",
-                            Employee.class
-                    )
+                                    "  AND e.deleted = FALSE",
+                            Employee.class)
                     .setParameter("frag", emailFragment)
                     .getResultList();
             logger.info("findByEmail() – znaleziono {} pracowników", list.size());
@@ -449,23 +342,15 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Wyszukuje pracowników w podanym przedziale zarobków, pomijając usuniętych.
-     *
-     * @param min minimalne zarobki
-     * @param max maksymalne zarobki
-     * @return lista pracowników spełniających kryterium lub pusta lista
-     */
     public List<Employee> findBySalary(double min, double max) {
         logger.debug("findBySalary() – min={}, max={}", min, max);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Employee> list = em.createQuery(
                             "SELECT e FROM Employee e " +
                                     "WHERE e.salary BETWEEN :min AND :max " +
-                                    "AND e.deleted = FALSE",
-                            Employee.class
-                    )
+                                    "  AND e.deleted = FALSE",
+                            Employee.class)
                     .setParameter("min", min)
                     .setParameter("max", max)
                     .getResultList();
@@ -480,21 +365,14 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Wyszukuje pracowników według stanowiska, pomijając usuniętych.
-     *
-     * @param position nazwa stanowiska
-     * @return lista pracowników na danym stanowisku lub pusta lista
-     */
     public List<Employee> findByPosition(String position) {
         logger.debug("findByPosition() – position={}", position);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Employee> list = em.createQuery(
                             "SELECT e FROM Employee e " +
                                     "WHERE e.position = :st AND e.deleted = FALSE",
-                            Employee.class
-                    )
+                            Employee.class)
                     .setParameter("st", position)
                     .getResultList();
             logger.info("findByPosition() – znaleziono {} pracowników", list.size());
@@ -508,20 +386,15 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Pobiera pracowników będących na zwolnieniu lekarskim, pomijając usuniętych.
-     *
-     * @return lista pracowników na zwolnieniu
-     */
     public List<Employee> getOnSickLeave() {
         logger.debug("getOnSickLeave() – start");
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Employee> list = em.createQuery(
-                    "SELECT e FROM Employee e " +
-                            "WHERE e.onSickLeave = TRUE AND e.deleted = FALSE",
-                    Employee.class
-            ).getResultList();
+                            "SELECT e FROM Employee e " +
+                                    "WHERE e.onSickLeave = TRUE AND e.deleted = FALSE",
+                            Employee.class)
+                    .getResultList();
             logger.info("getOnSickLeave() – znaleziono {} pracowników", list.size());
             return list;
         } catch (Exception e) {
@@ -533,20 +406,15 @@ public class UserRepository {
         }
     }
 
-    /**
-     * Pobiera pracowników niebędących na zwolnieniu lekarskim, pomijając usuniętych.
-     *
-     * @return lista pracowników nie na zwolnieniu
-     */
     public List<Employee> getNotOnSickLeave() {
         logger.debug("getNotOnSickLeave() – start");
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Employee> list = em.createQuery(
-                    "SELECT e FROM Employee e " +
-                            "WHERE e.onSickLeave = FALSE AND e.deleted = FALSE",
-                    Employee.class
-            ).getResultList();
+                            "SELECT e FROM Employee e " +
+                                    "WHERE e.onSickLeave = FALSE AND e.deleted = FALSE",
+                            Employee.class)
+                    .getResultList();
             logger.info("getNotOnSickLeave() – znaleziono {} pracowników", list.size());
             return list;
         } catch (Exception e) {
@@ -558,44 +426,40 @@ public class UserRepository {
         }
     }
 
-    // W klasie UserRepository
     public boolean updatePasswordByEmail(String email, String newHashedPassword) {
         logger.debug("updatePasswordByEmail() – email={}", email);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-
             List<Employee> employees = em.createQuery(
                             "SELECT e FROM Employee e WHERE e.email = :email AND e.deleted = FALSE",
                             Employee.class)
                     .setParameter("email", email)
                     .getResultList();
-
             if (employees.isEmpty()) {
                 logger.warn("updatePasswordByEmail() – brak użytkownika z emailem: {}", email);
                 return false;
             }
-
             Employee employee = employees.get(0);
             employee.setPassword(newHashedPassword);
             em.merge(employee);
             tx.commit();
-
             logger.info("updatePasswordByEmail() – zaktualizowano hasło dla: {}", email);
             return true;
-        } catch (Exception ex) {
-            logger.error("updatePasswordByEmail() – błąd", ex);
+        } catch (Exception e) {
+            logger.error("updatePasswordByEmail() – błąd", e);
             if (tx.isActive()) tx.rollback();
             return false;
         } finally {
             em.close();
+            logger.debug("updatePasswordByEmail() – EM zamknięty");
         }
     }
 
     public boolean savePasswordResetToken(PasswordResetToken token) {
         logger.debug("savePasswordResetToken() – start");
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -603,46 +467,50 @@ public class UserRepository {
             tx.commit();
             logger.info("savePasswordResetToken() – zapisano token dla użytkownika: {}", token.getUserId());
             return true;
-        } catch (Exception ex) {
-            logger.error("savePasswordResetToken() – błąd", ex);
+        } catch (Exception e) {
+            logger.error("savePasswordResetToken() – błąd", e);
             if (tx.isActive()) tx.rollback();
             return false;
         } finally {
             em.close();
+            logger.debug("savePasswordResetToken() – EM zamknięty");
         }
     }
 
-    // Weryfikacja tokenu
     public PasswordResetToken findValidToken(String email, String codeHash) {
-        logger.debug("findValidToken() – email: {}", email);
-        EntityManager em = emf.createEntityManager();
+        logger.debug("findValidToken() – email={}", email);
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             Employee employee = em.createQuery(
                             "SELECT e FROM Employee e WHERE e.email = :email AND e.deleted = FALSE",
                             Employee.class)
                     .setParameter("email", email)
                     .getSingleResult();
-
             if (employee == null) return null;
-
             return em.createQuery(
-                            "SELECT t FROM PasswordResetToken t WHERE t.userId = :userId AND t.resetCodeHash = :codeHash AND t.expirationTime > CURRENT_TIMESTAMP AND t.used = false",
+                            "SELECT t FROM PasswordResetToken t " +
+                                    " WHERE t.userId = :userId " +
+                                    "   AND t.resetCodeHash = :codeHash " +
+                                    "   AND t.expirationTime > CURRENT_TIMESTAMP " +
+                                    "   AND t.used = FALSE",
                             PasswordResetToken.class)
                     .setParameter("userId", (long) employee.getId())
                     .setParameter("codeHash", codeHash)
                     .getSingleResult();
-        } catch (Exception ex) {
-            logger.error("findValidToken() – błąd", ex);
+        } catch (NoResultException e) {
+            return null;
+        } catch (Exception e) {
+            logger.error("findValidToken() – błąd", e);
             return null;
         } finally {
             em.close();
+            logger.debug("findValidToken() – EM zamknięty");
         }
     }
 
-    // Oznaczanie tokenu jako użyty
     public boolean markTokenAsUsed(PasswordResetToken token) {
-        logger.debug("markTokenAsUsed() – token ID: {}", token.getId());
-        EntityManager em = emf.createEntityManager();
+        logger.debug("markTokenAsUsed() – token ID={}", token.getId());
+        EntityManager em = EMFProvider.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -650,46 +518,37 @@ public class UserRepository {
             em.merge(token);
             tx.commit();
             return true;
-        } catch (Exception ex) {
-            logger.error("markTokenAsUsed() – błąd", ex);
+        } catch (Exception e) {
+            logger.error("markTokenAsUsed() – błąd", e);
             if (tx.isActive()) tx.rollback();
             return false;
         } finally {
             em.close();
+            logger.debug("markTokenAsUsed() – EM zamknięty");
         }
     }
 
     public List<PasswordResetToken> findValidTokensByUserId(long userId) {
-        logger.debug("findValidTokensByUserId() – userId: {}", userId);
-        EntityManager em = emf.createEntityManager();
+        logger.debug("findValidTokensByUserId() – userId={}", userId);
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
-            String jpql = "SELECT t FROM PasswordResetToken t WHERE t.userId = :userId AND t.expirationTime > CURRENT_TIMESTAMP AND t.used = false";
-            TypedQuery<PasswordResetToken> query = em.createQuery(jpql, PasswordResetToken.class);
-            query.setParameter("userId", userId);
-            return query.getResultList();
-        } catch (Exception ex) {
-            logger.error("findValidTokensByUserId() – błąd", ex);
+            return em.createQuery(
+                            "SELECT t FROM PasswordResetToken t " +
+                                    " WHERE t.userId = :userId " +
+                                    "   AND t.expirationTime > CURRENT_TIMESTAMP " +
+                                    "   AND t.used = FALSE",
+                            PasswordResetToken.class)
+                    .setParameter("userId", userId)
+                    .getResultList();
+        } catch (Exception e) {
+            logger.error("findValidTokensByUserId() – błąd", e);
             return List.of();
         } finally {
             em.close();
+            logger.debug("findValidTokensByUserId() – EM zamknięty");
         }
     }
 
-    /**
-     * Zamyka fabrykę EntityManagerFactory, zwalniając wszystkie zasoby.
-     * Po wywołaniu tej metody instancja repozytorium nie może być już używana.
-     */
     public void close() {
-        logger.debug("close() – start zamykania EMF");
-        try {
-            if (emf.isOpen()) {
-                emf.close();
-                logger.info("close() – EMF zamknięty");
-            } else {
-                logger.warn("close() – EMF był już zamknięty");
-            }
-        } catch (Exception ex) {
-            logger.error("close() – błąd podczas zamykania EMF", ex);
-        }
     }
 }

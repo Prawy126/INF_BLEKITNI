@@ -59,7 +59,6 @@ public class Login implements ILacz {
             protected Employee call() throws Exception {
                 UserRepository repo = new UserRepository();
                 Employee user = repo.findByLogin(username);
-                repo.close();
                 if (user == null) {
                     logger.warn("Nie znaleziono użytkownika o loginie: {}", username);
                     throw new Exception("Nie znaleziono użytkownika o podanym loginie");

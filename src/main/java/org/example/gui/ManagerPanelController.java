@@ -373,7 +373,6 @@ public class ManagerPanelController {
         backButton.setOnAction(e -> showTaskPanel());
 
         primaryStage.setOnHidden(event -> {
-            absenceRepository.close();
         });
 
         layout.getChildren().addAll(
@@ -527,8 +526,6 @@ public class ManagerPanelController {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            userRepository.close();
-            taskRepository.close();
         }
     }
 

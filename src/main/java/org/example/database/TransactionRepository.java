@@ -1,26 +1,24 @@
 /*
  * Classname: TransactionRepository
- * Version information: 1.3
- * Date: 2025-05-22
+ * Version information: 2.0
+ * Date: 2025-05-30
  * Copyright notice: © BŁĘKITNI
  */
 
 package org.example.database;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.Persistence;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.sys.Product;
 import org.example.sys.Transaction;
 import org.example.sys.TransactionProduct;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
 
 import java.time.LocalDate;
@@ -28,22 +26,17 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Repozytorium zarządzające transakcjami w bazie danych.
- * Umożliwia tworzenie, odczyt, aktualizację, usuwanie oraz zaawansowane wyszukiwanie transakcji.
- */
 public class TransactionRepository {
     private static final Logger logger = LogManager.getLogger(TransactionRepository.class);
-    private final EntityManagerFactory emf;
 
     public TransactionRepository() {
-        this.emf = Persistence.createEntityManagerFactory("myPU");
-        logger.info("Utworzono TransactionRepository, EMF={}", emf);
+        // już nie tworzymy EMF tutaj
+        logger.info("Używam wspólnego EMF z EMFProvider");
     }
 
     public void addTransaction(Transaction transaction) {
         logger.debug("addTransaction() – start, transaction={}", transaction);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -61,7 +54,7 @@ public class TransactionRepository {
 
     public Transaction findTransactionById(int id) {
         logger.debug("findTransactionById() – start, id={}", id);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             Transaction t = em.find(Transaction.class, id);
             logger.info("findTransactionById() – znaleziono: {}", t);
@@ -77,7 +70,7 @@ public class TransactionRepository {
 
     public List<Transaction> getAllTransactions() {
         logger.debug("getAllTransactions() – start");
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Transaction> list = em.createQuery("SELECT t FROM Transaction t", Transaction.class)
                     .getResultList();
@@ -94,7 +87,7 @@ public class TransactionRepository {
 
     public void removeTransactions(int id) {
         logger.debug("removeTransactions() – start, id={}", id);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -117,7 +110,7 @@ public class TransactionRepository {
 
     public void updateTransaction(Transaction transaction) {
         logger.debug("updateTransaction() – start, transaction={}", transaction);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -136,19 +129,17 @@ public class TransactionRepository {
     // =============== GŁÓWNE ZMIANY ===============
     public int getSoldQuantityForProductOnDate(Product product, LocalDate date) {
         logger.debug("getSoldQuantityForProductOnDate() – start, product={}, date={}", product, date);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             Date sqlDate = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
-
             Long total = em.createQuery(
                             "SELECT COALESCE(SUM(tp.quantity), 0) " +
                                     "FROM TransactionProduct tp " +
-                                    "JOIN tp.transaction t " +  // Łączenie z transakcją
+                                    "JOIN tp.transaction t " +
                                     "WHERE tp.product = :product AND t.date = :date", Long.class)
                     .setParameter("product", product)
                     .setParameter("date", sqlDate, TemporalType.DATE)
                     .getSingleResult();
-
             int result = total.intValue();
             logger.info("getSoldQuantityForProductOnDate() – sprzedano {} sztuk produktu {} w dniu {}",
                     result, product, date);
@@ -165,7 +156,7 @@ public class TransactionRepository {
 
     public List<Transaction> getTransactionsBetweenDates(Date startDate, Date endDate) {
         logger.debug("getTransactionsBetweenDates() – start, from={}, to={}", startDate, endDate);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Transaction> cq = cb.createQuery(Transaction.class);
@@ -192,12 +183,12 @@ public class TransactionRepository {
     public void addProductToTransaction(Transaction transaction, Product product, int quantity) {
         logger.debug("addProductToTransaction() – start, transactionId={}, productId={}, quantity={}",
                 transaction.getId(), product.getId(), quantity);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             Transaction managedTx = em.find(Transaction.class, transaction.getId());
-            Product     managedPr = em.find(Product.class, product.getId());
+            Product    managedPr = em.find(Product.class, product.getId());
             if (managedTx != null && managedPr != null) {
                 String jpql = "SELECT tp FROM TransactionProduct tp " +
                         "WHERE tp.transaction.id = :txId AND tp.product.id = :prodId";
@@ -236,7 +227,7 @@ public class TransactionRepository {
 
     public List<Transaction> findByEmployee(int employeeId) {
         logger.debug("findByEmployee() – employeeId={}", employeeId);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Transaction> list = em.createQuery(
                             "SELECT t FROM Transaction t WHERE t.employee.id = :pid", Transaction.class)
@@ -255,7 +246,7 @@ public class TransactionRepository {
 
     public List<Transaction> findByDate(Date date) {
         logger.debug("findByDate() – date={}", date);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Transaction> list = em.createQuery(
                             "SELECT t FROM Transaction t WHERE t.date = :date", Transaction.class)
@@ -274,12 +265,12 @@ public class TransactionRepository {
 
     public List<Transaction> findByDateRange(Date fromDate, Date toDate) {
         logger.debug("findByDateRange() – from={}, to={}", fromDate, toDate);
-        EntityManager em = emf.createEntityManager();
+        EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Transaction> list = em.createQuery(
                             "SELECT t FROM Transaction t WHERE t.date BETWEEN :from AND :to", Transaction.class)
                     .setParameter("from", fromDate, TemporalType.DATE)
-                    .setParameter("to", toDate,   TemporalType.DATE)
+                    .setParameter("to",   toDate,   TemporalType.DATE)
                     .getResultList();
             logger.info("findByDateRange() – znaleziono {} transakcji", list.size());
             return list;
@@ -294,17 +285,13 @@ public class TransactionRepository {
 
     public Session getSession() {
         logger.debug("getSession() – start");
-        EntityManager em = emf.createEntityManager();
-        Session session = em.unwrap(Session.class);
-        logger.info("getSession() – uzyskano sesję Hibernate: {}", session);
-        return session;
-    }
-
-    public void close() {
-        logger.debug("close() – zamykanie EMF");
-        if (emf.isOpen()) {
-            emf.close();
-            logger.info("close() – EMF zamknięty");
+        EntityManager em = EMFProvider.get().createEntityManager();
+        try {
+            Session session = em.unwrap(Session.class);
+            logger.info("getSession() – uzyskano sesję Hibernate: {}", session);
+            return session;
+        } finally {
+            // Uwaga: tu nie zamykamy EM, bo sesja może go potrzebować.
         }
     }
 }
