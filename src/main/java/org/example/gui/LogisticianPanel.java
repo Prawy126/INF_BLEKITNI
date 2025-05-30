@@ -136,11 +136,15 @@ public class LogisticianPanel {
             controller.showInventoryReports();
         });
 
+        Button closeShiftBtn   = createStyledButton("Zamknij zmianę", "#E67E22");
+        closeShiftBtn.setOnAction(e -> controller.showCloseShiftPanel());
+
         Button absenceButton = createStyledButton("Złóż wniosek o nieobecność");
         absenceButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Złóż wniosek o nieobecność'");
             controller.showAbsenceRequestForm();
         });
+
 
         Button logoutButton = createStyledButton("Wyloguj", "#E74C3C");
         logoutButton.setOnAction(e -> {
@@ -148,7 +152,7 @@ public class LogisticianPanel {
             controller.logout();
         });
 
-        menu.getChildren().addAll(logo, inventoryButton, ordersButton, reportsButton, absenceButton, logoutButton);
+        menu.getChildren().addAll(logo, inventoryButton, ordersButton, reportsButton, absenceButton, closeShiftBtn,  logoutButton);
         logger.debug("Menu utworzone pomyślnie z {} przyciskami", menu.getChildren().size() - 1); // -1 dla logo
 
         return menu;

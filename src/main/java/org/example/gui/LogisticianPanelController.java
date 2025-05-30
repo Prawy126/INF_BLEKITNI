@@ -16,17 +16,7 @@ import javafx.geometry.Pos;
 
 import javafx.scene.Scene;
 
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import javafx.scene.layout.GridPane;
@@ -49,10 +39,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static javafx.scene.control.Alert.AlertType.ERROR;
@@ -68,6 +55,7 @@ public class LogisticianPanelController {
     private static final Logger logger = LogManager.getLogger(LogisticianPanelController.class);
     private final ProductRepository productRepository = new ProductRepository();
     private final WarehouseRepository warehouseRepository = new WarehouseRepository();
+    private boolean reportGeneratedInCurrentSession;
 
     /**
      * Konstruktor przypisujący panel logistyka.
@@ -77,6 +65,17 @@ public class LogisticianPanelController {
     public LogisticianPanelController(LogisticianPanel logisticianPanel) {
         this.logisticianPanel = logisticianPanel;
         this.primaryStage = logisticianPanel.getPrimaryStage();
+        reportGeneratedInCurrentSession = false;
+        logger.info("LogisticianPanelController utworzony i przypisany do panelu wartość {}", logisticianPanel);
+        this.primaryStage.setOnCloseRequest(event -> {
+            if (!reportGeneratedInCurrentSession) {
+                event.consume();  // Zatrzymaj zamknięcie
+                showAlert(Alert.AlertType.ERROR,
+                        "Zamknięcie zablokowane",
+                        "Musisz wygenerować raport, aby zamknąć aplikację.");
+            }
+        });
+        logger.debug("Ustawiono obsługę zdarzenia zamknięcia okna");
     }
 
     public void showInventoryManagement() {
@@ -409,6 +408,9 @@ public class LogisticianPanelController {
             showAlert(Alert.AlertType.INFORMATION, "Sukces",
                     "Raport zapisany: " + targetFile.getAbsolutePath());
             stage.close();
+            reportGeneratedInCurrentSession = true; // raport został wygenerowany w tej sesji
+            logger.info("Raport magazynowy wygenerowany: {}", targetFile.getAbsolutePath());
+            logger.info("Flag reportGeneratedInCurrentSession ustawiona na true");
 
         } catch (Exception ex) {
             logger.error("Błąd generowania raportu", ex);
@@ -416,6 +418,51 @@ public class LogisticianPanelController {
                     "Generowanie raportu nie powiodło się: " + ex.getMessage());
         }
     }
+
+    /* -------------------------------------------------------------------- */
+    /*  PANEL ZAMKNIĘCIA ZMIANY                                             */
+    /* -------------------------------------------------------------------- */
+    public void showCloseShiftPanel() {
+        VBox layout = new VBox(15);
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
+
+        Label info = new Label("Zamknięcie zmiany (logistyk)");
+        info.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+
+        Button genBtn  = new Button("Generuj raport dzienny");
+        styleLogisticButton(genBtn, "#2980B9");
+        genBtn.setOnAction(e -> showReportDialog());
+
+        Button confirm = new Button("Potwierdź zamknięcie zmiany");
+        styleLogisticButton(confirm, "#E67E22");
+        confirm.setOnAction(e -> {
+            if (!reportGeneratedInCurrentSession) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Brak raportu");
+                alert.setHeaderText("Nie wygenerowano raportu dziennego");
+                alert.setContentText("Czy mimo to chcesz zamknąć aplikację?");
+
+                ButtonType cancelBtn = new ButtonType("Anuluj", ButtonBar.ButtonData.CANCEL_CLOSE);
+                ButtonType forceExit = new ButtonType("Zamknij mimo wszystko", ButtonBar.ButtonData.OK_DONE);
+                alert.getButtonTypes().setAll(cancelBtn, forceExit);
+
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isPresent() && result.get() == forceExit) {
+                    logger.warn("Forsowne wylogowanie logistyka bez raportu dziennego");
+                    reportGeneratedInCurrentSession = false;
+                    logoutByForce();
+                }
+                return;
+            }
+            logout();
+        });
+
+        layout.getChildren().addAll(info, genBtn, confirm);
+        logisticianPanel.setCenterPane(layout);
+    }
+
+
 
     /**
      * Otwiera formularz dodawania nowego zamówienia: wprowadzasz ID produktu,
@@ -700,14 +747,26 @@ public class LogisticianPanelController {
      * Zamyka aplikację i powraca do okna logowania.
      */
     public void logout() {
+        if (!reportGeneratedInCurrentSession) {
+            showAlert(Alert.AlertType.ERROR,
+                    "Wylogowanie zablokowane",
+                    "Musisz najpierw wygenerować raport dzienny, aby się wylogować.");
+            return;
+        }
+
+        reportGeneratedInCurrentSession = false;
+        logger.info("Wylogowanie z panelu logistyka, reset flagi reportGeneratedInCurrentSession");
+        logger.info("Uruchamianie ekranu logowania...");
+
         primaryStage.close();
-        Stage loginStage = new Stage();
         try {
-            new HelloApplication().start(loginStage);
+            new HelloApplication().start(new Stage());
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Błąd przy starcie ekranu logowania", e);
         }
     }
+
+
 
     /**
      * Wspólny styl dla przycisków w panelu logistyka.
@@ -727,4 +786,18 @@ public class LogisticianPanelController {
             button.setScaleY(1);
         });
     }
+    /**
+     * Zamyka aplikację bez sprawdzania flagi raportu.
+     * Używane tylko przy forsownym wyjściu.
+     */
+    private void logoutByForce() {
+        logger.info("Forsowne zamknięcie aplikacji bez raportu");
+        primaryStage.close();
+        try {
+            new HelloApplication().start(new Stage());
+        } catch (Exception e) {
+            logger.error("Błąd przy starcie ekranu logowania (forsowne)", e);
+        }
+    }
+
 }
