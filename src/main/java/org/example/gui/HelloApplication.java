@@ -171,6 +171,30 @@ public class HelloApplication extends Application {
             passwordField.setPromptText("Tutaj podaj hasło");
             passwordField.setStyle("-fx-background-color: #FFD966; -fx-padding: 5;");
 
+            // Pozwól na logowanie klawiszem Enter z pola hasła
+            passwordField.setOnKeyPressed(event -> {
+                switch (event.getCode()) {
+                    case ENTER:
+                        logger.debug("ENTER wciśnięty – próba logowania");
+                        try {
+                            Login.attemptLogin(
+                                    loginField.getText(),
+                                    passwordField.getText(),
+                                    root
+                            );
+                        } catch (Exception ex) {
+                            logger.error("BŁĄD podczas logowania przez ENTER: {}", ex.getMessage(), ex);
+                            showAlert(
+                                    Alert.AlertType.ERROR,
+                                    "Błąd logowania",
+                                    "Nie można zalogować",
+                                    "Wystąpił błąd podczas próby logowania: " + ex.getMessage()
+                            );
+                        }
+                        break;
+                }
+            });
+
             grid.add(loginLabel, 0, 0);
             grid.add(loginField, 1, 0);
             grid.add(passwordLabel, 0, 1);
