@@ -14,9 +14,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
+import java.sql.*;
 
 public class DatabaseInitializer implements ILacz {
     private static final Logger logger = LogManager.getLogger(DatabaseInitializer.class);
@@ -36,10 +34,8 @@ public class DatabaseInitializer implements ILacz {
         try (Connection conn = DriverManager.getConnection(MYSQL_SERVER_URL, MYSQL_USER, MYSQL_PASSWORD)) {
             logger.debug("Połączenie do serwera MySQL nawiązane: {}", MYSQL_SERVER_URL);
             logger.info("Tworzenie bazy danych: {}", DB_NAME);
-
-            try (Statement stmt = conn.createStatement()) {
-                stmt.execute("CREATE DATABASE IF NOT EXISTS " + DB_NAME);
-                logger.info("Baza danych '{}' utworzona lub już istnieje", DB_NAME);
+            if (!databaseExists(conn, "StonkaDB")) {
+                executeSqlScript(conn, SQL_FILE); // Uruchom skrypt tylko raz
             }
 
         } catch (Exception e) {
@@ -56,6 +52,17 @@ public class DatabaseInitializer implements ILacz {
         } catch (Exception e) {
             logger.error("Błąd podczas importowania danych do bazy '{}'", DB_NAME, e);
         }
+    }
+
+    private static boolean databaseExists(Connection conn, String dbName) throws SQLException {
+        try (ResultSet rs = conn.getMetaData().getCatalogs()) {
+            while (rs.next()) {
+                if (dbName.equals(rs.getString(1))) return true;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return false;
     }
 
     /**

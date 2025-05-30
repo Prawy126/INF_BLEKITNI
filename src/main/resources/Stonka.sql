@@ -1,8 +1,7 @@
 -- =============================================================
 -- USUWANIE I TWORZENIE BAZY DANYCH
 -- =============================================================
-DROP DATABASE IF EXISTS StonkaDB;
-CREATE DATABASE StonkaDB;
+CREATE DATABASE  IF NOT EXISTS StonkaDB;
 USE StonkaDB;
 
 -- =============================================================
@@ -255,6 +254,7 @@ INSERT INTO Zamowienia (Id_produktu, Id_pracownika, Ilosc, Cena, Data) VALUES
 (4, 4, 40, 279.60, '2025-04-08'),
 (5, 5, 25, 114.75, '2025-04-09');
 
+-- Maciek naucz się robić sensowne dane do testów, a nie takie bzdury
 -- Transakcje
 INSERT INTO Transakcje (Id_pracownika, Data) VALUES
 (1, '2025-04-10'),
