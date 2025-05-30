@@ -28,11 +28,11 @@ import javafx.util.Duration;
 import javafx.util.converter.IntegerStringConverter;
 import org.example.database.*;
 import org.example.sys.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import pdf.SalesReportGenerator;
 import org.hibernate.Session;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
@@ -45,7 +45,7 @@ import java.util.*;
  */
 public class CashierPanelController {
 
-    private static final Logger log = LoggerFactory.getLogger(CashierPanelController.class);
+    private static final Logger log = LogManager.getLogger(CashierPanelController.class);
     private final CashierPanel cashierPanel;
     private final ReportRepository reportRepository;
     private final TransactionRepository transactionRepository;
@@ -60,6 +60,7 @@ public class CashierPanelController {
         this.reportRepository = new ReportRepository();
         this.transactionRepository = new TransactionRepository();
         this.userRepository = new UserRepository();
+        this.reportGeneratedInCurrentSession = false;
 
         // Utworzenie katalogu na raporty, jeśli nie istnieje
         File reportsDir = new File(REPORTS_DIRECTORY);
@@ -168,6 +169,7 @@ public class CashierPanelController {
         confirmButton.setOnAction(e -> {
             if (cartItems.isEmpty()) {
                 showNotification("Błąd", "Koszyk jest pusty. Dodaj produkty do koszyka.");
+                log.info("Potwierdzenie zamknięcia zmiany – flaga raportu: {}", reportGeneratedInCurrentSession);
                 return;
             }
             saveTransaction(cartItems, dialog);
@@ -380,6 +382,7 @@ public class CashierPanelController {
         report.setFilePath(reportPath);
         reportRepository.addReport(report);
         reportGeneratedInCurrentSession = true;
+        log.info("Zapisano raport – flaga reportGeneratedInCurrentSession ustawiona na true.");
     }
 
     /**
@@ -726,6 +729,7 @@ public class CashierPanelController {
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
 
+        log.info("Otwarto panel zamknięcia zmiany. Flaga raportu: {}", reportGeneratedInCurrentSession);
         if (!reportGeneratedInCurrentSession) {
             Label warning = new Label("Uwaga: Nie wygenerowano jeszcze raportu dziennego!");
             warning.setStyle("-fx-text-fill: #E74C3C; -fx-font-weight: bold;");
@@ -733,16 +737,16 @@ public class CashierPanelController {
             genBtn.setOnAction(e -> {
                 showReportDialog();
                 // Ustaw flagę po wygenerowaniu raportu
-                reportGeneratedInCurrentSession = isDailyReportGeneratedToday();
+                //reportGeneratedInCurrentSession = isDailyReportGeneratedToday();
+                log.info("Po wygenerowaniu raportu (przez guzik): flaga reportGeneratedInCurrentSession = {}", reportGeneratedInCurrentSession);
             });
             layout.getChildren().addAll(warning, genBtn);
         }
 
         Button confirmButton = cashierPanel.createStyledButton("Potwierdź zamknięcie zmiany", "#E67E22");
         confirmButton.setOnAction(e -> {
-            boolean today = isDailyReportGeneratedToday();
 
-            if (!reportGeneratedInCurrentSession && !today) {
+            if (!reportGeneratedInCurrentSession ) {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Ostrzeżenie");
                 alert.setHeaderText("Nie wygenerowano raportu dziennego");
@@ -756,7 +760,7 @@ public class CashierPanelController {
                 if (res.isPresent()) {
                     if (res.get() == gen) {
                         showReportDialog();
-                        reportGeneratedInCurrentSession = isDailyReportGeneratedToday();
+                        //reportGeneratedInCurrentSession = isDailyReportGeneratedToday();
                         return;
                     } else if (res.get() == canc) {
                         return;
@@ -785,13 +789,13 @@ public class CashierPanelController {
             primaryStage.close();
             HelloApplication.showLoginScreen(primaryStage);
         });
-        reportGeneratedInCurrentSession = false; // Reset flagi przy otwarciu panelu
         layout.getChildren().add(confirmButton);
         cashierPanel.setCenterPane(layout);
     }
 
     public void resetReportGeneratedFlag() {
         reportGeneratedInCurrentSession = false;
+        log.info("Flaga raportu zresetowana ręcznie do false.");
     }
 
     /**
@@ -809,6 +813,7 @@ public class CashierPanelController {
 
     public void markReportAsGenerated() {
         this.reportGeneratedInCurrentSession = true;
+        log.info("Flaga raportu ustawiona ręcznie na true.");
     }
 
     public void checkReportFlagState(String panelName) {
@@ -1017,17 +1022,20 @@ public class CashierPanelController {
     /**
      * Wylogowuje kasjera, resetując flagę, kończąc zadania i przechodząc do ekranu logowania.
      */
+    /**
+     * Wylogowuje kasjera – nie pozwala, jeśli w bieżącej sesji (ani w bazie)
+     * nie ma raportu dziennego.
+     */
     public void logout() {
-        reportGeneratedInCurrentSession = false; // Resetuj flagę po zakończeniu zmiany
+        log.info("Wylogowanie rozpoczęte. Flaga raportu przed walidacją: {}", reportGeneratedInCurrentSession);
+        System.out.println("Używana klasa logera: " + log.getClass());
         if (!reportGeneratedInCurrentSession) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Uwaga");
-            alert.setHeaderText("Nie wygenerowano raportu dziennego");
-            alert.setContentText("Czy chcesz się wylogować bez raportu dziennego?");
-            Optional<ButtonType> result = alert.showAndWait();
-            if (result.isEmpty() || result.get() != ButtonType.OK) {
-                return;
-            }
+            log.warn("Brak raportu dziennego – wylogowanie zablokowane.");
+            Alert warn = new Alert(Alert.AlertType.WARNING);
+            warn.setTitle("Brak raportu dziennego");
+            warn.setHeaderText("Musisz wygenerować raport dzienny przed wylogowaniem.");
+            warn.showAndWait();
+            return;
         }
 
         Employee current = userRepository.getCurrentEmployee();
@@ -1035,15 +1043,16 @@ public class CashierPanelController {
             completeAllTasksForEmployee(current.getId());
         }
 
-        // Zresetuj flagę przy wylogowaniu
         reportGeneratedInCurrentSession = false;
+        log.info("Wylogowanie zakończone. Flaga raportu zresetowana do false.");
 
-        // Wyloguj użytkownika
         userRepository.resetCurrentEmployee();
-        Stage primaryStage = cashierPanel.getPrimaryStage();
-        primaryStage.close();
-        HelloApplication.showLoginScreen(primaryStage);
+        Stage stage = cashierPanel.getPrimaryStage();
+        stage.close();
+        HelloApplication.showLoginScreen(stage);
     }
+
+
 
     /**
      * Ustawia status „completed” dla WSZYSTKICH zadań przypisanych bieżącemu

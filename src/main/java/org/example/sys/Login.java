@@ -183,9 +183,7 @@ public class Login implements ILacz {
                     case "kasjer" -> {
                         CashierPanel cashierPanel = new CashierPanel(nextStage);
                         cashierPanel.getController().resetReportGeneratedFlag();
-                        if (cashierPanel.getController().isDailyReportGeneratedToday()) {
-                            cashierPanel.getController().markReportAsGenerated();
-                        }
+
                     }
                     case "logistyk" -> new LogisticianPanel(nextStage);
                     case "pracownik" -> new EmployeePanel(nextStage);
