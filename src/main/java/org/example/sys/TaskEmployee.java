@@ -19,6 +19,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 /**
  * Encja reprezentująca powiązanie między zadaniami a pracownikami.
  * Odpowiada tabeli Zadania_Pracownicy z bazy danych.
@@ -97,5 +100,42 @@ public class TaskEmployee {
         } else {
             logger.warn("Próba ustawienia pracownika na wartość null.");
         }
+    }
+
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    private Duration shiftDuration;
+
+    public Duration getShiftDuration() {
+        return shiftDuration;
+    }
+
+    public void setShiftDuration(Duration shiftDuration) {
+        this.shiftDuration = shiftDuration;
     }
 }

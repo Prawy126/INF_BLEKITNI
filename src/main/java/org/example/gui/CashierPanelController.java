@@ -28,6 +28,8 @@ import javafx.util.Duration;
 import javafx.util.converter.IntegerStringConverter;
 import org.example.database.*;
 import org.example.sys.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pdf.SalesReportGenerator;
 import org.hibernate.Session;
 
@@ -43,6 +45,7 @@ import java.util.*;
  */
 public class CashierPanelController {
 
+    private static final Logger log = LoggerFactory.getLogger(CashierPanelController.class);
     private final CashierPanel cashierPanel;
     private final ReportRepository reportRepository;
     private final TransactionRepository transactionRepository;
@@ -723,19 +726,22 @@ public class CashierPanelController {
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
 
-        boolean reportToday = isDailyReportGeneratedToday();
-
-        if (!reportGeneratedInCurrentSession && !reportToday) {
+        if (!reportGeneratedInCurrentSession) {
             Label warning = new Label("Uwaga: Nie wygenerowano jeszcze raportu dziennego!");
             warning.setStyle("-fx-text-fill: #E74C3C; -fx-font-weight: bold;");
             Button genBtn = cashierPanel.createStyledButton("Wygeneruj raport dzienny", "#3498DB");
-            genBtn.setOnAction(e -> showReportDialog());
+            genBtn.setOnAction(e -> {
+                showReportDialog();
+                // Ustaw flagę po wygenerowaniu raportu
+                reportGeneratedInCurrentSession = isDailyReportGeneratedToday();
+            });
             layout.getChildren().addAll(warning, genBtn);
         }
 
         Button confirmButton = cashierPanel.createStyledButton("Potwierdź zamknięcie zmiany", "#E67E22");
         confirmButton.setOnAction(e -> {
             boolean today = isDailyReportGeneratedToday();
+
             if (!reportGeneratedInCurrentSession && !today) {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Ostrzeżenie");
@@ -745,22 +751,41 @@ public class CashierPanelController {
                 ButtonType ign = new ButtonType("Ignoruj i zamknij");
                 ButtonType canc = new ButtonType("Anuluj", ButtonBar.ButtonData.CANCEL_CLOSE);
                 alert.getButtonTypes().setAll(gen, ign, canc);
+
                 Optional<ButtonType> res = alert.showAndWait();
-                if (res.isPresent() && res.get() == gen) {
-                    showReportDialog();
-                    return;
-                }
-                if (res.isPresent() && res.get() == canc) {
-                    return;
+                if (res.isPresent()) {
+                    if (res.get() == gen) {
+                        showReportDialog();
+                        reportGeneratedInCurrentSession = isDailyReportGeneratedToday();
+                        return;
+                    } else if (res.get() == canc) {
+                        return;
+                    }
                 }
             }
+
+            // Zakończ zadania i wyloguj
+            Employee current = userRepository.getCurrentEmployee();
+            if (current != null) {
+                completeAllTasksForEmployee(current.getId());
+            }
+
             Alert success = new Alert(Alert.AlertType.INFORMATION);
             success.setTitle("Zamknięcie zmiany");
             success.setHeaderText("Zmiana została pomyślnie zamknięta");
             success.setContentText("Dziękujemy za pracę w tej zmianie!");
             success.showAndWait();
+
+            // Zresetuj flagę po pomyślnym zamknięciu zmiany
             reportGeneratedInCurrentSession = false;
+
+            // Wyloguj użytkownika
+            userRepository.resetCurrentEmployee();
+            Stage primaryStage = cashierPanel.getPrimaryStage();
+            primaryStage.close();
+            HelloApplication.showLoginScreen(primaryStage);
         });
+        reportGeneratedInCurrentSession = false; // Reset flagi przy otwarciu panelu
         layout.getChildren().add(confirmButton);
         cashierPanel.setCenterPane(layout);
     }
@@ -990,24 +1015,59 @@ public class CashierPanelController {
     }
 
     /**
-     * Wylogowuje kasjera, resetując flagę i przechodząc do ekranu logowania.
+     * Wylogowuje kasjera, resetując flagę, kończąc zadania i przechodząc do ekranu logowania.
      */
     public void logout() {
-        System.out.println("Sprawdzanie flagi przed wylogowaniem: " + reportGeneratedInCurrentSession);
-        boolean reportToday = isDailyReportGeneratedToday();
-        if (!reportGeneratedInCurrentSession && !reportToday) {
+        reportGeneratedInCurrentSession = false; // Resetuj flagę po zakończeniu zmiany
+        if (!reportGeneratedInCurrentSession) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Uwaga");
             alert.setHeaderText("Nie wygenerowano raportu dziennego");
             alert.setContentText("Czy chcesz się wylogować bez raportu dziennego?");
             Optional<ButtonType> result = alert.showAndWait();
-            if (result.isPresent() && result.get() != ButtonType.OK) {
+            if (result.isEmpty() || result.get() != ButtonType.OK) {
                 return;
             }
         }
+
+        Employee current = userRepository.getCurrentEmployee();
+        if (current != null) {
+            completeAllTasksForEmployee(current.getId());
+        }
+
+        // Zresetuj flagę przy wylogowaniu
+        reportGeneratedInCurrentSession = false;
+
+        // Wyloguj użytkownika
         userRepository.resetCurrentEmployee();
         Stage primaryStage = cashierPanel.getPrimaryStage();
         primaryStage.close();
         HelloApplication.showLoginScreen(primaryStage);
     }
+
+    /**
+     * Ustawia status „completed” dla WSZYSTKICH zadań przypisanych bieżącemu
+     * pracownikowi i rozpoczętych DZISIAJ.  Aktualizacja odbywa się w jednej
+     * transakcji na każdym rekordzie, dzięki czemu zmiany są trwałe.
+     */
+    public void completeAllTasksForEmployee(int employeeId) {
+        try (TaskEmployeeRepository repo = new TaskEmployeeRepository()) {
+
+            List<TaskEmployee> todays =
+                    repo.findEmployeeTasksForDate(employeeId, LocalDate.now());
+
+            log.info("completeAllTasksForEmployee() – zamykam {} zadań pracownika {} ({}).",
+                    todays.size(), employeeId, LocalDate.now());
+
+            for (TaskEmployee te : todays) {
+                // ustawiamy czas zakończenia, obliczamy czas trwania i status
+                te.setEndTime(LocalDateTime.now());
+                te.getTask().setStatus("completed");         // aktualizujemy encję Task
+
+                repo.updateTaskStatus(te.getTask().getId(), "Zakończone");
+                // zapis w bazie
+            }
+        }
+    }
+
 }

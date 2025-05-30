@@ -13,9 +13,11 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.sys.EmpTask;
 import org.example.sys.TaskEmployee;
 import org.example.sys.TaskEmployeeId;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -126,6 +128,73 @@ public class TaskEmployeeRepository implements AutoCloseable {
             em.close();
         }
     }
+
+    /**
+     * Aktualizuje istniejące przypisanie pracownika do zadania.
+     */
+    public void update(TaskEmployee updatedTe) {
+        logger.debug("update() – start, updatedTe={}", updatedTe);
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            TaskEmployee managed = em.merge(updatedTe);   // scal i zachowaj zmiany
+
+            // upewniamy się, że ew. zmiana statusu zadania trafi do bazy
+            if (managed.getTask() != null) {
+                em.merge(managed.getTask());
+            }
+            tx.commit();
+            logger.info("update() – zakończono pomyślnie");
+        } catch (Exception e) {
+            logger.error("update() – błąd", e);
+            if (tx.isActive()) tx.rollback();
+        } finally {
+            em.close();
+        }
+    }
+
+
+    /**
+     * Zwraca wszystkie przypisania zadań danego pracownika z konkretnego dnia
+     * (porównuje pole task.date z datą przekazaną w argumencie).
+     */
+    public List<TaskEmployee> findEmployeeTasksForDate(int employeeId, LocalDate day) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createQuery("""
+                SELECT te
+                FROM TaskEmployee te
+                JOIN FETCH te.task t
+                WHERE te.id.employeeId = :eid
+                  AND DATE(t.date) = :day
+                """, TaskEmployee.class)
+                    .setParameter("eid", employeeId)
+                    .setParameter("day", day)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public void updateTaskStatus(int taskId, String newStatus) {
+        EntityManager em = emf.createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            EmpTask t = em.find(EmpTask.class, taskId);
+            if (t != null) {
+                t.setStatus(newStatus);
+            }
+            tx.commit();
+        } catch (Exception ex) {
+            if (tx.isActive()) tx.rollback();
+            throw ex;
+        } finally {
+            em.close();
+        }
+    }
+
 
     @Override
     public void close() {

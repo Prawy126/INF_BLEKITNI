@@ -23,6 +23,7 @@ module org.example.gui {
     requires layout;
     requires mysql.connector.j;
     requires jbcrypt;
+    requires org.slf4j;
 
     opens org.example.gui to javafx.fxml;
     opens org.example.sys to javafx.base, javafx.fxml, org.hibernate.orm.core, jakarta.persistence;

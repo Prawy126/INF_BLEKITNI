@@ -233,7 +233,7 @@ INSERT INTO Zadania (Nazwa, Data, Status, Opis, czas_trwania_zmiany) VALUES
 ('Inwentaryzacja',             '2025-04-15', 'Nowe',      'Spis towarów', '00:30:00'),
 ('Dostawa mleka',              '2025-04-10', 'Zakończone','Odbiór dostawy', '01:15:00'),
 ('Wymiana regałów',            '2025-04-12', 'W trakcie', 'Wymiana regałów w dziale nabiałowym', '02:45:00'),
-('Porządkowanie zaplecza',     '2025-04-08', 'Zakończone','Czyszczenie i sortowanie towarów', '01:30:00');
+('Porządkowanie zaplecza',     '2025-05-30', 'W trakcie','Czyszczenie i sortowanie towarów', '01:30:00');
 
 -- Zadania_Pracownicy
 INSERT INTO Zadania_Pracownicy (Id_pracownika, Id_zadania) VALUES
