@@ -15,6 +15,8 @@ import jakarta.persistence.Persistence;
 import jakarta.persistence.TypedQuery;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.sys.Product;
+import org.example.sys.Transaction;
 import org.example.sys.TransactionProduct;
 import org.example.sys.TransactionProductId;
 
@@ -51,21 +53,37 @@ public class TransactionProductRepository {
      * @param tp obiekt TransactionProduct do zapisania
      */
     public void addTransactionProduct(TransactionProduct tp) {
-        logger.debug("addTransactionProduct() – start, tp={}", tp);
         EntityManager em = emf.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
+
+            // pobieramy managed instance zamiast używać odłączonego product/transaction
+            Transaction managedTx = em.getReference(
+                    Transaction.class, tp.getTransaction().getId()
+            );
+            Product managedPr = em.getReference(
+                    Product.class,     tp.getProduct().getId()
+            );
+
+            // synchronizujemy
+            tp.setTransaction(managedTx);
+            tp.setProduct(managedPr);
+            tp.setId(new TransactionProductId(
+                    managedTx.getId(), managedPr.getId()
+            ));
+
             em.persist(tp);
             tx.commit();
-            logger.info("addTransactionProduct() – dodano: {}", tp);
         } catch (Exception e) {
-            logger.error("addTransactionProduct() – błąd podczas dodawania tp", e);
             if (tx.isActive()) tx.rollback();
+            throw e;
         } finally {
             em.close();
         }
     }
+
+
 
     /**
      * Znajduje pozycję transakcji po kluczu złożonym (transactionId + productId).

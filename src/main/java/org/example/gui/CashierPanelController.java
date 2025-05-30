@@ -11,6 +11,7 @@ import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.TranslateTransition;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -513,35 +514,49 @@ public class CashierPanelController {
     private TableView<Product> createProductTableWithSearch(TextField searchField) {
         TableView<Product> table = new TableView<>();
         table.setMinHeight(300);
+
         TableColumn<Product, Integer> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+
         TableColumn<Product, String> nameCol = new TableColumn<>("Nazwa");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+
         TableColumn<Product, String> categoryCol = new TableColumn<>("Kategoria");
         categoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
+
         TableColumn<Product, Double> priceCol = new TableColumn<>("Cena");
         priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
-        table.getColumns().addAll(idCol, nameCol, categoryCol, priceCol);
+
+        // Nowa kolumna ze stanem magazynowym
+        TableColumn<Product, Integer> stockCol = new TableColumn<>("Stan");
+        stockCol.setCellValueFactory(cd -> {
+            Product p = cd.getValue();
+            int qty = getAvailableQuantity(p);
+            return new SimpleIntegerProperty(qty).asObject();
+        });
+
+        table.getColumns().addAll(idCol, nameCol, categoryCol, priceCol, stockCol);
 
         ProductRepository productRepo = new ProductRepository();
         ObservableList<Product> productList = FXCollections.observableArrayList(productRepo.getAllProducts());
         productRepo.close();
         table.setItems(productList);
 
+        // Aktualizacja filtrowania z uwzględnieniem nowej kolumny nie jest potrzebna, ale odświeżamy stan przy każdym odfiltrowaniu
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal == null || newVal.isEmpty()) {
-                table.setItems(productList);
-            } else {
-                ObservableList<Product> filtered = FXCollections.observableArrayList();
-                for (Product p : productList) {
-                    if (p.getName().toLowerCase().contains(newVal.toLowerCase()) ||
-                            p.getCategory().toLowerCase().contains(newVal.toLowerCase())) {
-                        filtered.add(p);
-                    }
+            ObservableList<Product> filtered = FXCollections.observableArrayList();
+            for (Product p : productList) {
+                if (newVal == null || newVal.isEmpty()
+                        || p.getName().toLowerCase().contains(newVal.toLowerCase())
+                        || p.getCategory().toLowerCase().contains(newVal.toLowerCase())) {
+                    filtered.add(p);
                 }
-                table.setItems(filtered);
             }
+            table.setItems(filtered);
+            // Odśwież kolumnę stanu magazynowego
+            table.refresh();
         });
+
         return table;
     }
 
@@ -624,32 +639,30 @@ public class CashierPanelController {
                 return;
             }
 
+            // Tworzenie i zapis transakcji
             Transaction tx = new Transaction();
             tx.setEmployee(current);
             tx.setDate(new Date());
             transactionRepository.addTransaction(tx);
             int txId = tx.getId();
 
-            Session session = transactionRepository.getSession();
-            session.beginTransaction();
-
+            // Zmiana stanu magazynowego i zapis pozycji
             WarehouseRepository whRepo = new WarehouseRepository();
             for (TransactionItem item : items) {
                 int pid = item.getProduct().getId();
                 int qty = item.getQuantity();
-                int avail = getAvailableQuantity(item.getProduct());
+                int avail = whRepo.findStateByProductId(pid).getQuantity();
                 whRepo.setProductQuantity(pid, avail - qty);
 
-                session.createNativeQuery(
-                                "INSERT INTO Transakcje_Produkty (Id_transakcji, Id_produktu, Ilosc) VALUES (:txId, :pid, :qty)")
-                        .setParameter("txId", txId)
-                        .setParameter("pid", pid)
-                        .setParameter("qty", qty)
-                        .executeUpdate();
+                // Zapis relacji transakcja-produkt po migracji do JPA/Hibernate
+                TransactionProduct tp = new TransactionProduct();
+                tp.setTransaction(transactionRepository.findTransactionById(txId));
+                tp.setProduct(item.getProduct());
+                tp.setQuantity(qty);
+                TransactionProductRepository tpRepo = new TransactionProductRepository();
+                tpRepo.addTransactionProduct(tp);
+                tpRepo.close();
             }
-
-            session.getTransaction().commit();
-            session.close();
             whRepo.close();
 
             showNotification("Sukces", "Transakcja zapisana pomyślnie.");
@@ -659,6 +672,7 @@ public class CashierPanelController {
             showNotification("Błąd", "Wystąpił błąd podczas zapisu: " + e.getMessage());
         }
     }
+
 
     /**
      * Panel zgłoszenia problemu przez kasjera.

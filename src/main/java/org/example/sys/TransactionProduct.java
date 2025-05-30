@@ -26,7 +26,6 @@ import jakarta.persistence.MapsId;
 @Access(AccessType.FIELD)
 public class TransactionProduct {
 
-    // Inicjalizacja logera
     private static final Logger logger = LogManager.getLogger(TransactionProduct.class);
 
     @EmbeddedId
@@ -45,23 +44,20 @@ public class TransactionProduct {
     @Column(name = "Ilosc", nullable = false)
     private int quantity;
 
-    // Konstruktory
-
     public TransactionProduct() {
+        // ważne: zawsze inicjalizujemy id, aby MapsId mogło wypełnić pola
+        this.id = new TransactionProductId();
         logger.debug("Utworzono nową instancję TransactionProduct (domyślny konstruktor).");
     }
 
     public TransactionProduct(Transaction transaction, Product product, int quantity) {
-        this.id = new TransactionProductId(transaction.getId(), product.getId());
-        this.transaction = transaction;
-        this.product = product;
-        this.quantity = quantity;
-
+        this();  // inicjalizuje id
+        setTransaction(transaction);
+        setProduct(product);
+        setQuantity(quantity);
         logger.info("Utworzono powiązanie produktu ID:{} z transakcją ID:{} (ilość: {})",
                 product.getId(), transaction.getId(), quantity);
     }
-
-    // Gettery i settery
 
     public TransactionProductId getId() {
         return id;
@@ -77,12 +73,14 @@ public class TransactionProduct {
     }
 
     public void setTransaction(Transaction transaction) {
-        if (transaction != null) {
-            logger.debug("Zaktualizowano powiązaną transakcję na ID: {}", transaction.getId());
-        } else {
+        if (transaction == null) {
             logger.warn("Próba ustawienia transakcji na wartość null.");
+            return;
         }
         this.transaction = transaction;
+        // synchronizujemy id
+        this.id.setTransactionId(transaction.getId());
+        logger.debug("Zaktualizowano powiązaną transakcję na ID: {}", transaction.getId());
     }
 
     public Product getProduct() {
@@ -90,12 +88,14 @@ public class TransactionProduct {
     }
 
     public void setProduct(Product product) {
-        if (product != null) {
-            logger.debug("Zaktualizowano powiązany produkt na ID: {}", product.getId());
-        } else {
+        if (product == null) {
             logger.warn("Próba ustawienia produktu na wartość null.");
+            return;
         }
         this.product = product;
+        // synchronizujemy id
+        this.id.setProductId(product.getId());
+        logger.debug("Zaktualizowano powiązany produkt na ID: {}", product.getId());
     }
 
     public int getQuantity() {
@@ -107,7 +107,6 @@ public class TransactionProduct {
             logger.warn("Nieprawidłowa ilość produktu: {}. Ilość musi być większa niż zero.", quantity);
             throw new IllegalArgumentException("Ilość produktu musi być większa niż zero.");
         }
-
         logger.info("Zaktualizowano ilość produktu z {} na {}", this.quantity, quantity);
         this.quantity = quantity;
     }
