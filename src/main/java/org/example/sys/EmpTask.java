@@ -8,19 +8,9 @@
 
 package org.example.sys;
 
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Access;
-import jakarta.persistence.AccessType;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.TemporalType;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.CascadeType;
+
+import jakarta.annotation.Priority;
+import jakarta.persistence.*;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -69,6 +59,25 @@ public class EmpTask {
     @OneToMany(mappedBy = "task", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<TaskEmployee> taskEmployees = new ArrayList<>();
 
+    @Column(name = "Priorytet")
+    @Enumerated(EnumType.STRING)
+    private Priority priority;
+
+    public Priority getPriority() {
+        logger.trace("Pobrano priorytet zadania: {}", priority);
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        logger.info("Zmieniono priorytet zadania na: {}", priority);
+        this.priority = priority;
+    }
+
+    // Definicja enum Priority wewnątrz klasy EmpTask
+    public enum Priority {
+        HIGH, MEDIUM, LOW
+    }
+
     public List<TaskEmployee> getTaskEmployees() {
         logger.trace("Pobrano listę pracowników przypisanych do zadania (liczba: {})", taskEmployees.size());
         return taskEmployees;
@@ -79,22 +88,24 @@ public class EmpTask {
         logger.debug("Utworzono nowe zadanie (konstruktor domyślny)");
     }
 
-    /**
-     * Konstruktor pełny (z czasem zmiany).
-     *
-     * @param name               nazwa zadania
-     * @param date                termin wykonania
-     * @param status              status zadania
-     * @param description         opis zadania
-     * @param durationOfTheShift   czas trwania zmiany przy zadaniu
-     */
+    public EmpTask(String name, Date date, String status, String description, LocalTime durationOfTheShift, Priority priority) {
+        this.name = name;
+        this.date = date;
+        this.status = status;
+        this.description = description;
+        this.durationOfTheShift = durationOfTheShift;
+        this.priority = priority;
+        logger.info("Utworzono zadanie: '{}', termin: {}, czas zmiany: {}, priorytet: {}", name, date, durationOfTheShift, priority);
+    }
+
     public EmpTask(String name, Date date, String status, String description, LocalTime durationOfTheShift) {
         this.name = name;
         this.date = date;
         this.status = status;
         this.description = description;
         this.durationOfTheShift = durationOfTheShift;
-        logger.info("Utworzono zadanie: '{}', termin: {}, czas zmiany: {}", name, date, durationOfTheShift);
+        this.priority = Priority.MEDIUM; // Domyślny priorytet
+        logger.info("Utworzono zadanie: '{}', termin: {}, czas zmiany: {}, priorytet: {}", name, date, durationOfTheShift, priority);
     }
 
     // ==================== Gettery i Settery z logowaniem ====================

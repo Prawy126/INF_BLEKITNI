@@ -283,6 +283,34 @@ public class EmpTaskRepository implements AutoCloseable {
         }
     }
 
+    public List<EmpTask> getAllTasksWithEmployees() {
+        EntityManager em = EMFProvider.get().createEntityManager();
+        try {
+            return em.createQuery("SELECT t FROM EmpTask t JOIN FETCH t.taskEmployees", EmpTask.class)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Pobiera wszystkie zadania wraz z przypisanymi pracownikami i ich danymi.
+     */
+    public List<EmpTask> getAllTasksWithEmployeesAndAssignees() {
+        EntityManager em = EMFProvider.get().createEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT t FROM EmpTask t LEFT JOIN FETCH t.taskEmployees te LEFT JOIN FETCH te.employee",
+                            EmpTask.class)
+                    .getResultList();
+        } catch (Exception e) {
+            logger.error("Błąd podczas pobierania zadań z przypisaniami i pracownikami", e);
+            return List.of();
+        } finally {
+            em.close();
+        }
+    }
+
     /**
      * Zamyka wspólną fabrykę EMF (na zakończenie działania aplikacji).
      */

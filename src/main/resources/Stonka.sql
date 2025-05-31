@@ -280,3 +280,14 @@ INSERT INTO Zgloszenia_techniczne (Typ, Opis, Id_pracownika) VALUES
 ('Awaria sprzętu',        'Nie działa drukarka fiskalna przy kasie nr 1', 2),
 ('Błąd oprogramowania',   'Błąd przy finalizacji sprzedaży - aplikacja się zamyka', 5),
 ('Inne',                  'Proszę o aktualizację systemu do najnowszej wersji', 1);
+
+
+ALTER TABLE Zadania
+    ADD Priorytet ENUM('HIGH', 'MEDIUM', 'LOW') NULL;
+
+
+UPDATE Zadania SET Priorytet = 'HIGH' WHERE Id = 1;  -- Sprawdzenie stanu magazynu
+UPDATE Zadania SET Priorytet = 'MEDIUM' WHERE Id = 2; -- Inwentaryzacja
+UPDATE Zadania SET Priorytet = 'LOW' WHERE Id = 3;    -- Dostawa mleka
+UPDATE Zadania SET Priorytet = 'MEDIUM' WHERE Id = 4; -- Wymiana regałów
+UPDATE Zadania SET Priorytet = 'LOW' WHERE Id = 5;    -- Porządkowanie zaplecza

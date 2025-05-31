@@ -42,16 +42,6 @@ public class DatabaseInitializer implements ILacz {
             logger.error("Błąd podczas tworzenia bazy danych '{}'", DB_NAME, e);
             return;
         }
-
-        // Połączenie do właściwej bazy danych + import danych
-        try (Connection conn = DriverManager.getConnection(MYSQL_DB_URL, MYSQL_USER, MYSQL_PASSWORD)) {
-            logger.debug("Połączenie do bazy '{}' nawiązane: {}", DB_NAME, MYSQL_DB_URL);
-            logger.info("Importowanie pliku SQL: src/main/resources/Stonka.sql");
-            executeSqlScript(conn, "Stonka.sql");
-            logger.info("Import danych zakończony pomyślnie. Baza '{}' gotowa.", DB_NAME);
-        } catch (Exception e) {
-            logger.error("Błąd podczas importowania danych do bazy '{}'", DB_NAME, e);
-        }
     }
 
     private static boolean databaseExists(Connection conn, String dbName) throws SQLException {

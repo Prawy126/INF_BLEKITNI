@@ -93,7 +93,7 @@ public class Employee extends Person {
     private Date sickLeaveStartDate;
 
     // Pole do usuwania miękkiego
-    @Column(name = "deleted", nullable = false)
+    @Column(name = "usuniety", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean deleted = false;
 
     /** lista powiązań do zadań przez tabelę łączącą */

@@ -182,7 +182,11 @@ public class TaskEmployeeRepository implements AutoCloseable {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            EmpTask t = em.find(EmpTask.class, taskId);
+            EmpTask t = em.createQuery(
+                            "SELECT t FROM EmpTask t JOIN FETCH t.taskEmployees WHERE t.id = :taskId",
+                            EmpTask.class)
+                    .setParameter("taskId", taskId)
+                    .getSingleResult();
             if (t != null) {
                 t.setStatus(newStatus);
             }
@@ -190,6 +194,25 @@ public class TaskEmployeeRepository implements AutoCloseable {
         } catch (Exception ex) {
             if (tx.isActive()) tx.rollback();
             throw ex;
+        } finally {
+            em.close();
+        }
+    }
+
+    public EmpTask findTaskWithEmployees(int taskId) {
+        logger.debug("findTaskWithEmployees() – start, taskId={}", taskId);
+        EntityManager em = emf.createEntityManager();
+        try {
+            EmpTask task = em.createQuery(
+                            "SELECT t FROM EmpTask t JOIN FETCH t.taskEmployees WHERE t.id = :taskId",
+                            EmpTask.class)
+                    .setParameter("taskId", taskId)
+                    .getSingleResult();
+            logger.info("findTaskWithEmployees() – pobrano zadanie z {} przypisaniami", task.getTaskEmployees().size());
+            return task;
+        } catch (Exception e) {
+            logger.error("findTaskWithEmployees() – błąd podczas pobierania zadania o id={}", taskId, e);
+            return null;
         } finally {
             em.close();
         }

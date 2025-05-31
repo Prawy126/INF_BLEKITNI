@@ -37,6 +37,8 @@
             <AppenderRef ref="ErrorFile"/>
         </Logger>
 
+        <Logger name="org.example.gui.AdminPanelController" level="DEBUG"/>
+
         <!-- Główny logger -->
         <Root level="info">
             <AppenderRef ref="Console"/>

@@ -236,6 +236,4 @@ public class EmailSender {
 
         return new String[]{email, password};
     }
-
-
 }
