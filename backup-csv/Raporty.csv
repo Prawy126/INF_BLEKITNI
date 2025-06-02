@@ -1,0 +1,6 @@
+Id,Typ_raportu,Data_poczatku,Data_zakonczenia,Id_pracownika,Plik
+1,Raport miesięczny,2025-04-01,2025-04-30,1,raport_kwiecien.pdf
+2,Stan magazynu,2025-04-01,2025-04-15,2,magazyn_15kwiecien.pdf
+3,Sprzedaż dzienna,2025-04-10,2025-04-10,3,sprzedaz_10kwietnia.pdf
+4,Wnioski o nieobecność,2025-04-01,2025-04-30,4,wnioski_kwiecien.pdf
+5,Zamówienia i dostawy,2025-04-01,2025-04-20,5,zamowienia_dostawy.pdf

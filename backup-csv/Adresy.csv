@@ -1,0 +1,11 @@
+Id,Miejscowosc,Numer_domu,Numer_mieszkania,Kod_pocztowy,Miasto
+1,Warszawa,12A,3,00-001,Warszawa
+2,Kraków,5,,30-002,Kraków
+3,Gdańsk,7B,10,80-001,Gdańsk
+4,Wrocław,20,,50-003,Wrocław
+5,Poznań,16,8,60-002,Poznań
+6,Łódź,3C,2,90-003,Łódź
+7,Szczecin,10,,70-005,Szczecin
+8,Lublin,4,1,20-001,Lublin
+9,Katowice,9A,,40-002,Katowice
+10,Rzeszów,22,5,35-003,Rzeszów

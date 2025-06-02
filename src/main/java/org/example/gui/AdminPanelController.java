@@ -39,9 +39,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.database.EmpTaskRepository;
-import org.example.database.TechnicalIssueRepository;
-import org.example.database.UserRepository;
+import org.example.database.*;
 import org.example.pdflib.ConfigManager;
 import org.example.sys.Employee;
 import org.example.sys.TechnicalIssue;
@@ -60,7 +58,6 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.example.database.AddressRepository;
 import org.example.sys.Address;
 import org.example.sys.EmpTask;
 import pdf.StatsRaportGenerator;
@@ -637,7 +634,7 @@ public class AdminPanelController {
 
         // Przycisk do otwierania folderu z logami
         Button openLogsButton = new Button("Otwórz folder z logami");
-        styleAdminButton(openLogsButton, "#9B59B6");  // Fioletowy dla odróżnienia
+        styleAdminButton(openLogsButton, "#9B59B6");
         openLogsButton.setOnAction(e -> openLogsDirectory());
 
         Button configurePDF = new Button("Konfiguruj raporty PDF");
@@ -648,14 +645,79 @@ public class AdminPanelController {
         styleAdminButton(backupButton, "#27AE60");
         backupButton.setOnAction(e -> performDatabaseBackup());
 
+        // DODANY PRZYCISK DO EKSPORTU CSV
+        Button exportCsvButton = new Button("Eksportuj bazę danych do CSV");
+        styleAdminButton(exportCsvButton, "#16A085");  // Inny kolor dla odróżnienia
+        exportCsvButton.setOnAction(e -> exportDatabaseToCsv());
+
         layout.getChildren().addAll(
                 titleLabel,
                 openLogsButton,
                 configurePDF,
-                backupButton
+                backupButton,
+                exportCsvButton  // DODANY PRZYCISK
         );
 
         return layout;
+    }
+
+    private void exportDatabaseToCsv() {
+        try {
+            // Użyj ścieżki względnej lub bezwzględnej
+            String backupPath = System.getProperty("user.dir") + "/backup-csv";
+
+            // Utwórz folder jeśli nie istnieje
+            File folder = new File(backupPath);
+            if (!folder.exists() && !folder.mkdirs()) {
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Nie można utworzyć katalogu: " + backupPath);
+                return;
+            }
+
+            // Alert informujący o trwającym eksporcie
+            Alert progressAlert = new Alert(Alert.AlertType.INFORMATION);
+            progressAlert.setTitle("Eksport do CSV");
+            progressAlert.setHeaderText("Trwa eksportowanie danych...");
+            progressAlert.setContentText("Proszę czekać.");
+            progressAlert.show();
+
+            // Uruchom eksport w tle
+            Task<Void> exportTask = new Task<>() {
+                @Override
+                protected Void call() throws Exception {
+                    DatabaseBackupExporter.exportAllTablesToCsv(backupPath);
+                    return null;
+                }
+            };
+
+            exportTask.setOnSucceeded(e -> {
+                progressAlert.close();
+                showAlert(Alert.AlertType.INFORMATION, "Eksport zakończony",
+                        "Dane zostały wyeksportowane do: " + backupPath);
+
+                // Otwórz folder po zakończeniu
+                try {
+                    if (Desktop.isDesktopSupported()) {
+                        Desktop.getDesktop().open(folder);
+                    }
+                } catch (IOException ex) {
+                    logger.warn("Nie można otworzyć folderu", ex);
+                }
+            });
+
+            exportTask.setOnFailed(e -> {
+                progressAlert.close();
+                Throwable ex = exportTask.getException();
+                ex.printStackTrace();
+                showAlert(Alert.AlertType.ERROR, "Błąd eksportu",
+                        "Wystąpił błąd: " + ex.getMessage());
+            });
+
+            executor.execute(exportTask);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Błąd", "Wystąpił nieoczekiwany problem: " + e.getMessage());
+        }
     }
 
     private void openLogsDirectory() {
