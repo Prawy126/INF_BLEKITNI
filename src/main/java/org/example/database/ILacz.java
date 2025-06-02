@@ -14,21 +14,33 @@ package org.example.database;
  */
 public interface ILacz {
 
-    /** Nazwa bazy danych */
+    /**
+     * Nazwa bazy danych
+     */
     String DB_NAME = "StonkaDB";
 
     String STRUKTURA_SQL_FILE = "Struktura.sql";
     String DANE_SQL_FILE = "Dane.sql";
 
-    /** URL do serwera MySQL (bez wskazania konkretnej bazy) */
+    /**
+     * URL do serwera MySQL (bez wskazania konkretnej bazy)
+     */
     String MYSQL_SERVER_URL = "jdbc:mysql://localhost:3306/?useSSL=false&serverTimezone=UTC";
 
-    /** URL do połączenia z docelową bazą danych */
+    /**
+     * URL do połączenia z docelową bazą danych
+     */
     String MYSQL_DB_URL = "jdbc:mysql://localhost:3306/StonkaDB?useSSL=false&serverTimezone=UTC";
 
-    /** Użytkownik bazy MySQL */
+    /**
+     * Użytkownik bazy MySQL
+     */
     String MYSQL_USER = "root";
 
-    /** Hasło użytkownika bazy MySQL */
-    String MYSQL_PASSWORD = "TwojeNoweHaslo";
+    /**
+     * Hasło użytkownika bazy MySQL
+     */
+
+    String MYSQL_PASSWORD = "twoje_haslo";
 }
+

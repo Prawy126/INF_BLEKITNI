@@ -1,0 +1,4 @@
+Id,Typ,Opis,Data_zgloszenia,Id_pracownika,Status,Data_zgłoszenia
+1,Awaria sprzętu,Nie działa drukarka fiskalna przy kasie nr 1,2025-06-02,2,Nowe,
+2,Błąd oprogramowania,Błąd przy finalizacji sprzedaży - aplikacja się zamyka,2025-06-02,5,Nowe,
+3,Inne,Proszę o aktualizację systemu do najnowszej wersji,2025-06-02,1,Nowe,

@@ -294,4 +294,7 @@ public class TransactionRepository {
             // Uwaga: tu nie zamykamy EM, bo sesja może go potrzebować.
         }
     }
+
+    public void close() {
+    }
 }
