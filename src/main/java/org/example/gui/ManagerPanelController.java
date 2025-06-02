@@ -1,25 +1,18 @@
 /*
  * Classname: ManagerPanelController
- * Version information: 1.6
- * Date: 2025-05-27
+ * Version information: 1.7
+ * Date: 2025-06-02
  * Copyright notice: © BŁĘKITNI
  */
 
 package org.example.gui;
 
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -29,14 +22,17 @@ import javafx.stage.Stage;
 
 import org.example.database.AbsenceRequestRepository;
 import org.example.database.EmpTaskRepository;
+import org.example.database.TaskEmployeeRepository;
 import org.example.database.UserRepository;
 
 import org.example.sys.AbsenceRequest;
 import org.example.sys.Employee;
 import org.example.sys.EmpTask;
+import org.example.sys.TaskEmployee;
 
 import java.sql.Date;
 import java.time.LocalTime;
+import java.util.List;
 
 /**
  * Kontroler logiki interfejsu użytkownika dla panelu kierownika.
@@ -395,15 +391,45 @@ public class ManagerPanelController {
         dialogLayout.setAlignment(Pos.CENTER);
 
         Label taskLabel = new Label("Wybierz zadanie:");
-        ComboBox<String> taskComboBox = new ComboBox<>();
-        taskRepository.getAllTasks()
-                .forEach(t -> taskComboBox.getItems().add(t.getName()));
+        ComboBox<EmpTask> taskComboBox = new ComboBox<>();
+        // Ładujemy obiekty EmpTask zamiast tylko nazw, by później mieć dostęp do pełnej encji
+        EmpTaskRepository taskRepo = new EmpTaskRepository();
+        List<EmpTask> allTasks = taskRepo.getAllTasks();
+        taskComboBox.setItems(FXCollections.observableArrayList(allTasks));
+        taskComboBox.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(EmpTask item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName());
+            }
+        });
+        taskComboBox.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(EmpTask item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName());
+            }
+        });
 
         Label employeeLabel = new Label("Wybierz pracownika:");
-        ComboBox<String> employeeComboBox = new ComboBox<>();
-        userRepository.getAllEmployees().forEach(p ->
-                employeeComboBox.getItems().add(p.getName() + " " + p.getSurname())
-        );
+        ComboBox<Employee> employeeComboBox = new ComboBox<>();
+        UserRepository userRepo = new UserRepository();
+        List<Employee> allEmployees = userRepo.getAllEmployees();
+        employeeComboBox.setItems(FXCollections.observableArrayList(allEmployees));
+        employeeComboBox.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(Employee item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName() + " " + item.getSurname());
+            }
+        });
+        employeeComboBox.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Employee item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName() + " " + item.getSurname());
+            }
+        });
 
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER);
@@ -412,12 +438,29 @@ public class ManagerPanelController {
         Button cancelButton = new Button("Anuluj");
 
         assignButton.setOnAction(e -> {
-            if (taskComboBox.getValue() != null && employeeComboBox.getValue() != null) {
-                System.out.println(
-                        "Przypisano: " + employeeComboBox.getValue() +
-                                " do " + taskComboBox.getValue()
-                );
-                dialogStage.close();
+            EmpTask selectedTask = taskComboBox.getValue();
+            Employee selectedEmployee = employeeComboBox.getValue();
+            if (selectedTask != null && selectedEmployee != null) {
+                try {
+                    // Tworzymy nowe powiązanie
+                    TaskEmployee te = new TaskEmployee(selectedTask, selectedEmployee);
+                    // Zapisujemy je w bazie
+                    TaskEmployeeRepository teRepo = new TaskEmployeeRepository();
+                    teRepo.add(te);
+                    teRepo.close();
+
+                    // Informujemy użytkownika o powodzeniu
+                    showAlert(Alert.AlertType.INFORMATION, "Sukces",
+                            "Pracownik został przypisany do zadania.");
+                    dialogStage.close();
+
+                    // Odświeżamy widok listy zadań, aby pokazać ewentualne zmiany
+                    showTaskPanel();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    showAlert(Alert.AlertType.ERROR, "Błąd",
+                            "Nie udało się przypisać pracownika: " + ex.getMessage());
+                }
             } else {
                 showAlert(Alert.AlertType.WARNING, "Błąd",
                         "Wybierz zarówno zadanie, jak i pracownika.");
@@ -433,10 +476,11 @@ public class ManagerPanelController {
                 buttonBox
         );
 
-        Scene scene = new Scene(dialogLayout, 300, 250);
+        Scene scene = new Scene(dialogLayout, 350, 250);
         dialogStage.setScene(scene);
         dialogStage.showAndWait();
     }
+
 
     /**
      * Wyświetla okno dialogowe edycji zadania.
