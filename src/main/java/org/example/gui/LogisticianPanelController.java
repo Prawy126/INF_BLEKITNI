@@ -465,8 +465,10 @@ public class LogisticianPanelController {
 
 
     /**
-     * Otwiera formularz dodawania nowego zamówienia: wprowadzasz ID produktu,
-     * ID pracownika, ilość, cenę i datę. Po zapisie automatycznie odświeża panel.
+     * Otwiera formularz dodawania nowego zamówienia.
+     * Pola: Id produktu, Ilość, Data.
+     * Id pracownika pobieramy automatycznie z zalogowanego użytkownika,
+     * Cena wyliczana jest jako (cena jednostkowa produktu * ilość).
      */
     private void showAddOrderForm() {
         Stage stage = new Stage();
@@ -477,76 +479,105 @@ public class LogisticianPanelController {
         grid.setHgap(10);
         grid.setVgap(10);
 
-        Label productLabel = new Label("Id produktu:");
-        Label employeeLabel = new Label("Id pracownika:");
-        Label qtyLabel = new Label("Ilość:");
-        Label priceLabel = new Label("Cena:");
-        Label dateLabel = new Label("Data:");
+        Label productLabel  = new Label("Id produktu:");
+        Label qtyLabel      = new Label("Ilość:");
+        Label dateLabel     = new Label("Data:");
 
-        TextField productId = new TextField();
-        TextField employeeId = new TextField();
-        TextField quantity = new TextField();
-        TextField price = new TextField();
-        DatePicker datePicker = new DatePicker();
+        TextField productIdField = new TextField();
+        productIdField.setPromptText("np. 42");
+
+        TextField quantityField  = new TextField();
+        quantityField.setPromptText("liczba całkowita");
+
+        DatePicker datePicker    = new DatePicker();
 
         Button submit = new Button("Zapisz");
         styleLogisticButton(submit, "#27AE60");
         submit.setOnAction(ev -> {
-            if (productId.getText().isBlank()  || employeeId.getText().isBlank()
-                    || quantity.getText().isBlank() || price.getText().isBlank()
-                    || datePicker.getValue()  == null) {
-                showAlert(Alert.AlertType.WARNING, "Brak danych",
-                        "Uzupełnij wszystkie pola");
+            // 1) Sprawdzenie, czy wszystkie pola wypełniono
+            if (productIdField.getText().isBlank()
+                    || quantityField.getText().isBlank()
+                    || datePicker.getValue() == null) {
+                showAlert(Alert.AlertType.WARNING,
+                        "Brak danych",
+                        "Uzupełnij wszystkie pola (produkt, ilość, data)");
                 return;
             }
+
             try {
-                OrderRepository or = new OrderRepository();
-                ProductRepository pr = new ProductRepository();
+                int prodId = Integer.parseInt(productIdField.getText().trim());
+                int qty    = Integer.parseInt(quantityField.getText().trim());
+                if (qty <= 0) {
+                    showAlert(Alert.AlertType.WARNING,
+                            "Nieprawidłowa ilość",
+                            "Ilość musi być dodatnią liczbą całkowitą");
+                    return;
+                }
+
+                // 2) Pobranie zalogowanego pracownika
                 UserRepository ur = new UserRepository();
-
-                Order ord = new Order();
-
-                Product prod = pr.findProductById(Integer.parseInt(productId.getText().trim()));
-                if (prod == null) {
-                    showAlert(ERROR,"Błąd","Brak produktu o ID="+productId.getText());
-                    return;
-                }
-                Employee empl = ur.findById(Integer.parseInt(employeeId.getText().trim()));
+                Employee empl = ur.getCurrentEmployee();
                 if (empl == null) {
-                    showAlert(ERROR,"Błąd","Brak prac. o ID="+employeeId.getText());
+                    showAlert(Alert.AlertType.ERROR,
+                            "Błąd",
+                            "Brak zalogowanego pracownika. Zaloguj się ponownie.");
                     return;
                 }
 
+                // 3) Pobranie produktu po ID
+                ProductRepository pr = new ProductRepository();
+                Product prod = pr.findProductById(prodId);
+                if (prod == null) {
+                    showAlert(Alert.AlertType.ERROR,
+                            "Błąd",
+                            "Nie znaleziono produktu o ID=" + prodId);
+                    return;
+                }
+
+                // 4) Obliczenie ceny: cena jednostkowa * ilość
+                BigDecimal unitPrice = prod.getPrice(); // zakładamy, że getPrice() zwraca BigDecimal
+                BigDecimal totalPrice = unitPrice.multiply(BigDecimal.valueOf(qty));
+
+                // 5) Utworzenie i zapis zamówienia
+                Order ord = new Order();
                 ord.setProduct(prod);
                 ord.setEmployee(empl);
-                ord.setQuantity(Integer.parseInt(quantity.getText().trim()));
-                ord.setPrice(new BigDecimal(price.getText().replace(",",".")));
+                ord.setQuantity(qty);
+                ord.setPrice(totalPrice);
                 ord.setDate(java.sql.Date.valueOf(datePicker.getValue()));
 
+                OrderRepository or = new OrderRepository();
                 or.addOrder(ord);
-                showAlert(Alert.AlertType.INFORMATION, "Sukces",
-                        "Zapisano zamówienie (id = " + ord.getId() + ")");
+
+                showAlert(Alert.AlertType.INFORMATION,
+                        "Sukces",
+                        "Zapisano zamówienie (ID=" + ord.getId() +
+                                ", cena = " + totalPrice + ")");
                 stage.close();
-                showOrdersPanel();
+                showOrdersPanel(); // odśwież panel zamówień
+
+            } catch (NumberFormatException ex) {
+                showAlert(Alert.AlertType.ERROR,
+                        "Błąd",
+                        "Pole ID produktu i Ilość muszą być liczbami całkowitymi!");
             } catch (Exception ex) {
                 logger.error("Błąd dodawania zamówienia", ex);
-                showAlert(ERROR, "Błąd","Nie udało się dodać zamówienia");
+                showAlert(Alert.AlertType.ERROR,
+                        "Błąd",
+                        "Nie udało się dodać zamówienia:\n" + ex.getMessage());
             }
         });
 
-        grid.add(productLabel, 0, 0);
-        grid.add(productId, 1, 0);
-        grid.add(employeeLabel, 0, 1);
-        grid.add(employeeId, 1, 1);
-        grid.add(qtyLabel, 0, 2);
-        grid.add(quantity, 1, 2);
-        grid.add(priceLabel, 0, 3);
-        grid.add(price, 1, 3);
-        grid.add(dateLabel, 0, 4);
-        grid.add(datePicker, 1, 4);
-        grid.add(submit, 1, 5);
+        // Ustawienie układu / dodanie kontroli do siatki
+        grid.add(productLabel,  0, 0);
+        grid.add(productIdField,1, 0);
+        grid.add(qtyLabel,      0, 1);
+        grid.add(quantityField, 1, 1);
+        grid.add(dateLabel,     0, 2);
+        grid.add(datePicker,    1, 2);
+        grid.add(submit,        1, 3);
 
-        stage.setScene(new Scene(grid, 350, 300));
+        stage.setScene(new Scene(grid, 350, 220));
         stage.show();
     }
 
