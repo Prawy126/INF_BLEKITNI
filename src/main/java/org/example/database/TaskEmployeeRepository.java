@@ -1,7 +1,7 @@
 /*
  * Classname: TaskEmployeeRepository
- * Version information: 1.2
- * Date: 2025-05-24
+ * Version information: 1.3
+ * Date: 2025-06-02
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -14,6 +14,7 @@ import jakarta.persistence.EntityTransaction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.sys.EmpTask;
+import org.example.sys.Employee;
 import org.example.sys.TaskEmployee;
 import org.example.sys.TaskEmployeeId;
 
@@ -37,6 +38,18 @@ public class TaskEmployeeRepository implements AutoCloseable {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
+
+            // Pobieramy zarządzane (attached) instancje EmpTask i Employee
+            int taskId = te.getTask().getId();
+            int empId  = te.getEmployee().getId();
+            EmpTask managedTask = em.getReference(EmpTask.class, taskId);
+            Employee managedEmp  = em.getReference(Employee.class, empId);
+
+            // Ustawiamy te zarządzane instancje w obiekcie TaskEmployee
+            te.setTask(managedTask);
+            te.setEmployee(managedEmp);
+
+            // Teraz możemy persystować TaskEmployee – obie referencje są w stanie „managed”
             em.persist(te);
             tx.commit();
             logger.info("add() – przypisanie zapisane: {}", te);
@@ -47,6 +60,7 @@ public class TaskEmployeeRepository implements AutoCloseable {
             em.close();
         }
     }
+
 
     /**
      * Usuwa istniejące przypisanie zadania do pracownika.

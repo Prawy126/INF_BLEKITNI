@@ -1160,27 +1160,27 @@ public class AdminPanelController {
                 .filter(t -> inRange(t.getDate(), from, to))
                 .map(t -> {
                     Employee assignee = t.getSingleAssignee();
-
                     StatsRaportGenerator.Priority priority = null;
                     if (t.getPriority() != null) {
-                        try { priority = StatsRaportGenerator.Priority.valueOf(t.getPriority().name()); }
-                        catch (IllegalArgumentException ignored) { /* brak mapowania */ }
+                        try {
+                            priority = StatsRaportGenerator.Priority.valueOf(t.getPriority().name());
+                        } catch (IllegalArgumentException e) {
+                            logger.warn("Nie można zmapować priorytetu: {} dla zadania: {}", t.getPriority(), t.getName());
+                        }
                     }
-
-                    /**  czas trwania zmiany w godzinach  */
-                    double duration = t.getDurationOfTheShift() != null
-                            ? hours(t.getDurationOfTheShift()) : 0;
-
-                    return new StatsRaportGenerator.TaskRecord(
+                    StatsRaportGenerator.TaskRecord record = new StatsRaportGenerator.TaskRecord(
                             t.getName(),
                             assignee != null ? assignee.getPosition() : "Brak",
                             priority,
-                            toLocalDate(t.getDate()),                         // dueDate
-                            "Zakończone".equals(t.getStatus())                // completionDate
-                                    ? toLocalDate(t.getDate()) : null,
-                            assignee != null ? assignee.getLogin() : "Brak",
-                            duration                                           // ← NOWE
+                            toLocalDate(t.getDate()), // dueDate
+                            "Zakończone".equals(t.getStatus()) ? toLocalDate(t.getDate()) : null, // completionDate
+                            assignee != null ? assignee.getLogin() : "Brak"
                     );
+                    // Logowanie każdego utworzonego TaskRecord
+                    logger.debug("Utworzono TaskRecord: taskName={}, position={}, priority={}, dueDate={}, completionDate={}, assignee={}",
+                            record.taskName(), record.position(), record.priority(),
+                            record.dueDate(), record.completionDate(), record.assignee());
+                    return record;
                 })
                 .toList();
 

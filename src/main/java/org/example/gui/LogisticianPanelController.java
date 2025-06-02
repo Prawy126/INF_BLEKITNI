@@ -466,9 +466,10 @@ public class LogisticianPanelController {
 
     /**
      * Otwiera formularz dodawania nowego zamówienia.
-     * Pola: Id produktu, Ilość, Data.
-     * Id pracownika pobieramy automatycznie z zalogowanego użytkownika,
-     * Cena wyliczana jest jako (cena jednostkowa produktu * ilość).
+     * Pole "Produkt" zastąpiono ComboBoxem wypełnionym nazwami produktów.
+     * Pole "Ilość" oraz "Data" pozostały bez zmian.
+     * ID pracownika pobierane jest automatycznie z zalogowanego użytkownika,
+     * a cena jest liczona jako (cena jednostkowa produktu * ilość).
      */
     private void showAddOrderForm() {
         Stage stage = new Stage();
@@ -479,23 +480,43 @@ public class LogisticianPanelController {
         grid.setHgap(10);
         grid.setVgap(10);
 
-        Label productLabel  = new Label("Id produktu:");
-        Label qtyLabel      = new Label("Ilość:");
-        Label dateLabel     = new Label("Data:");
+        Label productLabel = new Label("Produkt:");
+        Label qtyLabel     = new Label("Ilość:");
+        Label dateLabel    = new Label("Data:");
 
-        TextField productIdField = new TextField();
-        productIdField.setPromptText("np. 42");
+        // 1) ComboBox z produktami zamiast TextField na ID
+        ComboBox<Product> productComboBox = new ComboBox<>();
+        productComboBox.setPrefWidth(200);
+        productComboBox.setPromptText("Wybierz produkt");
+        // Wypełniamy ComboBox wszystkimi produktami (z repozytorium)
+        List<Product> allProducts = productRepository.getAllProducts();
+        productComboBox.getItems().addAll(allProducts);
+        // Wyświetlamy w liście jedynie nazwę produktu
+        productComboBox.setCellFactory(cb -> new ListCell<>() {
+            @Override
+            protected void updateItem(Product item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName());
+            }
+        });
+        productComboBox.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Product item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName());
+            }
+        });
 
-        TextField quantityField  = new TextField();
+        TextField quantityField = new TextField();
         quantityField.setPromptText("liczba całkowita");
 
-        DatePicker datePicker    = new DatePicker();
+        DatePicker datePicker = new DatePicker();
 
         Button submit = new Button("Zapisz");
         styleLogisticButton(submit, "#27AE60");
         submit.setOnAction(ev -> {
-            // 1) Sprawdzenie, czy wszystkie pola wypełniono
-            if (productIdField.getText().isBlank()
+            // 2) Sprawdzenie, czy wszystkie pola wypełniono
+            if (productComboBox.getValue() == null
                     || quantityField.getText().isBlank()
                     || datePicker.getValue() == null) {
                 showAlert(Alert.AlertType.WARNING,
@@ -505,8 +526,8 @@ public class LogisticianPanelController {
             }
 
             try {
-                int prodId = Integer.parseInt(productIdField.getText().trim());
-                int qty    = Integer.parseInt(quantityField.getText().trim());
+                // 3) Parsowanie ilości
+                int qty = Integer.parseInt(quantityField.getText().trim());
                 if (qty <= 0) {
                     showAlert(Alert.AlertType.WARNING,
                             "Nieprawidłowa ilość",
@@ -514,7 +535,7 @@ public class LogisticianPanelController {
                     return;
                 }
 
-                // 2) Pobranie zalogowanego pracownika
+                // 4) Pobranie zalogowanego pracownika
                 UserRepository ur = new UserRepository();
                 Employee empl = ur.getCurrentEmployee();
                 if (empl == null) {
@@ -524,21 +545,14 @@ public class LogisticianPanelController {
                     return;
                 }
 
-                // 3) Pobranie produktu po ID
-                ProductRepository pr = new ProductRepository();
-                Product prod = pr.findProductById(prodId);
-                if (prod == null) {
-                    showAlert(Alert.AlertType.ERROR,
-                            "Błąd",
-                            "Nie znaleziono produktu o ID=" + prodId);
-                    return;
-                }
+                // 5) Pobranie wybranego produktu z ComboBoxa
+                Product prod = productComboBox.getValue();
 
-                // 4) Obliczenie ceny: cena jednostkowa * ilość
-                BigDecimal unitPrice = prod.getPrice(); // zakładamy, że getPrice() zwraca BigDecimal
+                // 6) Obliczenie ceny: cena jednostkowa * ilość
+                BigDecimal unitPrice = prod.getPrice();
                 BigDecimal totalPrice = unitPrice.multiply(BigDecimal.valueOf(qty));
 
-                // 5) Utworzenie i zapis zamówienia
+                // 7) Utworzenie i zapis zamówienia
                 Order ord = new Order();
                 ord.setProduct(prod);
                 ord.setEmployee(empl);
@@ -559,7 +573,7 @@ public class LogisticianPanelController {
             } catch (NumberFormatException ex) {
                 showAlert(Alert.AlertType.ERROR,
                         "Błąd",
-                        "Pole ID produktu i Ilość muszą być liczbami całkowitymi!");
+                        "Pole Ilość musi być liczbą całkowitą!");
             } catch (Exception ex) {
                 logger.error("Błąd dodawania zamówienia", ex);
                 showAlert(Alert.AlertType.ERROR,
@@ -568,16 +582,16 @@ public class LogisticianPanelController {
             }
         });
 
-        // Ustawienie układu / dodanie kontroli do siatki
-        grid.add(productLabel,  0, 0);
-        grid.add(productIdField,1, 0);
-        grid.add(qtyLabel,      0, 1);
-        grid.add(quantityField, 1, 1);
-        grid.add(dateLabel,     0, 2);
-        grid.add(datePicker,    1, 2);
-        grid.add(submit,        1, 3);
+        // Ułożenie kontrolek w siatce
+        grid.add(productLabel,       0, 0);
+        grid.add(productComboBox,    1, 0);
+        grid.add(qtyLabel,           0, 1);
+        grid.add(quantityField,      1, 1);
+        grid.add(dateLabel,          0, 2);
+        grid.add(datePicker,         1, 2);
+        grid.add(submit,             1, 3);
 
-        stage.setScene(new Scene(grid, 350, 220));
+        stage.setScene(new Scene(grid, 380, 230));
         stage.show();
     }
 
