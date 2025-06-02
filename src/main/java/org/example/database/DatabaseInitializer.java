@@ -1,10 +1,9 @@
 /*
  * Classname: DatabaseInitializer
- * Version information: 1.2
- * Date: 2025-05-22
+ * Version information: 1.3
+ * Date: 2025-06-02
  * Copyright notice: © BŁĘKITNI
  */
-
 
 package org.example.database;
 
@@ -21,45 +20,159 @@ public class DatabaseInitializer implements ILacz {
 
     /**
      * Tworzy bazę danych (jeśli nie istnieje) i importuje do niej struktury oraz dane
-     * na podstawie pliku SQL.
+     * na podstawie plików SQL.
      * <p>
      * Najpierw łączy się z serwerem MySQL bez wskazania konkretnej bazy,
-     * tworzy bazę (DB_NAME), a następnie ponownie łączy się już z nią i
-     * importuje zawartość pliku Stonka.sql.
+     * tworzy bazę (jeśli nie istnieje), a następnie:
+     * 1. Tworzy strukturę tabel (jeśli nie istnieją)
+     * 2. Wstawia dane początkowe (tylko jeśli tabela Pracownicy jest pusta)
      * </p>
      */
     public static void initialize() {
         logger.info("Rozpoczynam inicjalizację bazy danych");
-        // Połączenie do serwera MySQL (bez wskazania konkretnej bazy)
-        try (Connection conn = DriverManager.getConnection(MYSQL_SERVER_URL, MYSQL_USER, MYSQL_PASSWORD)) {
-            logger.debug("Połączenie do serwera MySQL nawiązane: {}", MYSQL_SERVER_URL);
-            logger.info("Tworzenie bazy danych: {}", DB_NAME);
-            if (!databaseExists(conn, "StonkaDB")) {
-                executeSqlScript(conn, SQL_FILE); // Uruchom skrypt tylko raz
-            }
 
+        try {
+            // Krok 1: Sprawdź czy baza istnieje, jeśli nie - utwórz ją
+            createDatabaseIfNotExists();
+
+            // Krok 2: Połącz się z bazą i utwórz strukturę tabel (jeśli nie istnieją)
+            createTablesStructure();
+
+            // Krok 3: Wstaw dane początkowe (tylko jeśli tabela Pracownicy jest pusta)
+            insertInitialData();
+
+            logger.info("Inicjalizacja bazy danych zakończona pomyślnie");
         } catch (Exception e) {
-            logger.error("Błąd podczas tworzenia bazy danych '{}'", DB_NAME, e);
-            return;
+            logger.error("Błąd podczas inicjalizacji bazy danych: {}", e.getMessage(), e);
+            throw new RuntimeException("Błąd inicjalizacji bazy danych", e);
         }
     }
 
+    /**
+     * Sprawdza czy baza danych istnieje, a jeśli nie - tworzy ją.
+     *
+     * @throws SQLException gdy wystąpi błąd podczas połączenia lub tworzenia bazy
+     */
+    private static void createDatabaseIfNotExists() throws SQLException {
+        try (Connection conn = DriverManager.getConnection(MYSQL_SERVER_URL, MYSQL_USER, MYSQL_PASSWORD)) {
+            logger.debug("Połączenie do serwera MySQL nawiązane: {}", MYSQL_SERVER_URL);
+
+            boolean databaseExists = databaseExists(conn, DB_NAME);
+
+            if (!databaseExists) {
+                logger.info("Baza danych '{}' nie istnieje, tworzę...", DB_NAME);
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS " + DB_NAME);
+                    logger.info("Baza danych '{}' została utworzona", DB_NAME);
+                }
+            } else {
+                logger.info("Baza danych '{}' już istnieje", DB_NAME);
+            }
+        }
+    }
+
+    /**
+     * Tworzy strukturę tabel w bazie danych na podstawie pliku Struktura.sql.
+     *
+     * @throws Exception gdy wystąpi błąd podczas wykonywania skryptu SQL
+     */
+    private static void createTablesStructure() throws Exception {
+        try (Connection conn = DriverManager.getConnection(MYSQL_DB_URL, MYSQL_USER, MYSQL_PASSWORD)) {
+            logger.debug("Połączenie do bazy danych '{}' nawiązane", DB_NAME);
+
+            // Sprawdź czy tabela Pracownicy już istnieje
+            boolean tablesExist = tableExists(conn, "Pracownicy");
+
+            if (!tablesExist) {
+                logger.info("Tabele nie istnieją, tworzę strukturę...");
+                executeSqlScript(conn, STRUKTURA_SQL_FILE);
+                logger.info("Struktura tabel została utworzona");
+            } else {
+                logger.info("Struktura tabel już istnieje, pomijam tworzenie");
+            }
+        } catch (SQLException e) {
+            logger.error("Błąd podczas tworzenia struktury tabel: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    /**
+     * Wstawia dane początkowe do bazy danych na podstawie pliku Dane.sql,
+     * ale tylko jeśli tabela Pracownicy jest pusta.
+     *
+     * @throws Exception gdy wystąpi błąd podczas wykonywania skryptu SQL
+     */
+    private static void insertInitialData() throws Exception {
+        try (Connection conn = DriverManager.getConnection(MYSQL_DB_URL, MYSQL_USER, MYSQL_PASSWORD)) {
+            logger.debug("Połączenie do bazy danych '{}' nawiązane do wstawienia danych", DB_NAME);
+
+            // Sprawdź czy tabela Pracownicy zawiera jakiekolwiek dane
+            boolean hasData = false;
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM Pracownicy")) {
+                if (rs.next() && rs.getInt(1) > 0) {
+                    hasData = true;
+                }
+            } catch (SQLException e) {
+                // Jeśli tabela nie istnieje lub wystąpił inny błąd, zakładamy że nie ma danych
+                logger.warn("Błąd podczas sprawdzania danych w tabeli Pracownicy: {}", e.getMessage());
+            }
+
+            if (!hasData) {
+                logger.info("Tabela Pracownicy jest pusta, wstawiam dane początkowe...");
+                try {
+                    executeSqlScript(conn, DANE_SQL_FILE);
+                    logger.info("Dane początkowe zostały wstawione");
+                } catch (SQLException e) {
+                    logger.error("Błąd podczas wstawiania danych: {}", e.getMessage(), e);
+                    throw e;
+                }
+            } else {
+                logger.info("Tabela Pracownicy już zawiera dane, pomijam wstawianie danych");
+            }
+        } catch (Exception e) {
+            logger.error("Błąd podczas inicjalizacji danych: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    /**
+     * Sprawdza czy baza danych o podanej nazwie istnieje.
+     *
+     * @param conn połączenie z serwerem bazy danych
+     * @param dbName nazwa bazy danych
+     * @return true jeśli baza istnieje, false w przeciwnym przypadku
+     * @throws SQLException gdy wystąpi błąd podczas sprawdzania
+     */
     private static boolean databaseExists(Connection conn, String dbName) throws SQLException {
         try (ResultSet rs = conn.getMetaData().getCatalogs()) {
             while (rs.next()) {
                 if (dbName.equals(rs.getString(1))) return true;
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
         return false;
+    }
+
+    /**
+     * Sprawdza czy tabela o podanej nazwie istnieje w bazie danych.
+     *
+     * @param conn połączenie z bazą danych
+     * @param tableName nazwa tabeli
+     * @return true jeśli tabela istnieje, false w przeciwnym przypadku
+     * @throws SQLException gdy wystąpi błąd podczas sprawdzania
+     */
+    private static boolean tableExists(Connection conn, String tableName) throws SQLException {
+        DatabaseMetaData meta = conn.getMetaData();
+        try (ResultSet rs = meta.getTables(null, null, tableName, new String[] {"TABLE"})) {
+            return rs.next();
+        }
     }
 
     /**
      * Wczytuje i wykonuje kolejne polecenia SQL zawarte w podanym pliku.
      *
      * @param conn     aktywne połączenie do bazy, w której mają zostać wykonane zapytania
-     * @param filePath ścieżka do pliku SQL zawierającego skrypt DDL i DML
+     * @param filePath ścieżka do pliku SQL zawierającego skrypt DDL lub DML
      * @throws Exception gdy odczyt pliku lub wykonanie zapytań zakończy się niepowodzeniem
      */
     private static void executeSqlScript(Connection conn, String filePath) throws Exception {
@@ -75,8 +188,20 @@ public class DatabaseInitializer implements ILacz {
                 for (String s : statements) {
                     String trimmed = s.trim();
                     if (!trimmed.isEmpty()) {
-                        logger.trace("Wykonuję zapytanie SQL: {}", trimmed.replaceAll("\\s+", " "));
-                        stmt.execute(trimmed);
+                        try {
+                            logger.trace("Wykonuję zapytanie SQL: {}", trimmed.replaceAll("\\s+", " "));
+                            stmt.execute(trimmed);
+                        } catch (SQLException e) {
+                            // Obsługa konkretnych błędów SQL
+                            if (e.getMessage().contains("Duplicate column") ||
+                                    e.getMessage().contains("Duplicate entry") ||
+                                    e.getMessage().contains("already exists")) {
+                                logger.warn("Ignoruję błąd duplikatu: {}", e.getMessage());
+                            } else {
+                                // Dla innych błędów rzucamy wyjątek
+                                throw e;
+                            }
+                        }
                     }
                 }
             }

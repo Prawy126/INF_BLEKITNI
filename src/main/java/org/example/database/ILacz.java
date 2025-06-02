@@ -17,8 +17,8 @@ public interface ILacz {
     /** Nazwa bazy danych */
     String DB_NAME = "StonkaDB";
 
-    /** Ścieżka do pliku .sql ze skryptem DDL i DML */
-    String SQL_FILE = "Stonka.sql";
+    String STRUKTURA_SQL_FILE = "Struktura.sql";
+    String DANE_SQL_FILE = "Dane.sql";
 
     /** URL do serwera MySQL (bez wskazania konkretnej bazy) */
     String MYSQL_SERVER_URL = "jdbc:mysql://localhost:3306/?useSSL=false&serverTimezone=UTC";
@@ -30,5 +30,5 @@ public interface ILacz {
     String MYSQL_USER = "root";
 
     /** Hasło użytkownika bazy MySQL */
-    String MYSQL_PASSWORD = "";
+    String MYSQL_PASSWORD = "TwojeNoweHaslo";
 }
