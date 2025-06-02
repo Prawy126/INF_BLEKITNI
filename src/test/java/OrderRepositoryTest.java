@@ -148,7 +148,7 @@ public class OrderRepositoryTest {
     @Test
     @org.junit.jupiter.api.Order(4)
     void testDelete() {
-        assertDoesNotThrow(() -> orderRepo.removeOrders(order.getId()));
+        assertDoesNotThrow(() -> orderRepo.removeOrder(order.getId()));
 
         assertNull(orderRepo.findOrderById(order.getId()));
         assertTrue(orderRepo.getAllOrders().stream()

@@ -231,6 +231,9 @@ public class ReportRepository {
             em.close();
         }
     }
+
+    public void close() {
+    }
 }
 
 
