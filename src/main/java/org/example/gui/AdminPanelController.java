@@ -663,60 +663,69 @@ public class AdminPanelController {
 
     private void exportDatabaseToCsv() {
         try {
-            // Użyj ścieżki względnej lub bezwzględnej
-            String backupPath = System.getProperty("user.dir") + "/backup-csv";
+            // Użyj ścieżki w katalogu użytkownika
+            String userHome = System.getProperty("user.home");
+            String backupPath = userHome + "/stonka-backup-csv";
 
-            // Utwórz folder jeśli nie istnieje
             File folder = new File(backupPath);
             if (!folder.exists() && !folder.mkdirs()) {
-                showAlert(Alert.AlertType.ERROR, "Błąd", "Nie można utworzyć katalogu: " + backupPath);
+                showAlert(Alert.AlertType.ERROR, "Błąd",
+                        "Nie można utworzyć katalogu: " + backupPath +
+                                "\nSprawdź uprawnienia do zapisu.");
                 return;
             }
 
-            // Alert informujący o trwającym eksporcie
+            // Alert z progress barem
             Alert progressAlert = new Alert(Alert.AlertType.INFORMATION);
             progressAlert.setTitle("Eksport do CSV");
             progressAlert.setHeaderText("Trwa eksportowanie danych...");
-            progressAlert.setContentText("Proszę czekać.");
+
+            ProgressIndicator progress = new ProgressIndicator();
+            progress.setProgress(-1); // indeterminate progress
+            progressAlert.getDialogPane().setContent(progress);
             progressAlert.show();
 
-            // Uruchom eksport w tle
             Task<Void> exportTask = new Task<>() {
                 @Override
                 protected Void call() throws Exception {
-                    DatabaseBackupExporter.exportAllTablesToCsv(backupPath);
-                    return null;
+                    try {
+                        logger.info("Rozpoczęcie eksportu CSV do: {}", backupPath);
+                        DatabaseBackupExporter.exportAllTablesToCsv(backupPath);
+                        return null;
+                    } catch (Exception e) {
+                        logger.error("Błąd eksportu CSV", e);
+                        throw e;
+                    }
                 }
             };
 
             exportTask.setOnSucceeded(e -> {
-                progressAlert.close();
-                showAlert(Alert.AlertType.INFORMATION, "Eksport zakończony",
-                        "Dane zostały wyeksportowane do: " + backupPath);
-
-                // Otwórz folder po zakończeniu
-                try {
-                    if (Desktop.isDesktopSupported()) {
-                        Desktop.getDesktop().open(folder);
-                    }
-                } catch (IOException ex) {
-                    logger.warn("Nie można otworzyć folderu", ex);
-                }
+                progressAlert.close(); // Zamknij alert postępu
+                showAlert(Alert.AlertType.INFORMATION, "Sukces",
+                        "Pomyślnie wyeksportowano dane do:\n" + backupPath);
             });
 
             exportTask.setOnFailed(e -> {
-                progressAlert.close();
                 Throwable ex = exportTask.getException();
-                ex.printStackTrace();
-                showAlert(Alert.AlertType.ERROR, "Błąd eksportu",
-                        "Wystąpił błąd: " + ex.getMessage());
+                logger.error("Błąd eksportu CSV", ex);
+
+                String errorMsg = "Wystąpił błąd podczas eksportu:\n";
+                if (ex.getCause() != null) {
+                    errorMsg += ex.getCause().getMessage();
+                } else {
+                    errorMsg += ex.getMessage();
+                }
+
+                showAlert(Alert.AlertType.ERROR, "Błąd eksportu", errorMsg);
             });
 
-            executor.execute(exportTask);
+            // Uruchom w puli wątków
+            new Thread(exportTask).start();
 
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Błąd", "Wystąpił nieoczekiwany problem: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Krytyczny błąd",
+                    "Nieoczekiwany błąd: " + e.getMessage());
         }
     }
 
