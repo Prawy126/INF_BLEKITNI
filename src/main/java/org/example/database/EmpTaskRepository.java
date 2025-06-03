@@ -1,7 +1,7 @@
 /*
  * Classname: EmpTaskRepository
- * Version information: 1.1
- * Date: 2025-05-30
+ * Version information: 1.2
+ * Date: 2025-06-03
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -83,16 +83,25 @@ public class EmpTaskRepository implements AutoCloseable {
      *
      * @return lista wszystkich zadań lub pusta lista w przypadku błędu
      */
+    /**
+     * Zwraca wszystkie zadania wraz z przypisanymi pracownikami i ich danymi.
+     * Używane w panelu kierownika, aby uniknąć LazyInitializationException.
+     */
     public List<EmpTask> getAllTasks() {
         logger.debug("getAllTasks() – start");
         EntityManager em = EMFProvider.get().createEntityManager();
         try {
-            List<EmpTask> list = em.createQuery("SELECT t FROM EmpTask t", EmpTask.class)
+            List<EmpTask> list = em.createQuery(
+                            "SELECT DISTINCT t " +
+                                    "FROM EmpTask t " +
+                                    "LEFT JOIN FETCH t.taskEmployees te " +
+                                    "LEFT JOIN FETCH te.employee",
+                            EmpTask.class)
                     .getResultList();
-            logger.info("getAllTasks() – pobrano {} zadań", list.size());
+            logger.info("getAllTasks() – pobrano {} zadań wraz z przypisaniami i pracownikami", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("getAllTasks() – błąd podczas pobierania zadań", e);
+            logger.error("getAllTasks() – błąd podczas pobierania zadań z przypisaniami i pracownikami", e);
             return List.of();
         } finally {
             em.close();
@@ -297,17 +306,24 @@ public class EmpTaskRepository implements AutoCloseable {
      * Pobiera wszystkie zadania wraz z przypisanymi pracownikami i ich danymi.
      */
     public List<EmpTask> getAllTasksWithEmployeesAndAssignees() {
+        logger.debug("getAllTasksWithEmployeesAndAssignees() – start");
         EntityManager em = EMFProvider.get().createEntityManager();
         try {
-            return em.createQuery(
-                            "SELECT t FROM EmpTask t LEFT JOIN FETCH t.taskEmployees te LEFT JOIN FETCH te.employee",
+            List<EmpTask> list = em.createQuery(
+                            "SELECT DISTINCT t " +
+                                    "FROM EmpTask t " +
+                                    "LEFT JOIN FETCH t.taskEmployees te " +
+                                    "LEFT JOIN FETCH te.employee",
                             EmpTask.class)
                     .getResultList();
+            logger.info("getAllTasksWithEmployeesAndAssignees() – pobrano {} zadań z przypisaniami i pracownikami", list.size());
+            return list;
         } catch (Exception e) {
-            logger.error("Błąd podczas pobierania zadań z przypisaniami i pracownikami", e);
+            logger.error("getAllTasksWithEmployeesAndAssignees() – błąd podczas pobierania zadań z przypisaniami i pracownikami", e);
             return List.of();
         } finally {
             em.close();
+            logger.debug("getAllTasksWithEmployeesAndAssignees() – EntityManager zamknięty");
         }
     }
 

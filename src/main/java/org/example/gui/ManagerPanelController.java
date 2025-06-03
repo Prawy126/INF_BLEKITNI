@@ -1,7 +1,7 @@
 /*
  * Classname: ManagerPanelController
- * Version information: 1.7
- * Date: 2025-06-02
+ * Version information: 1.8
+ * Date: 2025-06-03
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -64,6 +64,7 @@ public class ManagerPanelController {
         layout.setPadding(new Insets(20));
 
         Label taskLabel = new Label("Lista zadań");
+        taskLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         TableView<EmpTask> taskTable = new TableView<>();
         taskTable.setMinHeight(200);
@@ -84,7 +85,29 @@ public class ManagerPanelController {
                 )
         );
 
-        taskTable.getColumns().addAll(nameCol, dateCol);
+        TableColumn<EmpTask, String> statusCol = new TableColumn<>("Status");
+        statusCol.setCellValueFactory(
+                data -> new javafx.beans.property.SimpleStringProperty(
+                        data.getValue().getStatus()
+                )
+        );
+
+        TableColumn<EmpTask, String> employeeCol = new TableColumn<>("Pracownik");
+        employeeCol.setCellValueFactory(
+                data -> {
+                    EmpTask task = data.getValue();
+                    if (task.getSingleAssignee() != null) {
+                        Employee emp = task.getSingleAssignee();
+                        return new javafx.beans.property.SimpleStringProperty(
+                                emp.getName() + " " + emp.getSurname()
+                        );
+                    } else {
+                        return new javafx.beans.property.SimpleStringProperty("Brak");
+                    }
+                }
+        );
+
+        taskTable.getColumns().addAll(nameCol, dateCol, statusCol, employeeCol);
         taskTable.getItems().addAll(taskRepository.getAllTasks());
 
         HBox taskButtons = new HBox(10);
@@ -392,9 +415,7 @@ public class ManagerPanelController {
 
         Label taskLabel = new Label("Wybierz zadanie:");
         ComboBox<EmpTask> taskComboBox = new ComboBox<>();
-        // Ładujemy obiekty EmpTask zamiast tylko nazw, by później mieć dostęp do pełnej encji
-        EmpTaskRepository taskRepo = new EmpTaskRepository();
-        List<EmpTask> allTasks = taskRepo.getAllTasks();
+        List<EmpTask> allTasks = taskRepository.getAllTasks();
         taskComboBox.setItems(FXCollections.observableArrayList(allTasks));
         taskComboBox.setCellFactory(param -> new ListCell<>() {
             @Override
@@ -413,9 +434,11 @@ public class ManagerPanelController {
 
         Label employeeLabel = new Label("Wybierz pracownika:");
         ComboBox<Employee> employeeComboBox = new ComboBox<>();
-        UserRepository userRepo = new UserRepository();
-        List<Employee> allEmployees = userRepo.getAllEmployees();
-        employeeComboBox.setItems(FXCollections.observableArrayList(allEmployees));
+        List<Employee> allEmployees = userRepository.getAllEmployees();
+        List<Employee> workers = allEmployees.stream()
+                .filter(emp -> "Pracownik".equalsIgnoreCase(emp.getPosition()))
+                .toList();
+        employeeComboBox.setItems(FXCollections.observableArrayList(workers));
         employeeComboBox.setCellFactory(param -> new ListCell<>() {
             @Override
             protected void updateItem(Employee item, boolean empty) {
@@ -442,19 +465,15 @@ public class ManagerPanelController {
             Employee selectedEmployee = employeeComboBox.getValue();
             if (selectedTask != null && selectedEmployee != null) {
                 try {
-                    // Tworzymy nowe powiązanie
                     TaskEmployee te = new TaskEmployee(selectedTask, selectedEmployee);
-                    // Zapisujemy je w bazie
                     TaskEmployeeRepository teRepo = new TaskEmployeeRepository();
                     teRepo.add(te);
                     teRepo.close();
 
-                    // Informujemy użytkownika o powodzeniu
                     showAlert(Alert.AlertType.INFORMATION, "Sukces",
                             "Pracownik został przypisany do zadania.");
                     dialogStage.close();
 
-                    // Odświeżamy widok listy zadań, aby pokazać ewentualne zmiany
                     showTaskPanel();
                 } catch (Exception ex) {
                     ex.printStackTrace();
