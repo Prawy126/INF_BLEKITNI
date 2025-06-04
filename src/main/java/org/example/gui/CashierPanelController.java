@@ -191,25 +191,36 @@ public class CashierPanelController {
     public void showSalesReportsPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
-        layout.setAlignment(Pos.CENTER);
+        layout.setAlignment(Pos.TOP_CENTER); // wyrównanie do góry, żeby tabela była zaraz pod nagłówkiem
 
+        // Nagłówek
         Label titleLabel = new Label("Raporty sprzedaży");
         titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
+        // Tabela raportów
         TableView<Report> tableView = createReportTable();
+        // Ustawienie preferowanej wysokości, aby od razu było widać wiersze
+        tableView.setPrefHeight(400);
 
+        // Pozwalamy tabeli rosnąć w pionie razem z VBox-em
+        VBox.setVgrow(tableView, Priority.ALWAYS);
+
+        // Przyciski akcji
         HBox buttons = new HBox(10);
         Button newReportButton = cashierPanel.createStyledButton("Nowy raport", "#27AE60");
-        Button refreshButton   = cashierPanel.createStyledButton("Odśwież", "#3498DB");
+        Button refreshButton = cashierPanel.createStyledButton("Odśwież", "#3498DB");
+
         newReportButton.setOnAction(e -> showReportDialog());
         refreshButton.setOnAction(e -> refreshReportTable(tableView));
+
         buttons.getChildren().addAll(newReportButton, refreshButton);
         buttons.setAlignment(Pos.CENTER);
 
+        // Składamy layout
         layout.getChildren().addAll(titleLabel, tableView, buttons);
         cashierPanel.setCenterPane(layout);
 
-        // Wczytaj raporty dla zalogowanego
+        // Załadowanie danych do tabeli (domyślnie przy pierwszym otwarciu)
         refreshReportTable(tableView);
     }
 
@@ -390,7 +401,7 @@ public class CashierPanelController {
      */
     private TableView<Report> createReportTable() {
         TableView<Report> tableView = new TableView<>();
-        tableView.setMinHeight(300);
+        tableView.setMinHeight(300);   // lub inna wartość, np. 350
 
         TableColumn<Report, Integer> idColumn = new TableColumn<>("ID");
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -417,8 +428,8 @@ public class CashierPanelController {
         TableColumn<Report, Void> actionsColumn = new TableColumn<>("Akcje");
         actionsColumn.setPrefWidth(200);
         actionsColumn.setCellFactory(param -> new TableCell<>() {
-            private final Button viewButton   = new Button("Podgląd");
-            private final Button openButton   = new Button("Otwórz");
+            private final Button viewButton = new Button("Podgląd");
+            private final Button openButton = new Button("Otwórz");
             private final Button deleteButton = new Button("Usuń");
             private final HBox pane = new HBox(5, viewButton, openButton, deleteButton);
 
@@ -427,13 +438,20 @@ public class CashierPanelController {
                 openButton.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white;");
                 deleteButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
 
-                viewButton.setOnAction(event -> showReportDetails(getCurrentReport()));
-                openButton.setOnAction(event -> openReportFile(getCurrentReport().getFilePath()));
-                deleteButton.setOnAction(event -> confirmAndDeleteReport(getCurrentReport(), tableView));
-            }
+                viewButton.setOnAction(event -> {
+                    Report report = getTableView().getItems().get(getIndex());
+                    showReportDetails(report);
+                });
 
-            private Report getCurrentReport() {
-                return getTableView().getItems().get(getIndex());
+                openButton.setOnAction(event -> {
+                    Report report = getTableView().getItems().get(getIndex());
+                    openReportFile(report.getFilePath());
+                });
+
+                deleteButton.setOnAction(event -> {
+                    Report report = getTableView().getItems().get(getIndex());
+                    confirmAndDeleteReport(report, getTableView());
+                });
             }
 
             @Override
@@ -444,9 +462,14 @@ public class CashierPanelController {
         });
 
         tableView.getColumns().addAll(
-                idColumn, typeColumn, dateStartColumn, dateEndColumn,
-                employeeColumn, actionsColumn
+                idColumn,
+                typeColumn,
+                dateStartColumn,
+                dateEndColumn,
+                employeeColumn,
+                actionsColumn
         );
+
         return tableView;
     }
 
