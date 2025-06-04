@@ -1,7 +1,7 @@
 /*
  * Classname: AdminPanel
- * Version information: 1.1
- * Date: 2025-05-29
+ * Version information: 1.2
+ * Date: 2025-06-04
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -32,7 +32,8 @@ import java.util.concurrent.Executors;
 
 /**
  * Klasa reprezentująca główny panel administratora.
- * Tworzy GUI, które zawiera panel nawigacyjny oraz różne widoki zarządzania.
+ * Tworzy GUI, które zawiera panel nawigacyjny oraz różne widoki
+ * zarządzania.
  */
 public class AdminPanel {
     private static final Logger logger = LogManager.getLogger(AdminPanel.class);
@@ -42,6 +43,11 @@ public class AdminPanel {
     private Image logoImage;
     private static final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
+    /**
+     * Konstruktor panelu administratora.
+     *
+     * @param stage główne okno aplikacji
+     */
     public AdminPanel(Stage stage) {
         logger.info("Tworzenie AdminPanel dla stage: {}", stage);
         this.primaryStage = stage;
@@ -80,6 +86,10 @@ public class AdminPanel {
         });
     }
 
+    /**
+     * Metoda uruchamiająca asynchroniczne ładowanie obrazu logo.
+     * Po pomyślnym załadowaniu ustawia ikonę okna.
+     */
     private void loadLogoAsync() {
         Task<Image> task = new Task<>() {
             @Override
@@ -111,6 +121,11 @@ public class AdminPanel {
         logger.debug("Zadanie ładowania logo przesłane do executor");
     }
 
+    /**
+     * Metoda uruchamiająca asynchroniczne tworzenie panelu menu.
+     * Po zakończeniu tworzenia następuje dodanie menu do głównego
+     * panelu oraz uruchomienie animacji.
+     */
     private void createMenuAsync() {
         Task<VBox> task = new Task<>() {
             @Override
@@ -145,6 +160,13 @@ public class AdminPanel {
         logger.debug("Zadanie tworzenia menu przesłane do executor");
     }
 
+    /**
+     * Tworzy panel menu nawigacyjnego z logiem i przyciskami.
+     * Przyciskom przypisane są odpowiednie akcje do wyświetlania
+     * różnych widoków panelu administratora.
+     *
+     * @return VBox zawierające elementy menu
+     */
     private VBox createMenu() {
         logger.debug("Tworzenie menu nawigacyjnego");
         VBox menu = new VBox(10);
@@ -214,10 +236,25 @@ public class AdminPanel {
         return menu;
     }
 
+    /**
+     * Tworzy przycisk z domyślnym kolorem tła #2980B9.
+     *
+     * @param text opis wyświetlany na przycisku
+     * @return stylizowany obiekt Button
+     */
     private Button createStyledButton(String text) {
         return createStyledButton(text, "#2980B9");
     }
 
+    /**
+     * Tworzy stylizowany przycisk z określonym kolorem tła.
+     * Przyciskowi przypisane są efekty powiększenia przy
+     * najechaniu kursorem.
+     *
+     * @param text  opis wyświetlany na przycisku
+     * @param color kolor tła przycisku w formacie hex
+     * @return stylizowany obiekt Button
+     */
     private Button createStyledButton(String text, String color) {
         logger.debug("Tworzenie stylizowanego przycisku: {}", text);
         Button button = new Button(text);
@@ -240,6 +277,13 @@ public class AdminPanel {
         return button;
     }
 
+    /**
+     * Uruchamia animację fadeIn na przekazanym elemencie.
+     * Po zakończeniu animacji wyłącza cache.
+     *
+     * @param element  element do animacji
+     * @param duration czas trwania animacji w milisekundach
+     */
     private void animateFadeIn(VBox element, int duration) {
         logger.debug("Animowanie efektu fadeIn dla elementu");
         // Włączenie cache dla lepszej wydajności animacji
@@ -259,6 +303,13 @@ public class AdminPanel {
         fade.play();
     }
 
+    /**
+     * Uruchamia animację slideDown na przekazanym elemencie.
+     * Po zakończeniu animacji wyłącza cache.
+     *
+     * @param element  element do animacji
+     * @param duration czas trwania animacji w milisekundach
+     */
     private void animateSlideDown(VBox element, int duration) {
         logger.debug("Animowanie efektu slideDown dla elementu");
         // Włączenie cache dla lepszej wydajności animacji
@@ -279,11 +330,21 @@ public class AdminPanel {
         slide.play();
     }
 
+    /**
+     * Ustawia nowy panel centralny w głównym układzie BorderPane.
+     *
+     * @param pane panel do ustawienia jako centralny
+     */
     public void setCenterPane(javafx.scene.layout.Pane pane) {
         logger.debug("Ustawianie nowego panelu centralnego");
         root.setCenter(pane);
     }
 
+    /**
+     * Zwraca główne okno aplikacji (Stage).
+     *
+     * @return obiekt Stage głównego okna
+     */
     public Stage getPrimaryStage() {
         return primaryStage;
     }
