@@ -42,6 +42,7 @@ public class AdminPanel {
     private AdminPanelController controller;
     private Image logoImage;
     private static final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+    private Button activeButton; // Pole do śledzenia aktywnego przycisku
 
     /**
      * Konstruktor panelu administratora.
@@ -195,24 +196,28 @@ public class AdminPanel {
         Button usersButton = createStyledButton("Użytkownicy");
         usersButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Użytkownicy'");
+            setActiveButton(usersButton);
             controller.showUserManagement();
         });
 
         Button configButton = createStyledButton("Konfiguracja");
         configButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Konfiguracja'");
+            setActiveButton(configButton);
             controller.showConfigPanel();
         });
 
         Button reportsButton = createStyledButton("Raporty");
         reportsButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Raporty'");
+            setActiveButton(reportsButton);
             controller.showReportsPanel();
         });
 
         Button issuesButton = createStyledButton("Zgłoszenia");
         issuesButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Zgłoszenia'");
+            setActiveButton(issuesButton);
             controller.showIssuesPanel();
         });
 
@@ -232,8 +237,24 @@ public class AdminPanel {
                 issuesButton,
                 logoutButton);
 
+        // Ustawienie domyślnego aktywnego przycisku
+        setActiveButton(usersButton);
+
         logger.debug("Menu utworzone pomyślnie");
         return menu;
+    }
+
+    /**
+     * Ustawia podany przycisk jako aktywny, aktualizując style.
+     *
+     * @param button przycisk do ustawienia jako aktywny
+     */
+    private void setActiveButton(Button button) {
+        if (activeButton != null) {
+            activeButton.setStyle("-fx-background-color: #2980B9; -fx-text-fill: white; -fx-font-weight: bold;");
+        }
+        activeButton = button;
+        activeButton.setStyle("-fx-background-color: #1A5276; -fx-text-fill: white; -fx-font-weight: bold;");
     }
 
     /**
