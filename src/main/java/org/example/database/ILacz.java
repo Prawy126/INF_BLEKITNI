@@ -19,7 +19,14 @@ public interface ILacz {
      */
     String DB_NAME = "StonkaDB";
 
+    /**
+     * Nazwa pliku ze strukturą bazy danych
+     */
     String STRUKTURA_SQL_FILE = "Struktura.sql";
+
+    /**
+     * Nazwa pliku z danymi do bazy danych
+     */
     String DANE_SQL_FILE = "Dane.sql";
 
     /**
@@ -40,7 +47,6 @@ public interface ILacz {
     /**
      * Hasło użytkownika bazy MySQL
      */
-
     String MYSQL_PASSWORD = "TwojeNoweHaslo";
 }
 
