@@ -738,7 +738,7 @@ public class AdminPanelController {
 
     private void openLogsDirectory() {
         try {
-            File logsDir = new File(System.getProperty("user.home") + "/stonka/logs");
+            File logsDir = new File("logs");
             if (!logsDir.exists()) {
                 logsDir.mkdirs();
             }
