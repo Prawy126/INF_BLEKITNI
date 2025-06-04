@@ -580,6 +580,16 @@ public class AdminPanelController {
             return;
         }
 
+        // Sprawdź, czy wybrany użytkownik to "root" (login root)
+        if ("root".equalsIgnoreCase(selected.getLogin())) {
+            showAlert(
+                    Alert.AlertType.WARNING,
+                    "Niedozwolona operacja",
+                    "Nie można usunąć użytkownika o loginie „root”."
+            );
+            return;
+        }
+
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Potwierdzenie usunięcia");
         confirm.setHeaderText("Czy na pewno chcesz usunąć użytkownika?");
@@ -606,6 +616,7 @@ public class AdminPanelController {
             }
         });
     }
+
 
     /**
      * Wyświetla panel ustawień konfiguracyjnych systemu.
