@@ -1,3 +1,10 @@
+/*
+ * Classname: DatabaseBackupExporter
+ * Version information: 1.0
+ * Date: 2025-06-04
+ * Copyright notice: © BŁĘKITNI
+ */
+
 package org.example.database;
 
 import org.apache.logging.log4j.LogManager;
@@ -11,24 +18,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseBackupExporter implements ILacz {
-    private static final Logger logger = LogManager.getLogger(DatabaseBackupExporter.class);
+    private static final Logger logger
+            = LogManager.getLogger(DatabaseBackupExporter.class);
 
     /**
-     * Eksportuje wszystkie tabele z bazy danych do plików CSV w określonym folderze.
+     * Eksportuje wszystkie tabele z bazy danych do
+     * plików CSV w określonym folderze.
      *
-     * @param outputFolder Ścieżka do folderu, w którym mają zostać zapisane pliki CSV
+     * @param outputFolder Ścieżka do folderu,
+     *                     w którym mają zostać zapisane pliki CSV
      * @throws SQLException Jeśli wystąpi błąd podczas dostępu do bazy danych
      * @throws IOException Jeśli wystąpi błąd podczas zapisu do pliku
      */
-    public static void exportAllTablesToCsv(String outputFolder) throws SQLException, IOException {
+    public static void exportAllTablesToCsv(String outputFolder)
+            throws SQLException,
+            IOException {
         // Utwórz folder jeśli nie istnieje
         File folder = new File(outputFolder);
         if (!folder.exists() && !folder.mkdirs()) {
-            throw new IOException("Nie można utworzyć katalogu: " + outputFolder);
+            throw new IOException("Nie można utworzyć katalogu: " +
+                    outputFolder);
         }
 
-        try (Connection conn = DriverManager.getConnection(MYSQL_DB_URL, MYSQL_USER, MYSQL_PASSWORD)) {
-            logger.info("Rozpoczynanie eksportu bazy danych do plików CSV w folderze: {}", outputFolder);
+        try (Connection conn = DriverManager.getConnection(
+                MYSQL_DB_URL,
+                MYSQL_USER,
+                MYSQL_PASSWORD)
+        ) {
+            logger.info("Rozpoczynanie eksportu " +
+                    "bazy danych do plików CSV w folderze: {}", outputFolder);
 
             // Pobierz listę wszystkich tabel w bazie danych
             List<String> tables = getAllTables(conn);
@@ -39,14 +57,17 @@ public class DatabaseBackupExporter implements ILacz {
                     if (tableExists(conn, table)) {
                         exportTableToCsv(conn, table, folder);
                     } else {
-                        logger.warn("Tabela {} nie istnieje, pomijam eksport", table);
+                        logger.warn("Tabela {} nie istnieje," +
+                                " pomijam eksport", table);
                     }
                 } catch (Exception e) {
-                    logger.error("Błąd podczas eksportu tabeli {}: {}", table, e.getMessage(), e);
+                    logger.error("Błąd podczas eksportu tabeli {}:" +
+                            " {}", table, e.getMessage(), e);
                 }
             }
 
-            logger.info("Zakończono eksport. Wyeksportowano {} z {} tabel.",
+            logger.info("Zakończono eksport. " +
+                            "Wyeksportowano {} z {} tabel.",
                     tables.size() - countErrors, tables.size());
         }
     }
@@ -60,11 +81,14 @@ public class DatabaseBackupExporter implements ILacz {
      * @return Lista nazw tabel
      * @throws SQLException Jeśli wystąpi błąd SQL
      */
-    private static List<String> getAllTables(Connection conn) throws SQLException {
+    private static List<String> getAllTables(Connection conn)
+            throws SQLException {
         List<String> tables = new ArrayList<>();
         DatabaseMetaData meta = conn.getMetaData();
 
-        try (ResultSet rs = meta.getTables(DB_NAME, null, "%", new String[] {"TABLE"})) {
+        try (ResultSet rs = meta.getTables(DB_NAME,
+                null, "%",
+                new String[] {"TABLE"})) {
             while (rs.next()) {
                 tables.add(rs.getString("TABLE_NAME"));
             }
@@ -84,11 +108,13 @@ public class DatabaseBackupExporter implements ILacz {
     private static boolean tableExists(Connection conn, String tableName) {
         try {
             DatabaseMetaData meta = conn.getMetaData();
-            try (ResultSet rs = meta.getTables(null, null, tableName, new String[] {"TABLE"})) {
+            try (ResultSet rs = meta.getTables(null, null,
+                    tableName, new String[] {"TABLE"})) {
                 return rs.next();
             }
         } catch (SQLException e) {
-            logger.error("Błąd podczas sprawdzania istnienia tabeli {}: {}", tableName, e.getMessage());
+            logger.error("Błąd podczas sprawdzania istnienia tabeli" +
+                    " {}: {}", tableName, e.getMessage());
             return false;
         }
     }
@@ -102,10 +128,16 @@ public class DatabaseBackupExporter implements ILacz {
      * @throws SQLException Jeśli wystąpi błąd SQL
      * @throws IOException Jeśli wystąpi błąd zapisu pliku
      */
-    private static void exportTableToCsv(Connection conn, String tableName, File outputFolder)
-            throws SQLException, IOException {
-        String csvFilePath = new File(outputFolder, tableName + ".csv").getAbsolutePath();
-        logger.info("Eksportowanie tabeli {} do pliku {}", tableName, csvFilePath);
+    private static void exportTableToCsv(
+            Connection conn,
+            String tableName,
+            File outputFolder
+    ) throws SQLException,
+            IOException {
+        String csvFilePath = new File(outputFolder,
+                tableName + ".csv").getAbsolutePath();
+        logger.info("Eksportowanie tabeli {} do pliku {}",
+                tableName, csvFilePath);
 
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName);
@@ -117,14 +149,17 @@ public class DatabaseBackupExporter implements ILacz {
             // Następnie zapisz dane
             writeDataRows(rs, writer);
 
-            logger.debug("Pomyślnie wyeksportowano tabelę {}", tableName);
+            logger.debug("Pomyślnie wyeksportowano tabelę {}",
+                    tableName);
         } catch (SQLException e) {
             countErrors++;
-            logger.error("Błąd SQL podczas eksportu tabeli {}: {}", tableName, e.getMessage());
+            logger.error("Błąd SQL podczas eksportu tabeli" +
+                    " {}: {}", tableName, e.getMessage());
             throw e;
         } catch (IOException e) {
             countErrors++;
-            logger.error("Błąd IO podczas eksportu tabeli {}: {}", tableName, e.getMessage());
+            logger.error("Błąd IO podczas eksportu tabeli" +
+                    " {}: {}", tableName, e.getMessage());
             throw e;
         }
     }
@@ -137,7 +172,9 @@ public class DatabaseBackupExporter implements ILacz {
      * @throws SQLException Jeśli wystąpi błąd SQL
      * @throws IOException Jeśli wystąpi błąd zapisu pliku
      */
-    private static void writeColumnHeaders(ResultSet rs, FileWriter writer) throws SQLException, IOException {
+    private static void writeColumnHeaders(ResultSet rs,
+                                           FileWriter writer
+    ) throws SQLException, IOException {
         ResultSetMetaData meta = rs.getMetaData();
         int columnCount = meta.getColumnCount();
 
@@ -160,7 +197,11 @@ public class DatabaseBackupExporter implements ILacz {
      * @throws SQLException Jeśli wystąpi błąd SQL
      * @throws IOException Jeśli wystąpi błąd zapisu pliku
      */
-    private static void writeDataRows(ResultSet rs, FileWriter writer) throws SQLException, IOException {
+    private static void writeDataRows
+    (ResultSet rs,
+     FileWriter writer
+    ) throws SQLException,
+            IOException {
         ResultSetMetaData meta = rs.getMetaData();
         int columnCount = meta.getColumnCount();
 
@@ -174,7 +215,8 @@ public class DatabaseBackupExporter implements ILacz {
                             .replace("\n", "\\n")
                             .replace("\r", "\\r");
 
-                    if (stringValue.contains(",") || stringValue.contains("\"")) {
+                    if (stringValue.contains(",")
+                            || stringValue.contains("\"")) {
                         line.append("\"").append(stringValue).append("\"");
                     } else {
                         line.append(stringValue);

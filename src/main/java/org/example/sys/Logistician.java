@@ -5,7 +5,6 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-
 package org.example.sys;
 
 import org.example.wyjatki.AgeException;
@@ -14,7 +13,6 @@ import org.example.wyjatki.SalaryException;
 
 import java.math.BigDecimal;
 
-// Importy Log4j2
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,7 +21,8 @@ import org.apache.logging.log4j.Logger;
  */
 public class Logistician {
 
-    private static final Logger logger = LogManager.getLogger(Logistician.class);
+    private static final Logger logger
+            = LogManager.getLogger(Logistician.class);
 
     private final Employee employee;
 
@@ -32,14 +31,17 @@ public class Logistician {
      */
     public Logistician(Employee employee) {
         this.employee = employee;
-        logger.info("Utworzono logistykę: {} {}", employee.getName(), employee.getSurname());
+        logger.info("Utworzono logistykę: {} {}",
+                employee.getName(),
+                employee.getSurname());
     }
 
     /**
      * Zwraca referencję do powiązanego pracownika.
      */
     public Employee getEmployee() {
-        logger.debug("Pobrano pracownika-logistykę: {}", employee.getLogin());
+        logger.debug("Pobrano pracownika-logistykę: {}",
+                employee.getLogin());
         return employee;
     }
 
@@ -64,7 +66,8 @@ public class Logistician {
     public void updateSurname(String newSurname) {
         try {
             employee.setSurname(newSurname);
-            logger.info("Zmieniono nazwisko logistyka na: {}", newSurname);
+            logger.info("Zmieniono nazwisko logistyka na: {}",
+                    newSurname);
         } catch (Exception e) {
             logger.error("Błąd zmiany nazwiska logistyka", e);
             System.err.println("Błąd zmiany nazwiska: " + e.getMessage());
@@ -110,7 +113,8 @@ public class Logistician {
      */
     public void updateDepartment(String newDepartment) {
         employee.setPosition(newDepartment);
-        logger.info("Zmieniono stanowisko logistyka na: {}", newDepartment);
+        logger.info("Zmieniono stanowisko logistyka na: {}",
+                newDepartment);
     }
 
     /**
@@ -119,7 +123,8 @@ public class Logistician {
     public void updateSalary(BigDecimal newSalary) {
         try {
             employee.setSalary(newSalary);
-            logger.info("Zmieniono wynagrodzenie logistyka na: {}", newSalary);
+            logger.info("Zmieniono wynagrodzenie logistyka na: {}",
+                    newSalary);
         } catch (SalaryException e) {
             logger.error("Błąd zmiany wynagrodzenia logistyka", e);
             System.err.println("Błąd zmiany zarobków: " + e.getMessage());
@@ -134,7 +139,9 @@ public class Logistician {
      * @param orderId ID zamówienia do przydzielenia
      */
     public void assignOrder(int orderId) {
-        logger.info("Logistyk {} przydzielił zamówienie o ID: {}", employee.getName(), orderId);
-        System.out.println("Logistyk " + employee.getName() + " przydzielił zamówienie o ID: " + orderId);
+        logger.info("Logistyk {} przydzielił zamówienie o ID: {}",
+                employee.getName(), orderId);
+        System.out.println("Logistyk " + employee.getName() +
+                " przydzielił zamówienie o ID: " + orderId);
     }
 }

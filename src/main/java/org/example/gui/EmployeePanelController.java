@@ -1,7 +1,7 @@
 /*
  * Classname: EmployeePanelController
- * Version information: 1.4
- * Date: 2025-05-27
+ * Version information: 1.5
+ * Date: 2025-06-03
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -13,16 +13,19 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.database.EmpTaskRepository;
 import org.example.database.TaskEmployeeRepository;
 import org.example.database.UserRepository;
+import org.example.database.TechnicalIssueRepository;
 import org.example.sys.EmpTask;
-import org.example.sys.TaskEmployee;
 import org.example.sys.Employee;
+import org.example.sys.TechnicalIssue;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -104,6 +107,12 @@ public class EmployeePanelController {
             ChoiceDialog<String> dialog = new ChoiceDialog<>(selected.getStatus(), "Nowe", "W trakcie", "Zakończone");
             dialog.setTitle("Zaktualizuj status");
             dialog.setHeaderText("Wybierz nowy status:");
+            dialog.showingProperty().addListener((obs, wasShowing, isNowShowing) -> {
+                if (isNowShowing) {
+                    Stage dialogStage = (Stage) dialog.getDialogPane().getScene().getWindow();
+                    dialogStage.getIcons().add(new Image(getClass().getResourceAsStream("/logo.png")));
+                }
+            });
             Optional<String> result = dialog.showAndWait();
             result.ifPresent(newStatus -> {
                 selected.setStatus(newStatus);
@@ -145,6 +154,7 @@ public class EmployeePanelController {
     public void showReportIssueWindow() {
         Stage issueStage = new Stage();
         issueStage.setTitle("Panel pracownika - Zgłoszenie problemu");
+        issueStage.getIcons().add(new Image(getClass().getResourceAsStream("/logo.png")));
 
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
@@ -157,7 +167,8 @@ public class EmployeePanelController {
 
         Label categoryLabel = new Label("Kategoria");
         ComboBox<String> categoryBox = new ComboBox<>();
-        categoryBox.getItems().addAll("Techniczny", "Zadanie", "Inny");
+        categoryBox.getItems().addAll("Awaria sprzętu", "Błąd oprogramowania", "Inne");
+        categoryBox.setValue("Awaria sprzętu");
 
         Button submitButton = new Button("Wyślij");
         submitButton.setStyle(
@@ -177,6 +188,17 @@ public class EmployeePanelController {
                 alert.setHeaderText("Uzupełnij wszystkie pola");
                 alert.showAndWait();
             } else {
+                Employee current = new UserRepository().getCurrentEmployee();
+                if (current != null) {
+                    TechnicalIssue issue = new TechnicalIssue(
+                            category,
+                            desc,
+                            LocalDate.now(),
+                            current,
+                            "Nowe"
+                    );
+                    new TechnicalIssueRepository().addIssue(issue);
+                }
                 Alert alert = new Alert(Alert.AlertType.INFORMATION,
                         "Dziękujemy za przesłanie zgłoszenia.", ButtonType.OK);
                 alert.setTitle("Zgłoszono");

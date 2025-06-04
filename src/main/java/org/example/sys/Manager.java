@@ -146,7 +146,8 @@ public class Manager {
         try {
             employee.setSalary(newSalary);
         } catch (SalaryException e) {
-            logger.error("Błąd zmiany wynagrodzenia: {}", e.getMessage(), e);
+            logger.error("Błąd zmiany wynagrodzenia:" +
+                    " {}", e.getMessage(), e);
         }
     }
 
@@ -154,6 +155,7 @@ public class Manager {
      * Generuje raport dla zespołu menedżera.
      */
     public void generateTeamReport() {
-        logger.info("Menedżer {} generuje raport dla {} pracowników.", employee.getName(), managedEmployees.size());
+        logger.info("Menedżer {} generuje raport dla {} pracowników.",
+                employee.getName(), managedEmployees.size());
     }
 }

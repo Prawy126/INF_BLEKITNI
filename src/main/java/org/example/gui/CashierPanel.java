@@ -47,8 +47,8 @@ public class CashierPanel {
         logger.info("Tworzenie CashierPanel dla stage: {}", primaryStage);
 
         this.primaryStage = primaryStage;
-        primaryStage.setMinWidth(700);
-        primaryStage.setMinHeight(450);
+        primaryStage.setMinWidth(900);
+        primaryStage.setMinHeight(600);
         this.controller = new CashierPanelController(this);
         logger.debug("Kontroler CashierPanelController utworzony");
 
@@ -86,7 +86,7 @@ public class CashierPanel {
         animateSlideDown(menu, 800);
 
         // Tworzenie sceny
-        Scene scene = new Scene(root, 700, 450);
+        Scene scene = new Scene(root, 900, 600);
         primaryStage.setScene(scene);
         logger.debug("Scena ustawiona");
 

@@ -1,3 +1,10 @@
+/*
+ * Classname: AddressRepository
+ * Version information: 1.0
+ * Date: 2025-06-04
+ * Copyright notice: © BŁĘKITNI
+ */
+
 package org.example.database;
 
 import jakarta.persistence.EntityManager;
@@ -9,18 +16,33 @@ import org.example.sys.Address;
 
 import java.util.List;
 
+/**
+ * Repozytorium do zarządzania adresami w systemie.
+ * Zapewnia operacje CRUD oraz metody wyszukiwania adresów
+ * według różnych kryteriów. Wykorzystuje EntityManager
+ * do komunikacji z bazą danych.
+ */
 public class AddressRepository implements AutoCloseable {
-    private static final Logger logger = LogManager.getLogger(AddressRepository.class);
+
+    /**
+     * Logger do rejestrowania zdarzeń związanych z klasą AddressRepository.
+     */
+    private static final Logger logger = LogManager.getLogger(
+            AddressRepository.class);
 
     /**
      * Domyślny konstruktor – korzysta ze wspólnego EMF z EMFProvider.
+     * Operacja jest logowana na poziomie INFO.
      */
     public AddressRepository() {
-        logger.info("Utworzono AddressRepository, EMF={}", EMFProvider.get());
+        logger.info("Utworzono AddressRepository, EMF={}",
+                EMFProvider.get());
     }
 
     /**
      * Dodaje nowy adres do bazy.
+     * Operacja jest wykonywana w transakcji.
+     * W przypadku błędu, transakcja jest wycofywana.
      *
      * @param address obiekt Address do zapisania
      */
@@ -34,7 +56,8 @@ public class AddressRepository implements AutoCloseable {
             tx.commit();
             logger.info("addAddress() - dodano adres: {}", address);
         } catch (Exception e) {
-            logger.error("addAddress() - błąd podczas dodawania adresu", e);
+            logger.error("addAddress() " +
+                    "- błąd podczas dodawania adresu", e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
@@ -44,9 +67,10 @@ public class AddressRepository implements AutoCloseable {
 
     /**
      * Pobiera adres o podanym identyfikatorze.
+     * W przypadku błędu, wyjątek jest logowany i zwracana jest wartość null.
      *
      * @param id identyfikator Address
-     * @return znaleziony Address lub null, jeśli brak
+     * @return znaleziony Address lub null, jeśli brak lub wystąpił błąd
      */
     public Address findAddressById(int id) {
         logger.debug("findAddressById() - start, id={}", id);
@@ -56,7 +80,9 @@ public class AddressRepository implements AutoCloseable {
             logger.info("findAddressById() - znaleziono: {}", a);
             return a;
         } catch (Exception e) {
-            logger.error("findAddressById() - błąd podczas pobierania adresu o id={}", id, e);
+            logger.error("findAddressById() " +
+                    "- błąd podczas pobierania adresu "
+                    + "o id={}", id, e);
             return null;
         } finally {
             em.close();
@@ -66,6 +92,7 @@ public class AddressRepository implements AutoCloseable {
 
     /**
      * Pobiera listę wszystkich adresów w bazie.
+     * W przypadku błędu, wyjątek jest logowany i zwracana jest pusta lista.
      *
      * @return lista obiektów Address (może być pusta)
      */
@@ -73,12 +100,16 @@ public class AddressRepository implements AutoCloseable {
         logger.debug("getAllAddresses() - start");
         EntityManager em = EMFProvider.get().createEntityManager();
         try {
-            List<Address> list = em.createQuery("SELECT a FROM Address a", Address.class)
+            List<Address> list = em
+                    .createQuery("SELECT a FROM Address a",
+                            Address.class)
                     .getResultList();
-            logger.info("getAllAddresses() - pobrano {} adresów", list.size());
+            logger.info("getAllAddresses() " +
+                    "- pobrano {} adresów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("getAllAddresses() - błąd podczas pobierania adresów", e);
+            logger.error("getAllAddresses() " +
+                    "- błąd podczas pobierania adresów", e);
             return List.of();
         } finally {
             em.close();
@@ -88,6 +119,8 @@ public class AddressRepository implements AutoCloseable {
 
     /**
      * Usuwa adres o podanym identyfikatorze.
+     * Operacja jest wykonywana w transakcji.
+     * Jeśli adres nie istnieje, operacja jest logowana jako ostrzeżenie.
      *
      * @param id identyfikator Address do usunięcia
      */
@@ -100,13 +133,17 @@ public class AddressRepository implements AutoCloseable {
             Address address = em.find(Address.class, id);
             if (address != null) {
                 em.remove(address);
-                logger.info("removeAddress() - usunięto adres: {}", address);
+                logger.info("removeAddress() " +
+                        "- usunięto adres: {}", address);
             } else {
-                logger.warn("removeAddress() - brak adresu o id={}", id);
+                logger.warn("removeAddress() " +
+                        "- brak adresu o id={}", id);
             }
             tx.commit();
         } catch (Exception e) {
-            logger.error("removeAddress() - błąd podczas usuwania adresu o id={}", id, e);
+            logger.error("removeAddress() " +
+                    "- błąd podczas usuwania adresu "
+                    + "o id={}", id, e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();
@@ -115,7 +152,8 @@ public class AddressRepository implements AutoCloseable {
     }
 
     /**
-     * Wyszukuje adresy po fragmencie nazwy miejscowości (case-insensitive).
+     * Wyszukuje adresy po fragmencie nazwy miejscowości.
+     * Wyszukiwanie jest wykonywane bez rozróżniania wielkości liter.
      *
      * @param town fragment nazwy miejscowości
      * @return lista pasujących Address (może być pusta)
@@ -125,14 +163,18 @@ public class AddressRepository implements AutoCloseable {
         EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Address> list = em.createQuery(
-                            "SELECT a FROM Address a WHERE LOWER(a.town) LIKE LOWER(CONCAT('%', :town, '%'))",
+                            "SELECT a FROM Address a "
+                                    + "WHERE LOWER(a.town) " +
+                                    "LIKE LOWER(CONCAT('%', :town, '%'))",
                             Address.class)
                     .setParameter("town", town)
                     .getResultList();
-            logger.info("findByTown() - znaleziono {} adresów", list.size());
+            logger.info("findByTown() " +
+                    "- znaleziono {} adresów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("findByTown() - błąd podczas wyszukiwania", e);
+            logger.error("findByTown() " +
+                    "- błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
@@ -142,23 +184,30 @@ public class AddressRepository implements AutoCloseable {
 
     /**
      * Wyszukuje adresy po numerze domu.
+     * W przypadku błędu, wyjątek jest logowany i zwracana jest pusta lista.
      *
      * @param houseNumber numer domu
      * @return lista pasujących Address
      */
     public List<Address> findByHouseNumber(String houseNumber) {
-        logger.debug("findByHouseNumber() - houseNumber={}", houseNumber);
+        logger.debug("findByHouseNumber() " +
+                "- houseNumber={}", houseNumber);
         EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Address> list = em.createQuery(
-                            "SELECT a FROM Address a WHERE a.houseNumber = :houseNumber",
+                            "SELECT a FROM Address a " +
+                                    "WHERE a.houseNumber = :houseNumber",
                             Address.class)
                     .setParameter("houseNumber", houseNumber)
                     .getResultList();
-            logger.info("findByHouseNumber() - znaleziono {} adresów", list.size());
+            logger.info(
+                    "findByHouseNumber() " +
+                            "- znaleziono {} adresów",
+                    list.size());
             return list;
         } catch (Exception e) {
-            logger.error("findByHouseNumber() - błąd podczas wyszukiwania", e);
+            logger.error("findByHouseNumber() " +
+                    "- błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
@@ -168,23 +217,31 @@ public class AddressRepository implements AutoCloseable {
 
     /**
      * Wyszukuje adresy po numerze mieszkania.
+     * W przypadku błędu, wyjątek jest logowany i zwracana jest pusta lista.
      *
      * @param apartmentNumber numer mieszkania
      * @return lista pasujących Address
      */
     public List<Address> findByApartmentNumber(String apartmentNumber) {
-        logger.debug("findByApartmentNumber() - apartmentNumber={}", apartmentNumber);
+        logger.debug(
+                "findByApartmentNumber() - apartmentNumber={}",
+                apartmentNumber);
         EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Address> list = em.createQuery(
-                            "SELECT a FROM Address a WHERE a.apartmentNumber = :apartmentNumber",
+                            "SELECT a FROM Address a "
+                                    + "WHERE a.apartmentNumber " +
+                                    "= :apartmentNumber",
                             Address.class)
                     .setParameter("apartmentNumber", apartmentNumber)
                     .getResultList();
-            logger.info("findByApartmentNumber() - znaleziono {} adresów", list.size());
+            logger.info(
+                    "findByApartmentNumber() - znaleziono {} adresów",
+                    list.size());
             return list;
         } catch (Exception e) {
-            logger.error("findByApartmentNumber() - błąd podczas wyszukiwania", e);
+            logger.error("findByApartmentNumber() " +
+                    "- błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
@@ -194,6 +251,7 @@ public class AddressRepository implements AutoCloseable {
 
     /**
      * Wyszukuje adresy po kodzie pocztowym.
+     * W przypadku błędu, wyjątek jest logowany i zwracana jest pusta lista.
      *
      * @param zipCode kod pocztowy
      * @return lista pasujących Address
@@ -203,14 +261,17 @@ public class AddressRepository implements AutoCloseable {
         EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Address> list = em.createQuery(
-                            "SELECT a FROM Address a WHERE a.zipCode = :zipCode",
+                            "SELECT a FROM Address a " +
+                                    "WHERE a.zipCode = :zipCode",
                             Address.class)
                     .setParameter("zipCode", zipCode)
                     .getResultList();
-            logger.info("findByZipCode() - znaleziono {} adresów", list.size());
+            logger.info("findByZipCode() - znaleziono {} adresów",
+                    list.size());
             return list;
         } catch (Exception e) {
-            logger.error("findByZipCode() - błąd podczas wyszukiwania", e);
+            logger.error("findByZipCode() " +
+                    "- błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
@@ -219,7 +280,8 @@ public class AddressRepository implements AutoCloseable {
     }
 
     /**
-     * Wyszukuje adresy po mieście (case-insensitive).
+     * Wyszukuje adresy po mieście.
+     * Wyszukiwanie jest wykonywane bez rozróżniania wielkości liter.
      *
      * @param city nazwa miasta
      * @return lista pasujących Address
@@ -229,14 +291,17 @@ public class AddressRepository implements AutoCloseable {
         EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<Address> list = em.createQuery(
-                            "SELECT a FROM Address a WHERE LOWER(a.city) = LOWER(:city)",
+                            "SELECT a FROM Address a " +
+                                    "WHERE LOWER(a.city) = LOWER(:city)",
                             Address.class)
                     .setParameter("city", city)
                     .getResultList();
-            logger.info("findByCity() - znaleziono {} adresów", list.size());
+            logger.info("findByCity() " +
+                    "- znaleziono {} adresów", list.size());
             return list;
         } catch (Exception e) {
-            logger.error("findByCity() - błąd podczas wyszukiwania", e);
+            logger.error("findByCity() " +
+                    "- błąd podczas wyszukiwania", e);
             return List.of();
         } finally {
             em.close();
@@ -246,6 +311,7 @@ public class AddressRepository implements AutoCloseable {
 
     /**
      * Zamyka wspólną fabrykę EMF (na zakończenie działania aplikacji).
+     * Implementacja jest pusta, ponieważ korzystamy z EMFProvider.
      */
     @Override
     public void close() {

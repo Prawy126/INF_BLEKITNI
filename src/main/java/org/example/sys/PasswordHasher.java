@@ -24,7 +24,8 @@ import java.security.NoSuchAlgorithmException;
 public class PasswordHasher {
 
     // Inicjalizacja logera
-    private static final Logger logger = LogManager.getLogger(PasswordHasher.class);
+    private static final Logger logger
+            = LogManager.getLogger(PasswordHasher.class);
 
     // Algorytm HMAC do haszowania
     private static final String HMAC_ALGORITHM = "HmacSHA256";
@@ -48,7 +49,8 @@ public class PasswordHasher {
 
         try {
             // Konwersja ID użytkownika na bajty (klucz HMAC)
-            byte[] keyBytes = String.valueOf(userId).getBytes(StandardCharsets.UTF_8);
+            byte[] keyBytes
+                    = String.valueOf(userId).getBytes(StandardCharsets.UTF_8);
             SecretKeySpec key = new SecretKeySpec(keyBytes, HMAC_ALGORITHM);
 
             // Tworzenie instancji MAC
@@ -56,16 +58,19 @@ public class PasswordHasher {
             mac.init(key);
 
             // Obliczanie HMAC dla hasła
-            byte[] hmacBytes = mac.doFinal(password.getBytes(StandardCharsets.UTF_8));
+            byte[] hmacBytes
+                    = mac.doFinal(password.getBytes(StandardCharsets.UTF_8));
 
             // Konwersja wyniku na heksadecymalny string
             String hashedPassword = bytesToHex(hmacBytes);
 
-            logger.info("Zahaszowano hasło dla użytkownika ID: {}", userId);
+            logger.info("Zahaszowano hasło dla użytkownika ID: {}",
+                    userId);
             return hashedPassword;
 
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            logger.error("Błąd podczas haszowania hasła dla użytkownika ID: {}", userId, e);
+            logger.error("Błąd podczas haszowania hasła dla" +
+                    " użytkownika ID: {}", userId, e);
             throw e;
         }
     }
@@ -80,8 +85,11 @@ public class PasswordHasher {
      * @throws NoSuchAlgorithmException jeśli algorytm HMAC nie jest dostępny
      * @throws InvalidKeyException      jeśli klucz HMAC jest nieprawidłowy
      */
-    public static boolean verifyPassword(String storedHash, String password, int userId)
-            throws NoSuchAlgorithmException, InvalidKeyException {
+    public static boolean verifyPassword(
+            String storedHash,
+            String password,
+            int userId
+    ) throws NoSuchAlgorithmException, InvalidKeyException {
 
         if (storedHash == null || password == null) {
             logger.warn("Nieprawidłowe dane wejściowe do weryfikacji hasła.");
@@ -95,15 +103,16 @@ public class PasswordHasher {
         );
 
         if (isEqual) {
-            logger.info("Weryfikacja hasła powiodła się dla użytkownika ID: {}", userId);
+            logger.info("Weryfikacja hasła powiodła się dla" +
+                    " użytkownika ID: {}", userId);
         } else {
-            logger.warn("Weryfikacja hasła NIE powiodła się dla użytkownika ID: {}", userId);
+            logger.warn("Weryfikacja hasła " +
+                    "NIE powiodła się dla użytkownika ID: {}", userId);
         }
 
         return isEqual;
     }
 
-    // Pomocnicza metoda do konwersji bajtów na hex
     /**
      * Konwertuje tablicę bajtów na string heksadecymalny.
      *

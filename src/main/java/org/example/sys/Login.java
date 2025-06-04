@@ -5,7 +5,6 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-
 package org.example.sys;
 
 import javafx.application.Platform;
@@ -28,7 +27,8 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * Klasa odpowiedzialna za logikę logowania użytkowników do systemu.
- * Zawiera metody do obsługi logowania, wysyłania kodów resetujących oraz zarządzania sesjami użytkowników.
+ * Zawiera metody do obsługi logowania, wysyłania kodów resetujących
+ * oraz zarządzania sesjami użytkowników.
  */
 public class Login implements ILacz {
 
@@ -45,12 +45,18 @@ public class Login implements ILacz {
      * @param password hasło użytkownika
      * @param root     główny kontener aplikacji
      */
-    public static void attemptLogin(String username, String password, VBox root) {
-        logger.debug("Rozpoczęto próbę logowania dla użytkownika: {}", username);
+    public static void attemptLogin(
+            String username,
+            String password,
+            VBox root
+    ) {
+        logger.debug("Rozpoczęto próbę logowania dla użytkownika: {}",
+                username);
 
         if (username.isBlank() || password.isBlank()) {
             logger.warn("Brak danych logowania");
-            showAlert(Alert.AlertType.WARNING, "Brak danych", "Proszę wypełnić wszystkie pola");
+            showAlert(Alert.AlertType.WARNING, "Brak danych",
+                    "Proszę wypełnić wszystkie pola");
             return;
         }
 
@@ -60,15 +66,21 @@ public class Login implements ILacz {
                 UserRepository repo = new UserRepository();
                 Employee user = repo.findByLogin(username);
                 if (user == null) {
-                    logger.warn("Nie znaleziono użytkownika o loginie: {}", username);
-                    throw new Exception("Nie znaleziono użytkownika o podanym loginie");
+                    logger.warn("Nie znaleziono użytkownika o" +
+                            " loginie: {}", username);
+                    throw new Exception("Nie znaleziono użytkownika o" +
+                            " podanym loginie");
                 }
-                boolean correct = PasswordHasher.verifyPassword(user.getPassword(), password, user.getId());
+                boolean correct = PasswordHasher.verifyPassword(
+                        user.getPassword(),
+                        password, user.getId());
                 if (!correct) {
-                    logger.warn("Nieprawidłowe hasło dla użytkownika: {}", username);
+                    logger.warn("Nieprawidłowe hasło" +
+                            " dla użytkownika: {}", username);
                     throw new Exception("Nieprawidłowe hasło");
                 }
-                logger.info("Użytkownik '{}' został pomyślnie zalogowany", username);
+                logger.info("Użytkownik '{}' został pomyślnie" +
+                        " zalogowany", username);
                 return user;
             }
         };
@@ -85,12 +97,18 @@ public class Login implements ILacz {
      * @param root     główny kontener aplikacji
      * @return zadanie logowania
      */
-    private static Task<Employee> createLoginTask(String username, String password, VBox root) {
-        logger.trace("Tworzenie zadania logowania dla użytkownika: {}", username);
+    private static Task<Employee> createLoginTask(String username,
+                                                  String password,
+                                                  VBox root)
+    {
+        logger.trace("Tworzenie zadania logowania dla użytkownika: {}",
+                username);
         return new Task<>() {
             @Override
             protected Employee call() throws Exception {
-                return userRepository.findByLoginAndPassword(username, password);
+                return userRepository.findByLoginAndPassword(username,
+                        password
+                );
             }
         };
     }
@@ -110,14 +128,17 @@ public class Login implements ILacz {
                 handleLoginSuccess(employee, root);
             } else {
                 Platform.runLater(() -> {
-                    logger.warn("Nie znaleziono użytkownika lub wystąpił błąd logowania");
+                    logger.warn("Nie znaleziono użytkownika " +
+                            "lub wystąpił błąd logowania");
                     showAlert(Alert.AlertType.ERROR, "Błąd logowania",
-                            "Nieprawidłowy login lub hasło. Spróbuj ponownie.");
+                            "Nieprawidłowy login lub hasło." +
+                                    " Spróbuj ponownie.");
                 });
             }
         });
 
-        task.setOnFailed(e -> handleLoginFailure(task.getException()));
+        task.setOnFailed(e
+                -> handleLoginFailure(task.getException()));
     }
 
     /**
@@ -126,8 +147,12 @@ public class Login implements ILacz {
      * @param employee obiekt pracownika
      * @param root     główny kontener aplikacji
      */
-    private static void handleLoginSuccess(Employee employee, VBox root) {
-        logger.info("Zalogowano użytkownika: {} {}", employee.getName(), employee.getSurname());
+    private static void handleLoginSuccess(
+            Employee employee,
+            VBox root
+    ) {
+        logger.info("Zalogowano użytkownika: {} {}",
+                employee.getName(), employee.getSurname());
 
         if (employee == null) {
             Platform.runLater(() -> {
@@ -151,7 +176,8 @@ public class Login implements ILacz {
      * @param employee obiekt pracownika
      */
     private static void showSuccessAlert(Employee employee) {
-        logger.debug("Wyświetlono alert sukcesu dla użytkownika: {}", employee.getLogin());
+        logger.debug("Wyświetlono alert sukcesu dla użytkownika: {}",
+                employee.getLogin());
         HelloApplication.showAlert(
                 Alert.AlertType.INFORMATION,
                 "Sukces",
@@ -161,13 +187,18 @@ public class Login implements ILacz {
     }
 
     /**
-     * Przekierowuje użytkownika do odpowiedniego panelu w zależności od jego stanowiska.
+     * Przekierowuje użytkownika do odpowiedniego panelu w zależności
+     * od jego stanowiska.
      *
      * @param position stanowisko użytkownika
      * @param root     główny kontener aplikacji
      */
-    private static void redirectToProperPanel(String position, VBox root) {
-        logger.info("Przekierowanie użytkownika do panelu: {}", position);
+    private static void redirectToProperPanel(
+            String position,
+            VBox root
+    ) {
+        logger.info("Przekierowanie użytkownika do panelu: {}",
+                position);
 
         Platform.runLater(() -> {
             Stage currentStage = (Stage) root.getScene().getWindow();
@@ -199,14 +230,18 @@ public class Login implements ILacz {
      * @param exception wyjątek związany z logowaniem
      */
     private static void handleLoginFailure(Throwable exception) {
-        logger.error("Błąd logowania: {}", exception.getMessage(), exception);
+        logger.error("Błąd logowania: {}",
+                exception.getMessage(), exception);
 
         Platform.runLater(() -> {
             if (exception instanceof SecurityException) {
-                showAlert(Alert.AlertType.ERROR, "Błąd logowania", exception.getMessage());
+                showAlert(Alert.AlertType.ERROR,
+                        "Błąd logowania", exception.getMessage());
             } else {
                 logError(exception);
-                showAlert(Alert.AlertType.ERROR, "Błąd połączenia", "Problem z połączeniem do systemu");
+                showAlert(Alert.AlertType.ERROR,
+                        "Błąd połączenia",
+                        "Problem z połączeniem do systemu");
             }
         });
     }
@@ -230,17 +265,21 @@ public class Login implements ILacz {
 
         if (!EmailValidator.isValid(email)) {
             logger.warn("Nieprawidłowy e-mail: {}", email);
-            showAlert(Alert.AlertType.ERROR, "Nieprawidłowy email", "Podaj poprawny adres email");
+            showAlert(Alert.AlertType.ERROR, "Nieprawidłowy email",
+                    "Podaj poprawny adres email");
             return;
         }
 
         executor.execute(() -> {
             try {
                 EmailSender.sendResetEmail(email);
-                logger.info("Kod resetujący wysłany na e-mail: {}", email);
-                showSuccessAlert("Kod resetujący wysłany", "Sprawdź swoją skrzynkę pocztową");
+                logger.info("Kod resetujący wysłany na e-mail: {}",
+                        email);
+                showSuccessAlert("Kod resetujący wysłany",
+                        "Sprawdź swoją skrzynkę pocztową");
             } catch (Exception e) {
-                logger.error("Nie można wysłać kodu resetowego do {}: {}", email, e.getMessage(), e);
+                logger.error("Nie można wysłać kodu resetowego do" +
+                        " {}: {}", email, e.getMessage(), e);
                 handleEmailError((MessagingException) e);
             }
         });
@@ -253,9 +292,12 @@ public class Login implements ILacz {
      * @return losowy kod
      */
     public static String generateRandomCode(int length) {
-        logger.trace("Generowanie losowego kodu o długości: {}", length);
-        return new Random().ints(length, 0, 36)
-                .mapToObj(i -> i < 10 ? String.valueOf(i) : String.valueOf((char) (i + 55)))
+        logger.trace("Generowanie losowego kodu " +
+                "o długości: {}", length);
+        return new Random().ints(length, 0,
+                        36)
+                .mapToObj(i -> i < 10
+                        ? String.valueOf(i) : String.valueOf((char) (i + 55)))
                 .collect(Collectors.joining());
     }
 
@@ -265,7 +307,8 @@ public class Login implements ILacz {
      * @param e wyjątek związany z wysyłaniem emaila
      */
     private static void handleEmailError(MessagingException e) {
-        logger.error("Błąd wysyłania e-maila z kodem resetowym: {}", e.getMessage(), e);
+        logger.error("Błąd wysyłania e-maila z kodem resetowym: {}",
+                e.getMessage(), e);
     }
 
     /**
@@ -275,8 +318,13 @@ public class Login implements ILacz {
      * @param title   tytuł alertu
      * @param message treść alertu
      */
-    private static void showAlert(Alert.AlertType type, String title, String message) {
-        logger.debug("Wyświetlono alert: {}, tytuł: '{}', wiadomość: '{}'", type, title, message);
+    private static void showAlert(
+            Alert.AlertType type,
+            String title,
+            String message
+    ) {
+        logger.debug("Wyświetlono alert: {}," +
+                " tytuł: '{}', wiadomość: '{}'", type, title, message);
         Platform.runLater(() ->
                 HelloApplication.showAlert(type, title, message, ""));
     }
@@ -287,10 +335,21 @@ public class Login implements ILacz {
      * @param title   tytuł alertu
      * @param content treść alertu
      */
-    private static void showSuccessAlert(String title, String content) {
-        logger.info("Wyświetlono alert sukcesu: '{}', wiadomość: '{}'", title, content);
+    private static void showSuccessAlert(
+            String title,
+            String content
+    ) {
+        logger.info("Wyświetlono alert sukcesu: '{}'," +
+                " wiadomość: '{}'",
+                title,
+                content
+        );
         Platform.runLater(() ->
-                HelloApplication.showAlert(Alert.AlertType.INFORMATION, title, content, ""));
+                HelloApplication.showAlert(
+                        Alert.AlertType.INFORMATION,
+                        title,
+                        content,
+                        ""));
     }
 
     /**
@@ -316,9 +375,14 @@ public class Login implements ILacz {
      * @return true jeśli kod jest poprawny, false w przeciwnym razie
      */
     public static boolean verifyResetCode(String email, String code) {
-        logger.debug("Weryfikacja kodu resetującego dla email: {}", email);
+        logger.debug("Weryfikacja kodu resetującego dla email: {}",
+                email);
 
-        if (email == null || email.isBlank() || code == null || code.isBlank()) {
+        if (email == null
+                || email.isBlank()
+                || code == null
+                || code.isBlank())
+        {
             logger.warn("Nieprawidłowe dane wejściowe do weryfikacji kodu");
             return false;
         }
@@ -332,7 +396,8 @@ public class Login implements ILacz {
             // Sprawdź czy kod jest prawidłowy
             return EmailSender.verifyResetCode(email, code);
         } catch (Exception e) {
-            logger.error("Błąd podczas weryfikacji kodu dla {}: {}", email, e.getMessage(), e);
+            logger.error("Błąd podczas weryfikacji kodu dla {}: {}",
+                    email, e.getMessage(), e);
             return false;
         }
     }
