@@ -50,13 +50,14 @@ import org.example.wyjatki.SalaryException;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Date;
+import java.util.*;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.Map;
 
 import org.example.sys.Address;
 import org.example.sys.EmpTask;
@@ -730,32 +731,20 @@ public class AdminPanelController {
     }
 
     private void openLogsDirectory() {
-        File logsDir = new File("logs");
         try {
+            File logsDir = new File(System.getProperty("user.home") + "/stonka/logs");
             if (!logsDir.exists()) {
-                if (logsDir.mkdirs()) {
-                    showAlert(Alert.AlertType.INFORMATION, "Utworzono folder",
-                            "Folder z logami został utworzony: " + logsDir.getAbsolutePath());
-                } else {
-                    showAlert(Alert.AlertType.ERROR, "Błąd",
-                            "Nie można utworzyć folderu z logami!");
-                    return;
-                }
+                logsDir.mkdirs();
             }
 
-            if (Desktop.isDesktopSupported()) {
-                Desktop.getDesktop().open(logsDir);
-            } else {
-                showAlert(Alert.AlertType.WARNING, "Nieobsługiwana operacja",
-                        "Bezpośrednie otwieranie folderu nie jest wspierane w tym systemie.\n\n" +
-                                "Logi znajdują się w: " + logsDir.getAbsolutePath());
-            }
+            // Wymuszone xdg-open niezależnie od Desktop
+            ProcessBuilder pb = new ProcessBuilder("xdg-open", logsDir.getAbsolutePath());
+            pb.inheritIO();  // zobaczysz ewentualne błędy
+            Process p = pb.start();
+
+            System.out.println("Uruchomiono: xdg-open " + logsDir.getAbsolutePath());
         } catch (IOException ex) {
-            showAlert(Alert.AlertType.ERROR, "Błąd",
-                    "Nie można otworzyć folderu: " + ex.getMessage());
-        } catch (Exception ex) {
-            showAlert(Alert.AlertType.ERROR, "Krytyczny błąd",
-                    "Wystąpił nieoczekiwany problem: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
