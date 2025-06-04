@@ -41,6 +41,6 @@ public interface ILacz {
      * Hasło użytkownika bazy MySQL
      */
 
-    String MYSQL_PASSWORD = "";
+    String MYSQL_PASSWORD = "TwojeNoweHaslo";
 }
 

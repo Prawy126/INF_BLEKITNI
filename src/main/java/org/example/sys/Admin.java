@@ -1,7 +1,7 @@
 /*
  * Classname: Admin
- * Version information: 1.2
- * Date: 2025-05-29
+ * Version information: 1.3
+ * Date: 2025-06-04
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -16,12 +16,12 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-// Importy Log4j2
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Klasa reprezentująca rolę administratora systemu – logiczną nakładkę na encję Employee.
+ * Klasa reprezentująca rolę administratora systemu – logiczną nakładkę
+ * na encję Employee.
  */
 public class Admin {
 
@@ -31,14 +31,16 @@ public class Admin {
     private final List<Employee> allEmployees;
 
     /**
-     * Tworzy nową instancję administratora na podstawie istniejącego pracownika.
+     * Tworzy nową instancję administratora na podstawie
+     * istniejącego pracownika.
      *
      * @param employee Pracownik, który staje się administratorem.
      */
     public Admin(Employee employee) {
         this.employee = employee;
         this.allEmployees = new ArrayList<>();
-        logger.info("Utworzono administratora: {}", employee.getLogin());
+        logger.info("Utworzono administratora: {}",
+                employee.getLogin());
     }
 
     /**
@@ -47,17 +49,20 @@ public class Admin {
      * @return Pracownik będący administratorem.
      */
     public Employee getEmployee() {
-        logger.debug("Pobrano pracownika-administratora: {}", employee.getLogin());
+        logger.debug("Pobrano pracownika-administratora: {}",
+                employee.getLogin());
         return employee;
     }
 
     /**
      * Zwraca informację czy użytkownik jest administratorem.
      *
-     * @return true, jeśli użytkownik jest administratorem, false w przeciwnym razie.
+     * @return true, jeśli użytkownik jest administratorem,
+     * false w przeciwnym razie.
      */
     public boolean isAdmin() {
-        logger.trace("Sprawdzono uprawnienia administratora dla: {}", employee.getLogin());
+        logger.trace("Sprawdzono uprawnienia administratora dla: {}",
+                employee.getLogin());
         return true;
     }
 
@@ -69,9 +74,11 @@ public class Admin {
     public void addEmployee(Employee e) {
         if (e != null && !allEmployees.contains(e)) {
             allEmployees.add(e);
-            logger.info("Dodano pracownika do listy: {} {}", e.getName(), e.getSurname());
+            logger.info("Dodano pracownika do listy: {} {}",
+                    e.getName(), e.getSurname());
         } else {
-            logger.warn("Próbowano dodać nieprawidłowego pracownika (null lub już istnieje)");
+            logger.warn("Próbowano dodać nieprawidłowego pracownika" + " " +
+                    "(null lub już istnieje)");
         }
     }
 
@@ -82,13 +89,14 @@ public class Admin {
      */
     public void removeEmployee(Employee e) {
         if (e != null && "root".equalsIgnoreCase(e.getPosition())) {
-            logger.warn("Próba usunięcia użytkownika z rolą root została zablokowana");
-            System.err.println("Próba usunięcia użytkownika z rolą root została zablokowana");
+            logger.warn("Próba usunięcia użytkownika z rolą root została" +
+                    " zablokowana");
             return;
         }
         if (e != null) {
             allEmployees.remove(e);
-            logger.info("Usunięto pracownika: {} {}", e.getName(), e.getSurname());
+            logger.info("Usunięto pracownika: {} {}", e.getName(),
+                    e.getSurname());
         } else {
             logger.warn("Próbowano usunąć pracownika o wartości null");
         }
@@ -100,7 +108,8 @@ public class Admin {
      * @return Lista wszystkich pracowników.
      */
     public List<Employee> getAllEmployees() {
-        logger.debug("Pobrano listę wszystkich pracowników (liczba: {})", allEmployees.size());
+        logger.debug("Pobrano listę wszystkich" +
+                " pracowników (liczba: {})", allEmployees.size());
         return allEmployees;
     }
 
@@ -110,7 +119,8 @@ public class Admin {
     public void updateName(String newName) {
         try {
             employee.setName(newName);
-            logger.info("Zmieniono imię administratora na: {}", newName);
+            logger.info("Zmieniono imię administratora na: {}",
+                    newName);
         } catch (Exception e) {
             logger.error("Błąd zmiany imienia: {}", e.getMessage(), e);
             System.err.println("Błąd zmiany imienia: " + e.getMessage());
@@ -123,7 +133,8 @@ public class Admin {
     public void updateSurname(String newSurname) {
         try {
             employee.setSurname(newSurname);
-            logger.info("Zmieniono nazwisko administratora na: {}", newSurname);
+            logger.info("Zmieniono nazwisko administratora na: {}",
+                    newSurname);
         } catch (Exception e) {
             logger.error("Błąd zmiany nazwiska: {}", e.getMessage(), e);
             System.err.println("Błąd zmiany nazwiska: " + e.getMessage());
@@ -169,7 +180,8 @@ public class Admin {
      */
     public void updateDepartment(String newDepartment) {
         employee.setPosition(newDepartment);
-        logger.info("Zmieniono stanowisko pracownika na: {}", newDepartment);
+        logger.info("Zmieniono stanowisko pracownika na: {}",
+                newDepartment);
     }
 
     /**
@@ -178,9 +190,11 @@ public class Admin {
     public void updateSalary(BigDecimal newSalary) {
         try {
             employee.setSalary(newSalary);
-            logger.info("Zmieniono wynagrodzenie pracownika na: {}", newSalary);
+            logger.info("Zmieniono wynagrodzenie pracownika na: {}",
+                    newSalary);
         } catch (SalaryException e) {
-            logger.error("Błąd zmiany wynagrodzenia: {}", e.getMessage(), e);
+            logger.error("Błąd zmiany wynagrodzenia: {}",
+                    e.getMessage(), e);
             System.err.println("Błąd zmiany wynagrodzenia: " + e.getMessage());
         }
     }
@@ -189,17 +203,21 @@ public class Admin {
      * Resetuje ustawienia systemowe.
      */
     public void resetSystemSettings() {
-        logger.info("Administrator {} resetuje ustawienia systemowe", employee.getLogin());
-        System.out.println("Administrator " + employee.getLogin() + " resetuje ustawienia systemowe.");
+        logger.info("Administrator {} resetuje ustawienia systemowe",
+                employee.getLogin());
+        System.out.println("Administrator " + employee.getLogin() +
+                " resetuje ustawienia systemowe.");
     }
 
     /**
      * Generuje pełny raport systemowy.
      */
     public void generateFullSystemReport() {
-        logger.info("Administrator {} generuje pełny raport systemowy (łącznie: {} pracowników)",
+        logger.info("Administrator {} generuje pełny raport systemowy" +
+                        " (łącznie: {} pracowników)",
                 employee.getLogin(), allEmployees.size());
-        System.out.println("Administrator " + employee.getLogin() + " generuje pełny raport systemowy (łącznie: "
+        System.out.println("Administrator " + employee.getLogin() +
+                " generuje pełny raport systemowy (łącznie: "
                 + allEmployees.size() + " pracowników).");
     }
 }

@@ -1,6 +1,6 @@
 /*
  * Classname: Cashier
- * Version information: 1.2
+ * Version information: 1.3
  * Date: 2025-05-29
  * Copyright notice: © BŁĘKITNI
  */
@@ -32,7 +32,8 @@ public class Cashier {
      */
     public Cashier(Employee employee) {
         this.employee = employee;
-        logger.info("Utworzono kasjera: {} {}", employee.getName(), employee.getSurname());
+        logger.info("Utworzono kasjera: {} {}", employee.getName(),
+                employee.getSurname());
     }
 
     /**
@@ -41,7 +42,8 @@ public class Cashier {
      * @return Pracownik będący kasjerem.
      */
     public Employee getEmployee() {
-        logger.debug("Pobrano pracownika-kasjera: {}", employee.getLogin());
+        logger.debug("Pobrano pracownika-kasjera: {}",
+                employee.getLogin());
         return employee;
     }
 
@@ -51,9 +53,11 @@ public class Cashier {
     public void updatePassword(String newPassword) {
         try {
             employee.setPassword(newPassword);
-            logger.info("Zmieniono hasło kasjera: {}", employee.getLogin());
+            logger.info("Zmieniono hasło kasjera: {}",
+                    employee.getLogin());
         } catch (PasswordException e) {
-            logger.error("Błąd zmiany hasła kasjera {}: {}", employee.getLogin(), e.getMessage(), e);
+            logger.error("Błąd zmiany hasła kasjera {}: {}",
+                    employee.getLogin(), e.getMessage(), e);
             System.err.println("Błąd zmiany hasła: " + e.getMessage());
         }
     }
@@ -64,9 +68,11 @@ public class Cashier {
     public void updateSalary(BigDecimal newSalary) {
         try {
             employee.setSalary(newSalary);
-            logger.info("Zmieniono wynagrodzenie kasjera {} na: {}", employee.getLogin(), newSalary);
+            logger.info("Zmieniono wynagrodzenie kasjera {} na: {}",
+                    employee.getLogin(), newSalary);
         } catch (SalaryException e) {
-            logger.error("Błąd zmiany wynagrodzenia kasjera {}: {}", employee.getLogin(), e.getMessage(), e);
+            logger.error("Błąd zmiany wynagrodzenia kasjera {}: {}",
+                    employee.getLogin(), e.getMessage(), e);
             System.err.println("Błąd zmiany wynagrodzenia: " + e.getMessage());
         }
     }
@@ -75,15 +81,19 @@ public class Cashier {
      * Symuluje zeskanowanie produktu przez kasjera.
      */
     public void scanProduct(String productName) {
-        logger.info("Kasjer {} zeskanował produkt: {}", employee.getLogin(), productName);
-        System.out.println("Kasjer " + employee.getName() + " zeskanował produkt: " + productName);
+        logger.info("Kasjer {} zeskanował produkt: {}",
+                employee.getLogin(), productName);
+        System.out.println("Kasjer " + employee.getName() +
+                " zeskanował produkt: " + productName);
     }
 
     /**
      * Symuluje zakończenie transakcji przez kasjera.
      */
     public void endTransaction() {
-        logger.info("Kasjer {} zakończył transakcję", employee.getLogin());
-        System.out.println("Kasjer " + employee.getName() + " zakończył transakcję.");
+        logger.info("Kasjer {} zakończył transakcję",
+                employee.getLogin());
+        System.out.println("Kasjer " + employee.getName() +
+                " zakończył transakcję.");
     }
 }

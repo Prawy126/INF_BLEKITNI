@@ -5,7 +5,6 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-
 package org.example.sys;
 
 import org.apache.logging.log4j.LogManager;
@@ -18,13 +17,13 @@ import org.example.wyjatki.NameException;
 
 /**
  * Klasa bazowa reprezentująca osobę w systemie.
- * Zawiera podstawowe informacje o osobie, takie jak imię, nazwisko, wiek i adres e-mail.
+ * Zawiera podstawowe informacje o osobie, takie jak imię,
+ * nazwisko, wiek i adres e-mail.
  * Klasa jest mapowana do bazy danych jako klasa nadrzędna.
  */
 @MappedSuperclass
 public abstract class Person {
 
-    // Inicjalizacja logera
     private static final Logger logger = LogManager.getLogger(Person.class);
 
     @Column(name = "Imie")
@@ -65,7 +64,8 @@ public abstract class Person {
         setAge(age);
         setEmail(email);
 
-        logger.info("Utworzono osobę: {} {}, wiek: {}, email: {}", name, surname, age, email);
+        logger.info("Utworzono osobę: {} {}," +
+                " wiek: {}, email: {}", name, surname, age, email);
     }
 
     /**

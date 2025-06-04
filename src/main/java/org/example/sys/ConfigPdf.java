@@ -33,7 +33,8 @@ public class ConfigPdf {
         ConfigPdf.pathLogo = pathLogo;
         ConfigPdf.pathPdf = pathPdf;
         ConfigPdf.sort = sort;
-        logger.info("Zaktualizowano pełne ustawienia PDF: logo={}, pdf={}, sort={}", pathLogo, pathPdf, sort);
+        logger.info("Zaktualizowano pełne ustawienia PDF: logo={}," +
+                " pdf={}, sort={}", pathLogo, pathPdf, sort);
     }
 
     /**
@@ -93,7 +94,8 @@ public class ConfigPdf {
      */
     public static void setSort(Sort sort) {
         if (sort == null) {
-            logger.warn("Próbowano ustawić wartość sortowania na null, zostanie użyty domyślny typ.");
+            logger.warn("Próbowano ustawić wartość sortowania na null," +
+                    " zostanie użyty domyślny typ.");
             sort = Sort.DEFAULT;
         }
         logger.info("Zmieniono sposób sortowania na: {}", sort);

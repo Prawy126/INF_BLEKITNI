@@ -21,7 +21,8 @@ import java.time.LocalDate;
 public class Registration {
 
     // Inicjalizacja logera
-    private static final Logger logger = LogManager.getLogger(Registration.class);
+    private static final Logger logger
+            = LogManager.getLogger(Registration.class);
 
     private String message;
     private String name;
@@ -34,7 +35,13 @@ public class Registration {
      * Domyślny konstruktor.
      * Używany przez Hibernate do tworzenia instancji klasy.
      */
-    public Registration(String message, String name, String surname, LocalDate date, String title) {
+    public Registration(
+            String message,
+            String name,
+            String surname,
+            LocalDate date,
+            String title
+    ) {
         this(message, name, surname, date, title, StatusRegistration.PENDING);
     }
 
@@ -50,7 +57,14 @@ public class Registration {
      * @param title   Tytuł
      * @param status  Status rejestracji
      */
-    public Registration(String message, String name, String surname, LocalDate date, String title, StatusRegistration status) {
+    public Registration(
+            String message,
+            String name,
+            String surname,
+            LocalDate date,
+            String title,
+            StatusRegistration status
+    ) {
         this.message = message;
         this.name = name;
         this.surname = surname;
@@ -58,7 +72,8 @@ public class Registration {
         this.date = date;
         this.status = status;
 
-        logger.info("Utworzono nową rejestrację: {} {}, tytuł: {}, data: {}", name, surname, title, date);
+        logger.info("Utworzono nową rejestrację:" +
+                " {} {}, tytuł: {}, data: {}", name, surname, title, date);
     }
 
     /**
@@ -73,7 +88,8 @@ public class Registration {
         this.date = date;
         this.status = StatusRegistration.PENDING;
 
-        logger.info("Utworzono nową uproszczoną rejestrację, data: {}", date);
+        logger.info("Utworzono nową uproszczoną rejestrację, data: {}",
+                date);
     }
 
     /**
@@ -121,16 +137,19 @@ public class Registration {
 
     public void setSurname(String surname) {
         this.surname = surname;
-        logger.debug("Zaktualizowano nazwisko rejestracji na: {}", surname);
+        logger.debug("Zaktualizowano nazwisko rejestracji na: {}",
+                surname);
     }
 
     public void setDate(LocalDate date) {
         this.date = date;
-        logger.debug("Zaktualizowano datę rejestracji na: {}", date);
+        logger.debug("Zaktualizowano datę rejestracji na: {}",
+                date);
     }
 
     public void setStatus(StatusRegistration status) {
-        logger.info("Zmieniono status rejestracji z {} na {}", this.status, status);
+        logger.info("Zmieniono status rejestracji z {} na {}",
+                this.status, status);
         this.status = status;
     }
 
@@ -163,8 +182,8 @@ public class Registration {
      */
     @Override
     public String toString() {
-        return String.format("Registration{name='%s %s', title='%s', date=%s, " +
-                        "status=%s}",
+        return String.format("Registration{name='%s %s', title='%s'," +
+                        " date=%s, status=%s}",
                 name, surname, title, date, status);
     }
 }

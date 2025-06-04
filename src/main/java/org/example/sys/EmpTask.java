@@ -8,8 +8,6 @@
 
 package org.example.sys;
 
-
-import jakarta.annotation.Priority;
 import jakarta.persistence.*;
 
 import java.time.LocalTime;
@@ -17,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-// Importy Log4j2
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,7 +53,8 @@ public class EmpTask {
     private LocalTime durationOfTheShift;
 
     /** zamiast osobnego pola employee: lista rekordów z tabeli łączącej */
-    @OneToMany(mappedBy = "task", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "task", fetch
+            = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<TaskEmployee> taskEmployees = new ArrayList<>();
 
     @Column(name = "Priorytet")
@@ -79,7 +77,8 @@ public class EmpTask {
     }
 
     public List<TaskEmployee> getTaskEmployees() {
-        logger.trace("Pobrano listę pracowników przypisanych do zadania (liczba: {})", taskEmployees.size());
+        logger.trace("Pobrano listę pracowników przypisanych" +
+                " do zadania (liczba: {})", taskEmployees.size());
         return taskEmployees;
     }
 
@@ -88,24 +87,39 @@ public class EmpTask {
         logger.debug("Utworzono nowe zadanie (konstruktor domyślny)");
     }
 
-    public EmpTask(String name, Date date, String status, String description, LocalTime durationOfTheShift, Priority priority) {
+    public EmpTask(String name,
+                   Date date,
+                   String status,
+                   String description,
+                   LocalTime durationOfTheShift,
+                   Priority priority)
+    {
         this.name = name;
         this.date = date;
         this.status = status;
         this.description = description;
         this.durationOfTheShift = durationOfTheShift;
         this.priority = priority;
-        logger.info("Utworzono zadanie: '{}', termin: {}, czas zmiany: {}, priorytet: {}", name, date, durationOfTheShift, priority);
+        logger.info("Utworzono zadanie: '{}'," +
+                " termin: {}, czas zmiany: {}," +
+                " priorytet: {}", name, date, durationOfTheShift, priority);
     }
 
-    public EmpTask(String name, Date date, String status, String description, LocalTime durationOfTheShift) {
+    public EmpTask(String name,
+                   Date date,
+                   String status,
+                   String description,
+                   LocalTime durationOfTheShift
+    ) {
         this.name = name;
         this.date = date;
         this.status = status;
         this.description = description;
         this.durationOfTheShift = durationOfTheShift;
         this.priority = Priority.MEDIUM; // Domyślny priorytet
-        logger.info("Utworzono zadanie: '{}', termin: {}, czas zmiany: {}, priorytet: {}", name, date, durationOfTheShift, priority);
+        logger.info("Utworzono zadanie: '{}', termin: {}," +
+                " czas zmiany: {}, priorytet: {}", name, date,
+                durationOfTheShift, priority);
     }
 
     // ==================== Gettery i Settery z logowaniem ====================
@@ -135,12 +149,14 @@ public class EmpTask {
     }
 
     public Date getDate() {
-        logger.trace("Pobrano datę zadania: {}", date != null ? date.toString() : "null");
+        logger.trace("Pobrano datę zadania: {}",
+                date != null ? date.toString() : "null");
         return date;
     }
 
     public void setDate(Date date) {
-        logger.info("Zmieniono datę zadania na: {}", date != null ? date.toString() : "null");
+        logger.info("Zmieniono datę zadania na: {}",
+                date != null ? date.toString() : "null");
         this.date = date;
     }
 
@@ -165,12 +181,14 @@ public class EmpTask {
     }
 
     public LocalTime getDurationOfTheShift() {
-        logger.trace("Pobrano czas trwania zmiany: {}", durationOfTheShift);
+        logger.trace("Pobrano czas trwania zmiany: {}",
+                durationOfTheShift);
         return durationOfTheShift;
     }
 
     public void setDurationOfTheShift(LocalTime durationOfTheShift) {
-        logger.info("Zmieniono czas trwania zmiany na: {}", durationOfTheShift);
+        logger.info("Zmieniono czas trwania zmiany na: {}",
+                durationOfTheShift);
         this.durationOfTheShift = durationOfTheShift;
     }
 
@@ -183,7 +201,8 @@ public class EmpTask {
                 "Zadanie: %s, Termin: %s, Czas zmiany: %s",
                 name,
                 date != null ? date.toString() : "brak daty",
-                durationOfTheShift != null ? durationOfTheShift.toString() : "brak"
+                durationOfTheShift != null
+                        ? durationOfTheShift.toString() : "brak"
         );
         logger.trace("Wygenerowano toString(): {}", result);
         return result;
@@ -195,7 +214,8 @@ public class EmpTask {
             logger.warn("Brak przypisanego pracownika do zadania");
             return null;
         }
-        logger.debug("Pobrano pracownika przypisanego do zadania: {}", taskEmployees.get(0).getEmployee().getName());
+        logger.debug("Pobrano pracownika przypisanego do zadania: {}",
+                taskEmployees.get(0).getEmployee().getName());
         return taskEmployees.get(0).getEmployee();
     }
 
@@ -206,7 +226,8 @@ public class EmpTask {
         if (taskEmployee != null && taskEmployees.remove(taskEmployee)) {
             logger.info("Usunięto przypisanie pracownika do zadania");
         } else {
-            logger.warn("Nie można usunąć przypisania – brak takiego TaskEmployee");
+            logger.warn("Nie można usunąć przypisania" +
+                    " – brak takiego TaskEmployee");
         }
     }
 }
