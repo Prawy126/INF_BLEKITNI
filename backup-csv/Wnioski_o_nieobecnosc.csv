@@ -1,6 +1,0 @@
-Id,Typ_wniosku,Data_rozpoczecia,Data_zakonczenia,Opis,Status,Id_pracownika
-1,Urlop wypoczynkowy,2025-05-01,2025-05-10,Wakacje w górach,PENDING,1
-2,Zwolnienie lekarskie,2025-04-20,2025-04-25,Przeziębienie,PENDING,2
-3,Urlop bezpłatny,2025-06-01,2025-06-15,Wyjazd zagraniczny,PENDING,3
-4,Urlop na żądanie,2025-04-22,2025-04-22,Sprawy rodzinne,PENDING,4
-5,Opieka nad dzieckiem,2025-05-05,2025-05-07,Chore dziecko,PENDING,5

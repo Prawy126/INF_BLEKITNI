@@ -675,14 +675,13 @@ public class AdminPanelController {
 
     private void exportDatabaseToCsv() {
         try {
-            // Użyj ścieżki w katalogu użytkownika
-            String userHome = System.getProperty("user.home");
-            String backupPath = userHome + "/stonka-backup-csv";
+            // Użyj katalogu projektu (bieżący katalog roboczy)
+            String backupPath = "backup-csv";
 
             File folder = new File(backupPath);
             if (!folder.exists() && !folder.mkdirs()) {
                 showAlert(Alert.AlertType.ERROR, "Błąd",
-                        "Nie można utworzyć katalogu: " + backupPath +
+                        "Nie można utworzyć katalogu: " + folder.getAbsolutePath() +
                                 "\nSprawdź uprawnienia do zapisu.");
                 return;
             }
@@ -693,7 +692,7 @@ public class AdminPanelController {
             progressAlert.setHeaderText("Trwa eksportowanie danych...");
 
             ProgressIndicator progress = new ProgressIndicator();
-            progress.setProgress(-1); // indeterminate progress
+            progress.setProgress(-1); // indeterminate
             progressAlert.getDialogPane().setContent(progress);
             progressAlert.show();
 
@@ -701,8 +700,8 @@ public class AdminPanelController {
                 @Override
                 protected Void call() throws Exception {
                     try {
-                        logger.info("Rozpoczęcie eksportu CSV do: {}", backupPath);
-                        DatabaseBackupExporter.exportAllTablesToCsv(backupPath);
+                        logger.info("Rozpoczęcie eksportu CSV do: {}", folder.getAbsolutePath());
+                        DatabaseBackupExporter.exportAllTablesToCsv(folder.getAbsolutePath());
                         return null;
                     } catch (Exception e) {
                         logger.error("Błąd eksportu CSV", e);
@@ -712,9 +711,9 @@ public class AdminPanelController {
             };
 
             exportTask.setOnSucceeded(e -> {
-                progressAlert.close(); // Zamknij alert postępu
+                progressAlert.close();
                 showAlert(Alert.AlertType.INFORMATION, "Sukces",
-                        "Pomyślnie wyeksportowano dane do:\n" + backupPath);
+                        "Dane zostały wyeksportowane do:\n" + folder.getAbsolutePath());
             });
 
             exportTask.setOnFailed(e -> {
@@ -722,16 +721,11 @@ public class AdminPanelController {
                 logger.error("Błąd eksportu CSV", ex);
 
                 String errorMsg = "Wystąpił błąd podczas eksportu:\n";
-                if (ex.getCause() != null) {
-                    errorMsg += ex.getCause().getMessage();
-                } else {
-                    errorMsg += ex.getMessage();
-                }
+                errorMsg += (ex.getCause() != null) ? ex.getCause().getMessage() : ex.getMessage();
 
                 showAlert(Alert.AlertType.ERROR, "Błąd eksportu", errorMsg);
             });
 
-            // Uruchom w puli wątków
             new Thread(exportTask).start();
 
         } catch (Exception e) {
@@ -740,6 +734,7 @@ public class AdminPanelController {
                     "Nieoczekiwany błąd: " + e.getMessage());
         }
     }
+
 
     private void openLogsDirectory() {
         try {
