@@ -191,36 +191,31 @@ public class CashierPanelController {
     public void showSalesReportsPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
-        layout.setAlignment(Pos.TOP_CENTER); // wyrównanie do góry, żeby tabela była zaraz pod nagłówkiem
+        layout.setAlignment(Pos.TOP_CENTER);
 
-        // Nagłówek
         Label titleLabel = new Label("Raporty sprzedaży");
         titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
-        // Tabela raportów
+        // Tworzymy tabelę raportów:
         TableView<Report> tableView = createReportTable();
-        // Ustawienie preferowanej wysokości, aby od razu było widać wiersze
         tableView.setPrefHeight(400);
-
-        // Pozwalamy tabeli rosnąć w pionie razem z VBox-em
         VBox.setVgrow(tableView, Priority.ALWAYS);
 
-        // Przyciski akcji
+        // Teraz tworzymy tylko jeden przycisk „Nowy raport”:
         HBox buttons = new HBox(10);
         Button newReportButton = cashierPanel.createStyledButton("Nowy raport", "#27AE60");
-        Button refreshButton = cashierPanel.createStyledButton("Odśwież", "#3498DB");
-
-        newReportButton.setOnAction(e -> showReportDialog());
-        refreshButton.setOnAction(e -> refreshReportTable(tableView));
-
-        buttons.getChildren().addAll(newReportButton, refreshButton);
+        // (usuńmy Button refreshButton = ...)
+        buttons.getChildren().addAll(newReportButton);
         buttons.setAlignment(Pos.CENTER);
 
-        // Składamy layout
+        // Po kliknięciu „Nowy raport” uruchamiamy dialog i podajemy referencję do tableView,
+        // żeby w showReportDialog(...) po wygenerowaniu od razu odświeżyć tę tabelę.
+        newReportButton.setOnAction(e -> showReportDialog(tableView));
+
         layout.getChildren().addAll(titleLabel, tableView, buttons);
         cashierPanel.setCenterPane(layout);
 
-        // Załadowanie danych do tabeli (domyślnie przy pierwszym otwarciu)
+        // Przy pierwszym wyświetleniu ładujemy dane:
         refreshReportTable(tableView);
     }
 
@@ -264,8 +259,9 @@ public class CashierPanelController {
 
     /**
      * Dialog generowania raportu sprzedaży.
+     * @param tableView referencja do tabeli raportów, którą odświeżamy po zatwierdzeniu
      */
-    private void showReportDialog() {
+    private void showReportDialog(TableView<Report> tableView) {
         Stage dialog = createStyledDialog("Generowanie raportu sprzedaży");
 
         Label typeLabel = new Label("Typ raportu:");
@@ -315,6 +311,8 @@ public class CashierPanelController {
                 if (transactions.isEmpty()) {
                     saveEmptyReportInfo(periodType, dates[0], dates[1]);
                     showNotification("Brak danych", "Nie znaleziono transakcji w wybranym okresie.");
+                    // Od razu odświeżamy tabelę raportów:
+                    refreshReportTable(tableView);
                     dialog.close();
                     return;
                 }
@@ -322,6 +320,9 @@ public class CashierPanelController {
                 String reportPath = generateSalesReport(periodType, dates[0], dates[1], selectedCategories);
                 saveReportInfo(periodType, dates[0], dates[1], reportPath);
                 showNotification("Sukces", "Raport zapisano: " + reportPath);
+                // Po udanym wygenerowaniu od razu odświeżamy tabelę w panelu kasjera:
+                refreshReportTable(tableView);
+
                 dialog.close();
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -339,6 +340,18 @@ public class CashierPanelController {
         root.setPadding(new Insets(20));
 
         setupDialog(dialog, root);
+    }
+
+    /**
+     * Przeciążona wersja showReportDialog() bez parametrów.
+     * Pozostaje tutaj tylko po to, aby zachować zgodność z dotychczasowymi wywołaniami.
+     * Wewnątrz wywołujemy oryginalną metodę, przekazując null jako referencję do tabeli.
+     */
+    private void showReportDialog() {
+        // Jeżeli wywołamy to z kontekstu, w którym nie mamy tabeli (np. panel zamknięcia zmiany),
+        // po prostu wywołujemy wersję z null. Metoda z null nie będzie próbowała odświeżać tabeli,
+        // wystarczy, że otworzy dialog generowania raportu.
+        showReportDialog(/* tableView= */ null);
     }
 
     /**
@@ -546,6 +559,7 @@ public class CashierPanelController {
 
         TableColumn<Product, Integer> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        // domyślne wyrównanie jest OK dla ID
 
         TableColumn<Product, String> nameCol = new TableColumn<>("Nazwa");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -553,16 +567,19 @@ public class CashierPanelController {
         TableColumn<Product, String> categoryCol = new TableColumn<>("Kategoria");
         categoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
 
+        // Kolumna „Cena” – wartości wyrównujemy do prawej:
         TableColumn<Product, Double> priceCol = new TableColumn<>("Cena");
         priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
+        priceCol.setStyle("-fx-alignment: CENTER-RIGHT;");
 
-        // Nowa kolumna ze stanem magazynowym
+        // Kolumna „Stan” – wartości wyrównujemy do prawej:
         TableColumn<Product, Integer> stockCol = new TableColumn<>("Stan");
         stockCol.setCellValueFactory(cd -> {
             Product p = cd.getValue();
             int qty = getAvailableQuantity(p);
             return new SimpleIntegerProperty(qty).asObject();
         });
+        stockCol.setStyle("-fx-alignment: CENTER-RIGHT;");
 
         table.getColumns().addAll(idCol, nameCol, categoryCol, priceCol, stockCol);
 
@@ -571,7 +588,6 @@ public class CashierPanelController {
         productRepo.close();
         table.setItems(productList);
 
-        // Aktualizacja filtrowania z uwzględnieniem nowej kolumny nie jest potrzebna, ale odświeżamy stan przy każdym odfiltrowaniu
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
             ObservableList<Product> filtered = FXCollections.observableArrayList();
             for (Product p : productList) {
@@ -582,7 +598,6 @@ public class CashierPanelController {
                 }
             }
             table.setItems(filtered);
-            // Odśwież kolumnę stanu magazynowego
             table.refresh();
         });
 
