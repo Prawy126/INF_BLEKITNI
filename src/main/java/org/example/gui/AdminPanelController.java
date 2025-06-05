@@ -336,12 +336,21 @@ public class AdminPanelController {
                 }
 
                 String newLogin = loginField.getText().trim();
+                String newEmail = emailField.getText().trim();
 
                 // Walidacja loginu: odrzucamy znaki specjalne
                 if (!newLogin.matches("[A-Za-z0-9]+")) {
                     showAlert(Alert.AlertType.ERROR,
                             "Nieprawidłowy login",
                             "Login może zawierać tylko litery i cyfry, bez znaków specjalnych.");
+                    return;
+                }
+
+                // Walidacja e-mailu: e-mail w formacie .+@.+\..+
+                if (!newEmail.matches(".+@.+\\..+")) {
+                    showAlert(Alert.AlertType.ERROR,
+                            "Nieprawidłowy email",
+                            "Podaj poprawny adres e-mail (np. user@example.com).");
                     return;
                 }
 
@@ -521,12 +530,21 @@ public class AdminPanelController {
                 }
 
                 String loginText = loginField.getText().trim();
+                String emailText = emailField.getText().trim();
 
                 // Walidacja loginu: odrzucamy znaki specjalne
                 if (!loginText.matches("[A-Za-z0-9]+")) {
                     showAlert(Alert.AlertType.ERROR,
                             "Nieprawidłowy login",
                             "Login może zawierać tylko litery i cyfry, bez znaków specjalnych.");
+                    return;
+                }
+
+                // Walidacja e-mailu: e-mail w formacie .+@.+\..+
+                if (!emailText.matches(".+@.+\\..+")) {
+                    showAlert(Alert.AlertType.ERROR,
+                            "Nieprawidłowy email",
+                            "Podaj poprawny adres e-mail (np. user@example.com).");
                     return;
                 }
 
