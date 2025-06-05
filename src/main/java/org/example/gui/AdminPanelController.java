@@ -1733,67 +1733,133 @@ public class AdminPanelController {
         });
     }
 
+    /**
+     * Otwiera okno dodawania nowego adresu z walidacją pól.
+     *
+     * @param addressComboBox ComboBox, który należy odświeżyć po dodaniu nowego adresu
+     */
     private void openNewAddressWindow(ComboBox<Address> addressComboBox) {
         Stage stage = new Stage();
         stage.setTitle("Dodaj nowy adres");
         VBox layout = new VBox(10);
         layout.setPadding(new Insets(20));
 
+        // --------------- Kontrolki formularza ---------------
         TextField town = new TextField();
         town.setPromptText("Miejscowość");
 
         TextField houseNumber = new TextField();
-        houseNumber.setPromptText("Numer domu");
+        houseNumber.setPromptText("Numer domu (np. 12, 12A, 12B/3)");
 
         TextField apartmentNumber = new TextField();
         apartmentNumber.setPromptText("Numer mieszkania (opcjonalnie)");
 
         TextField zipCode = new TextField();
-        zipCode.setPromptText("Kod pocztowy");
+        zipCode.setPromptText("Kod pocztowy (np. 00-123)");
 
         TextField city = new TextField();
         city.setPromptText("Miasto");
 
         Button saveButton = new Button("Zapisz adres");
+        styleAdminButton(saveButton, "#27AE60");
 
+        // --------------- Obsługa przycisku Zapisz ---------------
         saveButton.setOnAction(e -> {
-            // WALIDACJA
-            if (town.getText().isEmpty()
-                    || houseNumber.getText().isEmpty()
-                    || zipCode.getText().isEmpty()
-                    || city.getText().isEmpty()) {
-                showAlert(Alert.AlertType.ERROR, "Błąd", "Wszystkie pola (poza numerem mieszkania) muszą być wypełnione.");
+            String sTown = town.getText().trim();
+            String sHouse = houseNumber.getText().trim();
+            String sApartment = apartmentNumber.getText().trim();
+            String sZip = zipCode.getText().trim();
+            String sCity = city.getText().trim();
+
+            // 1. Sprawdzenie, czy wymagane pola nie są puste
+            if (sTown.isEmpty() || sHouse.isEmpty() || sZip.isEmpty() || sCity.isEmpty()) {
+                showAlert(Alert.AlertType.ERROR,
+                        "Błąd",
+                        "Wszystkie pola (poza numerem mieszkania) muszą być wypełnione.");
                 return;
             }
 
-            if (!zipCode.getText().matches("\\d{2}-\\d{3}")) {
-                showAlert(Alert.AlertType.ERROR, "Błąd", "Nieprawidłowy format kodu pocztowego. Poprawny to np. 00-001.");
+            // 2. Walidacja formatu Miejscowości i Miasta: tylko litery i spacje
+            //    (bez cyfr i znaków specjalnych)
+            if (!sTown.matches("[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż\\s\\-]+")) {
+                showAlert(Alert.AlertType.ERROR,
+                        "Błąd",
+                        "Miejscowość może zawierać tylko litery, spacje i myślniki.");
+                return;
+            }
+            if (!sCity.matches("[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż\\s\\-]+")) {
+                showAlert(Alert.AlertType.ERROR,
+                        "Błąd",
+                        "Miasto może zawierać tylko litery, spacje i myślniki.");
                 return;
             }
 
-            // ZAPIS
+            // 3. Walidacja formatu Numeru domu:
+            //    dopuszczamy cyfry, ewentualnie litery (np. "12", "12A") lub
+            //    fragment typu "12B/3" (np. dom 12B, mieszkanie 3), choć mieszkanie
+            //    powinno być wpisane w polu "Numer mieszkania". Tutaj sprawdzamy
+            //    co najmniej jedną cyfrę na początku, a potem opcjonalnie 1-2 litery.
+            if (!sHouse.matches("\\d{1,4}[A-Za-z]{0,2}")) {
+                showAlert(Alert.AlertType.ERROR,
+                        "Błąd",
+                        "Numer domu jest nieprawidłowy. Może składać się z cyfr i maksymalnie dwóch liter, np. 12A.");
+                return;
+            }
+
+            // 4. Walidacja formatu Numeru mieszkania (jeśli podano):
+            //    dopuszczamy albo puste, albo tylko cyfry, np. "3" lub "12".
+            if (!sApartment.isEmpty() && !sApartment.matches("\\d{1,4}")) {
+                showAlert(Alert.AlertType.ERROR,
+                        "Błąd",
+                        "Numer mieszkania może zawierać tylko cyfry (np. 3).");
+                return;
+            }
+
+            // 5. Walidacja formatu kodu pocztowego: wzorzec "dd-ddd"
+            if (!sZip.matches("\\d{2}-\\d{3}")) {
+                showAlert(Alert.AlertType.ERROR,
+                        "Błąd",
+                        "Nieprawidłowy format kodu pocztowego. Poprawny przykład: 00-001.");
+                return;
+            }
+
+            // 6. Po przejściu wszystkich walidacji, zapisujemy nowy adres
             AddressRepository repo = new AddressRepository();
             Address newAddress = new Address();
-            newAddress.setTown(town.getText());
-            newAddress.setHouseNumber(houseNumber.getText());
-            newAddress.setApartmentNumber(apartmentNumber.getText().isEmpty() ? null : apartmentNumber.getText());
-            newAddress.setZipCode(zipCode.getText());
-            newAddress.setCity(city.getText());
+            newAddress.setTown(sTown);
+            newAddress.setHouseNumber(sHouse);
+            // numer mieszkania ustawiamy tylko jeśli zostało podane
+            newAddress.setApartmentNumber(sApartment.isEmpty() ? null : sApartment);
+            newAddress.setZipCode(sZip);
+            newAddress.setCity(sCity);
 
-            repo.addAddress(newAddress);
+            try {
+                repo.addAddress(newAddress);
+            } catch (Exception ex) {
+                showAlert(Alert.AlertType.ERROR,
+                        "Błąd zapisu",
+                        "Wystąpił problem podczas zapisywania adresu:\n" + ex.getMessage());
+                return;
+            }
 
-            // Odśwież listę i wybierz newAddress adres
+            // 7. Odświeżamy ComboBox z adresami i ustawiamy nowo dodany adres jako wybrany
+            List<Address> updatedList = repo.getAllAddresses();
             addressComboBox.getItems().clear();
-            addressComboBox.getItems().addAll(repo.getAllAddresses());
+            addressComboBox.getItems().addAll(updatedList);
             addressComboBox.setValue(newAddress);
 
             stage.close();
         });
 
+        // Dodajemy etykietę nad polami i układamy wszystkie kontrolki w jednym VBox-ie
         layout.getChildren().addAll(
                 new Label("Nowy adres:"),
-                town, houseNumber, apartmentNumber,
-                zipCode, city, saveButton
+                town,
+                houseNumber,
+                apartmentNumber,
+                zipCode,
+                city,
+                saveButton
         );
 
         stage.setScene(new javafx.scene.Scene(layout));
