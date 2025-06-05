@@ -1,10 +1,9 @@
 /*
  * Classname: AdminPanelController
- * Version information: 1.7
- * Date: 2025-05-27
+ * Version information: 1.8
+ * Date: 2025-06-06
  * Copyright notice: © BŁĘKITNI
  */
-
 
 package org.example.gui;
 
@@ -320,6 +319,7 @@ public class AdminPanelController {
 
         saveButton.setOnAction(e -> {
             try {
+                // Sprawdzenie, czy wszystkie pola poza hasłem są wypełnione
                 if (nameField.getText().isEmpty()
                         || surnameField.getText().isEmpty()
                         || loginField.getText().isEmpty()
@@ -335,19 +335,29 @@ public class AdminPanelController {
                     return;
                 }
 
+                String newLogin = loginField.getText().trim();
+
+                // Walidacja loginu: odrzucamy znaki specjalne
+                if (!newLogin.matches("[A-Za-z0-9]+")) {
+                    showAlert(Alert.AlertType.ERROR,
+                            "Nieprawidłowy login",
+                            "Login może zawierać tylko litery i cyfry, bez znaków specjalnych.");
+                    return;
+                }
+
                 showLoadingIndicator();
 
-                selected.setName(nameField.getText());
-                selected.setSurname(surnameField.getText());
-                selected.setLogin(loginField.getText());
-                selected.setEmail(emailField.getText());
+                selected.setName(nameField.getText().trim());
+                selected.setSurname(surnameField.getText().trim());
+                selected.setLogin(newLogin);
+                selected.setEmail(emailField.getText().trim());
                 selected.setAddress(addressComboBox.getValue());
                 if (!passwordField.getText().isEmpty()) {
                     selected.setPassword(passwordField.getText());
                 }
                 selected.setPosition(positionBox.getValue());
-                selected.setAge(Integer.parseInt(ageField.getText()));
-                selected.setSalary(new BigDecimal(salaryField.getText()));
+                selected.setAge(Integer.parseInt(ageField.getText().trim()));
+                selected.setSalary(new BigDecimal(salaryField.getText().trim()));
 
                 Task<Void> updateTask = new Task<>() {
                     @Override
@@ -395,7 +405,6 @@ public class AdminPanelController {
 
         cancelButton.setOnAction(e -> showUserManagement());
     }
-
 
     /**
      * Pobiera dane z bazy i ładuje do tabeli asynchronicznie.
@@ -496,7 +505,7 @@ public class AdminPanelController {
 
         saveButton.setOnAction(e -> {
             try {
-                // sprawdzenie czy nie ma pustych pól
+                // Sprawdzenie, czy nie ma pustych pól
                 if (nameField.getText().isEmpty()
                         || surnameField.getText().isEmpty()
                         || loginField.getText().isEmpty()
@@ -511,15 +520,25 @@ public class AdminPanelController {
                     return;
                 }
 
-                int age = Integer.parseInt(ageField.getText());
-                BigDecimal salary = new BigDecimal(salaryField.getText());
+                String loginText = loginField.getText().trim();
+
+                // Walidacja loginu: odrzucamy znaki specjalne
+                if (!loginText.matches("[A-Za-z0-9]+")) {
+                    showAlert(Alert.AlertType.ERROR,
+                            "Nieprawidłowy login",
+                            "Login może zawierać tylko litery i cyfry, bez znaków specjalnych.");
+                    return;
+                }
+
+                int age = Integer.parseInt(ageField.getText().trim());
+                BigDecimal salary = new BigDecimal(salaryField.getText().trim());
 
                 Employee newEmployee = new Employee();
-                newEmployee.setName(nameField.getText());
-                newEmployee.setSurname(surnameField.getText());
-                newEmployee.setLogin(loginField.getText());
+                newEmployee.setName(nameField.getText().trim());
+                newEmployee.setSurname(surnameField.getText().trim());
+                newEmployee.setLogin(loginText);
                 newEmployee.setPassword(passwordField.getText());
-                newEmployee.setEmail(emailField.getText());
+                newEmployee.setEmail(emailField.getText().trim());
                 newEmployee.setAddress(addressComboBox.getValue());
                 newEmployee.setPosition(positionComboBox.getValue());
                 newEmployee.setAge(age);
@@ -561,7 +580,6 @@ public class AdminPanelController {
 
         cancelButton.setOnAction(e -> showUserManagement());
     }
-
 
     /**
      * Usuwa zaznaczonego użytkownika asynchronicznie.
@@ -616,7 +634,6 @@ public class AdminPanelController {
             }
         });
     }
-
 
     /**
      * Wyświetla panel ustawień konfiguracyjnych systemu.
@@ -734,7 +751,6 @@ public class AdminPanelController {
                     "Nieoczekiwany błąd: " + e.getMessage());
         }
     }
-
 
     private void openLogsDirectory() {
         try {
@@ -1440,7 +1456,6 @@ public class AdminPanelController {
         dialog.showAndWait();
     }
 
-
     /**
      * Tworzy widok panelu zgłoszeń.
      *
@@ -1796,9 +1811,7 @@ public class AdminPanelController {
 
             // 3. Walidacja formatu Numeru domu:
             //    dopuszczamy cyfry, ewentualnie litery (np. "12", "12A") lub
-            //    fragment typu "12B/3" (np. dom 12B, mieszkanie 3), choć mieszkanie
-            //    powinno być wpisane w polu "Numer mieszkania". Tutaj sprawdzamy
-            //    co najmniej jedną cyfrę na początku, a potem opcjonalnie 1-2 litery.
+            //    fragment typu "12B" (bez dalszych znaków), maksymalnie dwie litery.
             if (!sHouse.matches("\\d{1,4}[A-Za-z]{0,2}")) {
                 showAlert(Alert.AlertType.ERROR,
                         "Błąd",
