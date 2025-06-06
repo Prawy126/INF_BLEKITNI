@@ -1,6 +1,6 @@
 /*
  * Classname: LogisticianPanelController
- * Version information: 1.5
+ * Version information: 1.6
  * Date: 2025-06-06
  * Copyright notice: © BŁĘKITNI
  */
@@ -410,10 +410,31 @@ public class LogisticianPanelController {
                         public int getQuantity(org.example.sys.Product p)    { return qtyById.getOrDefault(p.getId(), 0); }
                     };
 
+            String logoPath = ConfigManager.getLogoPath();
+            if (logoPath == null || logoPath.isBlank()) {
+                showAlert(Alert.AlertType.ERROR,
+                        "Brak logo",
+                        "W konfiguracji nie ustawiono ścieżki do logo. Ustaw logo w panelu administratora.");
+                return;
+            }
+
+            File logoFile = new File(logoPath);
+            if (!logoFile.exists() || !logoFile.isFile()) {
+                showAlert(Alert.AlertType.ERROR,
+                        "Niepoprawny plik logo",
+                        "Nie odnaleziono pliku logo pod ścieżką: " + logoPath);
+                return;
+            }
+
             WarehouseRaport raport = new WarehouseRaport();
-            raport.setLogoPath("src/main/resources/logo.png");
+            raport.setLogoPath(logoPath);
             raport.setLowStockThreshold(lowStockThreshold);
-            raport.generateReport(targetFile.getAbsolutePath(), filteredProducts, extractor, selectedCategories);
+            raport.generateReport(
+                    targetFile.getAbsolutePath(),
+                    filteredProducts,
+                    extractor,
+                    selectedCategories
+            );
 
             showAlert(Alert.AlertType.INFORMATION, "Sukces",
                     "Raport zapisany: " + targetFile.getAbsolutePath());

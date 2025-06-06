@@ -1,7 +1,7 @@
 /*
  * Classname: CashierPanelController
- * Version information: 1.10.0
- * Date: 2025-05-27
+ * Version information: 1.11
+ * Date: 2025-06-06
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -29,6 +29,7 @@ import javafx.util.converter.IntegerStringConverter;
 import org.example.database.*;
 import org.example.sys.*;
 
+import org.example.pdflib.ConfigManager;
 import pdf.SalesReportGenerator;
 import org.hibernate.Session;
 import org.apache.logging.log4j.LogManager;
@@ -997,8 +998,22 @@ public class CashierPanelController {
             throw new SalesReportGenerator.NoDataException("Brak danych transakcji");
         }
 
+        String logoPath = ConfigManager.getLogoPath();
+        if (logoPath == null || logoPath.isBlank()) {
+            // Jeżeli nie ustawiono żadnej ścieżki, pokaż komunikat i przerwij
+            showNotification("Błąd", "Brak skonfigurowanego logo. Ustaw logo w panelu administratora.");
+            throw new IllegalStateException("Brak logo w konfiguracji");
+        }
+        File logoFile = new File(logoPath);
+        if (!logoFile.exists() || !logoFile.isFile()) {
+            // Ścieżka jest pusta lub plik nie istnieje
+            showNotification("Błąd", "Plik logo nie istnieje: " + logoPath);
+            throw new IllegalStateException("Plik logo nie został odnaleziony: " + logoPath);
+        }
+
         SalesReportGenerator gen = new SalesReportGenerator();
         gen.setSalesData(salesData);
+        gen.setLogoPath(logoPath);
 
         String fileName = String.format("raport_%s_%s_%s.pdf",
                 periodType.getDisplayName().toLowerCase(),

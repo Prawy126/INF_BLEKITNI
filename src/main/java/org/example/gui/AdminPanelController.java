@@ -1,6 +1,6 @@
 /*
  * Classname: AdminPanelController
- * Version information: 1.10
+ * Version information: 1.11
  * Date: 2025-06-06
  * Copyright notice: © BŁĘKITNI
  */
@@ -688,10 +688,8 @@ public class AdminPanelController {
      * Tworzenie węzłów odbywa się na wątku JavaFX – brak konfliktów z toolkitem.
      */
     public void showConfigPanel() {
-        if (configPanelView == null) {
-            configPanelView = createConfigPanelView();
-        }
-        adminPanel.setCenterPane(configPanelView);
+        VBox freshConfigView = createConfigPanelView();
+        adminPanel.setCenterPane(freshConfigView);
     }
 
     /**
@@ -833,14 +831,10 @@ public class AdminPanelController {
         logoField.setPrefWidth(400);
         logoField.setPromptText("Wybierz plik logo (PNG/JPG)");
 
-        // Jeśli w resources jest logo.png, wypełnij ścieżkę absolutną:
-        try {
-            // zakładamy, że resources są w folderze projektu, np. src/main/resources/logo.png
-            Path candidate = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "logo.png");
-            if (Files.exists(candidate)) {
-                logoField.setText(candidate.toAbsolutePath().toString());
-            }
-        } catch (Exception ignored) {}
+        String savedLogo = ConfigManager.getLogoPath();
+        if (savedLogo != null && !savedLogo.isBlank()) {
+            logoField.setText(savedLogo);
+        }
 
         Button chooseLogoButton = new Button("Wybierz nowe logo");
         styleAdminButton(chooseLogoButton, "#2980B9");
@@ -870,9 +864,9 @@ public class AdminPanelController {
         pathField.setText(ConfigManager.getReportPath());
 
         // Wczytaj aktualną ścieżkę z ConfigManager (jeśli jest)
-        String currentReports = ConfigManager.getReportPath();
-        if (currentReports != null && !currentReports.isBlank()) {
-            pathField.setText(new File(currentReports).getAbsolutePath());
+        String savedPath = ConfigManager.getReportPath();
+        if (savedPath != null && !savedPath.isBlank()) {
+            pathField.setText(new File(savedPath).getAbsolutePath());
         }
 
         Button choosePathButton = new Button("Wybierz katalog…");
@@ -1104,6 +1098,10 @@ public class AdminPanelController {
                     from, to, positions, priors);
 
             StatsRaportGenerator gen   = new StatsRaportGenerator();
+            String logoPath = ConfigManager.getLogoPath();
+            if (logoPath != null && !logoPath.isBlank()) {
+                gen.setLogoPath(logoPath);
+            }
             List<StatsRaportGenerator.TaskRecord> taskData = fetchTaskStatsData(from, to);
             logger.info("Pobrano {} zadań dla raportu KPI", taskData.size());
 
@@ -1172,6 +1170,11 @@ public class AdminPanelController {
             logger.debug("Generowanie raportu zadań dla okresu: {}, statusy: {}", period, statuses);
 
             TaskRaportGenerator gen = new TaskRaportGenerator();
+            // ustawienie ścieżki do logo:
+            String logoPath = ConfigManager.getLogoPath();
+            if (logoPath != null && !logoPath.isBlank()) {
+                gen.setLogoPath(logoPath);
+            }
 
             // dane z repozytorium
             List<TaskRaportGenerator.TaskRecord> taskData = fetchTaskSimpleData(period);
@@ -1257,6 +1260,11 @@ public class AdminPanelController {
             logger.debug("Generowanie raportu obciążenia dla dat: {} do {}, stanowiska: {}, statusy: {}",
                     from, to, positions, statuses);
             WorkloadReportGenerator gen = new WorkloadReportGenerator();
+            // ustawienie ścieżki do logo:
+            String logoPath = ConfigManager.getLogoPath();
+            if (logoPath != null && !logoPath.isBlank()) {
+                gen.setLogoPath(logoPath);
+            }
             List<WorkloadReportGenerator.EmployeeWorkload> workloadData = fetchWorkloadData(from, to);
             logger.info("Pobrano dane dla {} pracowników dla raportu obciążenia", workloadData.size());
             gen.setWorkloadData(workloadData);
