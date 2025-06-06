@@ -1,7 +1,7 @@
 /*
  * Classname: EmployeePanelController
- * Version information: 1.5
- * Date: 2025-06-03
+ * Version information: 1.6
+ * Date: 2025-06-06
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -84,6 +84,7 @@ public class EmployeePanelController {
             List<EmpTask> tasks = teRepo.findByEmployee(empId).stream()
                     .map(te -> taskRepo.findTaskById(te.getId().getTaskId()))
                     .filter(Objects::nonNull)
+                    .filter(t -> !"Zakończone".equalsIgnoreCase(t.getStatus()))  // ← tu
                     .collect(Collectors.toList());
 
             taskTable.setItems(FXCollections.observableArrayList(tasks));
@@ -100,25 +101,36 @@ public class EmployeePanelController {
         updateStatusButton.setOnAction(e -> {
             EmpTask selected = taskTable.getSelectionModel().getSelectedItem();
             if (selected == null) {
-                Alert a = new Alert(Alert.AlertType.WARNING, "Wybierz zadanie do edycji statusu.", ButtonType.OK);
+                Alert a = new Alert(Alert.AlertType.WARNING,
+                        "Wybierz zadanie do zaktualizowania statusu.", ButtonType.OK);
+                a.setTitle("Brak wyboru");
+                a.setHeaderText("Nie wybrano zadania");
                 a.showAndWait();
                 return;
             }
-            ChoiceDialog<String> dialog = new ChoiceDialog<>(selected.getStatus(), "Nowe", "W trakcie", "Zakończone");
-            dialog.setTitle("Zaktualizuj status");
-            dialog.setHeaderText("Wybierz nowy status:");
-            dialog.showingProperty().addListener((obs, wasShowing, isNowShowing) -> {
-                if (isNowShowing) {
-                    Stage dialogStage = (Stage) dialog.getDialogPane().getScene().getWindow();
-                    dialogStage.getIcons().add(new Image(getClass().getResourceAsStream("/logo.png")));
+            String currentStatus = selected.getStatus();
+            String nextStatus;
+            switch (currentStatus) {
+                case "Nowe"   -> nextStatus = "W trakcie";
+                case "W trakcie" -> nextStatus = "Zakończone";
+                default -> {
+                    // Jeśli już 'Zakończone', nic się nie dzieje
+                    return;
                 }
-            });
-            Optional<String> result = dialog.showAndWait();
-            result.ifPresent(newStatus -> {
-                selected.setStatus(newStatus);
-                new EmpTaskRepository().updateTask(selected);
+            }
+            selected.setStatus(nextStatus);
+            new EmpTaskRepository().updateTask(selected);
+            if ("Zakończone".equalsIgnoreCase(nextStatus)) {
+                // Po przejściu na 'Zakończone' usuwamy zadanie z tabeli
+                taskTable.getItems().remove(selected);
+            } else {
                 taskTable.refresh();
-            });
+            }
+            Alert info = new Alert(Alert.AlertType.INFORMATION,
+                    "Status zaktualizowano na: " + nextStatus, ButtonType.OK);
+            info.setTitle("Zaktualizowane");
+            info.setHeaderText(null);
+            info.showAndWait();
         });
 
         Button reportProblemButton = new Button("Zgłoś problem");
