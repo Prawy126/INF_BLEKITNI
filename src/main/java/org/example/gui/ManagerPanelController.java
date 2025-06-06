@@ -219,6 +219,11 @@ public class ManagerPanelController {
                     return;
                 }
 
+                if (date.before(Date.valueOf(java.time.LocalDate.now()))) {
+                    showAlert(Alert.AlertType.WARNING, "Błąd", "Termin nie może być w przeszłości.");
+                    return;
+                }
+
                 EmpTask newTask = new EmpTask(name, date, status, description, timeOfShift);
                 taskRepository.addTask(newTask);
 
@@ -549,14 +554,32 @@ public class ManagerPanelController {
         Button saveButton = new Button("Zapisz");
         Button cancelButton = new Button("Anuluj");
 
-        saveButton.setOnAction(e -> {
-            try {
-                task.setName(nameField.getText());
-                task.setDescription(descArea.getText());
-                task.setStatus(statusCombo.getValue());
-                if (deadlinePicker.getValue() != null) {
-                    task.setDate(java.sql.Date.valueOf(deadlinePicker.getValue()));
-                }
+       saveButton.setOnAction(e -> {
+                    try {
+                        String name = nameField.getText();
+                        String description = descArea.getText();
+                        String status = statusCombo.getValue();
+
+                        task.setName(name);
+                        task.setDescription(description);
+                        task.setStatus(status);
+
+                        java.sql.Date date = null;
+                        if (deadlinePicker.getValue() != null) {
+                            date = java.sql.Date.valueOf(deadlinePicker.getValue());
+                            task.setDate(date);
+                        }
+
+                        if (name.isEmpty() || description.isEmpty() || status == null || date == null) {
+                            showAlert(Alert.AlertType.WARNING, "Błąd", "Wypełnij wszystkie pola.");
+                            return;
+                        }
+
+                        if (date.before(Date.valueOf(java.time.LocalDate.now()))) {
+                            showAlert(Alert.AlertType.WARNING, "Błąd", "Termin nie może być w przeszłości.");
+                            return;
+                        }
+
                 taskRepository.updateTask(task);
 
                 showAlert(Alert.AlertType.INFORMATION, "Sukces",
