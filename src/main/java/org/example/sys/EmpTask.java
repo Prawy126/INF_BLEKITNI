@@ -52,6 +52,9 @@ public class EmpTask {
     @Column(name = "czas_trwania_zmiany")
     private LocalTime durationOfTheShift;
 
+    @Column(name = "usuniety")
+    private boolean usuniety = false;
+
     /** zamiast osobnego pola employee: lista rekordów z tabeli łączącej */
     @OneToMany(mappedBy = "task", fetch
             = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -217,6 +220,16 @@ public class EmpTask {
         logger.debug("Pobrano pracownika przypisanego do zadania: {}",
                 taskEmployees.get(0).getEmployee().getName());
         return taskEmployees.get(0).getEmployee();
+    }
+
+    public boolean isUsuniety() {
+        logger.trace("Pobrano status usunięcia zadania: {}", usuniety);
+        return usuniety;
+    }
+
+    public void setUsuniety(boolean usuniety) {
+        logger.info("Zmieniono status usunięcia zadania na: {}", usuniety);
+        this.usuniety = usuniety;
     }
 
     /**

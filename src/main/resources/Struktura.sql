@@ -162,3 +162,6 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
     INDEX idx_pracownik (pracownik_id),
     INDEX idx_code (reset_code_hash)
     );
+
+ALTER TABLE Zadania
+    ADD COLUMN usuniety BOOLEAN DEFAULT FALSE;

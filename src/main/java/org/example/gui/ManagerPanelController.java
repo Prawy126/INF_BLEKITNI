@@ -130,7 +130,7 @@ public class ManagerPanelController {
         editButton.setOnMouseEntered(e -> { editButton.setScaleX(1.1); editButton.setScaleY(1.1); });
         editButton.setOnMouseExited(e -> { editButton.setScaleX(1); editButton.setScaleY(1); });
 
-        Button deleteButton = new Button("Usuń zadanie");
+        Button deleteButton = new Button("Archiwizuj zadanie");
         deleteButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-font-weight: bold;");
         deleteButton.setOnMouseEntered(e -> { deleteButton.setScaleX(1.1); deleteButton.setScaleY(1.1); });
         deleteButton.setOnMouseExited(e -> { deleteButton.setScaleX(1); deleteButton.setScaleY(1); });
@@ -147,11 +147,16 @@ public class ManagerPanelController {
         deleteButton.setOnAction(e -> {
             EmpTask selectedTask = taskTable.getSelectionModel().getSelectedItem();
             if (selectedTask != null) {
-                taskRepository.removeTask(selectedTask);
-                showAlert(Alert.AlertType.INFORMATION, "Sukces", "Usunięto zadanie.");
-                showTaskPanel();
+                // Użycie miękkiego usuwania zamiast trwałego usunięcia
+                boolean success = taskRepository.softDeleteTask(selectedTask);
+                if (success) {
+                    showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zadanie zostało zarchiwizowane.");
+                    showTaskPanel(); // Odświeżenie panelu
+                } else {
+                    showAlert(Alert.AlertType.ERROR, "Błąd", "Nie udało się zarchiwizować zadania.");
+                }
             } else {
-                showAlert(Alert.AlertType.WARNING, "Błąd", "Wybierz zadanie do usunięcia.");
+                showAlert(Alert.AlertType.WARNING, "Błąd", "Wybierz zadanie do archiwizacji.");
             }
         });
 
@@ -172,6 +177,9 @@ public class ManagerPanelController {
     /**
      * Wyświetla panel dodawania nowego zadania.
      */
+    /**
+     * Wyświetla panel dodawania nowego zadania.
+     */
     public void showAddTaskPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
@@ -185,7 +193,7 @@ public class ManagerPanelController {
 
         Label statusLabel = new Label("Status");
         ComboBox<String> statusCombo = new ComboBox<>();
-        statusCombo.getItems().addAll("Nowe", "W trakcie", "Zakończone");
+        statusCombo.getItems().addAll("Nowe", "W trakcie");
 
         Label dateLabel = new Label("Termin");
         DatePicker deadlinePicker = new DatePicker();
@@ -524,7 +532,7 @@ public class ManagerPanelController {
 
         Label statusLabel = new Label("Status:");
         ComboBox<String> statusCombo = new ComboBox<>();
-        statusCombo.getItems().addAll("Nowe", "W trakcie", "Zakończone");
+        statusCombo.getItems().addAll("Nowe", "W trakcie", "Zakończone", "Opóźnione");
         statusCombo.setValue(task.getStatus());
 
         Label dateLabel = new Label("Termin:");

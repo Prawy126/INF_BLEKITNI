@@ -1,7 +1,7 @@
 /*
  * Classname: EmpTaskRepository
- * Version information: 1.2
- * Date: 2025-06-04
+ * Version information: 1.3
+ * Date: 2025-06-06
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * Repozytorium zarządzające zadaniami w bazie danych.
  * Umożliwia operacje CRUD na zadaniach oraz ich wyszukiwanie
- * według różnych kryteriów.
+ * według różnych kryteriów. Implementuje miękkie usuwanie zadań.
  */
 public class EmpTaskRepository implements AutoCloseable {
     /**
@@ -53,6 +53,8 @@ public class EmpTaskRepository implements AutoCloseable {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
+            // Upewniamy się, że nowe zadanie ma flagę usuniety = false
+            task.setUsuniety(false);
             em.persist(task);
             tx.commit();
             logger.info("addTask() – zadanie dodane: {}", task);
@@ -67,7 +69,7 @@ public class EmpTaskRepository implements AutoCloseable {
     }
 
     /**
-     * Znajduje zadanie o podanym identyfikatorze.
+     * Znajduje zadanie o podanym identyfikatorze, niezależnie od statusu usunięcia.
      * W przypadku błędu, wyjątek jest logowany i zwracana jest wartość null.
      *
      * @param id identyfikator zadania
@@ -92,11 +94,11 @@ public class EmpTaskRepository implements AutoCloseable {
     }
 
     /**
-     * Zwraca wszystkie zadania wraz z przypisanymi pracownikami i ich danymi.
+     * Zwraca wszystkie nieusunięte zadania wraz z przypisanymi pracownikami i ich danymi.
      * Zapobiega wystąpieniu LazyInitializationException przy dostępie
      * do powiązanych obiektów.
      *
-     * @return lista wszystkich zadań lub pusta lista w przypadku błędu
+     * @return lista wszystkich nieusunietych zadań lub pusta lista w przypadku błędu
      */
     public List<EmpTask> getAllTasks() {
         logger.debug("getAllTasks() – start");
@@ -106,11 +108,12 @@ public class EmpTaskRepository implements AutoCloseable {
                             "SELECT DISTINCT t " +
                                     "FROM EmpTask t " +
                                     "LEFT JOIN FETCH t.taskEmployees te " +
-                                    "LEFT JOIN FETCH te.employee",
+                                    "LEFT JOIN FETCH te.employee " +
+                                    "WHERE t.usuniety = false",
                             EmpTask.class)
                     .getResultList();
             logger.info("getAllTasks() " +
-                            "– pobrano {} zadań z przypisaniami",
+                            "– pobrano {} nieusunietych zadań z przypisaniami",
                     list.size());
             return list;
         } catch (Exception e) {
@@ -120,6 +123,37 @@ public class EmpTaskRepository implements AutoCloseable {
         } finally {
             em.close();
             logger.debug("getAllTasks() – EntityManager zamknięty");
+        }
+    }
+
+    /**
+     * Zwraca wszystkie usunięte zadania wraz z przypisanymi pracownikami i ich danymi.
+     *
+     * @return lista wszystkich usuniętych zadań lub pusta lista w przypadku błędu
+     */
+    public List<EmpTask> getAllDeletedTasks() {
+        logger.debug("getAllDeletedTasks() – start");
+        EntityManager em = EMFProvider.get().createEntityManager();
+        try {
+            List<EmpTask> list = em.createQuery(
+                            "SELECT DISTINCT t " +
+                                    "FROM EmpTask t " +
+                                    "LEFT JOIN FETCH t.taskEmployees te " +
+                                    "LEFT JOIN FETCH te.employee " +
+                                    "WHERE t.usuniety = true",
+                            EmpTask.class)
+                    .getResultList();
+            logger.info("getAllDeletedTasks() " +
+                            "– pobrano {} usuniętych zadań z przypisaniami",
+                    list.size());
+            return list;
+        } catch (Exception e) {
+            logger.error("getAllDeletedTasks() " +
+                    "– błąd podczas pobierania usuniętych zadań", e);
+            return List.of();
+        } finally {
+            em.close();
+            logger.debug("getAllDeletedTasks() – EntityManager zamknięty");
         }
     }
 
@@ -151,12 +185,90 @@ public class EmpTaskRepository implements AutoCloseable {
     }
 
     /**
-     * Usuwa zadanie z bazy.
+     * Wykonuje miękkie usunięcie zadania - ustawia flagę usuniety na true.
+     * Operacja jest wykonywana w transakcji.
+     * W przypadku błędu, transakcja jest wycofywana.
+     *
+     * @param task obiekt EmpTask do miękkiego usunięcia
+     * @return true jeśli operacja się powiodła, false w przeciwnym razie
+     */
+    public boolean softDeleteTask(EmpTask task) {
+        logger.debug("softDeleteTask() – start, task={}", task);
+        EntityManager em = EMFProvider.get().createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            EmpTask managedTask = em.find(EmpTask.class, task.getId());
+            if (managedTask != null) {
+                managedTask.setUsuniety(true);
+                tx.commit();
+                logger.info("softDeleteTask() " +
+                        "– zadanie oznaczone jako usunięte: {}", task);
+                return true;
+            } else {
+                logger.warn("softDeleteTask() " +
+                        "– brak zadania o id={}", task.getId());
+                if (tx.isActive()) tx.rollback();
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error("softDeleteTask() " +
+                    "– błąd podczas miękkiego usuwania zadania", e);
+            if (tx.isActive()) tx.rollback();
+            return false;
+        } finally {
+            em.close();
+            logger.debug("softDeleteTask() – EntityManager zamknięty");
+        }
+    }
+
+    /**
+     * Przywraca usunięte zadanie - ustawia flagę usuniety na false.
+     * Operacja jest wykonywana w transakcji.
+     * W przypadku błędu, transakcja jest wycofywana.
+     *
+     * @param task obiekt EmpTask do przywrócenia
+     * @return true jeśli operacja się powiodła, false w przeciwnym razie
+     */
+    public boolean restoreTask(EmpTask task) {
+        logger.debug("restoreTask() – start, task={}", task);
+        EntityManager em = EMFProvider.get().createEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            EmpTask managedTask = em.find(EmpTask.class, task.getId());
+            if (managedTask != null) {
+                managedTask.setUsuniety(false);
+                tx.commit();
+                logger.info("restoreTask() " +
+                        "– zadanie przywrócone: {}", task);
+                return true;
+            } else {
+                logger.warn("restoreTask() " +
+                        "– brak zadania o id={}", task.getId());
+                if (tx.isActive()) tx.rollback();
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error("restoreTask() " +
+                    "– błąd podczas przywracania zadania", e);
+            if (tx.isActive()) tx.rollback();
+            return false;
+        } finally {
+            em.close();
+            logger.debug("restoreTask() – EntityManager zamknięty");
+        }
+    }
+
+    /**
+     * Usuwa zadanie z bazy (trwałe usunięcie).
      * Operacja jest wykonywana w transakcji.
      * Jeśli zadanie nie istnieje, operacja jest logowana jako ostrzeżenie.
      *
      * @param task obiekt EmpTask do usunięcia
+     * @deprecated Zalecane jest używanie metody softDeleteTask() zamiast tej metody.
      */
+    @Deprecated
     public void removeTask(EmpTask task) {
         logger.debug("removeTask() – start, task={}", task);
         EntityManager em = EMFProvider.get().createEntityManager();
@@ -184,7 +296,7 @@ public class EmpTaskRepository implements AutoCloseable {
     }
 
     /**
-     * Znajduje zadania, których nazwa zawiera podany fragment.
+     * Znajduje nieusunięte zadania, których nazwa zawiera podany fragment.
      * Wyszukiwanie jest wykonywane bez rozróżniania wielkości liter.
      *
      * @param nameFragment fragment tekstu nazwy
@@ -196,7 +308,8 @@ public class EmpTaskRepository implements AutoCloseable {
         try {
             List<EmpTask> list = em.createQuery(
                             "SELECT t FROM EmpTask t " +
-                                    "WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :frag, '%'))",
+                                    "WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :frag, '%')) " +
+                                    "AND t.usuniety = false",
                             EmpTask.class)
                     .setParameter("frag", nameFragment)
                     .getResultList();
@@ -213,7 +326,7 @@ public class EmpTaskRepository implements AutoCloseable {
     }
 
     /**
-     * Znajduje zadania o dokładnie podanej dacie (bez czasu).
+     * Znajduje nieusunięte zadania o dokładnie podanej dacie (bez czasu).
      * Wyszukiwanie wykorzystuje TemporalType.DATE do porównania samej daty.
      *
      * @param date data zadania
@@ -224,7 +337,9 @@ public class EmpTaskRepository implements AutoCloseable {
         EntityManager em = EMFProvider.get().createEntityManager();
         try {
             List<EmpTask> list = em.createQuery(
-                            "SELECT t FROM EmpTask t WHERE t.date = :date",
+                            "SELECT t FROM EmpTask t " +
+                                    "WHERE t.date = :date " +
+                                    "AND t.usuniety = false",
                             EmpTask.class)
                     .setParameter("date", date, TemporalType.DATE)
                     .getResultList();
@@ -242,7 +357,7 @@ public class EmpTaskRepository implements AutoCloseable {
     }
 
     /**
-     * Znajduje zadania o podanym statusie.
+     * Znajduje nieusunięte zadania o podanym statusie.
      * W przypadku błędu, wyjątek jest logowany i zwracana jest pusta lista.
      *
      * @param status status zadania
@@ -254,7 +369,8 @@ public class EmpTaskRepository implements AutoCloseable {
         try {
             List<EmpTask> list = em.createQuery(
                             "SELECT t FROM EmpTask t " +
-                                    "WHERE t.status = :status",
+                                    "WHERE t.status = :status " +
+                                    "AND t.usuniety = false",
                             EmpTask.class)
                     .setParameter("status", status)
                     .getResultList();
@@ -272,7 +388,7 @@ public class EmpTaskRepository implements AutoCloseable {
     }
 
     /**
-     * Znajduje zadania, których opis zawiera podany fragment.
+     * Znajduje nieusunięte zadania, których opis zawiera podany fragment.
      * Wyszukiwanie jest wykonywane bez rozróżniania wielkości liter.
      *
      * @param descriptionFragment fragment tekstu opisu
@@ -286,7 +402,8 @@ public class EmpTaskRepository implements AutoCloseable {
             List<EmpTask> list = em.createQuery(
                             "SELECT t FROM EmpTask t " +
                                     "WHERE LOWER(t.description) " +
-                                    "LIKE LOWER(CONCAT('%', :frag, '%'))",
+                                    "LIKE LOWER(CONCAT('%', :frag, '%')) " +
+                                    "AND t.usuniety = false",
                             EmpTask.class)
                     .setParameter("frag", descriptionFragment)
                     .getResultList();
@@ -305,7 +422,7 @@ public class EmpTaskRepository implements AutoCloseable {
     }
 
     /**
-     * Znajduje zadania, których czas trwania zmiany mieści się
+     * Znajduje nieusunięte zadania, których czas trwania zmiany mieści się
      * w podanym przedziale czasowym.
      *
      * @param from    początek przedziału czasu (inclusive)
@@ -323,7 +440,8 @@ public class EmpTaskRepository implements AutoCloseable {
             List<EmpTask> list = em.createQuery(
                             "SELECT t FROM EmpTask t " +
                                     "WHERE t.durationOfTheShift " +
-                                    "BETWEEN :from AND :toTime",
+                                    "BETWEEN :from AND :toTime " +
+                                    "AND t.usuniety = false",
                             EmpTask.class)
                     .setParameter("from", from)
                     .setParameter("toTime", toTime)
@@ -344,7 +462,7 @@ public class EmpTaskRepository implements AutoCloseable {
     }
 
     /**
-     * Pobiera wszystkie zadania wraz z przypisanymi pracownikami.
+     * Pobiera wszystkie nieusunięte zadania wraz z przypisanymi pracownikami.
      * Metoda zoptymalizowana pod kątem wydajności poprzez użycie JOIN FETCH.
      *
      * @return lista zadań z załadowanymi pracownikami
@@ -355,7 +473,8 @@ public class EmpTaskRepository implements AutoCloseable {
         try {
             List<EmpTask> list = em.createQuery(
                             "SELECT t FROM EmpTask t " +
-                                    "JOIN FETCH t.taskEmployees",
+                                    "JOIN FETCH t.taskEmployees " +
+                                    "WHERE t.usuniety = false",
                             EmpTask.class)
                     .getResultList();
             logger.info("getAllTasksWithEmployees() " +
@@ -373,7 +492,7 @@ public class EmpTaskRepository implements AutoCloseable {
     }
 
     /**
-     * Pobiera wszystkie zadania wraz z przypisanymi pracownikami i ich danymi.
+     * Pobiera wszystkie nieusunięte zadania wraz z przypisanymi pracownikami i ich danymi.
      * Metoda używana w panelu kierownika dla pełnego widoku zadań.
      * Zapobiega wystąpieniu LazyInitializationException.
      *
@@ -387,7 +506,7 @@ public class EmpTaskRepository implements AutoCloseable {
                             "SELECT DISTINCT t " +
                                     "FROM EmpTask t " +
                                     "LEFT JOIN FETCH t.taskEmployees te " +
-                                    "LEFT JOIN FETCH te.employee",
+                                    "LEFT JOIN FETCH te.employee ",
                             EmpTask.class)
                     .getResultList();
             logger.info("getAllTasksWithEmployeesAndAssignees() " +
