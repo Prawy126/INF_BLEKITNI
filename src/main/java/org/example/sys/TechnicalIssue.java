@@ -62,7 +62,7 @@ public class TechnicalIssue {
     /**
      * Data złożenia zgłoszenia technicznego.
      */
-    @Column(name = "Data_zgłoszenia")
+    @Column(name = "Data_zgloszenia")
     private LocalDate dateSubmitted;
 
     /**

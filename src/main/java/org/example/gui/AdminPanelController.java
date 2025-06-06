@@ -367,6 +367,21 @@ public class AdminPanelController {
                 String newLogin = loginField.getText().trim();
                 String newEmail = emailField.getText().trim();
 
+
+                if(!nameField.getText().matches("[A-Za-z]+")) {
+                    showAlert(Alert.AlertType.ERROR,
+                            "Nieprawidłowe imię",
+                            "Imię może zawierać tylko litery.");
+                    return;
+                }
+
+                if(!surnameField.getText().matches("[A-Za-z]+")) {
+                    showAlert(Alert.AlertType.ERROR,
+                            "Nieprawidłowe nazwisko",
+                            "Nazwisko może zawierać tylko litery.");
+                    return;
+                }
+
                 // Walidacja loginu: odrzucamy znaki specjalne
                 if (!newLogin.matches("[A-Za-z0-9]+")) {
                     showAlert(Alert.AlertType.ERROR,
@@ -560,6 +575,21 @@ public class AdminPanelController {
 
                 String loginText = loginField.getText().trim();
                 String emailText = emailField.getText().trim();
+
+
+                if(!nameField.getText().matches("[A-Za-z]+")) {
+                    showAlert(Alert.AlertType.ERROR,
+                            "Nieprawidłowe imię",
+                            "Imię może zawierać tylko litery.");
+                    return;
+                }
+
+                if(!surnameField.getText().matches("[A-Za-z]+")) {
+                    showAlert(Alert.AlertType.ERROR,
+                            "Nieprawidłowe nazwisko",
+                            "Nazwisko może zawierać tylko litery.");
+                    return;
+                }
 
                 // Walidacja loginu: odrzucamy znaki specjalne
                 if (!loginText.matches("[A-Za-z0-9]+")) {
