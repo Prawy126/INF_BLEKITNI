@@ -118,12 +118,18 @@ public class LogisticianPanelController {
         styleLogisticButton(addProductBtn, "#27AE60");
         addProductBtn.setOnAction(e -> showAddProductDialog(table));
 
-        HBox btnBox = new HBox(10, filterBtn, refreshBtn, reportsBtn, addProductBtn);
+        // –––––––––– PRZYCISK EDYTUJĄCY PRODUKT ––––––––––
+        Button editProductBtn = new Button("Edytuj produkt");
+        styleLogisticButton(editProductBtn, "#E67E22");
+        editProductBtn.setOnAction(e -> showEditProductDialog(table));
+
+        HBox btnBox = new HBox(10, filterBtn, refreshBtn, reportsBtn, addProductBtn, editProductBtn);
         btnBox.setAlignment(Pos.CENTER_RIGHT);
 
         layout.getChildren().addAll(title, table, btnBox);
         logisticianPanel.setCenterPane(layout);
     }
+
 
     /**
      * Ładuje i wyświetla w tabeli aktualne stany magazynowe (id, nazwa, ilość).
@@ -567,6 +573,31 @@ public class LogisticianPanelController {
                 OrderRepository or = new OrderRepository();
                 or.addOrder(ord);
 
+                try {
+                    // 1) Pobierz istniejący wpis magazynowy (jeśli jest) albo null
+                    Warehouse stan = warehouseRepository.findStateByProductId(prod.getId());
+
+                    if (stan == null) {
+                        // 2a) Jeśli nie ma jeszcze rekordu, twórz nowy wpis „przyjęcia”:
+                        stan = new Warehouse();
+                        stan.setProductId(prod.getId());
+                        stan.setQuantity(Math.max(0, qty));  // nie wstawiamy ujemnej ilości
+                        warehouseRepository.addWarehouseState(stan);
+                    }
+                    else {
+                        // 2b) Jeśli rekord już istnieje, skoryguj ilość:
+                        int newQty = stan.getQuantity() + qty;  // +qty → przyjęcie towaru
+                        if (newQty < 0) {
+                            newQty = 0;  // gwarancja, że nigdy nie spadniemy poniżej 0
+                        }
+                        stan.setQuantity(newQty);
+                        warehouseRepository.updateState(stan);
+                        // (ew. zamiast updateState możesz użyć setProductQuantity(prod.getId(), newQty))
+                    }
+                } catch (Exception ex) {
+                    logger.error("Błąd aktualizacji stanu magazynowego", ex);
+                }
+
                 showAlert(Alert.AlertType.INFORMATION,
                         "Sukces",
                         "Zapisano zamówienie (ID=" + ord.getId() +
@@ -931,6 +962,157 @@ public class LogisticianPanelController {
         grid.add(saveBtn, 1, 4);
 
         stage.setScene(new Scene(grid, 400, 280));
+        stage.show();
+    }
+
+    /**
+     * Pokazuje formularz edycji wybranego produktu wraz z jego stanem magazynowym.
+     * - Pola: Nazwa, Kategoria, Cena, Ilość w magazynie.
+     * - Wypełnia je wartościami z bazy.
+     * - Po zatwierdzeniu waliduje i aktualizuje Product oraz Warehouse.
+     *
+     * @param table tabela stanów magazynowych, z której czytamy zaznaczony wiersz
+     */
+    private void showEditProductDialog(TableView<StockRow> table) {
+        StockRow selected = table.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert(Alert.AlertType.WARNING, "Brak wyboru",
+                    "Wybierz wiersz, który chcesz edytować.");
+            return;
+        }
+
+        // 1) Pobierz właściwy obiekt Product po ID
+        ProductRepository pr = new ProductRepository();
+        Product prod = pr.getAllProducts().stream()
+                .filter(p -> p.getId() == selected.getId())
+                .findFirst()
+                .orElse(null);
+
+        if (prod == null) {
+            showAlert(Alert.AlertType.ERROR, "Błąd",
+                    "Nie znaleziono produktu o ID=" + selected.getId());
+            return;
+        }
+
+        // 2) Pobierz stan magazynowy dla tego produktu
+        Warehouse stanMag = warehouseRepository.findStateByProductId(prod.getId());
+        int currentQty = (stanMag != null ? stanMag.getQuantity() : 0);
+
+        // 3) Zbuduj nowe okienko
+        Stage stage = new Stage();
+        stage.setTitle("Edytuj produkt (ID=" + prod.getId() + ")");
+
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(20));
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        Label nameLabel     = new Label("Nazwa produktu:");
+        TextField nameField = new TextField(prod.getName());
+        nameField.setPromptText("np. Kawa");
+
+        Label categoryLabel     = new Label("Kategoria:");
+        TextField categoryField = new TextField(prod.getCategory());
+        categoryField.setPromptText("np. Napoje");
+
+        Label priceLabel     = new Label("Cena (PLN):");
+        TextField priceField = new TextField(prod.getPrice().toString());
+        priceField.setPromptText("np. 12.99");
+
+        Label qtyLabel     = new Label("Ilość w magazynie:");
+        TextField qtyField = new TextField(String.valueOf(currentQty));
+        qtyField.setPromptText("liczba całkowita");
+
+        Button saveBtn = new Button("Zapisz zmiany");
+        styleLogisticButton(saveBtn, "#27AE60");
+        saveBtn.setOnAction(ev -> {
+            // WALIDACJA PÓL:
+            String newName = nameField.getText().trim();
+            String newCat  = categoryField.getText().trim();
+            String newPriceText = priceField.getText().trim().replace(',', '.');
+            String newQtyText   = qtyField.getText().trim();
+
+            if (newName.isBlank() || newCat.isBlank()
+                    || newPriceText.isBlank() || newQtyText.isBlank()) {
+                showAlert(Alert.AlertType.WARNING, "Brak danych",
+                        "Uzupełnij wszystkie pola (nazwa, kategoria, cena, ilość).");
+                return;
+            }
+
+            // 3a) Nazwa i Kategoria – tylko litery i spacje:
+            String lettersOnlyRegex = "[\\p{L} ]+";
+            if (!newName.matches(lettersOnlyRegex) || !newCat.matches(lettersOnlyRegex)) {
+                showAlert(Alert.AlertType.WARNING, "Nieprawidłowe dane",
+                        "Pola 'Nazwa' i 'Kategoria' mogą zawierać wyłącznie litery oraz spacje.");
+                return;
+            }
+
+            // 3b) Cena – dodatnia liczba:
+            BigDecimal newPrice;
+            try {
+                newPrice = new BigDecimal(newPriceText);
+                if (newPrice.compareTo(BigDecimal.ZERO) <= 0) {
+                    showAlert(Alert.AlertType.WARNING, "Nieprawidłowa cena",
+                            "Cena musi być dodatnią liczbą.");
+                    return;
+                }
+            } catch (NumberFormatException ex) {
+                showAlert(Alert.AlertType.ERROR, "Błąd formatu",
+                        "Podaj poprawną liczbę (np. 12.99).");
+                return;
+            }
+
+            // 3c) Ilość – liczba całkowita ≥ 0:
+            int newQty;
+            try {
+                newQty = Integer.parseInt(newQtyText);
+                if (newQty < 0) {
+                    showAlert(Alert.AlertType.WARNING, "Nieprawidłowa ilość",
+                            "Ilość nie może być ujemna.");
+                    return;
+                }
+            } catch (NumberFormatException ex) {
+                showAlert(Alert.AlertType.ERROR, "Błąd formatu",
+                        "Ilość musi być liczbą całkowitą.");
+                return;
+            }
+
+            // 4) Zapisz zmiany w bazie:
+            try {
+                // 4a) Zaktualizuj dane Product
+                prod.setName(newName);
+                prod.setCategory(newCat);
+                prod.setPrice(newPrice);
+                pr.updateProduct(prod);  // załóżmy, że taka metoda istnieje w ProductRepository
+
+                // 4b) Zaktualizuj stan magazynowy
+                warehouseRepository.setProductQuantity(prod.getId(), newQty);
+
+                // 4c) Odśwież widok tabeli
+                refreshStockTable(table);
+
+                showAlert(Alert.AlertType.INFORMATION, "Sukces",
+                        "Zapisano zmiany dla produktu \"" + newName + "\".");
+                stage.close();
+            } catch (Exception ex) {
+                logger.error("Błąd przy aktualizacji produktu", ex);
+                showAlert(Alert.AlertType.ERROR, "Błąd",
+                        "Nie udało się zapisać zmian:\n" + ex.getMessage());
+            }
+        });
+
+        // Układ w siatce:
+        grid.add(nameLabel,     0, 0);
+        grid.add(nameField,     1, 0);
+        grid.add(categoryLabel, 0, 1);
+        grid.add(categoryField, 1, 1);
+        grid.add(priceLabel,    0, 2);
+        grid.add(priceField,    1, 2);
+        grid.add(qtyLabel,      0, 3);
+        grid.add(qtyField,      1, 3);
+        grid.add(saveBtn,       1, 4);
+
+        stage.setScene(new Scene(grid, 400, 300));
         stage.show();
     }
 
