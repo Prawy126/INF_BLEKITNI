@@ -234,9 +234,12 @@ public class Login implements ILacz {
                 exception.getMessage(), exception);
 
         Platform.runLater(() -> {
-            if (exception instanceof SecurityException) {
+            // Dla wszystkich typów błędów logowania pokazujemy jednolity komunikat
+            if (exception.getMessage().contains("Nie znaleziono użytkownika") ||
+                    exception.getMessage().contains("Nieprawidłowe hasło")) {
                 showAlert(Alert.AlertType.ERROR,
-                        "Błąd logowania", exception.getMessage());
+                        "Błąd logowania",
+                        "Niepoprawne dane logowania");
             } else {
                 logError(exception);
                 showAlert(Alert.AlertType.ERROR,
