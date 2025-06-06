@@ -57,12 +57,12 @@ INSERT INTO StanyMagazynowe (Id_produktu, Ilosc) VALUES
 (10, 70);
 
 -- Zadania
-INSERT INTO Zadania (Nazwa, Data, Status, Opis, czas_trwania_zmiany) VALUES
-('Sprawdzenie stanu magazynu', '2025-04-01', 'Nowe',      'Weryfikacja towaru przed dostawą', NULL),
-('Inwentaryzacja',             '2025-04-15', 'Nowe',      'Spis towarów', '00:30:00'),
-('Dostawa mleka',              '2025-04-10', 'Zakończone','Odbiór dostawy', '01:15:00'),
-('Wymiana regałów',            '2025-04-12', 'W trakcie', 'Wymiana regałów w dziale nabiałowym', '02:45:00'),
-('Porządkowanie zaplecza',     '2025-05-30', 'W trakcie','Czyszczenie i sortowanie towarów', '01:30:00');
+INSERT INTO Zadania (Nazwa, Data, Status, Opis, czas_trwania_zmiany,usuniety) VALUES
+('Sprawdzenie stanu magazynu', '2025-04-01', 'Nowe',      'Weryfikacja towaru przed dostawą', NULL,DEFAULT),
+('Inwentaryzacja',             '2025-04-15', 'Nowe',      'Spis towarów', '00:30:00',DEFAULT),
+('Dostawa mleka',              '2025-04-10', 'Zakończone','Odbiór dostawy', '01:15:00',DEFAULT),
+('Wymiana regałów',            '2025-04-12', 'W trakcie', 'Wymiana regałów w dziale nabiałowym', '02:45:00',DEFAULT),
+('Porządkowanie zaplecza',     '2025-05-30', 'W trakcie','Czyszczenie i sortowanie towarów', '01:30:00',DEFAULT);
 
 -- Zadania_Pracownicy
 INSERT INTO Zadania_Pracownicy (Id_pracownika, Id_zadania) VALUES
