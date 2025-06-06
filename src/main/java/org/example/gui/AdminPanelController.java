@@ -1,6 +1,6 @@
 /*
  * Classname: AdminPanelController
- * Version information: 1.8
+ * Version information: 1.9
  * Date: 2025-06-06
  * Copyright notice: © BŁĘKITNI
  */
@@ -103,6 +103,34 @@ public class AdminPanelController {
         this.primaryStage = adminPanel.getPrimaryStage();
         this.userRepository = new UserRepository();
         this.technicalIssueRepository = new TechnicalIssueRepository();
+
+        String configuredPath = ConfigManager.getReportPath();
+        if (configuredPath == null || configuredPath.trim().isEmpty()) {
+            logger.info("Brak skonfigurowanej ścieżki do raportów – ustawiamy domyślną.");
+
+            // pobierz bieżący katalog roboczy (tam, gdzie uruchomiono aplikację)
+            String projectDir = System.getProperty("user.dir");
+            logger.debug("Aktualny katalog roboczy: {}", projectDir);
+
+            String defaultReportsDir = projectDir + File.separator + "reports";
+            logger.debug("Wybrano domyślny katalog raportów: {}", defaultReportsDir);
+
+            File reportsFolder = new File(defaultReportsDir);
+            if (!reportsFolder.exists()) {
+                logger.info("Katalog '{}' nie istnieje – próbuję utworzyć.", defaultReportsDir);
+                boolean created = reportsFolder.mkdirs();
+                if (created) {
+                    logger.info("Pomyślnie utworzono katalog: {}", defaultReportsDir);
+                } else {
+                    logger.error("Nie udało się utworzyć katalogu: {}", defaultReportsDir);
+                }
+            } else {
+                logger.info("Domyślny katalog raportów już istnieje: {}", defaultReportsDir);
+            }
+
+            ConfigManager.setReportPath(defaultReportsDir);
+            logger.info("Ustawiono ścieżkę do raportów w ConfigManager: {}", defaultReportsDir);
+        }
     }
 
     /**
@@ -1001,6 +1029,15 @@ public class AdminPanelController {
                                   List<String> positions,
                                   List<StatsRaportGenerator.Priority> priors) {
 
+        String reportPath = ConfigManager.getReportPath();
+        if (reportPath == null || reportPath.trim().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR,
+                    "Brak ścieżki do raportów",
+                    "Najpierw ustaw ścieżkę do zapisywania raportów w panelu " +
+                            "konfiguracji ");
+            return;
+        }
+
         try {
             logger.debug("Generowanie raportu KPI dla dat: {}–{}, stanowiska: {}, priorytety: {}",
                     from, to, positions, priors);
@@ -1014,7 +1051,6 @@ public class AdminPanelController {
             String out = ConfigManager.getReportPath()
                     + "/stats-" + System.currentTimeMillis() + ".pdf";
 
-            /*  ↓  nowy prototyp: (output, startDate, endDate, positions, priorities) */
             gen.generateReport(out, from, to, positions, priors);
 
             showAlert(Alert.AlertType.INFORMATION, "Raport wygenerowany", out);
@@ -1024,8 +1060,6 @@ public class AdminPanelController {
             showAlert(Alert.AlertType.ERROR, "Błąd", ex.getMessage());
         }
     }
-
-
 
     /**
      * Otwiera okno dialogowe z filtrami do generowania raportu zadań (TaskRaportGenerator).
