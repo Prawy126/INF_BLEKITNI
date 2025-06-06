@@ -1,7 +1,7 @@
 /*
  * Classname: LogisticianPanelController
- * Version information: 1.4
- * Date: 2025-05-27
+ * Version information: 1.5
+ * Date: 2025-06-06
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -114,7 +114,11 @@ public class LogisticianPanelController {
         styleLogisticButton(reportsBtn, "#27AE60");
         reportsBtn.setOnAction(e -> showInventoryReports());
 
-        HBox btnBox = new HBox(10, filterBtn, refreshBtn, reportsBtn);
+        Button addProductBtn = new Button("Dodaj produkt");
+        styleLogisticButton(addProductBtn, "#27AE60");
+        addProductBtn.setOnAction(e -> showAddProductDialog(table));
+
+        HBox btnBox = new HBox(10, filterBtn, refreshBtn, reportsBtn, addProductBtn);
         btnBox.setAlignment(Pos.CENTER_RIGHT);
 
         layout.getChildren().addAll(title, table, btnBox);
@@ -811,7 +815,124 @@ public class LogisticianPanelController {
         }
     }
 
+    /**
+     * Wyświetla formularz dodawania nowego produktu.
+     * @param stockTable referencja do tabeli stanów magazynowych, którą odświeżamy po zapisie
+     */
+    private void showAddProductDialog(TableView<StockRow> stockTable) {
+        Stage stage = new Stage();
+        stage.setTitle("Dodaj nowy produkt");
 
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(20));
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        Label nameLabel       = new Label("Nazwa produktu:");
+        TextField nameField   = new TextField();
+        nameField.setPromptText("np. Kawa");
+
+        Label categoryLabel   = new Label("Kategoria:");
+        TextField categoryField = new TextField();
+        categoryField.setPromptText("np. Napoje");
+
+        Label priceLabel      = new Label("Cena (PLN):");
+        TextField priceField  = new TextField();
+        priceField.setPromptText("liczba, np. 12.99");
+
+        Label qtyLabel        = new Label("Początkowy stan:");
+        TextField qtyField    = new TextField();
+        qtyField.setPromptText("liczba całkowita, np. 50");
+
+        Button saveBtn = new Button("Zapisz produkt");
+        styleLogisticButton(saveBtn, "#27AE60");
+        saveBtn.setOnAction(ev -> {
+
+            /* ---- podstawowa weryfikacja pustych pól ---- */
+            if (nameField.getText().isBlank() ||
+                    categoryField.getText().isBlank() ||
+                    priceField.getText().isBlank() ||
+                    qtyField.getText().isBlank()) {
+                showAlert(Alert.AlertType.WARNING, "Brak danych",
+                        "Uzupełnij wszystkie pola (nazwa, kategoria, cena, stan).");
+                return;
+            }
+
+            /* ---- sprawdzenie, czy nazwa i kategoria to TYLKO litery/spacje ---- */
+            // [\\p{L}] = dowolna litera unicode, spacja dozwolona
+            String lettersOnlyRegex = "[\\p{L} ]+";
+            if (!nameField.getText().matches(lettersOnlyRegex) ||
+                    !categoryField.getText().matches(lettersOnlyRegex)) {
+                showAlert(Alert.AlertType.WARNING, "Nieprawidłowe dane",
+                        "Pola 'Nazwa' i 'Kategoria' mogą zawierać wyłącznie litery oraz spacje.");
+                return;
+            }
+
+            /* ---- cena ---- */
+            BigDecimal price;
+            try {
+                price = new BigDecimal(priceField.getText().trim().replace(',', '.'));
+                if (price.compareTo(BigDecimal.ZERO) <= 0) {
+                    showAlert(Alert.AlertType.WARNING, "Nieprawidłowa cena",
+                            "Cena musi być dodatnią liczbą.");
+                    return;
+                }
+            } catch (NumberFormatException ex) {
+                showAlert(Alert.AlertType.ERROR, "Nieprawidłowy format ceny",
+                        "Podaj poprawną liczbę (np. 12.99).");
+                return;
+            }
+
+            /* ---- początkowy stan ---- */
+            int initQty;
+            try {
+                initQty = Integer.parseInt(qtyField.getText().trim());
+                if (initQty < 0) {
+                    showAlert(Alert.AlertType.WARNING, "Nieprawidłowa ilość",
+                            "Ilość początkowa nie może być ujemna.");
+                    return;
+                }
+            } catch (NumberFormatException ex) {
+                showAlert(Alert.AlertType.ERROR, "Nieprawidłowy format ilości",
+                        "Pole 'Początkowy stan' musi być liczbą całkowitą.");
+                return;
+            }
+
+            /* ---- zapis w bazie ---- */
+            try {
+                Product p = new Product();
+                p.setName(nameField.getText().trim());
+                p.setCategory(categoryField.getText().trim());
+                p.setPrice(price);
+                productRepository.addProduct(p);
+
+                Warehouse w = new Warehouse();
+                w.setProductId(p.getId());
+                w.setQuantity(initQty);
+                warehouseRepository.addWarehouseState(w);
+
+                showAlert(Alert.AlertType.INFORMATION, "Sukces",
+                        "Dodano produkt: " + p.getName() +
+                                " (ID=" + p.getId() + "), stan początkowy: " + initQty);
+
+                stage.close();
+                if (stockTable != null) refreshStockTable(stockTable);
+            } catch (Exception ex) {
+                logger.error("Błąd podczas dodawania produktu", ex);
+                showAlert(Alert.AlertType.ERROR, "Błąd",
+                        "Nie udało się dodać produktu:\n" + ex.getMessage());
+            }
+        });
+
+        grid.addRow(0, nameLabel,     nameField);
+        grid.addRow(1, categoryLabel, categoryField);
+        grid.addRow(2, priceLabel,    priceField);
+        grid.addRow(3, qtyLabel,      qtyField);
+        grid.add(saveBtn, 1, 4);
+
+        stage.setScene(new Scene(grid, 400, 280));
+        stage.show();
+    }
 
     /**
      * Wspólny styl dla przycisków w panelu logistyka.
