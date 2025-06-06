@@ -310,6 +310,12 @@ public class ManagerPanelController {
         });
         toDateColumn.setPrefWidth(100);
 
+        // Dodanie nowej kolumny statusu
+        TableColumn<AbsenceRequest, String> statusColumn = new TableColumn<>("Status");
+        statusColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+                data.getValue().getStatus().toString()));
+        statusColumn.setPrefWidth(100);
+
         TableColumn<AbsenceRequest, String> descriptionColumn = new TableColumn<>("Opis");
         descriptionColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
                 data.getValue().getDescription()));
@@ -317,7 +323,7 @@ public class ManagerPanelController {
 
         absenceTable.getColumns().addAll(
                 idColumn, typeColumn, employeeColumn,
-                fromDateColumn, toDateColumn, descriptionColumn
+                fromDateColumn, toDateColumn, statusColumn, descriptionColumn
         );
 
         AbsenceRequestRepository absenceRepository = new AbsenceRequestRepository();
@@ -343,12 +349,10 @@ public class ManagerPanelController {
             AbsenceRequest selectedRequest = absenceTable.getSelectionModel().getSelectedItem();
             if (selectedRequest != null) {
                 try {
-                    String currentDescription = selectedRequest.getDescription();
-                    String newDescription = (currentDescription != null && !currentDescription.isEmpty())
-                            ? currentDescription + " [ZATWIERDZONY]"
-                            : "[ZATWIERDZONY]";
-                    selectedRequest.setDescription(newDescription);
+                    // Zmiana statusu zamiast modyfikacji opisu
+                    selectedRequest.setStatus(AbsenceRequest.RequestStatus.ACCEPTED);
                     absenceRepository.updateRequest(selectedRequest);
+
                     if (selectedRequest.getRequestType().toLowerCase().contains("chorob")) {
                         Employee employee = selectedRequest.getEmployee();
                         employee.startSickLeave(selectedRequest.getStartDate());
@@ -370,11 +374,8 @@ public class ManagerPanelController {
             AbsenceRequest selectedRequest = absenceTable.getSelectionModel().getSelectedItem();
             if (selectedRequest != null) {
                 try {
-                    String currentDescription = selectedRequest.getDescription();
-                    String newDescription = (currentDescription != null && !currentDescription.isEmpty())
-                            ? currentDescription + " [REJECTED]"
-                            : "[REJECTED]";
-                    selectedRequest.setDescription(newDescription);
+                    // Zmiana statusu zamiast modyfikacji opisu
+                    selectedRequest.setStatus(AbsenceRequest.RequestStatus.REJECTED);
                     absenceRepository.updateRequest(selectedRequest);
                     showAlert(Alert.AlertType.INFORMATION, "Sukces", "Wniosek został odrzucony.");
                     absenceTable.getItems().setAll(absenceRepository.getAllRequests());
@@ -388,27 +389,13 @@ public class ManagerPanelController {
             }
         });
 
-        refreshButton.setOnAction(e -> {
-            try {
-                absenceTable.getItems().setAll(absenceRepository.getAllRequests());
-                showAlert(Alert.AlertType.INFORMATION, "Sukces", "Lista wniosków została odświeżona.");
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                showAlert(Alert.AlertType.ERROR, "Błąd",
-                        "Nie udało się odświeżyć listy wniosków: " + ex.getMessage());
-            }
-        });
-
-        buttonBox.getChildren().addAll(approveButton, rejectButton, refreshButton);
-
-        Button backButton = new Button("Wróć");
-        backButton.setOnAction(e -> showTaskPanel());
+        buttonBox.getChildren().addAll(approveButton, rejectButton);
 
         primaryStage.setOnHidden(event -> {
         });
 
         layout.getChildren().addAll(
-                absenceLabel, absenceTable, buttonBox, backButton
+                absenceLabel, absenceTable, buttonBox
         );
 
         managerPanel.setCenterPane(layout);

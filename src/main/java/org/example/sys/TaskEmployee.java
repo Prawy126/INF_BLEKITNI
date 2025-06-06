@@ -64,6 +64,27 @@ public class TaskEmployee {
     private Employee employee;
 
     /**
+     * Czas rozpoczęcia pracy nad zadaniem.
+     */
+    private LocalDateTime startTime;
+
+    /**
+     * Czas zakończenia pracy nad zadaniem.
+     */
+    private LocalDateTime endTime;
+
+    /**
+     * Status przypisania pracownika do zadania.
+     * Może określać np. "w trakcie", "zakończone", "oczekujące".
+     */
+    private String status;
+
+    /**
+     * Czas trwania zmiany przypisanej do zadania.
+     */
+    private Duration shiftDuration;
+
+    /**
      * Konstruktor bezparametrowy wymagany przez JPA.
      * Operacja jest logowana na poziomie DEBUG.
      */
@@ -140,5 +161,61 @@ public class TaskEmployee {
         } else {
             logger.warn("Próba ustawienia pracownika na wartość null.");
         }
+    }
+
+    /**
+     * @return czas rozpoczęcia pracy nad zadaniem
+     */
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    /**
+     * @param startTime nowy czas rozpoczęcia pracy
+     */
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    /**
+     * @return czas zakończenia pracy nad zadaniem
+     */
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    /**
+     * @param endTime nowy czas zakończenia pracy
+     */
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    /**
+     * @return status przypisania do zadania
+     */
+    public String getStatus() {
+        return status;
+    }
+
+    /**
+     * @param status nowy status przypisania
+     */
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    /**
+     * @return czas trwania zmiany
+     */
+    public Duration getShiftDuration() {
+        return shiftDuration;
+    }
+
+    /**
+     * @param shiftDuration nowy czas trwania zmiany
+     */
+    public void setShiftDuration(Duration shiftDuration) {
+        this.shiftDuration = shiftDuration;
     }
 }

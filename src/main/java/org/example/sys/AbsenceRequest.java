@@ -110,7 +110,7 @@ public class AbsenceRequest {
         /**
          * Wniosek odrzucony.
          */
-        NOTACCEPTED("Nie przyjęty"),
+        REJECTED("Odrzucony"),
 
         /**
          * Wniosek zaakceptowany.
