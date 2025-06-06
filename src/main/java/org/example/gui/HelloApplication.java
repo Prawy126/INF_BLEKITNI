@@ -31,6 +31,7 @@ import javafx.stage.Stage;
 import javafx.util.converter.DefaultStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.database.DatabaseErrorHandler;
 import org.example.database.EMFProvider;
 import org.example.database.UserRepository;
 import org.example.sys.ConfigPdf;
@@ -744,8 +745,29 @@ public class HelloApplication extends Application {
     public static void main(String[] args) {
         logger.info("Rozpoczęcie metody main()");
 
+        // Globalny handler wyjątków - łapie wszystkie niezłapane wyjątki
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             logger.fatal("NIEZŁAPANY WYJĄTEK w wątku {}: {}", thread.getName(), throwable.getMessage(), throwable);
+
+            // Sprawdź czy wyjątek lub jego przyczyna jest związana z bazą danych
+            if (isDataAccessException(throwable)) {
+                DatabaseErrorHandler.showDatabaseError(
+                        throwable,
+                        "Nieoczekiwany błąd bazy danych",
+                        "Wystąpił nieoczekiwany błąd podczas operacji na bazie danych",
+                        false
+                );
+            } else {
+                // Dla innych wyjątków pokazujemy standardowy alert
+                Platform.runLater(() -> {
+                    showAlert(
+                            Alert.AlertType.ERROR,
+                            "Nieoczekiwany błąd",
+                            "Wystąpił nieoczekiwany błąd",
+                            throwable.getMessage()
+                    );
+                });
+            }
         });
 
         try {
@@ -755,16 +777,15 @@ public class HelloApplication extends Application {
                 logger.info("Baza danych zainicjalizowana pomyślnie");
             } catch (Exception e) {
                 logger.error("BŁĄD podczas inicjalizacji bazy danych: {}", e.getMessage(), e);
-                criticalErrorOccurred.set(true);
 
-                if (e instanceof SQLException) {
-                    SQLException sqlEx = (SQLException) e;
-                    errorMessage = formatSQLException(sqlEx);
-                } else {
-                    errorMessage = "Wystąpił nieoczekiwany błąd: " + e.getMessage();
-                }
-
-                logger.error("Ustawiono flagę błędu krytycznego: {}", criticalErrorOccurred.get());
+                // Użyj nowego handlera błędów bazy danych
+                DatabaseErrorHandler.showDatabaseError(
+                        e,
+                        "Błąd inicjalizacji bazy danych",
+                        "Nie można zainicjalizować bazy danych",
+                        true  // Krytyczny błąd - zamyka aplikację
+                );
+                return; // Zakończ metodę main, aplikacja zostanie zamknięta przez handler
             }
 
             // Migracja haseł
@@ -784,6 +805,14 @@ public class HelloApplication extends Application {
                 logger.info("Migracja haseł zakończona");
             } catch (Exception ex) {
                 logger.error("BŁĄD podczas migracji haseł: {}", ex.getMessage(), ex);
+
+                // Użyj nowego handlera błędów bazy danych
+                DatabaseErrorHandler.showDatabaseError(
+                        ex,
+                        "Błąd migracji haseł",
+                        "Wystąpił błąd podczas migracji haseł",
+                        false  // Niekrytyczny błąd - daje opcję kontynuacji
+                );
             }
 
             Platform.setImplicitExit(true);
@@ -793,55 +822,53 @@ public class HelloApplication extends Application {
 
         } catch (Exception e) {
             logger.fatal("BŁĄD KRYTYCZNY w main(): {}", e.getMessage(), e);
+
+            // Użyj nowego handlera błędów
+            if (isDataAccessException(e)) {
+                DatabaseErrorHandler.showDatabaseError(
+                        e,
+                        "Błąd krytyczny bazy danych",
+                        "Wystąpił krytyczny błąd bazy danych",
+                        true  // Krytyczny błąd - zamyka aplikację
+                );
+            } else {
+                Platform.runLater(() -> {
+                    showAlert(
+                            Alert.AlertType.ERROR,
+                            "Błąd krytyczny",
+                            "Wystąpił krytyczny błąd podczas uruchamiania aplikacji",
+                            e.getMessage()
+                    );
+                    Platform.exit();
+                });
+            }
         }
 
         logger.info("Koniec metody main()");
         EMFProvider.close();
     }
 
-
     /**
-     * Formatuje wyjątek SQLException do czytelnej postaci.
-     *
-     * @param ex wyjątek SQLException
-     * @return sformatowany komunikat błędu
+     * Sprawdza czy wyjątek jest związany z dostępem do bazy danych.
      */
-    private static String formatSQLException(SQLException ex) {
-        logger.debug("Formatowanie wyjątku SQLException");
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("Błąd SQL: ").append(ex.getMessage()).append("\n");
-        sb.append("Kod błędu: ").append(ex.getErrorCode()).append("\n");
-        sb.append("Stan SQL: ").append(ex.getSQLState()).append("\n\n");
-
-        // Dodaj informacje o przyczynie błędu
-        Throwable cause = ex.getCause();
-        if (cause != null) {
-            sb.append("Przyczyna: ").append(cause.getMessage()).append("\n");
+    private static boolean isDataAccessException(Throwable throwable) {
+        // Sprawdź czy sam wyjątek jest SQLException
+        if (throwable instanceof SQLException) {
+            return true;
         }
 
-        // Dodaj sugestie rozwiązania problemu
-        sb.append("\nMożliwe rozwiązania:\n");
-
-        // Sugestie w zależności od kodu błędu
-        switch (ex.getErrorCode()) {
-            case 0:
-                sb.append("- Sprawdź, czy serwer bazy danych jest uruchomiony\n");
-                sb.append("- Sprawdź ustawienia połączenia (host, port)\n");
-                break;
-            case 1045:
-                sb.append("- Nieprawidłowa nazwa użytkownika lub hasło\n");
-                sb.append("- Sprawdź uprawnienia użytkownika bazy danych\n");
-                break;
-            case 1049:
-                sb.append("- Baza danych nie istnieje\n");
-                sb.append("- Sprawdź nazwę bazy danych\n");
-                break;
-            default:
-                sb.append("- Sprawdź logi serwera bazy danych\n");
-                sb.append("- Skontaktuj się z administratorem systemu\n");
+        // Sprawdź czy przyczyna jest SQLException
+        Throwable cause = throwable.getCause();
+        if (cause instanceof SQLException) {
+            return true;
         }
 
-        return sb.toString();
+        // Sprawdź nazwę klasy, czasami mogą być używane inne wyjątki dla błędów bazy danych
+        String className = throwable.getClass().getName();
+        return className.contains("SQL") ||
+                className.contains("Database") ||
+                className.contains("Connection") ||
+                className.contains("Persistence") ||
+                className.contains("JPA");
     }
 }

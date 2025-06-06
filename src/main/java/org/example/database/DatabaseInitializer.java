@@ -47,8 +47,8 @@ public class DatabaseInitializer implements ILacz {
 
             logger.info("Inicjalizacja bazy danych zakończona pomyślnie");
         } catch (Exception e) {
-            logger.error("Błąd podczas inicjalizacji bazy danych:" +
-                    " {}", e.getMessage(), e);
+            logger.error("Błąd podczas inicjalizacji bazy danych: {}", e.getMessage(), e);
+            // Rzuć wyjątek dalej, żeby został obsłużony przez globalny handler w HelloApplication
             throw new RuntimeException("Błąd inicjalizacji bazy danych", e);
         }
     }
