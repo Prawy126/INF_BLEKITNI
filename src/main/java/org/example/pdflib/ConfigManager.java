@@ -1,7 +1,7 @@
 /*
  * Classname: ConfigManager
- * Version information: 1.1
- * Date: 2025-05-16
+ * Version information: 1.2
+ * Date: 2025-06-06
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -86,6 +86,44 @@ public class ConfigManager {
 
         } catch (IOException e) {
             logger.error("Nie można ustawić ścieżki wyjściowej PDF.", e);
+        }
+    }
+
+    /**
+     * Pobiera ścieżkę do pliku z logo (jeśli nie ma w properties, zwraca domyślną).
+     */
+    public static String getLogoPath() {
+        Properties props = new Properties();
+        try (InputStream input = new FileInputStream(CONFIG_FILE)) {
+            props.load(input);
+            return props.getProperty("pdf.logo.path", "src/main/resources/logo.png");
+        } catch (IOException e) {
+            logger.error("Nie można wczytać pliku konfiguracyjnego: {}", CONFIG_FILE, e);
+            return "src/main/resources/logo.png";
+        }
+    }
+
+    /**
+     * Ustawia ścieżkę do logo i zapisuje ją do config.properties.
+     */
+    public static void setLogoPath(String path) {
+        Properties props = new Properties();
+        try {
+            File file = new File(CONFIG_FILE);
+            if (file.exists()) {
+                try (InputStream input = new FileInputStream(file)) {
+                    props.load(input);
+                }
+            }
+
+            props.setProperty("pdf.logo.path", path);
+
+            try (OutputStream output = new FileOutputStream(CONFIG_FILE)) {
+                props.store(output, null);
+                logger.info("Zaktualizowano ścieżkę do logo PDF na: {}", path);
+            }
+        } catch (IOException e) {
+            logger.error("Nie można ustawić ścieżki do logo PDF.", e);
         }
     }
 }

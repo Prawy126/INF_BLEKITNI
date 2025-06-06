@@ -1,6 +1,6 @@
 /*
  * Classname: AdminPanelController
- * Version information: 1.9
+ * Version information: 1.10
  * Date: 2025-06-06
  * Copyright notice: © BŁĘKITNI
  */
@@ -35,6 +35,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -823,27 +825,79 @@ public class AdminPanelController {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
 
-        Label titleLabel = new Label("Aktualizacja loga hipermarketu");
+        Label titleLabel = new Label("Ustawienia raportów PDF");
+        titleLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
         Label logoLabel = new Label("Logo:");
         TextField logoField = new TextField();
+        logoField.setPrefWidth(400);
+        logoField.setPromptText("Wybierz plik logo (PNG/JPG)");
 
-        Button updateLogoButton = new Button("Aktualizuj logo");
-        styleAdminButton(updateLogoButton,"#2980B9");
+        // Jeśli w resources jest logo.png, wypełnij ścieżkę absolutną:
+        try {
+            // zakładamy, że resources są w folderze projektu, np. src/main/resources/logo.png
+            Path candidate = Paths.get(System.getProperty("user.dir"), "src", "main", "resources", "logo.png");
+            if (Files.exists(candidate)) {
+                logoField.setText(candidate.toAbsolutePath().toString());
+            }
+        } catch (Exception ignored) {}
 
-        Label sortingLabel = new Label("Sortowanie domyślne:");
-        ComboBox<String> sortingComboBox = new ComboBox<>();
-        sortingComboBox.getItems().addAll("Nazwa", "Data", "Priorytet");
+        Button chooseLogoButton = new Button("Wybierz nowe logo");
+        styleAdminButton(chooseLogoButton, "#2980B9");
+        chooseLogoButton.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Wybierz plik logo");
+            fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Grafika (PNG, JPG)", "*.png", "*.jpg", "*.jpeg")
+            );
+            File initialDir = new File(System.getProperty("user.dir"));
+            if (initialDir.exists()) {
+                fileChooser.setInitialDirectory(initialDir);
+            }
+            File selected = fileChooser.showOpenDialog(primaryStage);
+            if (selected != null && selected.isFile()) {
+                logoField.setText(selected.getAbsolutePath());
+            }
+        });
+
+        HBox logoBox = new HBox(10, logoField, chooseLogoButton);
+        logoBox.setAlignment(Pos.CENTER_LEFT);
 
         Label pathLabel = new Label("Ścieżka zapisu raportów:");
         TextField pathField = new TextField();
-        pathField.setPromptText("Np. C:/raporty/");
+        pathField.setPrefWidth(400);
+        pathField.setPromptText("Wybierz katalog, w którym będą zapisywane raporty");
         pathField.setText(ConfigManager.getReportPath());
+
+        // Wczytaj aktualną ścieżkę z ConfigManager (jeśli jest)
+        String currentReports = ConfigManager.getReportPath();
+        if (currentReports != null && !currentReports.isBlank()) {
+            pathField.setText(new File(currentReports).getAbsolutePath());
+        }
+
+        Button choosePathButton = new Button("Wybierz katalog…");
+        styleAdminButton(choosePathButton, "#2980B9");
+        choosePathButton.setOnAction(e -> {
+            DirectoryChooser dirChooser = new DirectoryChooser();
+            dirChooser.setTitle("Wybierz katalog na raporty");
+            File initialDir = new File(System.getProperty("user.dir"));
+            if (initialDir.exists()) {
+                dirChooser.setInitialDirectory(initialDir);
+            }
+            File selected = dirChooser.showDialog(primaryStage);
+            if (selected != null && selected.isDirectory()) {
+                pathField.setText(selected.getAbsolutePath());
+            }
+        });
+
+        HBox pathBox = new HBox(10, pathField, choosePathButton);
+        pathBox.setAlignment(Pos.CENTER_LEFT);
 
         Button saveButton = new Button("Zapisz konfigurację");
         styleAdminButton(saveButton,"#3498DB");
 
         saveButton.setOnAction(e -> {
+            String logo = logoField.getText().trim();
             String path = pathField.getText().trim();
 
             if (path.isEmpty()) {
@@ -857,8 +911,17 @@ public class AdminPanelController {
                 return;
             }
 
+            if (!logo.isEmpty()) {
+                File logoFile = new File(logo);
+                if (!logoFile.exists() || !logoFile.isFile()) {
+                    showAlert(Alert.AlertType.ERROR, "Niepoprawny plik logo", "Podany plik logo nie istnieje.");
+                    return;
+                }
+                // zapisujemy ścieżkę do logo tylko jeśli nie jest pusta
+                ConfigManager.setLogoPath(logoFile.getAbsolutePath());
+            }
             ConfigManager.setReportPath(path);
-            showAlert(Alert.AlertType.INFORMATION, "Zapisano", "Ścieżka została zapisana.");
+            showAlert(Alert.AlertType.INFORMATION, "Zapisano", "Zaktualizowano konfigurację raportów");
         });
 
         Button backButton = new Button("Wróć");
@@ -867,10 +930,8 @@ public class AdminPanelController {
 
         layout.getChildren().addAll(
                 titleLabel,
-                logoLabel, logoField,
-                updateLogoButton,
-                sortingLabel, sortingComboBox,
-                pathLabel, pathField,
+                logoLabel, logoBox,
+                pathLabel, pathBox,
                 saveButton,
                 backButton
         );
@@ -1949,4 +2010,34 @@ public class AdminPanelController {
             button.setScaleY(1);
         });
     }
+
+    /**
+     * Otwiera eksplorator plików (Windows Explorer lub xdg-open) ustawiony na katalogu projektu.
+     */
+    private void openProjectDirectory() {
+        try {
+            String projectDir = System.getProperty("user.dir");
+            File dir = new File(projectDir);
+            if (!dir.exists()) {
+                // W razie czego spróbuj aktualny katalog
+                dir = new File(".");
+            }
+
+            String os = System.getProperty("os.name").toLowerCase();
+            ProcessBuilder pb;
+            if (os.contains("win")) {
+                // Windows Explorer
+                pb = new ProcessBuilder("explorer", dir.getAbsolutePath());
+            } else {
+                // Linux / Unix / macOS (zakładamy xdg-open)
+                pb = new ProcessBuilder("xdg-open", dir.getAbsolutePath());
+            }
+            pb.inheritIO();
+            pb.start();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Błąd", "Nie udało się otworzyć katalogu projektu:\n" + ex.getMessage());
+        }
+    }
+
 }
