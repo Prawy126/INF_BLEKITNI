@@ -676,12 +676,11 @@ public class AdminPanelController {
             return;
         }
 
-        // Sprawdź, czy wybrany użytkownik to "root" (login root)
-        if ("root".equalsIgnoreCase(selected.getLogin())) {
+        if (selected.isRoot()) {
             showAlert(
                     Alert.AlertType.WARNING,
                     "Niedozwolona operacja",
-                    "Nie można usunąć użytkownika o loginie „root"
+                    "Nie można usunąć użytkownika z uprawnieniami administratora (root)"
             );
             return;
         }

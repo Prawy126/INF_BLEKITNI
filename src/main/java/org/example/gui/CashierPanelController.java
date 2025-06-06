@@ -741,8 +741,58 @@ public class CashierPanelController {
             if (typeBox.getValue() == null || description.getText().trim().isEmpty()) {
                 showNotification("Błąd", "Uzupełnij wszystkie pola.");
             } else {
-                showNotification("Sukces", "Zgłoszenie wysłane.");
-                dialog.close();
+                try {
+                    // Pobierz aktualnie zalogowanego pracownika
+                    UserRepository userRepo = new UserRepository();
+                    Employee currentEmployee = userRepo.getCurrentEmployee();
+
+                    if (currentEmployee == null) {
+                        showNotification("Błąd", "Nie można zidentyfikować zalogowanego użytkownika.");
+                        userRepo.close();
+                        return;
+                    }
+
+                    // Utwórz nowe zgłoszenie techniczne
+                    TechnicalIssue issue = new TechnicalIssue();
+
+                    // Ustaw typ zgłoszenia
+                    issue.setType(typeBox.getValue());
+
+                    // Ustaw opis problemu
+                    issue.setDescription(description.getText().trim());
+
+                    // Ustaw datę zgłoszenia na dzisiejszą
+                    issue.setDateSubmitted(LocalDate.now());
+
+                    // Ustaw pracownika zgłaszającego
+                    issue.setEmployee(currentEmployee);
+
+                    // Ustaw domyślny status "Nowe"
+                    issue.setStatus("Nowe");
+
+                    // Zapisz zgłoszenie w bazie danych
+                    TechnicalIssueRepository issueRepo = new TechnicalIssueRepository();
+                    issueRepo.addIssue(issue);
+
+                    // Wyświetl komunikat sukcesu
+                    showNotification("Sukces", "Zgłoszenie techniczne zostało" +
+                            " wysłane");
+
+                    // Loguj wysłanie zgłoszenia
+                    Logger logger = LogManager.getLogger(getClass());
+                    logger.info("Użytkownik {} wysłał zgłoszenie techniczne typu: {}",
+                            currentEmployee.getLogin(), typeBox.getValue());
+
+                    // Zamknij okno dialogowe
+                    dialog.close();
+
+                    // Zamknij repozytoria
+                    userRepo.close();
+                } catch (Exception ex) {
+                    Logger logger = LogManager.getLogger(getClass());
+                    logger.error("Błąd podczas wysyłania zgłoszenia technicznego", ex);
+                    showNotification("Błąd", "Wystąpił problem podczas wysyłania zgłoszenia. Spróbuj ponownie.");
+                }
             }
         });
 
@@ -899,8 +949,40 @@ public class CashierPanelController {
         Button submit = cashierPanel.createStyledButton("Wyślij wniosek", "#27AE60");
         submit.setOnAction(e -> {
             if (validateAbsenceForm(reasonField.getText(), fromDatePicker.getValue(), toDatePicker.getValue())) {
-                showNotification("Sukces", "Wniosek został wysłany.");
-                stage.close();
+                try {
+                    // Tworzenie obiektu wniosku o nieobecność
+                    AbsenceRequest request = new AbsenceRequest();
+
+                    // Ustawienie pracownika
+                    request.setEmployee(current);
+
+                    // Ustawienie typu wniosku na podstawie wybranej opcji z combobox
+                    request.setRequestType(typeCombo.getValue());
+
+                    // Ustawienie opisu
+                    request.setDescription(reasonField.getText());
+
+                    // Konwersja LocalDate na Date
+                    Date startDate = java.sql.Date.valueOf(fromDatePicker.getValue());
+                    Date endDate = java.sql.Date.valueOf(toDatePicker.getValue());
+                    request.setStartDate(startDate);
+                    request.setEndDate(endDate);
+
+                    // Status domyślnie ustawiony na PENDING (nie trzeba ustawiać)
+
+                    // Zapisanie wniosku w bazie danych
+                    AbsenceRequestRepository repository = new AbsenceRequestRepository();
+                    repository.addRequest(request);
+
+                    log.info("Wysłano wniosek o nieobecność: {}",
+                            typeCombo.getValue());
+
+                    showNotification("Sukces", "Wniosek został wysłany.");
+                    stage.close();
+                } catch (Exception ex) {
+                    log.error("Błąd podczas wysyłania wniosku o nieobecność", ex);
+                    showNotification("Błąd", "Wystąpił problem podczas wysyłania wniosku. Spróbuj ponownie.");
+                }
             }
         });
 
