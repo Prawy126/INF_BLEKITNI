@@ -1,6 +1,6 @@
 /*
  * Classname: ConfigManager
- * Version information: 1.2
+ * Version information: 1.3
  * Date: 2025-06-06
  * Copyright notice: © BŁĘKITNI
  */
@@ -32,18 +32,6 @@ public class ConfigManager {
             logger.error("Nie można wczytać pliku konfiguracyjnego: {}", CONFIG_FILE, e);
             return "";
         }
-    }
-
-    public static boolean isNotificationsEnabled() {
-        String value = props.getProperty("notifications.enabled", "true");
-        logger.trace("Wczytano wartość notifications.enabled: {}", value);
-        return Boolean.parseBoolean(value);
-    }
-
-    public static void setNotificationsEnabled(boolean on) {
-        props.setProperty("notifications.enabled", Boolean.toString(on));
-        save();
-        logger.info("Powiadomienia zostały {}.", on ? "włączone" : "wyłączone");
     }
 
     public static boolean isLoggingEnabled() {
