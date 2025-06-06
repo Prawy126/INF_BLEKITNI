@@ -576,7 +576,6 @@ public class AdminPanelController {
                 String loginText = loginField.getText().trim();
                 String emailText = emailField.getText().trim();
 
-
                 if(!nameField.getText().matches("[A-Za-z]+")) {
                     showAlert(Alert.AlertType.ERROR,
                             "Nieprawidłowe imię",
@@ -604,6 +603,16 @@ public class AdminPanelController {
                     showAlert(Alert.AlertType.ERROR,
                             "Nieprawidłowy email",
                             "Podaj poprawny adres e-mail (np. user@example.com).");
+                    return;
+                }
+
+                // NOWA FUNKCJONALNOŚĆ: Sprawdzenie unikalności loginu
+                UserRepository checkRepo = new UserRepository();
+                Employee existingEmployee = checkRepo.findByLogin(loginText);
+                if (existingEmployee != null) {
+                    showAlert(Alert.AlertType.ERROR,
+                            "Login zajęty",
+                            "Użytkownik o loginie '" + loginText + "' już istnieje w systemie. Wybierz inny login.");
                     return;
                 }
 
