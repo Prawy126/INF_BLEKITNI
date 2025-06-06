@@ -725,7 +725,7 @@ public class AdminPanelController {
         // Przycisk do otwierania folderu z logami
         Button openLogsButton = new Button("Otwórz folder z logami");
         styleAdminButton(openLogsButton, "#9B59B6");
-        openLogsButton.setOnAction(e -> openLogsDirectory());
+        openLogsButton.setOnAction(e -> openLogsDirectory("logs"));
 
         Button configurePDF = new Button("Konfiguruj raporty PDF");
         styleAdminButton(configurePDF, "#2980B9");
@@ -813,21 +813,27 @@ public class AdminPanelController {
         }
     }
 
-    private void openLogsDirectory() {
+    public void openLogsDirectory(String path) {
         try {
-            File logsDir = new File("logs");
-            if (!logsDir.exists()) {
-                logsDir.mkdirs();
+            String os = System.getProperty("os.name").toLowerCase();
+            ProcessBuilder pb;
+
+            if (os.contains("windows")) {
+                pb = new ProcessBuilder("explorer", path);
+            } else if (os.contains("mac")) {
+                pb = new ProcessBuilder("open", path);
+            } else if (os.contains("nix") || os.contains("nux") || os.contains("bsd")) {
+                pb = new ProcessBuilder("xdg-open", path);
+            } else {
+                throw new UnsupportedOperationException("Nieobsługiwany system operacyjny");
             }
 
-            // Wymuszone xdg-open niezależnie od Desktop
-            ProcessBuilder pb = new ProcessBuilder("xdg-open", logsDir.getAbsolutePath());
-            pb.inheritIO();  // zobaczysz ewentualne błędy
-            Process p = pb.start();
-
-            System.out.println("Uruchomiono: xdg-open " + logsDir.getAbsolutePath());
-        } catch (IOException ex) {
-            ex.printStackTrace();
+            pb.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Obsługa błędu - np. wyświetlenie komunikatu użytkownikowi
+            showAlert(Alert.AlertType.ERROR, "Błąd",
+                    "Nie można otworzyć katalogu logów: " + e.getMessage());
         }
     }
 
