@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Kontroler obsługujący panel kasjera.
@@ -481,74 +482,104 @@ public class CashierPanelController {
     }
 
     private void openReportFile(String filePath) {
-        try {
-            File file = new File(filePath);
-            if (!file.exists()) {
-                showNotification("Błąd", "Plik nie istnieje: " + filePath);
-                return;
-            }
+        File file = new File(filePath);
+        if (!file.exists()) {
+            showNotification("Błąd", "Plik nie istnieje: " + filePath);
+            return;
+        }
 
-            // Pobierz informację o systemie operacyjnym
-            String os = System.getProperty("os.name").toLowerCase();
+        // Pobierz informację o systemie operacyjnym
+        String os = System.getProperty("os.name").toLowerCase();
+        log.info("Próba otwarcia raportu: {}, system: {}", filePath, os);
 
-            // Logowanie informacji o próbie otwarcia pliku
-            Logger logger = LogManager.getLogger(getClass());
-            logger.info("Próba otwarcia raportu: {}, system: {}", filePath, os);
+        // Użyj wątku w tle aby nie blokować interfejsu użytkownika
+        new Thread(() -> {
+            try {
+                boolean success = false;
 
-            boolean opened = false;
-
-            if (os.contains("win")) {
-                // Windows
-                Desktop.getDesktop().open(file);
-                opened = true;
-            } else if (os.contains("mac")) {
-                // macOS
-                Desktop.getDesktop().open(file);
-                opened = true;
-            } else if (os.contains("nix") || os.contains("nux") || os.contains("unix")) {
-                // Linux/Unix
-                try {
-                    // Sprawdź czy Desktop API jest wspierane
-                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
-                        Desktop.getDesktop().open(file);
-                        opened = true;
-                    } else {
-                        // Użyj xdg-open dla środowisk GNOME, KDE, itp.
-                        ProcessBuilder pb = new ProcessBuilder("xdg-open", file.getAbsolutePath());
-                        Process process = pb.start();
-                        int exitCode = process.waitFor();
-                        opened = (exitCode == 0);
-
-                        // Jeśli xdg-open zawiódł, spróbuj alternatywnych metod
-                        if (!opened) {
-                            // Spróbuj gnome-open dla starszych wersji GNOME
-                            pb = new ProcessBuilder("gnome-open", file.getAbsolutePath());
-                            process = pb.start();
-                            exitCode = process.waitFor();
-                            opened = (exitCode == 0);
-                        }
-                    }
-                } catch (Exception e) {
-                    logger.error("Błąd podczas otwierania pliku na Linuxie", e);
-                    // Ostatnia próba - uruchom domyślną przeglądarkę z URL pliku
+                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
                     try {
-                        ProcessBuilder pb = new ProcessBuilder("firefox", "file://" + file.getAbsolutePath());
-                        pb.start();
-                        opened = true;
-                    } catch (Exception ex) {
-                        logger.error("Nie udało się otworzyć pliku przez przeglądarkę", ex);
+                        Desktop.getDesktop().open(file);
+                        success = true;
+                        log.info("Otwarto plik używając Desktop API");
+                    } catch (IOException e) {
+                        log.warn("Nie udało się otworzyć pliku przez Desktop API: {}", e.getMessage());
                     }
                 }
-            }
 
-            if (!opened) {
-                showNotification("Informacja", "Nie można automatycznie otworzyć pliku. Ścieżka: " + filePath);
+                // Jeśli Desktop API nie zadziałało, próbuj alternatywnych metod na Linuksie
+                if (!success && (os.contains("nix") || os.contains("nux") || os.contains("unix"))) {
+                    log.info("Próbuję alternatywnych metod otwarcia pliku na Linuksie");
+
+                    // Lista programów do wypróbowania
+                    String[] commands = {"xdg-open", "gnome-open", "kde-open", "gio open", "gvfs-open"};
+
+                    for (String cmd : commands) {
+                        if (success) break;
+
+                        try {
+                            log.info("Próba użycia komendy: {}", cmd);
+                            ProcessBuilder pb = new ProcessBuilder(cmd.split(" ")[0], file.getAbsolutePath());
+                            pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+                            pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+
+                            Process process = pb.start();
+
+                            // Użyj wykonawcy z timeoutem, aby nie blokować wątku na zawsze
+                            boolean exited = process.waitFor(3, TimeUnit.SECONDS);
+
+                            if (exited && process.exitValue() == 0) {
+                                success = true;
+                                log.info("Plik otwarty pomyślnie używając: {}", cmd);
+                            } else {
+                                // Upewnij się, że proces jest zakończony
+                                process.destroy();
+                                log.warn("Komenda {} nie powiodła się", cmd);
+                            }
+                        } catch (Exception e) {
+                            log.warn("Błąd przy użyciu komendy {}: {}", cmd, e.getMessage());
+                        }
+                    }
+
+                    // Ostateczna próba - otwarcie w przeglądarce
+                    if (!success) {
+                        try {
+                            log.info("Próba otwarcia w przeglądarce");
+                            String[] browsers = {"firefox", "google-chrome", "chromium-browser"};
+
+                            for (String browser : browsers) {
+                                try {
+                                    ProcessBuilder pb = new ProcessBuilder(browser, file.toURI().toString());
+                                    pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+                                    pb.start();
+                                    success = true;
+                                    log.info("Plik otwarty w przeglądarce: {}", browser);
+                                    break;
+                                } catch (IOException e) {
+                                    log.warn("Nie udało się otworzyć w przeglądarce {}: {}", browser, e.getMessage());
+                                }
+                            }
+                        } catch (Exception e) {
+                            log.error("Błąd podczas próby otwarcia w przeglądarce: {}", e.getMessage());
+                        }
+                    }
+                }
+
+                // Wyświetl informację dla użytkownika na wątku UI
+                final boolean finalSuccess = success;
+                javafx.application.Platform.runLater(() -> {
+                    if (!finalSuccess) {
+                        showNotification("Informacja",
+                                "Nie można automatycznie otworzyć pliku. Lokalizacja pliku: " + filePath);
+                    }
+                });
+
+            } catch (Exception e) {
+                log.error("Błąd podczas otwierania pliku: {}", e.getMessage(), e);
+                javafx.application.Platform.runLater(() ->
+                        showNotification("Błąd", "Nie można otworzyć pliku: " + e.getMessage()));
             }
-        } catch (Exception e) {
-            Logger logger = LogManager.getLogger(getClass());
-            logger.error("Błąd podczas otwierania pliku", e);
-            showNotification("Błąd", "Nie można otworzyć pliku: " + e.getMessage());
-        }
+        }).start();
     }
 
     private void confirmAndDeleteReport(Report report, TableView<Report> tableView) {
