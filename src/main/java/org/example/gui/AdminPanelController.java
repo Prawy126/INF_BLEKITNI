@@ -14,6 +14,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.CacheHint;
 
+import javafx.scene.Scene;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Alert;
@@ -35,9 +36,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
+import javafx.stage.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.database.*;
@@ -752,65 +751,52 @@ public class AdminPanelController {
     }
 
     private void exportDatabaseToCsv() {
-        try {
-            // Użyj katalogu projektu (bieżący katalog roboczy)
-            String backupPath = "backup-csv";
 
-            File folder = new File(backupPath);
-            if (!folder.exists() && !folder.mkdirs()) {
-                showAlert(Alert.AlertType.ERROR, "Błąd",
-                        "Nie można utworzyć katalogu: " + folder.getAbsolutePath() +
-                                "\nSprawdź uprawnienia do zapisu.");
-                return;
-            }
-
-            // Alert z progress barem
-            Alert progressAlert = new Alert(Alert.AlertType.INFORMATION);
-            progressAlert.setTitle("Eksport do CSV");
-            progressAlert.setHeaderText("Trwa eksportowanie danych...");
-
-            ProgressIndicator progress = new ProgressIndicator();
-            progress.setProgress(-1); // indeterminate
-            progressAlert.getDialogPane().setContent(progress);
-            progressAlert.show();
-
-            Task<Void> exportTask = new Task<>() {
-                @Override
-                protected Void call() throws Exception {
-                    try {
-                        logger.info("Rozpoczęcie eksportu CSV do: {}", folder.getAbsolutePath());
-                        DatabaseBackupExporter.exportAllTablesToCsv(folder.getAbsolutePath());
-                        return null;
-                    } catch (Exception e) {
-                        logger.error("Błąd eksportu CSV", e);
-                        throw e;
-                    }
-                }
-            };
-
-            exportTask.setOnSucceeded(e -> {
-                progressAlert.close();
-                showAlert(Alert.AlertType.INFORMATION, "Sukces",
-                        "Dane zostały wyeksportowane do:\n" + folder.getAbsolutePath());
-            });
-
-            exportTask.setOnFailed(e -> {
-                Throwable ex = exportTask.getException();
-                logger.error("Błąd eksportu CSV", ex);
-
-                String errorMsg = "Wystąpił błąd podczas eksportu:\n";
-                errorMsg += (ex.getCause() != null) ? ex.getCause().getMessage() : ex.getMessage();
-
-                showAlert(Alert.AlertType.ERROR, "Błąd eksportu", errorMsg);
-            });
-
-            new Thread(exportTask).start();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Krytyczny błąd",
-                    "Nieoczekiwany błąd: " + e.getMessage());
+        File folder = new File("backup-csv");
+        if (!folder.exists() && !folder.mkdirs()) {
+            showAlert(Alert.AlertType.ERROR, "Błąd",
+                    "Nie można utworzyć katalogu:\n" + folder.getAbsolutePath());
+            return;
         }
+
+        /* ---------- loader ---------- */
+        Stage loaderStage = new Stage();
+        loaderStage.initOwner(primaryStage);
+        loaderStage.initModality(Modality.APPLICATION_MODAL);
+        loaderStage.initStyle(StageStyle.UNDECORATED);
+
+        VBox box = new VBox(10, new ProgressIndicator());
+        box.setPadding(new Insets(20));
+        box.setAlignment(Pos.CENTER);
+        loaderStage.setScene(new Scene(box));
+        loaderStage.setTitle("Eksport CSV – trwa…");
+        loaderStage.show();
+
+        /* ---------- zadanie ---------- */
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                logger.info("Rozpoczęcie eksportu CSV do: {}", folder.getAbsolutePath());
+                DatabaseBackupExporter.exportAllTablesToCsv(folder.getAbsolutePath());
+                return null;
+            }
+        };
+
+        task.setOnSucceeded(ev -> Platform.runLater(() -> {
+            loaderStage.close();
+            showAlert(Alert.AlertType.INFORMATION, "Eksport zakończony",
+                    "Pliki CSV znajdują się w:\n" + folder.getAbsolutePath());
+        }));
+
+        task.setOnFailed(ev -> Platform.runLater(() -> {
+            loaderStage.close();
+            Throwable ex = task.getException();
+            logger.error("Błąd eksportu CSV", ex);
+            showAlert(Alert.AlertType.ERROR, "Błąd eksportu",
+                    (ex != null) ? ex.getMessage() : "Nieznany błąd");
+        }));
+
+        new Thread(task, "CsvExportTask").start();
     }
 
     public void openLogsDirectory(String path) {
@@ -1746,107 +1732,125 @@ public class AdminPanelController {
      * Obsługuje zarówno XAMPP, jak i standardową instalację MySQL na Windows, Linux i Mac OS.
      */
     private void performDatabaseBackup() {
+
+        /* ---------- 0. Okno loadera (Stage) ---------- */
+        Stage loaderStage = new Stage();
+        loaderStage.initOwner(primaryStage);
+        loaderStage.initModality(Modality.APPLICATION_MODAL);
+        loaderStage.initStyle(StageStyle.UNDECORATED);
+
+        VBox box = new VBox(10, new ProgressIndicator());
+        box.setPadding(new Insets(20));
+        box.setAlignment(Pos.CENTER);
+        loaderStage.setScene(new Scene(box));
+        loaderStage.setTitle("Backup bazy – trwa…");
+        loaderStage.show();
+
+        /* ---------- 1. Wyszukiwanie mysqldump (oryginał) ---------- */
+        String os = System.getProperty("os.name").toLowerCase();
+        String mysqldumpPath;
         try {
-            String timestamp = java.time.LocalDateTime.now().toString().replace(":", "-");
-            String fileName = "stonkadb-backup-" + timestamp + ".sql";
-
-            File backupDir = new File("backups");
-            if (!backupDir.exists()) {
-                backupDir.mkdirs();
-            }
-
-            File outputFile = new File(backupDir, fileName);
-
-            // Wykrywanie systemu operacyjnego
-            String os = System.getProperty("os.name").toLowerCase();
-            String mysqldumpPath;
-
             if (os.contains("win")) {
-                // Ścieżka dla Windows
                 File programFiles = new File("C:\\Program Files\\MySQL");
                 File found = searchForMysqlDump(programFiles, "mysqldump.exe");
-
                 if (found != null && found.exists()) {
                     mysqldumpPath = found.getAbsolutePath();
                 } else {
-                    // Próba z XAMPP
-                    File xamppPath = new File("C:\\xampp\\mysql\\bin\\mysqldump.exe");
-                    if (xamppPath.exists()) {
-                        mysqldumpPath = xamppPath.getAbsolutePath();
+                    File xampp = new File("C:\\xampp\\mysql\\bin\\mysqldump.exe");
+                    if (xampp.exists()) {
+                        mysqldumpPath = xampp.getAbsolutePath();
                     } else {
+                        loaderStage.close();
                         showAlert(Alert.AlertType.ERROR, "Nie znaleziono mysqldump.exe",
-                                "Nie znaleziono mysqldump ani w C:\\Program Files\\MySQL, ani w C:\\xampp.");
+                                "Nie znaleziono mysqldump ani w Program Files, ani w XAMPP.");
                         return;
                     }
                 }
             } else if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {
-                // Ścieżka dla Linux/Unix/Mac
-                File[] possiblePaths = {
+                File[] paths = {
                         new File("/usr/bin/mysqldump"),
                         new File("/usr/local/bin/mysqldump"),
                         new File("/usr/local/mysql/bin/mysqldump"),
                         new File("/opt/mysql/bin/mysqldump")
                 };
-
-                File foundPath = null;
-                for (File path : possiblePaths) {
-                    if (path.exists()) {
-                        foundPath = path;
-                        break;
-                    }
-                }
-
-                if (foundPath != null) {
-                    mysqldumpPath = foundPath.getAbsolutePath();
-                } else {
-                    mysqldumpPath = "mysqldump";
-                }
+                File found = null;
+                for (File p : paths) if (p.exists()) { found = p; break; }
+                mysqldumpPath = (found != null) ? found.getAbsolutePath() : "mysqldump";
             } else {
-                throw new UnsupportedOperationException("Nieobsługiwany system operacyjny: " + os);
+                loaderStage.close();
+                showAlert(Alert.AlertType.ERROR, "Nieobsługiwany system",
+                        "System „" + os + "” nie jest obsługiwany.");
+                return;
             }
-
-            ProcessBuilder pb = new ProcessBuilder(
-                    mysqldumpPath,
-                    "-u", org.example.database.ILacz.MYSQL_USER,
-                    "--password=" + org.example.database.ILacz.MYSQL_PASSWORD,
-                    "--routines",
-                    "--events",
-                    "--triggers",
-                    "--single-transaction",
-                    "--quick",
-                    "--skip-lock-tables",
-                    "--add-drop-database",
-                    "--add-drop-table",
-                    "--complete-insert",
-                    "--databases", org.example.database.ILacz.DB_NAME
-            );
-
-            String password = org.example.database.ILacz.MYSQL_PASSWORD;
-            if (password != null && !password.isEmpty()) {
-                Map<String, String> env = pb.environment();
-                env.put("MYSQL_PWD", password);
-            }
-
-            pb.redirectOutput(outputFile);
-            pb.redirectError(ProcessBuilder.Redirect.INHERIT);
-
-            Process process = pb.start();
-            int exitCode = process.waitFor();
-
-            if (exitCode == 0) {
-                showAlert(Alert.AlertType.INFORMATION, "Backup zakończony",
-                        "Plik zapisany:\n" + outputFile.getAbsolutePath());
-            } else {
-                showAlert(Alert.AlertType.ERROR, "Błąd backupu",
-                        "Nie udało się wykonać kopii zapasowej. Kod wyjścia: " + exitCode);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Wyjątek",
-                    "Wystąpił błąd podczas backupu:\n" + e.getMessage());
+        } catch (Exception ex) {
+            loaderStage.close();
+            logger.error("Błąd wyszukiwania mysqldump", ex);
+            showAlert(Alert.AlertType.ERROR, "Błąd", ex.getMessage());
+            return;
         }
+
+        /* ---------- 2. Zadanie w tle (Twój kod) ---------- */
+        Task<Path> task = new Task<>() {
+            @Override
+            protected Path call() throws Exception {
+
+                String ts   = java.time.LocalDateTime.now().toString().replace(":", "-");
+                String name = "stonkadb-backup-" + ts + ".sql";
+
+                File backupDir = new File("backups");
+                if (!backupDir.exists()) backupDir.mkdirs();
+
+                File out = new File(backupDir, name);
+
+                ProcessBuilder pb = new ProcessBuilder(
+                        mysqldumpPath,
+                        "-u", org.example.database.ILacz.MYSQL_USER,
+                        "--password=" + org.example.database.ILacz.MYSQL_PASSWORD,
+                        "--routines",
+                        "--events",
+                        "--triggers",
+                        "--single-transaction",
+                        "--quick",
+                        "--skip-lock-tables",
+                        "--add-drop-database",
+                        "--add-drop-table",
+                        "--complete-insert",
+                        "--databases", org.example.database.ILacz.DB_NAME
+                );
+
+                String pwd = org.example.database.ILacz.MYSQL_PASSWORD;
+                if (pwd != null && !pwd.isEmpty()) pb.environment().put("MYSQL_PWD", pwd);
+
+                pb.redirectOutput(out);
+                pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+
+                Process proc = pb.start();
+                if (proc.waitFor() != 0)
+                    throw new IOException("mysqldump zakończył się nie-zerowym kodem.");
+
+                return out.toPath();
+            }
+        };
+
+        task.setOnSucceeded(ev -> Platform.runLater(() -> {
+            loaderStage.close();
+            Path p = task.getValue();
+            showAlert(Alert.AlertType.INFORMATION, "Backup zakończony",
+                    "Plik zapisano w:\n" + p.toAbsolutePath());
+        }));
+
+        task.setOnFailed(ev -> Platform.runLater(() -> {
+            loaderStage.close();
+            Throwable ex = task.getException();
+            logger.error("Błąd backupu", ex);
+            showAlert(Alert.AlertType.ERROR, "Błąd backupu",
+                    (ex != null) ? ex.getMessage() : "Nieznany błąd");
+        }));
+
+        new Thread(task, "BackupTask").start();
     }
+
+
 
     /**
      * Przeszukuje rekurencyjnie podany katalog w poszukiwaniu pliku o nazwie targetName.
