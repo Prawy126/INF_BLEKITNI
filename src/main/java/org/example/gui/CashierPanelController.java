@@ -219,6 +219,11 @@ public class CashierPanelController {
      * Odświeża tabelę raportów, pokazując tylko te wygenerowane przez aktualnego pracownika.
      */
     private void refreshReportTable(TableView<Report> tableView) {
+
+        if (tableView == null) {
+            return;
+        }
+
         Employee currentEmployee = userRepository.getCurrentEmployee();
         if (currentEmployee == null) {
             tableView.setItems(FXCollections.observableArrayList());
@@ -343,9 +348,6 @@ public class CashierPanelController {
      * Wewnątrz wywołujemy oryginalną metodę, przekazując null jako referencję do tabeli.
      */
     private void showReportDialog() {
-        // Jeżeli wywołamy to z kontekstu, w którym nie mamy tabeli (np. panel zamknięcia zmiany),
-        // po prostu wywołujemy wersję z null. Metoda z null nie będzie próbowała odświeżać tabeli,
-        // wystarczy, że otworzy dialog generowania raportu.
         showReportDialog(/* tableView= */ null);
     }
 
@@ -1178,11 +1180,28 @@ public class CashierPanelController {
         gen.setSalesData(salesData);
         gen.setLogoPath(logoPath);
 
+        // Pobierz ścieżkę z konfiguracji
+        String outputDir = ConfigManager.getReportPath();
+        if (outputDir == null || outputDir.trim().isEmpty()) {
+            // Jeśli ścieżka nie jest ustawiona, użyj domyślnej wartości
+            outputDir = REPORTS_DIRECTORY;
+            log.info("Używam domyślnej ścieżki raportów: {}", outputDir);
+        } else {
+            log.info("Używam ścieżki raportów z konfiguracji: {}", outputDir);
+        }
+
+        // Upewnij się, że katalog istnieje
+        File dirFile = new File(outputDir);
+        if (!dirFile.exists()) {
+            dirFile.mkdirs();
+            log.info("Utworzono katalog raportów: {}", outputDir);
+        }
+
         String fileName = String.format("raport_%s_%s_%s.pdf",
                 periodType.getDisplayName().toLowerCase(),
                 startDate.format(DateTimeFormatter.BASIC_ISO_DATE),
                 endDate.format(DateTimeFormatter.BASIC_ISO_DATE));
-        String outputPath = REPORTS_DIRECTORY + File.separator + fileName;
+        String outputPath = outputDir + File.separator + fileName;
 
         pdf.SalesReportGenerator.PeriodType pdfType = toPdfPeriodType(periodType);
         gen.generateReport(outputPath, pdfType, categories == null ? List.of() : categories);
