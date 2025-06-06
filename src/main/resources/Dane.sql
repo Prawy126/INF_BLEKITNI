@@ -66,7 +66,7 @@ INSERT INTO Zadania (Nazwa, Data, Status, Opis, czas_trwania_zmiany,usuniety) VA
 
 -- Zadania_Pracownicy
 INSERT INTO Zadania_Pracownicy (Id_pracownika, Id_zadania) VALUES
-(1, 1), (2, 2), (3, 3), (4, 4), (5, 5);
+(3, 1), (6, 2), (3, 3), (7, 4), (9, 5);
 
 -- Wnioski o nieobecność
 INSERT INTO Wnioski_o_nieobecnosc (Typ_wniosku, Data_rozpoczecia, Data_zakonczenia, Opis, Id_pracownika, Status) VALUES
