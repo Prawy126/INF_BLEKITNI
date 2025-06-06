@@ -634,6 +634,12 @@ public class AdminPanelController {
      * Zabezpiecza przed usunięciem użytkownika z rolą "root".
      * Usuwa zaznaczonego użytkownika (soft-delete) i odświeża tabelę.
      */
+    /**
+     * Usuwa zaznaczonego użytkownika asynchronicznie.
+     * Zabezpiecza przed usunięciem użytkownika z rolą "root".
+     * Zabezpiecza przed usunięciem własnego konta przez administratora.
+     * Usuwa zaznaczonego użytkownika (soft-delete) i odświeża tabelę.
+     */
     private void removeSelectedUser() {
         Employee selected = tableView.getSelectionModel().getSelectedItem();
 
@@ -651,7 +657,21 @@ public class AdminPanelController {
             showAlert(
                     Alert.AlertType.WARNING,
                     "Niedozwolona operacja",
-                    "Nie można usunąć użytkownika o loginie „root”."
+                    "Nie można usunąć użytkownika o loginie „root"
+            );
+            return;
+        }
+
+        // Sprawdź, czy admin próbuje usunąć własne konto
+        // Pobierz aktualnie zalogowanego użytkownika
+        UserRepository repo = new UserRepository();
+        Employee currentUser = repo.getCurrentEmployee();
+
+        if (currentUser != null && currentUser.getId() == selected.getId()) {
+            showAlert(
+                    Alert.AlertType.WARNING,
+                    "Niedozwolona operacja",
+                    "Nie możesz usunąć własnego konta będąc zalogowanym."
             );
             return;
         }
