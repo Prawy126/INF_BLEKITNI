@@ -177,7 +177,7 @@ public class LogisticianPanelController {
         TableColumn<Order, String> employeeCol = new TableColumn<>("Pracownik");
         TableColumn<Order, Integer> qtyCol = new TableColumn<>("Ilość");
         TableColumn<Order, BigDecimal> priceCol = new TableColumn<>("Cena");
-        TableColumn<Order, Date> dateCol = new TableColumn<>("Data");
+        TableColumn<Order, Date> dateCol = new TableColumn<>("Data złożenia");
 
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         productCol.setCellValueFactory(cellData -> new SimpleStringProperty(
@@ -472,8 +472,6 @@ public class LogisticianPanelController {
         logisticianPanel.setCenterPane(layout);
     }
 
-
-
     /**
      * Otwiera formularz dodawania nowego zamówienia.
      * Pole "Produkt" zastąpiono ComboBoxem wypełnionym nazwami produktów.
@@ -490,18 +488,15 @@ public class LogisticianPanelController {
         grid.setHgap(10);
         grid.setVgap(10);
 
+        // 1) Etykieta i ComboBox na produkt
         Label productLabel = new Label("Produkt:");
-        Label qtyLabel     = new Label("Ilość:");
-        Label dateLabel    = new Label("Data:");
-
-        // 1) ComboBox z produktami zamiast TextField na ID
         ComboBox<Product> productComboBox = new ComboBox<>();
         productComboBox.setPrefWidth(200);
         productComboBox.setPromptText("Wybierz produkt");
-        // Wypełniamy ComboBox wszystkimi produktami (z repozytorium)
+        // Wypełniamy ComboBox wszystkimi produktami
         List<Product> allProducts = productRepository.getAllProducts();
         productComboBox.getItems().addAll(allProducts);
-        // Wyświetlamy w liście jedynie nazwę produktu
+        // Wyświetlamy w liście tylko nazwę produktu
         productComboBox.setCellFactory(cb -> new ListCell<>() {
             @Override
             protected void updateItem(Product item, boolean empty) {
@@ -517,26 +512,25 @@ public class LogisticianPanelController {
             }
         });
 
+        // 2) Pole ilości
+        Label qtyLabel = new Label("Ilość:");
         TextField quantityField = new TextField();
         quantityField.setPromptText("liczba całkowita");
-
-        DatePicker datePicker = new DatePicker();
 
         Button submit = new Button("Zapisz");
         styleLogisticButton(submit, "#27AE60");
         submit.setOnAction(ev -> {
-            // 2) Sprawdzenie, czy wszystkie pola wypełniono
+            // 3) Sprawdzenie, czy wszystkie niezbędne pola wypełniono
             if (productComboBox.getValue() == null
-                    || quantityField.getText().isBlank()
-                    || datePicker.getValue() == null) {
+                    || quantityField.getText().isBlank()) {
                 showAlert(Alert.AlertType.WARNING,
                         "Brak danych",
-                        "Uzupełnij wszystkie pola (produkt, ilość, data)");
+                        "Uzupełnij wszystkie pola (produkt, ilość)");
                 return;
             }
 
             try {
-                // 3) Parsowanie ilości
+                // 4) Parsowanie ilości
                 int qty = Integer.parseInt(quantityField.getText().trim());
                 if (qty <= 0) {
                     showAlert(Alert.AlertType.WARNING,
@@ -545,7 +539,7 @@ public class LogisticianPanelController {
                     return;
                 }
 
-                // 4) Pobranie zalogowanego pracownika
+                // 5) Pobranie zalogowanego pracownika
                 UserRepository ur = new UserRepository();
                 Employee empl = ur.getCurrentEmployee();
                 if (empl == null) {
@@ -555,49 +549,47 @@ public class LogisticianPanelController {
                     return;
                 }
 
-                // 5) Pobranie wybranego produktu z ComboBoxa
+                // 6) Pobranie wybranego produktu z ComboBoxa
                 Product prod = productComboBox.getValue();
 
-                // 6) Obliczenie ceny: cena jednostkowa * ilość
+                // 7) Obliczenie ceny: cena jednostkowa * ilość
                 BigDecimal unitPrice = prod.getPrice();
                 BigDecimal totalPrice = unitPrice.multiply(BigDecimal.valueOf(qty));
 
-                // 7) Utworzenie i zapis zamówienia
+                // 8) Utworzenie i zapis zamówienia z dzisiejszą datą (LocalDate.now())
                 Order ord = new Order();
                 ord.setProduct(prod);
                 ord.setEmployee(empl);
                 ord.setQuantity(qty);
                 ord.setPrice(totalPrice);
-                ord.setDate(java.sql.Date.valueOf(datePicker.getValue()));
+                // zamiast datePicker używamy LocalDate.now():
+                ord.setDate(java.sql.Date.valueOf(java.time.LocalDate.now()));
 
                 OrderRepository or = new OrderRepository();
                 or.addOrder(ord);
 
+                // 9) AKTUALIZACJA STANU MAGAZYNOWEGO (tak jak wcześniej)
                 try {
-                    // 1) Pobierz istniejący wpis magazynowy (jeśli jest) albo null
                     Warehouse stan = warehouseRepository.findStateByProductId(prod.getId());
 
                     if (stan == null) {
-                        // 2a) Jeśli nie ma jeszcze rekordu, twórz nowy wpis „przyjęcia”:
+                        // jeśli nie ma jeszcze wpisu, tworzymy nowy
                         stan = new Warehouse();
                         stan.setProductId(prod.getId());
-                        stan.setQuantity(Math.max(0, qty));  // nie wstawiamy ujemnej ilości
+                        stan.setQuantity(Math.max(0, qty));
                         warehouseRepository.addWarehouseState(stan);
-                    }
-                    else {
-                        // 2b) Jeśli rekord już istnieje, skoryguj ilość:
-                        int newQty = stan.getQuantity() + qty;  // +qty → przyjęcie towaru
-                        if (newQty < 0) {
-                            newQty = 0;  // gwarancja, że nigdy nie spadniemy poniżej 0
-                        }
+                    } else {
+                        // jeśli jest, inkrementujemy
+                        int newQty = stan.getQuantity() + qty;
+                        if (newQty < 0) newQty = 0;
                         stan.setQuantity(newQty);
                         warehouseRepository.updateState(stan);
-                        // (ew. zamiast updateState możesz użyć setProductQuantity(prod.getId(), newQty))
                     }
                 } catch (Exception ex) {
                     logger.error("Błąd aktualizacji stanu magazynowego", ex);
                 }
 
+                // 10) Komunikat o sukcesie i zamknięcie formularza
                 showAlert(Alert.AlertType.INFORMATION,
                         "Sukces",
                         "Zapisano zamówienie (ID=" + ord.getId() +
@@ -617,16 +609,14 @@ public class LogisticianPanelController {
             }
         });
 
-        // Ułożenie kontrolek w siatce
-        grid.add(productLabel,       0, 0);
-        grid.add(productComboBox,    1, 0);
-        grid.add(qtyLabel,           0, 1);
-        grid.add(quantityField,      1, 1);
-        grid.add(dateLabel,          0, 2);
-        grid.add(datePicker,         1, 2);
-        grid.add(submit,             1, 3);
+        // 11) Układ w siatce (bez DatePickera)
+        grid.add(productLabel,    0, 0);
+        grid.add(productComboBox, 1, 0);
+        grid.add(qtyLabel,        0, 1);
+        grid.add(quantityField,   1, 1);
+        grid.add(submit,          1, 2);
 
-        stage.setScene(new Scene(grid, 380, 230));
+        stage.setScene(new Scene(grid, 350, 180));
         stage.show();
     }
 
