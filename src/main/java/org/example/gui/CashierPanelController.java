@@ -197,26 +197,20 @@ public class CashierPanelController {
         Label titleLabel = new Label("Raporty sprzedaży");
         titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
-        // Tworzymy tabelę raportów:
         TableView<Report> tableView = createReportTable();
         tableView.setPrefHeight(400);
         VBox.setVgrow(tableView, Priority.ALWAYS);
 
-        // Teraz tworzymy tylko jeden przycisk „Nowy raport”:
         HBox buttons = new HBox(10);
         Button newReportButton = cashierPanel.createStyledButton("Nowy raport", "#27AE60");
-        // (usuńmy Button refreshButton = ...)
         buttons.getChildren().addAll(newReportButton);
         buttons.setAlignment(Pos.CENTER);
 
-        // Po kliknięciu „Nowy raport” uruchamiamy dialog i podajemy referencję do tableView,
-        // żeby w showReportDialog(...) po wygenerowaniu od razu odświeżyć tę tabelę.
         newReportButton.setOnAction(e -> showReportDialog(tableView));
 
         layout.getChildren().addAll(titleLabel, tableView, buttons);
         cashierPanel.setCenterPane(layout);
 
-        // Przy pierwszym wyświetleniu ładujemy dane:
         refreshReportTable(tableView);
     }
 
@@ -229,8 +223,7 @@ public class CashierPanelController {
             tableView.setItems(FXCollections.observableArrayList());
             return;
         }
-        // Jeśli ReportRepository ma metodę getReportsByEmployee(id), użyj jej zamiast filtra:
-        // List<Report> reports = reportRepository.getReportsByEmployee(currentEmployee.getId());
+
         List<Report> allReports = reportRepository.getAllReports();
         List<Report> filtered = new ArrayList<>();
         for (Report r : allReports) {
@@ -490,13 +483,70 @@ public class CashierPanelController {
     private void openReportFile(String filePath) {
         try {
             File file = new File(filePath);
-            if (file.exists()) {
-                Desktop.getDesktop().open(file);
-            } else {
+            if (!file.exists()) {
                 showNotification("Błąd", "Plik nie istnieje: " + filePath);
+                return;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            // Pobierz informację o systemie operacyjnym
+            String os = System.getProperty("os.name").toLowerCase();
+
+            // Logowanie informacji o próbie otwarcia pliku
+            Logger logger = LogManager.getLogger(getClass());
+            logger.info("Próba otwarcia raportu: {}, system: {}", filePath, os);
+
+            boolean opened = false;
+
+            if (os.contains("win")) {
+                // Windows
+                Desktop.getDesktop().open(file);
+                opened = true;
+            } else if (os.contains("mac")) {
+                // macOS
+                Desktop.getDesktop().open(file);
+                opened = true;
+            } else if (os.contains("nix") || os.contains("nux") || os.contains("unix")) {
+                // Linux/Unix
+                try {
+                    // Sprawdź czy Desktop API jest wspierane
+                    if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+                        Desktop.getDesktop().open(file);
+                        opened = true;
+                    } else {
+                        // Użyj xdg-open dla środowisk GNOME, KDE, itp.
+                        ProcessBuilder pb = new ProcessBuilder("xdg-open", file.getAbsolutePath());
+                        Process process = pb.start();
+                        int exitCode = process.waitFor();
+                        opened = (exitCode == 0);
+
+                        // Jeśli xdg-open zawiódł, spróbuj alternatywnych metod
+                        if (!opened) {
+                            // Spróbuj gnome-open dla starszych wersji GNOME
+                            pb = new ProcessBuilder("gnome-open", file.getAbsolutePath());
+                            process = pb.start();
+                            exitCode = process.waitFor();
+                            opened = (exitCode == 0);
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.error("Błąd podczas otwierania pliku na Linuxie", e);
+                    // Ostatnia próba - uruchom domyślną przeglądarkę z URL pliku
+                    try {
+                        ProcessBuilder pb = new ProcessBuilder("firefox", "file://" + file.getAbsolutePath());
+                        pb.start();
+                        opened = true;
+                    } catch (Exception ex) {
+                        logger.error("Nie udało się otworzyć pliku przez przeglądarkę", ex);
+                    }
+                }
+            }
+
+            if (!opened) {
+                showNotification("Informacja", "Nie można automatycznie otworzyć pliku. Ścieżka: " + filePath);
+            }
+        } catch (Exception e) {
+            Logger logger = LogManager.getLogger(getClass());
+            logger.error("Błąd podczas otwierania pliku", e);
             showNotification("Błąd", "Nie można otworzyć pliku: " + e.getMessage());
         }
     }
