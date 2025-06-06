@@ -1,3 +1,10 @@
+/*
+ * Classname: DatabaseErrorHandler
+ * Version information: 1.0
+ * Date: 2025-06-06
+ * Copyright notice: © BŁĘKITNI
+ */
+
 package org.example.database;
 
 import javafx.application.Platform;
@@ -17,29 +24,64 @@ import java.util.Optional;
 
 /**
  * Globalny handler do wyświetlania błędów bazy danych.
+ * <p>
+ * Klasa odpowiada za przetwarzanie, logowanie i prezentację użytkownikowi
+ * błędów związanych z bazą danych w przyjazny sposób. Umożliwia szczegółowe
+ * wyświetlanie informacji o wyjątkach SQL oraz innych błędach bazodanowych.
+ * </p>
+ * <p>
+ * Funkcjonalności:
+ * <ul>
+ *   <li>Logowanie błędów przy użyciu Log4j</li>
+ *   <li>Wyświetlanie okien dialogowych z informacjami o błędach</li>
+ *   <li>Formatowanie błędów SQL z dodatkowymi szczegółami i sugestiami</li>
+ *   <li>Obsługa krytycznych i niekrytycznych błędów</li>
+ *   <li>Wsparcie dla wielowątkowości (automatyczne przełączanie do wątku
+ *       JavaFX)</li>
+ * </ul>
+ * </p>
+ *
+ * @version 1.0
+ * @since 2025-06-06
+ * @author BŁĘKITNI
  */
 public class DatabaseErrorHandler {
-    private static final Logger logger = LogManager.getLogger(DatabaseErrorHandler.class);
+    private static final Logger logger
+            = LogManager.getLogger(DatabaseErrorHandler.class);
 
     /**
      * Wyświetla okno dialogowe z błędem bazy danych.
      * Ta metoda może być wywoływana z dowolnego miejsca w aplikacji.
+     *
+     * @param exception wyjątek do wyświetlenia
+     * @param title tytuł okna dialogowego
+     * @param header nagłówek z opisem błędu
+     * @param isCritical czy błąd jest krytyczny (powoduje zamknięcie aplikacji)
      */
-    public static void showDatabaseError(Throwable exception, String title, String header, boolean isCritical) {
-        logger.error("{}: {}", header, exception.getMessage(), exception);
+    public static void showDatabaseError(Throwable exception, String title,
+                                         String header, boolean isCritical) {
+        logger.error("{}: {}",
+                header, exception.getMessage(), exception);
 
         // Upewnij się, że kod UI jest wykonywany w wątku JavaFX
         if (Platform.isFxApplicationThread()) {
             showErrorDialog(exception, title, header, isCritical);
         } else {
-            Platform.runLater(() -> showErrorDialog(exception, title, header, isCritical));
+            Platform.runLater(() -> showErrorDialog(exception, title, header,
+                    isCritical));
         }
     }
 
     /**
      * Tworzy i wyświetla okno dialogowe z błędem.
+     *
+     * @param exception wyjątek do wyświetlenia
+     * @param title tytuł okna dialogowego
+     * @param header nagłówek z opisem błędu
+     * @param isCritical czy błąd jest krytyczny
      */
-    private static void showErrorDialog(Throwable exception, String title, String header, boolean isCritical) {
+    private static void showErrorDialog(Throwable exception, String title,
+                                        String header, boolean isCritical) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setHeaderText(header);
@@ -83,15 +125,20 @@ public class DatabaseErrorHandler {
 
         // Dodaj podstawowy komunikat
         if (exception instanceof SQLException) {
-            alert.setContentText("Wystąpił błąd podczas komunikacji z bazą danych. " +
-                    "Sprawdź czy serwer bazy danych jest uruchomiony i dostępny.");
+            alert.setContentText("Wystąpił błąd podczas " +
+                    "komunikacji z bazą danych. " +
+                    "Sprawdź czy serwer bazy danych jest " +
+                    "uruchomiony i dostępny.");
         } else {
-            alert.setContentText("Wystąpił nieoczekiwany błąd podczas komunikacji z bazą danych.");
+            alert.setContentText("Wystąpił nieoczekiwany " +
+                    "błąd podczas komunikacji " +
+                    "z bazą danych.");
         }
 
         // Dla krytycznych błędów
         if (isCritical) {
-            alert.setContentText(alert.getContentText() + "\nAplikacja zostanie zamknięta po zamknięciu tego okna.");
+            alert.setContentText(alert.getContentText() +
+                    "\nAplikacja zostanie zamknięta po zamknięciu tego okna.");
             alert.showAndWait();
             Platform.exit();
         } else {
@@ -110,6 +157,9 @@ public class DatabaseErrorHandler {
 
     /**
      * Formatuje szczegóły błędu w zależności od typu wyjątku.
+     *
+     * @param exception wyjątek do sformatowania
+     * @return sformatowany tekst z opisem błędu
      */
     private static String formatErrorDetails(Throwable exception) {
         if (exception instanceof SQLException) {
@@ -122,6 +172,9 @@ public class DatabaseErrorHandler {
 
     /**
      * Formatuje SQLException do bardziej czytelnej postaci.
+     *
+     * @param ex wyjątek SQL do sformatowania
+     * @return sformatowany tekst z opisem błędu SQL i sugestiami
      */
     private static String formatSQLException(SQLException ex) {
         StringBuilder sb = new StringBuilder();
@@ -141,7 +194,8 @@ public class DatabaseErrorHandler {
         // Sugestie w zależności od kodu błędu
         switch (ex.getErrorCode()) {
             case 0:
-                sb.append("- Sprawdź, czy serwer bazy danych jest uruchomiony\n");
+                sb.append("- Sprawdź, czy serwer bazy danych " +
+                        "jest uruchomiony\n");
                 sb.append("- Sprawdź ustawienia połączenia (host, port)\n");
                 break;
             case 1045:
@@ -155,7 +209,8 @@ public class DatabaseErrorHandler {
             default:
                 sb.append("- Sprawdź logi serwera bazy danych\n");
                 sb.append("- Skontaktuj się z administratorem systemu\n");
-                sb.append("- Sprawdź czy tabele istnieją i mają odpowiednią strukturę\n");
+                sb.append("- Sprawdź czy tabele istnieją" +
+                        " i mają odpowiednią strukturę\n");
         }
 
         return sb.toString();
