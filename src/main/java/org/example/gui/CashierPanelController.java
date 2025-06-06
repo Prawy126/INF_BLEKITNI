@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Kontroler obsługujący panel kasjera.
@@ -197,26 +198,20 @@ public class CashierPanelController {
         Label titleLabel = new Label("Raporty sprzedaży");
         titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
-        // Tworzymy tabelę raportów:
         TableView<Report> tableView = createReportTable();
         tableView.setPrefHeight(400);
         VBox.setVgrow(tableView, Priority.ALWAYS);
 
-        // Teraz tworzymy tylko jeden przycisk „Nowy raport”:
         HBox buttons = new HBox(10);
         Button newReportButton = cashierPanel.createStyledButton("Nowy raport", "#27AE60");
-        // (usuńmy Button refreshButton = ...)
         buttons.getChildren().addAll(newReportButton);
         buttons.setAlignment(Pos.CENTER);
 
-        // Po kliknięciu „Nowy raport” uruchamiamy dialog i podajemy referencję do tableView,
-        // żeby w showReportDialog(...) po wygenerowaniu od razu odświeżyć tę tabelę.
         newReportButton.setOnAction(e -> showReportDialog(tableView));
 
         layout.getChildren().addAll(titleLabel, tableView, buttons);
         cashierPanel.setCenterPane(layout);
 
-        // Przy pierwszym wyświetleniu ładujemy dane:
         refreshReportTable(tableView);
     }
 
@@ -224,13 +219,17 @@ public class CashierPanelController {
      * Odświeża tabelę raportów, pokazując tylko te wygenerowane przez aktualnego pracownika.
      */
     private void refreshReportTable(TableView<Report> tableView) {
+
+        if (tableView == null) {
+            return;
+        }
+
         Employee currentEmployee = userRepository.getCurrentEmployee();
         if (currentEmployee == null) {
             tableView.setItems(FXCollections.observableArrayList());
             return;
         }
-        // Jeśli ReportRepository ma metodę getReportsByEmployee(id), użyj jej zamiast filtra:
-        // List<Report> reports = reportRepository.getReportsByEmployee(currentEmployee.getId());
+
         List<Report> allReports = reportRepository.getAllReports();
         List<Report> filtered = new ArrayList<>();
         for (Report r : allReports) {
@@ -349,9 +348,6 @@ public class CashierPanelController {
      * Wewnątrz wywołujemy oryginalną metodę, przekazując null jako referencję do tabeli.
      */
     private void showReportDialog() {
-        // Jeżeli wywołamy to z kontekstu, w którym nie mamy tabeli (np. panel zamknięcia zmiany),
-        // po prostu wywołujemy wersję z null. Metoda z null nie będzie próbowała odświeżać tabeli,
-        // wystarczy, że otworzy dialog generowania raportu.
         showReportDialog(/* tableView= */ null);
     }
 
@@ -488,17 +484,104 @@ public class CashierPanelController {
     }
 
     private void openReportFile(String filePath) {
-        try {
-            File file = new File(filePath);
-            if (file.exists()) {
-                Desktop.getDesktop().open(file);
-            } else {
-                showNotification("Błąd", "Plik nie istnieje: " + filePath);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            showNotification("Błąd", "Nie można otworzyć pliku: " + e.getMessage());
+        File file = new File(filePath);
+        if (!file.exists()) {
+            showNotification("Błąd", "Plik nie istnieje: " + filePath);
+            return;
         }
+
+        // Pobierz informację o systemie operacyjnym
+        String os = System.getProperty("os.name").toLowerCase();
+        log.info("Próba otwarcia raportu: {}, system: {}", filePath, os);
+
+        // Użyj wątku w tle aby nie blokować interfejsu użytkownika
+        new Thread(() -> {
+            try {
+                boolean success = false;
+
+                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+                    try {
+                        Desktop.getDesktop().open(file);
+                        success = true;
+                        log.info("Otwarto plik używając Desktop API");
+                    } catch (IOException e) {
+                        log.warn("Nie udało się otworzyć pliku przez Desktop API: {}", e.getMessage());
+                    }
+                }
+
+                // Jeśli Desktop API nie zadziałało, próbuj alternatywnych metod na Linuksie
+                if (!success && (os.contains("nix") || os.contains("nux") || os.contains("unix"))) {
+                    log.info("Próbuję alternatywnych metod otwarcia pliku na Linuksie");
+
+                    // Lista programów do wypróbowania
+                    String[] commands = {"xdg-open", "gnome-open", "kde-open", "gio open", "gvfs-open"};
+
+                    for (String cmd : commands) {
+                        if (success) break;
+
+                        try {
+                            log.info("Próba użycia komendy: {}", cmd);
+                            ProcessBuilder pb = new ProcessBuilder(cmd.split(" ")[0], file.getAbsolutePath());
+                            pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+                            pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+
+                            Process process = pb.start();
+
+                            // Użyj wykonawcy z timeoutem, aby nie blokować wątku na zawsze
+                            boolean exited = process.waitFor(3, TimeUnit.SECONDS);
+
+                            if (exited && process.exitValue() == 0) {
+                                success = true;
+                                log.info("Plik otwarty pomyślnie używając: {}", cmd);
+                            } else {
+                                // Upewnij się, że proces jest zakończony
+                                process.destroy();
+                                log.warn("Komenda {} nie powiodła się", cmd);
+                            }
+                        } catch (Exception e) {
+                            log.warn("Błąd przy użyciu komendy {}: {}", cmd, e.getMessage());
+                        }
+                    }
+
+                    // Ostateczna próba - otwarcie w przeglądarce
+                    if (!success) {
+                        try {
+                            log.info("Próba otwarcia w przeglądarce");
+                            String[] browsers = {"firefox", "google-chrome", "chromium-browser"};
+
+                            for (String browser : browsers) {
+                                try {
+                                    ProcessBuilder pb = new ProcessBuilder(browser, file.toURI().toString());
+                                    pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+                                    pb.start();
+                                    success = true;
+                                    log.info("Plik otwarty w przeglądarce: {}", browser);
+                                    break;
+                                } catch (IOException e) {
+                                    log.warn("Nie udało się otworzyć w przeglądarce {}: {}", browser, e.getMessage());
+                                }
+                            }
+                        } catch (Exception e) {
+                            log.error("Błąd podczas próby otwarcia w przeglądarce: {}", e.getMessage());
+                        }
+                    }
+                }
+
+                // Wyświetl informację dla użytkownika na wątku UI
+                final boolean finalSuccess = success;
+                javafx.application.Platform.runLater(() -> {
+                    if (!finalSuccess) {
+                        showNotification("Informacja",
+                                "Nie można automatycznie otworzyć pliku. Lokalizacja pliku: " + filePath);
+                    }
+                });
+
+            } catch (Exception e) {
+                log.error("Błąd podczas otwierania pliku: {}", e.getMessage(), e);
+                javafx.application.Platform.runLater(() ->
+                        showNotification("Błąd", "Nie można otworzyć pliku: " + e.getMessage()));
+            }
+        }).start();
     }
 
     private void confirmAndDeleteReport(Report report, TableView<Report> tableView) {
@@ -1097,11 +1180,28 @@ public class CashierPanelController {
         gen.setSalesData(salesData);
         gen.setLogoPath(logoPath);
 
+        // Pobierz ścieżkę z konfiguracji
+        String outputDir = ConfigManager.getReportPath();
+        if (outputDir == null || outputDir.trim().isEmpty()) {
+            // Jeśli ścieżka nie jest ustawiona, użyj domyślnej wartości
+            outputDir = REPORTS_DIRECTORY;
+            log.info("Używam domyślnej ścieżki raportów: {}", outputDir);
+        } else {
+            log.info("Używam ścieżki raportów z konfiguracji: {}", outputDir);
+        }
+
+        // Upewnij się, że katalog istnieje
+        File dirFile = new File(outputDir);
+        if (!dirFile.exists()) {
+            dirFile.mkdirs();
+            log.info("Utworzono katalog raportów: {}", outputDir);
+        }
+
         String fileName = String.format("raport_%s_%s_%s.pdf",
                 periodType.getDisplayName().toLowerCase(),
                 startDate.format(DateTimeFormatter.BASIC_ISO_DATE),
                 endDate.format(DateTimeFormatter.BASIC_ISO_DATE));
-        String outputPath = REPORTS_DIRECTORY + File.separator + fileName;
+        String outputPath = outputDir + File.separator + fileName;
 
         pdf.SalesReportGenerator.PeriodType pdfType = toPdfPeriodType(periodType);
         gen.generateReport(outputPath, pdfType, categories == null ? List.of() : categories);

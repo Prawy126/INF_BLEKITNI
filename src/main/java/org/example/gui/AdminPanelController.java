@@ -1281,6 +1281,22 @@ public class AdminPanelController {
 
         dialog.setResultConverter(bt -> {
             if (bt == ButtonType.OK) {
+                // Walidacja dat
+                if (start.getValue() != null && end.getValue() != null) {
+                    if (start.getValue().isAfter(end.getValue())) {
+                        // Wyświetl alert o nieprawidłowym zakresie dat
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Nieprawidłowy zakres dat");
+                        alert.setHeaderText("Data początkowa nie może być późniejsza niż data końcowa");
+                        alert.setContentText("Proszę poprawić zakres dat.");
+                        alert.showAndWait();
+
+                        // Zapobiegaj zamknięciu dialogu
+                        return null;
+                    }
+                }
+
+                // Kontynuuj generowanie raportu, jeśli daty są poprawne
                 generateWorkloadPDF(start.getValue(), end.getValue(),
                         new ArrayList<>(positionsList.getSelectionModel().getSelectedItems()),
                         new ArrayList<>(statusList.getSelectionModel().getSelectedItems()));
