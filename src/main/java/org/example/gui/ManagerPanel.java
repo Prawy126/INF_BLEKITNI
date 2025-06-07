@@ -39,6 +39,7 @@ public class ManagerPanel {
     private Stage primaryStage;
     private ManagerPanelController controller;
     private Image logoImage;
+    private Button activeButton;
 
     /**
      * Konstruktor panelu kierownika.
@@ -134,11 +135,13 @@ public class ManagerPanel {
 
         tasksButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Zadania dla pracowników'");
+            setActiveButton(tasksButton);
             controller.showTaskPanel();
         });
 
         absenceButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Wnioski o nieobecność'");
+            setActiveButton(absenceButton);
             controller.showAbsencePanel();
         });
 
@@ -156,6 +159,7 @@ public class ManagerPanel {
 
         logger.debug("Menu utworzone pomyślnie z {} przyciskami",
                 menu.getChildren().size() - 1); // -1 dla logoBox
+        setActiveButton(tasksButton);
         return menu;
     }
 
@@ -256,4 +260,20 @@ public class ManagerPanel {
     public Stage getPrimaryStage() {
         return primaryStage;
     }
+
+    /**
+     * Ustawia podany przycisk jako aktywny, resetując styl poprzedniego.
+     */
+    private void setActiveButton(Button button) {
+        String defaultStyle = "-fx-background-color: #2980B9; -fx-text-fill:" +
+                " white; -fx-font-weight: bold;";
+        String activeStyle  = "-fx-background-color: #1A5276; -fx-text-fill:" +
+                " white; -fx-font-weight: bold;";
+        if (activeButton != null) {
+            activeButton.setStyle(defaultStyle);
+        }
+        activeButton = button;
+        activeButton.setStyle(activeStyle);
+    }
+
 }

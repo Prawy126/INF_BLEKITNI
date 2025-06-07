@@ -42,6 +42,7 @@ public class CashierPanel {
     private Stage primaryStage;
     private CashierPanelController controller;
     private Image logoImage;
+    private Button activeButton;
 
     public CashierPanel(Stage primaryStage) {
         logger.info("Tworzenie CashierPanel dla stage: {}", primaryStage);
@@ -161,6 +162,7 @@ public class CashierPanel {
         Button salesButton = createStyledButton("Ekran sprzedaży");
         salesButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Ekran sprzedaży'");
+            setActiveButton(salesButton);
             controller.showSalesScreen();
         });
 
@@ -168,6 +170,7 @@ public class CashierPanel {
         Button reportsButton = createStyledButton("Raporty sprzedaży");
         reportsButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Raporty sprzedaży'");
+            setActiveButton(reportsButton);
             controller.showSalesReportsPanel();
         });
 
@@ -175,6 +178,7 @@ public class CashierPanel {
         Button closeShiftButton = createStyledButton("Zamknięcie zmiany");
         closeShiftButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Zamknięcie zmiany'");
+            setActiveButton(closeShiftButton);
             controller.showCloseShiftPanel();
         });
 
@@ -182,6 +186,7 @@ public class CashierPanel {
         Button issueReportButton = createStyledButton("Zgłoszenie awarii");
         issueReportButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Zgłoszenie awarii'");
+            setActiveButton(issueReportButton);
             controller.showIssueReportPanel();
         });
 
@@ -189,6 +194,7 @@ public class CashierPanel {
         Button absenceButton = createStyledButton("Złóż wniosek o nieobecność");
         absenceButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Złóż wniosek o nieobecność'");
+            setActiveButton(absenceButton);
             controller.showAbsenceRequestForm();
         });
 
@@ -210,6 +216,7 @@ public class CashierPanel {
                 logoutButton
         );
 
+        setActiveButton(salesButton);
         logger.debug("Menu nawigacyjne utworzone pomyślnie");
         return menu;
     }
@@ -330,5 +337,21 @@ public class CashierPanel {
     public void resetCloseRequestHandler() {
         logger.debug("Resetowanie handlera zamknięcia okna");
         primaryStage.setOnCloseRequest(null);
+    }
+
+    /**
+     * Ustawia przycisk jako aktywny, przywracając styl poprzedniego
+     * i nadając ciemniejszy odcień nowemu.
+     */
+    private void setActiveButton(Button button) {
+        String defaultStyle = "-fx-background-color: #2980B9;" +
+                " -fx-text-fill: white; -fx-font-weight: bold;";
+        String activeStyle  = "-fx-background-color: #1A5276;" +
+                " -fx-text-fill: white; -fx-font-weight: bold;";
+        if (activeButton != null) {
+            activeButton.setStyle(defaultStyle);
+        }
+        activeButton = button;
+        activeButton.setStyle(activeStyle);
     }
 }

@@ -37,6 +37,7 @@ public class LogisticianPanel {
     private Stage primaryStage;
     private LogisticianPanelController controller;
     private Image logoImage;
+    private Button activeButton;
 
     /**
      * Konstruktor klasy LogisticianPanel.
@@ -123,18 +124,21 @@ public class LogisticianPanel {
         Button inventoryButton = createStyledButton("Zarządzanie magazynem");
         inventoryButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Zarządzanie magazynem'");
+            setActiveButton(inventoryButton);
             controller.showInventoryManagement();
         });
 
         Button ordersButton = createStyledButton("Zamówienia");
         ordersButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Zamówienia'");
+            setActiveButton(ordersButton);
             controller.showOrdersPanel();
         });
 
         Button reportsButton = createStyledButton("Raporty magazynowe");
         reportsButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Raporty magazynowe'");
+            setActiveButton(reportsButton);
             controller.showInventoryReports();
         });
 
@@ -144,6 +148,7 @@ public class LogisticianPanel {
         Button absenceButton = createStyledButton("Złóż wniosek o nieobecność");
         absenceButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Złóż wniosek o nieobecność'");
+            setActiveButton(absenceButton);
             controller.showAbsenceRequestForm();
         });
 
@@ -159,6 +164,7 @@ public class LogisticianPanel {
         logger.debug("Menu utworzone pomyślnie z {} przyciskami",
                 menu.getChildren().size() - 1); // -1 dla logo
 
+        setActiveButton(reportsButton);
         return menu;
     }
 
@@ -219,5 +225,21 @@ public class LogisticianPanel {
 
     public Stage getPrimaryStage() {
         return primaryStage;
+    }
+
+    /**
+     * Ustawia przycisk jako aktywny, przywracając domyślny styl poprzedniemu
+     * i nadając ciemniejszy odcień nowemu.
+     */
+    private void setActiveButton(Button button) {
+        String defaultStyle = "-fx-background-color: #2980B9;" +
+                " -fx-text-fill: white; -fx-font-weight: bold;";
+        String activeStyle  = "-fx-background-color: #1A5276;" +
+                " -fx-text-fill: white; -fx-font-weight: bold;";
+        if (activeButton != null) {
+            activeButton.setStyle(defaultStyle);
+        }
+        activeButton = button;
+        activeButton.setStyle(activeStyle);
     }
 }
