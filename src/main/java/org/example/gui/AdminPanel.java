@@ -1,7 +1,7 @@
 /*
  * Classname: AdminPanel
- * Version information: 1.2
- * Date: 2025-06-04
+ * Version information: 1.3
+ * Date: 2025-06-07
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -41,7 +41,8 @@ public class AdminPanel {
     private Stage primaryStage;
     private AdminPanelController controller;
     private Image logoImage;
-    private static final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+    private static final ExecutorService executor =
+            Executors.newVirtualThreadPerTaskExecutor();
     private Button activeButton; // Pole do śledzenia aktywnego przycisku
 
     /**
@@ -115,7 +116,8 @@ public class AdminPanel {
         });
 
         task.setOnFailed(e -> {
-            logger.error("Nie udało się załadować logo: {}", task.getException().getMessage(), task.getException());
+            logger.error("Nie udało się załadować logo: {}",
+                    task.getException().getMessage(), task.getException());
         });
 
         executor.execute(task);
@@ -154,7 +156,8 @@ public class AdminPanel {
         });
 
         task.setOnFailed(e -> {
-            logger.error("Nie udało się utworzyć menu: {}", task.getException().getMessage(), task.getException());
+            logger.error("Nie udało się utworzyć menu: {}",
+                    task.getException().getMessage(), task.getException());
         });
 
         executor.execute(task);
@@ -251,10 +254,12 @@ public class AdminPanel {
      */
     private void setActiveButton(Button button) {
         if (activeButton != null) {
-            activeButton.setStyle("-fx-background-color: #2980B9; -fx-text-fill: white; -fx-font-weight: bold;");
+            activeButton.setStyle("-fx-background-color: #2980B9;" +
+                    " -fx-text-fill: white; -fx-font-weight: bold;");
         }
         activeButton = button;
-        activeButton.setStyle("-fx-background-color: #1A5276; -fx-text-fill: white; -fx-font-weight: bold;");
+        activeButton.setStyle("-fx-background-color: #1A5276;" +
+                " -fx-text-fill: white; -fx-font-weight: bold;");
     }
 
     /**
