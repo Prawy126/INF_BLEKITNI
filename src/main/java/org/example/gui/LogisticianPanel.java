@@ -1,7 +1,7 @@
 /*
  * Classname: LogisticianPanel
- * Version information: 1.1
- * Date: 2025-04-11
+ * Version information: 1.2
+ * Date: 2025-06-07
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -31,7 +31,8 @@ import java.util.Objects;
  */
 public class LogisticianPanel {
 
-    private static final Logger logger = LogManager.getLogger(LogisticianPanel.class);
+    private static final Logger logger =
+            LogManager.getLogger(LogisticianPanel.class);
     private BorderPane root;
     private Stage primaryStage;
     private LogisticianPanelController controller;
@@ -97,7 +98,8 @@ public class LogisticianPanel {
         VBox menu = new VBox(10);
         menu.setPadding(new Insets(10));
         menu.setAlignment(Pos.TOP_LEFT);
-        menu.setStyle("-fx-background-color: #E0E0E0; -fx-border-radius: 10; -fx-background-radius: 10;");
+        menu.setStyle("-fx-background-color: #E0E0E0; -fx-border-radius: 10;" +
+                " -fx-background-radius: 10;");
 
         // logo
         Image image = null;
@@ -152,8 +154,10 @@ public class LogisticianPanel {
             controller.logout();
         });
 
-        menu.getChildren().addAll(logo, inventoryButton, ordersButton, reportsButton, absenceButton, closeShiftBtn,  logoutButton);
-        logger.debug("Menu utworzone pomyślnie z {} przyciskami", menu.getChildren().size() - 1); // -1 dla logo
+        menu.getChildren().addAll(logo, inventoryButton, ordersButton,
+                reportsButton, absenceButton, closeShiftBtn,  logoutButton);
+        logger.debug("Menu utworzone pomyślnie z {} przyciskami",
+                menu.getChildren().size() - 1); // -1 dla logo
 
         return menu;
     }
@@ -200,7 +204,8 @@ public class LogisticianPanel {
 
     private void animateSlideDown(VBox element, int duration) {
         logger.debug("Animowanie efektu slideDown dla menu");
-        TranslateTransition slide = new TranslateTransition(Duration.millis(duration), element);
+        TranslateTransition slide = new TranslateTransition(Duration.millis(duration),
+                element);
         slide.setFromY(-50);
         slide.setToY(0);
         slide.setInterpolator(Interpolator.EASE_BOTH);

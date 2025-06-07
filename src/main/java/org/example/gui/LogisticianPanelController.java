@@ -1,7 +1,7 @@
 /*
  * Classname: LogisticianPanelController
- * Version information: 1.6
- * Date: 2025-06-06
+ * Version information: 1.7
+ * Date: 2025-06-07
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -52,9 +52,11 @@ public class LogisticianPanelController {
 
     private final LogisticianPanel logisticianPanel;
     private final Stage primaryStage;
-    private static final Logger logger = LogManager.getLogger(LogisticianPanelController.class);
+    private static final Logger logger =
+            LogManager.getLogger(LogisticianPanelController.class);
     private final ProductRepository productRepository = new ProductRepository();
-    private final WarehouseRepository warehouseRepository = new WarehouseRepository();
+    private final WarehouseRepository warehouseRepository =
+            new WarehouseRepository();
     private boolean reportGeneratedInCurrentSession;
 
     /**
@@ -66,7 +68,8 @@ public class LogisticianPanelController {
         this.logisticianPanel = logisticianPanel;
         this.primaryStage = logisticianPanel.getPrimaryStage();
         reportGeneratedInCurrentSession = false;
-        logger.info("LogisticianPanelController utworzony i przypisany do panelu wartość {}", logisticianPanel);
+        logger.info("LogisticianPanelController utworzony i przypisany do panelu wartość {}",
+                logisticianPanel);
         this.primaryStage.setOnCloseRequest(event -> {
             if (!reportGeneratedInCurrentSession) {
                 event.consume();  // Zatrzymaj zamknięcie
@@ -123,7 +126,8 @@ public class LogisticianPanelController {
         styleLogisticButton(editProductBtn, "#E67E22");
         editProductBtn.setOnAction(e -> showEditProductDialog(table));
 
-        HBox btnBox = new HBox(10, filterBtn, refreshBtn, reportsBtn, addProductBtn, editProductBtn);
+        HBox btnBox = new HBox(10, filterBtn, refreshBtn, reportsBtn,
+                addProductBtn, editProductBtn);
         btnBox.setAlignment(Pos.CENTER_RIGHT);
 
         layout.getChildren().addAll(title, table, btnBox);
@@ -160,7 +164,8 @@ public class LogisticianPanelController {
 
     /**
      * Otwiera panel „Zamówienia” z tabelą wszystkich zamówień.
-     * Ustawia kolumny, ładuje dane z repozytorium oraz tworzy przyciski Dodaj, Filtruj i Odśwież.
+     * Ustawia kolumny, ładuje dane z repozytorium
+     * oraz tworzy przyciski Dodaj, Filtruj i Odśwież.
      */
     public void showOrdersPanel() {
         VBox layout = new VBox(15);
@@ -181,14 +186,17 @@ public class LogisticianPanelController {
 
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         productCol.setCellValueFactory(cellData -> new SimpleStringProperty(
-                cellData.getValue().getProduct() != null ? cellData.getValue().getProduct().getName() : ""));
+                cellData.getValue().getProduct() !=
+                        null ? cellData.getValue().getProduct().getName() : ""));
         employeeCol.setCellValueFactory(cellData -> new SimpleStringProperty(
-                cellData.getValue().getEmployee() != null ? cellData.getValue().getEmployee().getLogin() : ""));
+                cellData.getValue().getEmployee() !=
+                        null ? cellData.getValue().getEmployee().getLogin() : ""));
         qtyCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
         dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
 
-        tableView.getColumns().addAll(idCol, productCol, employeeCol, qtyCol, priceCol, dateCol);
+        tableView.getColumns().addAll(idCol, productCol, employeeCol,
+                qtyCol, priceCol, dateCol);
 
         OrderRepository orderRepo = new OrderRepository();
         List<Order> orders = orderRepo.getAllOrders();
@@ -205,7 +213,8 @@ public class LogisticianPanelController {
         Button refreshBtn = new Button("Odśwież");
         styleLogisticButton(refreshBtn, "#3498DB");
         refreshBtn.setOnAction(e ->
-                tableView.setItems(FXCollections.observableArrayList(new OrderRepository().getAllOrders()))
+                tableView.setItems(FXCollections.observableArrayList(
+                        new OrderRepository().getAllOrders()))
         );
 
         HBox btnBox = new HBox(10, addOrderButton, filterButton, refreshBtn);
@@ -216,7 +225,8 @@ public class LogisticianPanelController {
     }
 
     /**
-     * Otwiera prosty dialog filtrowania zamówień po ID zamówienia i ID produktu.
+     * Otwiera prosty dialog filtrowania zamówień po ID zamówienia i
+     * ID produktu.
      * Po zatwierdzeniu zastępuje zawartość tabeli wyfiltrowanymi rekordami.
      *
      * @param tableView tabela zamówień, która ma zostać przefiltrowana
@@ -277,7 +287,8 @@ public class LogisticianPanelController {
     }
 
     /**
-     * Otwiera panel „Raporty magazynowe” z przyciskiem uruchamiającym kreator raportu.
+     * Otwiera panel „Raporty magazynowe” z
+     * przyciskiem uruchamiającym kreator raportu.
      * Wyświetla ekran raportów magazynowych.
      */
     public void showInventoryReports() {
@@ -296,7 +307,8 @@ public class LogisticianPanelController {
     }
 
     /**
-     * Okienko konfiguracji: wybór kategorii i progu niskiego stanu magazynowego.
+     * Okienko konfiguracji: wybór kategorii
+     * i progu niskiego stanu magazynowego.
      * Po naciśnięciu „Generuj” tworzy PDF-owy raport.
      */
     private void showReportDialog() {
@@ -366,7 +378,8 @@ public class LogisticianPanelController {
     }
 
     /**
-     * Generuje raport magazynowy na podstawie wybranych kategorii i progu niskiego stanu.
+     * Generuje raport magazynowy na podstawie
+     * wybranych kategorii i progu niskiego stanu.
      * Zapisuje go w katalogu zdefiniowanym w ConfigManager.
      *
      * @param selectedCategories lista wybranych kategorii
@@ -384,7 +397,8 @@ public class LogisticianPanelController {
             return;
         }
 
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String timestamp =
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
         File targetFile = new File(basePath, "warehouse-report-" + timestamp + ".pdf");
 
         try {
@@ -406,15 +420,18 @@ public class LogisticianPanelController {
                     new WarehouseRaport.ProductDataExtractor<>() {
                         public String getName(org.example.sys.Product p)     { return p.getName(); }
                         public String getCategory(org.example.sys.Product p) { return p.getCategory(); }
-                        public double getPrice(org.example.sys.Product p)    { return p.getPrice().doubleValue(); }
-                        public int getQuantity(org.example.sys.Product p)    { return qtyById.getOrDefault(p.getId(), 0); }
+                        public double getPrice(org.example.sys.Product p)    {
+                            return p.getPrice().doubleValue(); }
+                        public int getQuantity(org.example.sys.Product p)    {
+                            return qtyById.getOrDefault(p.getId(), 0); }
                     };
 
             String logoPath = ConfigManager.getLogoPath();
             if (logoPath == null || logoPath.isBlank()) {
                 showAlert(Alert.AlertType.ERROR,
                         "Brak logo",
-                        "W konfiguracji nie ustawiono ścieżki do logo. Ustaw logo w panelu administratora.");
+                        "W konfiguracji nie ustawiono ścieżki do logo. Ustaw logo w" +
+                                " panelu administratora.");
                 return;
             }
 
@@ -439,7 +456,8 @@ public class LogisticianPanelController {
             showAlert(Alert.AlertType.INFORMATION, "Sukces",
                     "Raport zapisany: " + targetFile.getAbsolutePath());
             stage.close();
-            reportGeneratedInCurrentSession = true; // raport został wygenerowany w tej sesji
+            // raport został wygenerowany w tej sesji
+            reportGeneratedInCurrentSession = true;
             logger.info("Raport magazynowy wygenerowany: {}", targetFile.getAbsolutePath());
             logger.info("Flag reportGeneratedInCurrentSession ustawiona na true");
 
@@ -450,9 +468,6 @@ public class LogisticianPanelController {
         }
     }
 
-    /* -------------------------------------------------------------------- */
-    /*  PANEL ZAMKNIĘCIA ZMIANY                                             */
-    /* -------------------------------------------------------------------- */
     public void showCloseShiftPanel() {
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
@@ -474,8 +489,10 @@ public class LogisticianPanelController {
                 alert.setHeaderText("Nie wygenerowano raportu dziennego");
                 alert.setContentText("Czy mimo to chcesz zamknąć aplikację?");
 
-                ButtonType cancelBtn = new ButtonType("Anuluj", ButtonBar.ButtonData.CANCEL_CLOSE);
-                ButtonType forceExit = new ButtonType("Zamknij mimo wszystko", ButtonBar.ButtonData.OK_DONE);
+                ButtonType cancelBtn = new ButtonType("Anuluj",
+                        ButtonBar.ButtonData.CANCEL_CLOSE);
+                ButtonType forceExit = new ButtonType("Zamknij mimo wszystko",
+                        ButtonBar.ButtonData.OK_DONE);
                 alert.getButtonTypes().setAll(cancelBtn, forceExit);
 
                 Optional<ButtonType> result = alert.showAndWait();
@@ -643,7 +660,8 @@ public class LogisticianPanelController {
 
     /**
      * Otwiera okienko filtrowania stanów magazynowych.
-     * Po zatwierdzeniu pobiera pełny zestaw danych, filtruje po Id, nazwie i minimalnej ilości
+     * Po zatwierdzeniu pobiera pełny zestaw danych, filtruje
+     * po Id, nazwie i minimalnej ilości
      * i aktualizuje tabelę.
      *
      * @param table tabela stanów magazynowych, która ma zostać przefiltrowana
@@ -703,7 +721,8 @@ public class LogisticianPanelController {
     /**
      * Wyświetla okno formularza filtrowania produktów.
      * Pola: Id, Nazwa, Cena, Ilość w magazynie.
-     * Przycisk „Filtruj” zamyka okno bez dalszej logiki filtrowania (symulacja działania).
+     * Przycisk „Filtruj” zamyka okno bez dalszej logiki filtrowania
+     * (symulacja działania).
      */
     private void showFilterProductDialog() {
         Stage stage = new Stage();
@@ -846,7 +865,8 @@ public class LogisticianPanelController {
         }
 
         reportGeneratedInCurrentSession = false;
-        logger.info("Wylogowanie z panelu logistyka, reset flagi reportGeneratedInCurrentSession");
+        logger.info("Wylogowanie z panelu logistyka," +
+                " reset flagi reportGeneratedInCurrentSession");
         logger.info("Uruchamianie ekranu logowania...");
 
         primaryStage.close();
@@ -859,7 +879,8 @@ public class LogisticianPanelController {
 
     /**
      * Wyświetla formularz dodawania nowego produktu.
-     * @param stockTable referencja do tabeli stanów magazynowych, którą odświeżamy po zapisie
+     * @param stockTable referencja do tabeli stanów magazynowych,
+     *                   którą odświeżamy po zapisie
      */
     private void showAddProductDialog(TableView<StockRow> stockTable) {
         Stage stage = new Stage();
@@ -977,12 +998,14 @@ public class LogisticianPanelController {
     }
 
     /**
-     * Pokazuje formularz edycji wybranego produktu wraz z jego stanem magazynowym.
+     * Pokazuje formularz edycji wybranego produktu
+     * wraz z jego stanem magazynowym.
      * - Pola: Nazwa, Kategoria, Cena, Ilość w magazynie.
      * - Wypełnia je wartościami z bazy.
      * - Po zatwierdzeniu waliduje i aktualizuje Product oraz Warehouse.
      *
-     * @param table tabela stanów magazynowych, z której czytamy zaznaczony wiersz
+     * @param table tabela stanów magazynowych, z
+     *              której czytamy zaznaczony wiersz
      */
     private void showEditProductDialog(TableView<StockRow> table) {
         StockRow selected = table.getSelectionModel().getSelectedItem();
@@ -1094,7 +1117,8 @@ public class LogisticianPanelController {
                 prod.setName(newName);
                 prod.setCategory(newCat);
                 prod.setPrice(newPrice);
-                pr.updateProduct(prod);  // załóżmy, że taka metoda istnieje w ProductRepository
+                // załóżmy, że taka metoda istnieje w ProductRepository
+                pr.updateProduct(prod);
 
                 // 4b) Zaktualizuj stan magazynowy
                 warehouseRepository.setProductQuantity(prod.getId(), newQty);
