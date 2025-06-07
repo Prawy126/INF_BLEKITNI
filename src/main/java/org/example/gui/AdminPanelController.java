@@ -41,9 +41,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.database.*;
 import org.example.pdflib.ConfigManager;
-import org.example.sys.Employee;
-import org.example.sys.TechnicalIssue;
-import org.example.sys.PeriodType;
+import org.example.sys.*;
 import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
 
@@ -53,14 +51,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
 
-import org.example.sys.Address;
-import org.example.sys.EmpTask;
 import pdf.StatsRaportGenerator;
 import pdf.TaskRaportGenerator;
 import pdf.WorkloadReportGenerator;
@@ -580,6 +578,7 @@ public class AdminPanelController {
 
                 String loginText = loginField.getText().trim();
                 String emailText = emailField.getText().trim();
+                String plainPassword = passwordField.getText(); // Zapisujemy niezahaszowane hasło
 
                 if(!nameField.getText().matches("[A-Za-z]+")) {
                     showAlert(Alert.AlertType.ERROR,
@@ -625,27 +624,53 @@ public class AdminPanelController {
                 int age = Integer.parseInt(ageField.getText().trim());
                 BigDecimal salary = new BigDecimal(salaryField.getText().trim());
 
+                // Tworzymy nowego pracownika z niezahaszowanym hasłem
                 Employee newEmployee = new Employee();
                 newEmployee.setName(nameField.getText().trim());
                 newEmployee.setSurname(surnameField.getText().trim());
                 newEmployee.setLogin(loginText);
-                newEmployee.setPassword(passwordField.getText());
+                newEmployee.setPassword(plainPassword); // Tymczasowo niezahaszowane hasło
                 newEmployee.setEmail(emailField.getText().trim());
                 newEmployee.setAddress(addressComboBox.getValue());
                 newEmployee.setPosition(positionComboBox.getValue());
                 newEmployee.setAge(age);
                 newEmployee.setSalary(salary);
 
+                // Task dodający użytkownika i następnie hashujący hasło
                 Task<Void> addTask = new Task<>() {
                     @Override
                     protected Void call() throws Exception {
+                        // 1. Dodajemy użytkownika z niezahaszowanym hasłem
                         userRepository.addEmployee(newEmployee);
+
+                        // 2. Pobieramy użytkownika z najwyższym ID (zakładamy, że to ten, którego właśnie dodaliśmy)
+                        Employee addedEmployee = userRepository.findEmployeeWithHighestId();
+
+                        if (addedEmployee != null) {
+                            try {
+                                // 3. Hashujemy hasło z użyciem faktycznego ID z bazy danych
+                                String hashedPassword = PasswordHasher.hashPassword(
+                                        plainPassword, addedEmployee.getId());
+
+                                // 4. Aktualizujemy hasło użytkownika
+                                addedEmployee.setPassword(hashedPassword);
+                                userRepository.updateEmployee(addedEmployee);
+
+                            } catch (NoSuchAlgorithmException |
+                                     InvalidKeyException ex) {
+                                throw new RuntimeException("Błąd podczas hashowania hasła: " + ex.getMessage(), ex);
+                            }
+                        } else {
+                            throw new RuntimeException("Nie udało się znaleźć dodanego użytkownika.");
+                        }
+
                         return null;
                     }
                 };
 
                 addTask.setOnSucceeded(evt -> {
-                    showAlert(Alert.AlertType.INFORMATION, "Sukces", "Dodano nowego użytkownika!");
+                    showAlert(Alert.AlertType.INFORMATION, "Sukces",
+                            "Dodano nowego użytkownika z bezpiecznym hasłem!");
                     showUserManagement();
                 });
 

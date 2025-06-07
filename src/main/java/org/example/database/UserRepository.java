@@ -246,6 +246,32 @@ public class UserRepository {
         }
     }
 
+    public Employee findEmployeeWithHighestId() {
+        logger.debug("findEmployeeWithHighestId() – start");
+        EntityManager em = EMFProvider.get().createEntityManager();
+        try {
+            TypedQuery<Employee> query = em.createQuery(
+                    "SELECT e FROM Employee e ORDER BY e.id DESC", Employee.class);
+            query.setMaxResults(1);
+            List<Employee> results = query.getResultList();
+
+            if (!results.isEmpty()) {
+                Employee employee = results.get(0);
+                logger.debug("findEmployeeWithHighestId() – znaleziono: {}", employee);
+                return employee;
+            } else {
+                logger.warn("findEmployeeWithHighestId() – nie znaleziono żadnego pracownika");
+                return null;
+            }
+        } catch (Exception ex) {
+            logger.error("findEmployeeWithHighestId() – błąd", ex);
+            return null;
+        } finally {
+            em.close();
+            logger.debug("findEmployeeWithHighestId() – EM zamknięty");
+        }
+    }
+
     /**
      * Aktualizuje dane pracownika.
      * Operacja jest wykonywana w transakcji.
