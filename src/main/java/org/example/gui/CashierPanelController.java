@@ -622,6 +622,8 @@ public class CashierPanelController {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Potwierdzenie usunięcia");
         alert.setHeaderText("Czy na pewno chcesz usunąć ten raport?");
+        alert.getDialogPane().setMinWidth(400);
+        alert.getDialogPane().setMinHeight(200);
         alert.setContentText("Ta operacja jest nieodwracalna.");
 
         Optional<ButtonType> result = alert.showAndWait();
@@ -974,6 +976,8 @@ public class CashierPanelController {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Ostrzeżenie");
                 alert.setHeaderText("Nie wygenerowano raportu dziennego");
+                alert.getDialogPane().setMinWidth(400);
+                alert.getDialogPane().setMinHeight(200);
                 alert.setContentText("Przed zamknięciem zmiany wygeneruj raport dzienny.");
                 ButtonType gen = new ButtonType("Generuj raport");
                 ButtonType ign = new ButtonType("Ignoruj i zamknij");
@@ -1204,6 +1208,8 @@ public class CashierPanelController {
     private void showNotification(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
+        alert.getDialogPane().setMinWidth(400);
+        alert.getDialogPane().setMinHeight(200);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
@@ -1335,6 +1341,8 @@ public class CashierPanelController {
             log.warn("Brak raportu dziennego – wylogowanie zablokowane.");
             Alert warn = new Alert(Alert.AlertType.WARNING);
             warn.setTitle("Brak raportu dziennego");
+            warn.getDialogPane().setMinWidth(400);
+            warn.getDialogPane().setMinHeight(200);
             warn.setHeaderText("Musisz wygenerować raport dzienny przed wylogowaniem.");
             warn.showAndWait();
             return;

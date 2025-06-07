@@ -524,7 +524,7 @@ public class ManagerPanelController {
                 buttonBox
         );
 
-        Scene scene = new Scene(dialogLayout, 350, 250);
+        Scene scene = new Scene(dialogLayout, 400, 300);
         dialogStage.setScene(scene);
         dialogStage.showAndWait();
     }
@@ -620,7 +620,7 @@ public class ManagerPanelController {
                 buttonBox
         );
 
-        Scene scene = new Scene(layout, 350, 500);
+        Scene scene = new Scene(layout, 400, 550);
         dialogStage.setScene(scene);
         dialogStage.showAndWait();
     }
@@ -651,6 +651,8 @@ public class ManagerPanelController {
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.setContentText(null);
+        alert.getDialogPane().setMinWidth(400);
+        alert.getDialogPane().setMinHeight(200);
         alert.showAndWait();
     }
 }

@@ -282,7 +282,8 @@ public class LogisticianPanelController {
         grid.add(productIdField, 1, 1);
         grid.add(filterButton, 1, 2);
 
-        stage.setScene(new Scene(grid, 320, 180));
+        stage.setMinWidth(400);
+        stage.setMinHeight(250);
         stage.show();
     }
 
@@ -654,7 +655,7 @@ public class LogisticianPanelController {
         grid.add(quantityField,   1, 1);
         grid.add(submit,          1, 2);
 
-        stage.setScene(new Scene(grid, 350, 180));
+        stage.setScene(new Scene(grid, 400, 250));
         stage.show();
     }
 
@@ -714,7 +715,7 @@ public class LogisticianPanelController {
 
         g.add(filt,1,3);
 
-        st.setScene(new Scene(g,320,220));
+        st.setScene(new Scene(g,400,250));
         st.show();
     }
 
@@ -821,7 +822,7 @@ public class LogisticianPanelController {
         grid.add(toDateLabel, 0, 2);   grid.add(toDatePicker, 1, 2);
         grid.add(submitButton, 1, 3);
 
-        stage.setScene(new Scene(grid, 350, 250));
+        stage.setScene(new Scene(grid, 400, 300));
         stage.show();
     }
 
@@ -837,6 +838,8 @@ public class LogisticianPanelController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);
+        alert.getDialogPane().setMinWidth(400);
+        alert.getDialogPane().setMinHeight(200);
         alert.showAndWait();
     }
 
@@ -993,7 +996,7 @@ public class LogisticianPanelController {
         grid.addRow(3, qtyLabel,      qtyField);
         grid.add(saveBtn, 1, 4);
 
-        stage.setScene(new Scene(grid, 400, 280));
+        stage.setScene(new Scene(grid, 450, 320));
         stage.show();
     }
 
@@ -1147,7 +1150,7 @@ public class LogisticianPanelController {
         grid.add(qtyField,      1, 3);
         grid.add(saveBtn,       1, 4);
 
-        stage.setScene(new Scene(grid, 400, 300));
+        stage.setScene(new Scene(grid, 450, 350));
         stage.show();
     }
 

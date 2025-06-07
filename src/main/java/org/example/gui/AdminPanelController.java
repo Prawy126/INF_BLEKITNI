@@ -716,6 +716,8 @@ public class AdminPanelController {
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.getDialogPane().setMinWidth(350);
+        confirm.getDialogPane().setMinHeight(220);
         confirm.setTitle("Potwierdzenie usunięcia");
         confirm.setHeaderText("Czy na pewno chcesz usunąć użytkownika?");
         confirm.setContentText(selected.getName() + " " + selected.getSurname());
@@ -1062,6 +1064,8 @@ public class AdminPanelController {
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.getDialogPane().setMinWidth(500);
+        dialog.getDialogPane().setMinHeight(350);
 
         dialog.setResultConverter(bt -> {
             if (bt == ButtonType.OK) {
@@ -1218,6 +1222,8 @@ public class AdminPanelController {
 
         dialog.getDialogPane().setContent(g);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.getDialogPane().setMinWidth(400);
+        dialog.getDialogPane().setMinHeight(300);
 
         dialog.setResultConverter(bt -> {
             if (bt == ButtonType.OK) {
@@ -1307,6 +1313,8 @@ public class AdminPanelController {
 
         dialog.getDialogPane().setContent(g);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.getDialogPane().setMinWidth(500);
+        dialog.getDialogPane().setMinHeight(350);
 
         dialog.setResultConverter(bt -> {
             if (bt == ButtonType.OK) {
@@ -1315,6 +1323,8 @@ public class AdminPanelController {
                     if (start.getValue().isAfter(end.getValue())) {
                         // Wyświetl alert o nieprawidłowym zakresie dat
                         Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.getDialogPane().setMinWidth(400);
+                        alert.getDialogPane().setMinHeight(200);
                         alert.setTitle("Nieprawidłowy zakres dat");
                         alert.setHeaderText("Data początkowa nie może być późniejsza niż data końcowa");
                         alert.setContentText("Proszę poprawić zakres dat.");
@@ -1581,6 +1591,9 @@ public class AdminPanelController {
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,
                 ButtonType.CANCEL);
 
+        dialog.getDialogPane().setMinWidth(450);
+        dialog.getDialogPane().setMinHeight(320);
+
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -1791,6 +1804,8 @@ public class AdminPanelController {
             return;
         }
         Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.getDialogPane().setMinWidth(400);
+        a.getDialogPane().setMinHeight(200);
         a.setTitle("Szczegóły zgłoszenia");
         a.setHeaderText("Zgłoszenie ID: " + sel.getId());
         a.setContentText(
@@ -1986,6 +2001,8 @@ public class AdminPanelController {
     private void showAlert(Alert.AlertType type, String title, String header) {
         Platform.runLater(() -> {
             Alert alert = new Alert(type);
+            alert.getDialogPane().setMinWidth(400);
+            alert.getDialogPane().setMinHeight(200);
             alert.setTitle(title);
             alert.setHeaderText(header);
             alert.setContentText(null);

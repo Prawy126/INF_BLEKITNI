@@ -109,6 +109,8 @@ public class EmployeePanelController {
                         "Wybierz zadanie do zaktualizowania statusu.", ButtonType.OK);
                 a.setTitle("Brak wyboru");
                 a.setHeaderText("Nie wybrano zadania");
+                a.getDialogPane().setMinWidth(400);
+                a.getDialogPane().setMinHeight(200);
                 a.showAndWait();
                 return;
             }
@@ -133,6 +135,8 @@ public class EmployeePanelController {
             Alert info = new Alert(Alert.AlertType.INFORMATION,
                     "Status zaktualizowano na: " + nextStatus, ButtonType.OK);
             info.setTitle("Zaktualizowane");
+            info.getDialogPane().setMinWidth(400);
+            info.getDialogPane().setMinHeight(200);
             info.setHeaderText(null);
             info.showAndWait();
         });
@@ -209,6 +213,8 @@ public class EmployeePanelController {
                         "Aby zgłosić problem, wpisz opis i wybierz kategorię.", ButtonType.OK);
                 alert.setTitle("Błąd");
                 alert.setHeaderText("Uzupełnij wszystkie pola");
+                alert.getDialogPane().setMinWidth(400);
+                alert.getDialogPane().setMinHeight(200);
                 alert.showAndWait();
             } else {
                 Employee current = new UserRepository().getCurrentEmployee();
@@ -225,6 +231,8 @@ public class EmployeePanelController {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION,
                         "Dziękujemy za przesłanie zgłoszenia.", ButtonType.OK);
                 alert.setTitle("Zgłoszono");
+                alert.getDialogPane().setMinWidth(400);
+                alert.getDialogPane().setMinHeight(200);
                 alert.setHeaderText("Zgłoszenie zostało przyjęte");
                 alert.showAndWait();
                 issueStage.close();
@@ -236,7 +244,8 @@ public class EmployeePanelController {
                 categoryLabel, categoryBox,
                 submitButton
         );
-        issueStage.setScene(new Scene(layout, 350, 300));
+        issueStage.setMinWidth(400);
+        issueStage.setMinHeight(350);
         issueStage.show();
     }
 
