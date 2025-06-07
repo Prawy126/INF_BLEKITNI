@@ -18,7 +18,7 @@ public class DatabaseInitializer implements ILacz {
         DatabaseInitializer initializer = new DatabaseInitializer();
         initializer.createDatabaseIfNotExists();
         initializer.executeStructureScript();
-        initializer.executeDataScript();
+        //initializer.executeDataScript();
     }
 
     /**
@@ -26,10 +26,12 @@ public class DatabaseInitializer implements ILacz {
      */
     private void createDatabaseIfNotExists() {
         try (Connection conn = DriverManager.getConnection(
-                getMySqlServerUrl(), getMySqlUser(), getMySqlPassword())) {
+                DatabaseConfig.getMySqlServerUrl(),
+                DatabaseConfig.getDbUser(),
+                DatabaseConfig.getDbPassword())) {
 
             Statement stmt = conn.createStatement();
-            stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS " + getDbName());
+            stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS " + DatabaseConfig.getDbName());
 
         } catch (SQLException e) {
             System.err.println("Błąd podczas tworzenia bazy danych: " + e.getMessage());
@@ -78,7 +80,7 @@ public class DatabaseInitializer implements ILacz {
      * Ładuje skrypt SQL z zasobów.
      */
     private String loadSqlScript(String filename) {
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream("sql/" + filename);
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(filename);
              BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 
             return reader.lines().collect(Collectors.joining("\n"));

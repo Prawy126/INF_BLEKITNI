@@ -243,6 +243,101 @@
             </plugin>
 
             <plugin>
+                <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                <artifactId>launch4j-maven-plugin</artifactId>
+                <version>2.4.1</version>
+                <executions>
+                    <execution>
+                        <id>l4j-gui</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>launch4j</goal>
+                        </goals>
+                        <configuration>
+                            <headerType>gui</headerType>
+                            <outfile>${project.build.directory}/stonka.exe</outfile>
+                            <jar>${project.build.directory}/${project.build.finalName}.jar</jar>
+                            <errTitle>Stonka</errTitle>
+                            <classPath>
+                                <mainClass>org.example.gui.HelloApplication</mainClass>
+                                <addDependencies>true</addDependencies>
+                                <preCp>lib/*.jar</preCp>
+                            </classPath>
+                            <!-- Poprawna ścieżka do ikony -->
+                            <icon>${project.basedir}/src/main/resources/distribution/stonka.ico</icon>
+                            <jre>
+                                <path>%JAVA_HOME%</path>
+                                <minVersion>17</minVersion>
+                                <requiresJdk>false</requiresJdk>
+                                <opts>
+                                    <opt>--module-path lib</opt>
+                                    <opt>--add-modules=javafx.controls,javafx.fxml,javafx.web,javafx.swing,javafx.media</opt>
+                                    <opt>--enable-preview</opt>
+                                </opts>
+                            </jre>
+                            <versionInfo>
+                                <fileVersion>1.0.0.0</fileVersion>
+                                <txtFileVersion>${project.version}</txtFileVersion>
+                                <fileDescription>Aplikacja Stonka</fileDescription>
+                                <copyright>Copyright © 2024</copyright>
+                                <productVersion>1.0.0.0</productVersion>
+                                <txtProductVersion>${project.version}</txtProductVersion>
+                                <productName>Stonka</productName>
+                                <internalName>stonka</internalName>
+                                <originalFilename>stonka.exe</originalFilename>
+                            </versionInfo>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Plugin do kopiowania zasobów dystrybucyjnych -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources-to-dist</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${project.build.directory}/dist/lib"/>
+                                <copy todir="${project.build.directory}/dist/lib">
+                                    <fileset dir="${project.build.directory}/lib"/>
+                                </copy>
+                                <copy file="${project.build.directory}/stonka.exe"
+                                      tofile="${project.build.directory}/dist/stonka.exe"/>
+                                <copy file="${project.basedir}/src/main/resources/distribution/stonka.ico"
+                                      tofile="${project.build.directory}/dist/stonka.ico"/>
+
+                                <!-- Kopiowanie plików SQL -->
+                                <mkdir dir="${project.build.directory}/dist/sql"/>
+                                <copy todir="${project.build.directory}/dist/sql">
+                                    <fileset dir="${project.basedir}/src/main/resources/distribution/sql"/>
+                                </copy>
+
+                                <!-- Kopiowanie plików konfiguracyjnych -->
+                                <mkdir dir="${project.build.directory}/dist/config"/>
+                                <copy todir="${project.build.directory}/dist/config">
+                                    <fileset dir="${project.basedir}/src/main/resources/distribution/config"/>
+                                </copy>
+
+                                <!-- Pliki BAT -->
+                                <copy file="${project.basedir}/src/main/resources/distribution/configure_database.bat"
+                                      tofile="${project.build.directory}/dist/configure_database.bat"/>
+                                <copy file="${project.basedir}/src/main/resources/distribution/run.bat"
+                                      tofile="${project.build.directory}/dist/run.bat"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>${javafx.maven.plugin.version}</version>
@@ -262,8 +357,50 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-distribution-files</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/distribution</directory>
+                                    <filtering>true</filtering>
+                                    <excludes>
+                                        <exclude>**/*.exe</exclude>
+                                        <exclude>**/*.ico</exclude>
+                                        <exclude>**/*.jar</exclude>
+                                        <exclude>**/*.bin</exclude>
+                                        <exclude>**/*.dat</exclude>
+                                    </excludes>
+                                </resource>
+                                <!-- Osobna sekcja dla plików binarnych bez filtrowania -->
+                                <resource>
+                                    <directory>src/main/resources/distribution</directory>
+                                    <filtering>false</filtering>
+                                    <includes>
+                                        <include>**/*.exe</include>
+                                        <include>**/*.ico</include>
+                                        <include>**/*.jar</include>
+                                        <include>**/*.bin</include>
+                                        <include>**/*.dat</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <id>copy-dependencies</id>
@@ -280,6 +417,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
