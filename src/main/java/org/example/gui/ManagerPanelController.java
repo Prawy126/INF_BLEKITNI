@@ -1,7 +1,7 @@
 /*
  * Classname: ManagerPanelController
- * Version information: 1.8
- * Date: 2025-06-03
+ * Version information: 1.9
+ * Date: 2025-06-07
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -114,33 +114,46 @@ public class ManagerPanelController {
         taskButtons.setAlignment(Pos.CENTER);
 
         Button addTaskButton = new Button("Dodaj zadanie");
-        addTaskButton.setStyle("-fx-background-color: #2980B9; -fx-text-fill: white; -fx-font-weight: bold;");
-        addTaskButton.setOnMouseEntered(e -> { addTaskButton.setScaleX(1.1); addTaskButton.setScaleY(1.1); });
-        addTaskButton.setOnMouseExited(e -> { addTaskButton.setScaleX(1); addTaskButton.setScaleY(1); });
+        addTaskButton.setStyle("-fx-background-color: #2980B9;" +
+                " -fx-text-fill: white; -fx-font-weight: bold;");
+        addTaskButton.setOnMouseEntered(e -> { addTaskButton.setScaleX(1.1);
+            addTaskButton.setScaleY(1.1); });
+        addTaskButton.setOnMouseExited(e -> { addTaskButton.setScaleX(1);
+            addTaskButton.setScaleY(1); });
         addTaskButton.setOnAction(e -> showAddTaskPanel());
 
         Button assignEmployeeButton = new Button("Przypisz pracownika");
-        assignEmployeeButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white; -fx-font-weight: bold;");
-        assignEmployeeButton.setOnMouseEntered(e -> { assignEmployeeButton.setScaleX(1.1); assignEmployeeButton.setScaleY(1.1); });
-        assignEmployeeButton.setOnMouseExited(e -> { assignEmployeeButton.setScaleX(1); assignEmployeeButton.setScaleY(1); });
+        assignEmployeeButton.setStyle("-fx-background-color: #3498DB;" +
+                " -fx-text-fill: white; -fx-font-weight: bold;");
+        assignEmployeeButton.setOnMouseEntered(e -> { assignEmployeeButton.setScaleX(1.1);
+            assignEmployeeButton.setScaleY(1.1); });
+        assignEmployeeButton.setOnMouseExited(e -> { assignEmployeeButton.setScaleX(1);
+            assignEmployeeButton.setScaleY(1); });
         assignEmployeeButton.setOnAction(e -> showAssignEmployeeDialog());
 
         Button editButton = new Button("Edytuj zadanie");
-        editButton.setStyle("-fx-background-color: #F39C12; -fx-text-fill: white; -fx-font-weight: bold;");
-        editButton.setOnMouseEntered(e -> { editButton.setScaleX(1.1); editButton.setScaleY(1.1); });
-        editButton.setOnMouseExited(e -> { editButton.setScaleX(1); editButton.setScaleY(1); });
+        editButton.setStyle("-fx-background-color: #F39C12;" +
+                " -fx-text-fill: white; -fx-font-weight: bold;");
+        editButton.setOnMouseEntered(e -> { editButton.setScaleX(1.1);
+            editButton.setScaleY(1.1); });
+        editButton.setOnMouseExited(e -> { editButton.setScaleX(1);
+            editButton.setScaleY(1); });
 
         Button deleteButton = new Button("Archiwizuj zadanie");
-        deleteButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white; -fx-font-weight: bold;");
-        deleteButton.setOnMouseEntered(e -> { deleteButton.setScaleX(1.1); deleteButton.setScaleY(1.1); });
-        deleteButton.setOnMouseExited(e -> { deleteButton.setScaleX(1); deleteButton.setScaleY(1); });
+        deleteButton.setStyle("-fx-background-color: #E74C3C;" +
+                " -fx-text-fill: white; -fx-font-weight: bold;");
+        deleteButton.setOnMouseEntered(e -> { deleteButton.setScaleX(1.1);
+            deleteButton.setScaleY(1.1); });
+        deleteButton.setOnMouseExited(e -> { deleteButton.setScaleX(1);
+            deleteButton.setScaleY(1); });
 
         editButton.setOnAction(e -> {
             EmpTask selectedTask = taskTable.getSelectionModel().getSelectedItem();
             if (selectedTask != null) {
                 showEditTaskDialog(selectedTask);
             } else {
-                showAlert(Alert.AlertType.WARNING, "Błąd", "Wybierz zadanie do edycji.");
+                showAlert(Alert.AlertType.WARNING, "Błąd",
+                        "Wybierz zadanie do edycji.");
             }
         });
 
@@ -150,13 +163,16 @@ public class ManagerPanelController {
                 // Użycie miękkiego usuwania zamiast trwałego usunięcia
                 boolean success = taskRepository.softDeleteTask(selectedTask);
                 if (success) {
-                    showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zadanie zostało zarchiwizowane.");
+                    showAlert(Alert.AlertType.INFORMATION, "Sukces",
+                            "Zadanie zostało zarchiwizowane.");
                     showTaskPanel(); // Odświeżenie panelu
                 } else {
-                    showAlert(Alert.AlertType.ERROR, "Błąd", "Nie udało się zarchiwizować zadania.");
+                    showAlert(Alert.AlertType.ERROR, "Błąd",
+                            "Nie udało się zarchiwizować zadania.");
                 }
             } else {
-                showAlert(Alert.AlertType.WARNING, "Błąd", "Wybierz zadanie do archiwizacji.");
+                showAlert(Alert.AlertType.WARNING, "Błąd",
+                        "Wybierz zadanie do archiwizacji.");
             }
         });
 
@@ -265,16 +281,20 @@ public class ManagerPanelController {
         absenceTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         TableColumn<AbsenceRequest, Integer> idColumn = new TableColumn<>("ID");
-        idColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleIntegerProperty(
+        idColumn.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleIntegerProperty(
                 data.getValue().getId()).asObject());
         idColumn.setPrefWidth(50);
 
-        TableColumn<AbsenceRequest, String> typeColumn = new TableColumn<>("Typ wniosku");
-        typeColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+        TableColumn<AbsenceRequest, String> typeColumn =
+                new TableColumn<>("Typ wniosku");
+        typeColumn.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(
                 data.getValue().getRequestType()));
         typeColumn.setPrefWidth(150);
 
-        TableColumn<AbsenceRequest, String> employeeColumn = new TableColumn<>("Pracownik");
+        TableColumn<AbsenceRequest, String> employeeColumn =
+                new TableColumn<>("Pracownik");
         employeeColumn.setCellValueFactory(data -> {
             Employee employee = data.getValue().getEmployee();
             if (employee != null) {
@@ -312,12 +332,15 @@ public class ManagerPanelController {
 
         // Dodanie nowej kolumny statusu
         TableColumn<AbsenceRequest, String> statusColumn = new TableColumn<>("Status");
-        statusColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+        statusColumn.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(
                 data.getValue().getStatus().toString()));
         statusColumn.setPrefWidth(100);
 
-        TableColumn<AbsenceRequest, String> descriptionColumn = new TableColumn<>("Opis");
-        descriptionColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+        TableColumn<AbsenceRequest, String> descriptionColumn =
+                new TableColumn<>("Opis");
+        descriptionColumn.setCellValueFactory(data ->
+                new javafx.beans.property.SimpleStringProperty(
                 data.getValue().getDescription()));
         descriptionColumn.setPrefWidth(200);
 
@@ -346,7 +369,8 @@ public class ManagerPanelController {
         refreshButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
 
         approveButton.setOnAction(e -> {
-            AbsenceRequest selectedRequest = absenceTable.getSelectionModel().getSelectedItem();
+            AbsenceRequest selectedRequest =
+                    absenceTable.getSelectionModel().getSelectedItem();
             if (selectedRequest != null) {
                 try {
                     // Zmiana statusu zamiast modyfikacji opisu
@@ -358,7 +382,8 @@ public class ManagerPanelController {
                         employee.startSickLeave(selectedRequest.getStartDate());
                         userRepository.updateEmployee(employee);
                     }
-                    showAlert(Alert.AlertType.INFORMATION, "Sukces", "Wniosek został zatwierdzony.");
+                    showAlert(Alert.AlertType.INFORMATION, "Sukces",
+                            "Wniosek został zatwierdzony.");
                     absenceTable.getItems().setAll(absenceRepository.getAllRequests());
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -366,18 +391,21 @@ public class ManagerPanelController {
                             "Nie udało się zatwierdzić wniosku: " + ex.getMessage());
                 }
             } else {
-                showAlert(Alert.AlertType.WARNING, "Błąd", "Wybierz wniosek do zatwierdzenia.");
+                showAlert(Alert.AlertType.WARNING, "Błąd",
+                        "Wybierz wniosek do zatwierdzenia.");
             }
         });
 
         rejectButton.setOnAction(e -> {
-            AbsenceRequest selectedRequest = absenceTable.getSelectionModel().getSelectedItem();
+            AbsenceRequest selectedRequest =
+                    absenceTable.getSelectionModel().getSelectedItem();
             if (selectedRequest != null) {
                 try {
                     // Zmiana statusu zamiast modyfikacji opisu
                     selectedRequest.setStatus(AbsenceRequest.RequestStatus.REJECTED);
                     absenceRepository.updateRequest(selectedRequest);
-                    showAlert(Alert.AlertType.INFORMATION, "Sukces", "Wniosek został odrzucony.");
+                    showAlert(Alert.AlertType.INFORMATION, "Sukces",
+                            "Wniosek został odrzucony.");
                     absenceTable.getItems().setAll(absenceRepository.getAllRequests());
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -385,7 +413,8 @@ public class ManagerPanelController {
                             "Nie udało się odrzucić wniosku: " + ex.getMessage());
                 }
             } else {
-                showAlert(Alert.AlertType.WARNING, "Błąd", "Wybierz wniosek do odrzucenia.");
+                showAlert(Alert.AlertType.WARNING, "Błąd",
+                        "Wybierz wniosek do odrzucenia.");
             }
         });
 

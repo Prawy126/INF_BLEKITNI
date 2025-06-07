@@ -1,7 +1,7 @@
 /*
  * Classname: CashierPanel
- * Version information: 1.2
- * Date: 2025-05-24
+ * Version information: 1.3
+ * Date: 2025-06-07
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -94,9 +94,11 @@ public class CashierPanel {
         primaryStage.setOnCloseRequest(event -> {
             logger.info("Próba zamknięcia okna panelu kasjera");
 
-            // Sprawdź, czy raport został wygenerowany w bieżącej sesji lub wcześniej dzisiaj
+            // Sprawdź, czy raport został wygenerowany w bieżącej sesji
+            // lub wcześniej dzisiaj
             logger.debug("Sprawdzanie statusu raportu dziennego");
-            boolean reportGenerated = controller.isReportGeneratedInCurrentSession() || controller.isDailyReportGeneratedToday();
+            boolean reportGenerated = controller.isReportGeneratedInCurrentSession() ||
+                    controller.isDailyReportGeneratedToday();
 
             if (!reportGenerated) {
                 logger.warn("Raport dzienny nie został wygenerowany - zapobieganie zamknięciu");
@@ -107,7 +109,8 @@ public class CashierPanel {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Uwaga");
                 alert.setHeaderText("Nie wygenerowano raportu dziennego");
-                alert.setContentText("Czy na pewno chcesz zamknąć aplikację bez wygenerowania raportu dziennego?");
+                alert.setContentText("Czy na pewno chcesz zamknąć aplikację bez" +
+                        " wygenerowania raportu dziennego?");
 
                 Optional<ButtonType> result = alert.showAndWait();
                 if (result.isPresent() && result.get() == ButtonType.OK) {

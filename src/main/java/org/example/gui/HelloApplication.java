@@ -1,7 +1,7 @@
 /*
  * Classname: HelloApplication
- * Version information: 1.5
- * Date: 2025-05-29
+ * Version information: 1.6
+ * Date: 2025-06-07
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -52,8 +52,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class HelloApplication extends Application {
 
     // Flaga wskazująca, czy wystąpił błąd krytyczny
-    private static final AtomicBoolean criticalErrorOccurred = new AtomicBoolean(false);
-    private static final Logger logger = LogManager.getLogger(HelloApplication.class);
+    private static final AtomicBoolean criticalErrorOccurred =
+            new AtomicBoolean(false);
+    private static final Logger logger =
+            LogManager.getLogger(HelloApplication.class);
     private static String errorMessage = "";
     private String resetEmail;
 
@@ -120,18 +122,21 @@ public class HelloApplication extends Application {
                     logger.debug("Obraz logo załadowany pomyślnie");
                 } else {
                     logger.error("Nie znaleziono pliku logo.png w zasobach");
-                    InputStream defaultLogoStream = getClass().getResourceAsStream("/default_logo.png");
+                    InputStream defaultLogoStream =
+                            getClass().getResourceAsStream("/default_logo.png");
                     if (defaultLogoStream != null) {
                         image = new Image(defaultLogoStream);
                         logger.debug("Użyto domyślnego obrazu logo");
                     } else {
-                        image = new Image("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=");
+                        image = new Image("data:image/png;base64,iVBORw0KGgoAAAANS" +
+                                "UhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=");
                         logger.debug("Użyto pustego obrazu logo");
                     }
                 }
             } catch (Exception e) {
                 logger.error("BŁĄD podczas ładowania logo: {}", e.getMessage(), e);
-                image = new Image("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=");
+                image = new Image("data:image/png;base64,iVBORw0KGgoAAAANS" +
+                        "UhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=");
                 logger.debug("Użyto pustego obrazu logo po błędzie");
             }
 
@@ -233,7 +238,8 @@ public class HelloApplication extends Application {
                 try {
                     showResetPasswordWindow();
                 } catch (Exception ex) {
-                    logger.error("BŁĄD podczas otwierania okna resetowania hasła: {}", ex.getMessage(), ex);
+                    logger.error("BŁĄD podczas otwierania okna resetowania hasła: {}",
+                            ex.getMessage(), ex);
                     showAlert(
                             Alert.AlertType.ERROR,
                             "Błąd",
@@ -317,14 +323,16 @@ public class HelloApplication extends Application {
         errorTitle.setFont(Font.font("Arial", FontWeight.BOLD, 18));
         errorTitle.setStyle("-fx-text-fill: #C62828;");
 
-        Label errorDetails = new Label("Nie można uruchomić aplikacji z powodu problemów z bazą danych:");
+        Label errorDetails =
+                new Label("Nie można uruchomić aplikacji z powodu problemów z bazą danych:");
         errorDetails.setFont(Font.font("Arial", 14));
 
         TextArea errorText = new TextArea(message);
         errorText.setEditable(false);
         errorText.setWrapText(true);
         errorText.setPrefHeight(100);
-        errorText.setStyle("-fx-control-inner-background: #FFEBEE; -fx-border-color: #C62828;");
+        errorText.setStyle("-fx-control-inner-background: #FFEBEE;" +
+                " -fx-border-color: #C62828;");
 
         Label instructionLabel = new Label("Sprawdź czy:");
         instructionLabel.setFont(Font.font("Arial", FontWeight.BOLD, 14));
@@ -443,7 +451,8 @@ public class HelloApplication extends Application {
                     scale.setToY(1.1);
                     scale.play();
                 } catch (Exception ex) {
-                    System.err.println("OSTRZEŻENIE: Błąd animacji przycisku (mouseEntered): " + ex.getMessage());
+                    System.err.println("OSTRZEŻENIE: Błąd animacji przycisku (mouseEntered): "
+                            + ex.getMessage());
                 }
             });
             button.setOnMouseExited(e -> {
@@ -456,11 +465,13 @@ public class HelloApplication extends Application {
                     scale.setToY(1);
                     scale.play();
                 } catch (Exception ex) {
-                    System.err.println("OSTRZEŻENIE: Błąd animacji przycisku (mouseExited): " + ex.getMessage());
+                    System.err.println("OSTRZEŻENIE: Błąd animacji przycisku (mouseExited): "
+                            + ex.getMessage());
                 }
             });
         } catch (Exception e) {
-            System.err.println("OSTRZEŻENIE: Błąd podczas stylizacji przycisku: " + e.getMessage());
+            System.err.println("OSTRZEŻENIE: Błąd podczas stylizacji przycisku: "
+                    + e.getMessage());
             // Ustaw podstawowy styl bez animacji
             button.setStyle("-fx-background-color: " + color + ";");
         }
@@ -530,7 +541,8 @@ public class HelloApplication extends Application {
                     resetStage.close();
                     showVerificationWindow();
                 } catch (Exception ex) {
-                    System.err.println("BŁĄD podczas wysyłania kodu resetowania: " + ex.getMessage());
+                    System.err.println("BŁĄD podczas wysyłania kodu resetowania: "
+                            + ex.getMessage());
                     ex.printStackTrace();
                     showAlert(
                             Alert.AlertType.ERROR,
@@ -572,22 +584,26 @@ public class HelloApplication extends Application {
         titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 16));
         titleLabel.setTextFill(Color.DARKBLUE);
 
-        Label instructionLabel = new Label("Podaj 6-znakowy kod, który otrzymałeś na adres:");
+        Label instructionLabel = new Label("Podaj 6-znakowy kod," +
+                " który otrzymałeś na adres:");
         Label emailLabel = new Label(this.resetEmail);
         emailLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         emailLabel.setTextFill(Color.DARKSLATEGRAY);
 
-        // Pole tekstowe umożliwiające wpisanie alfanumerycznego kodu (maks. 6 znaków)
+        // Pole tekstowe umożliwiające wpisanie alfanumerycznego
+        // kodu (maks. 6 znaków)
         TextField codeField = new TextField();
         codeField.setPromptText("Wprowadź kod weryfikacyjny");
         codeField.setMaxWidth(150);
-        codeField.setTextFormatter(new TextFormatter<>(new DefaultStringConverter(), "", change -> {
+        codeField.setTextFormatter(new TextFormatter<>(new DefaultStringConverter(),
+                "", change -> {
             // Pozwól na dowolne znaki, ograniczając długość do 6
             return change.getControlNewText().length() <= 6 ? change : null;
         }));
 
         Button verifyButton = new Button("Zweryfikuj");
-        verifyButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;");
+        verifyButton.setStyle("-fx-background-color: #4CAF50;" +
+                " -fx-text-fill: white; -fx-font-weight: bold;");
         verifyButton.setOnAction(e -> {
             logger.debug("Próba weryfikacji kodu");
             String code = codeField.getText().trim();
@@ -676,13 +692,16 @@ public class HelloApplication extends Application {
 
             if (newPass.isEmpty() || repeatPass.isEmpty()) {
                 logger.warn("Puste pola hasła");
-                showAlert(Alert.AlertType.ERROR, "Błąd", "Puste pola", "Proszę wypełnić oba pola hasła.");
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Puste pola",
+                        "Proszę wypełnić oba pola hasła.");
             } else if (!newPass.equals(repeatPass)) {
                 logger.warn("Hasła nie są zgodne");
-                showAlert(Alert.AlertType.ERROR, "Błąd", "Hasła nie są zgodne", "Upewnij się, że oba hasła są identyczne.");
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Hasła nie są zgodne",
+                        "Upewnij się, że oba hasła są identyczne.");
             } else if (newPass.length() < 8) {
                 logger.warn("Hasło za krótkie: {} znaków", newPass.length());
-                showAlert(Alert.AlertType.ERROR, "Błąd", "Hasło za krótkie", "Hasło musi mieć co najmniej 8 znaków.");
+                showAlert(Alert.AlertType.ERROR, "Błąd", "Hasło za krótkie",
+                        "Hasło musi mieć co najmniej 8 znaków.");
             } else {
                 logger.info("Walidacja hasła pomyślna");
 
@@ -747,7 +766,8 @@ public class HelloApplication extends Application {
 
         // Globalny handler wyjątków - łapie wszystkie niezłapane wyjątki
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            logger.fatal("NIEZŁAPANY WYJĄTEK w wątku {}: {}", thread.getName(), throwable.getMessage(), throwable);
+            logger.fatal("NIEZŁAPANY WYJĄTEK w wątku {}: {}",
+                    thread.getName(), throwable.getMessage(), throwable);
 
             // Sprawdź czy wyjątek lub jego przyczyna jest związana z bazą danych
             if (isDataAccessException(throwable)) {
@@ -863,7 +883,8 @@ public class HelloApplication extends Application {
             return true;
         }
 
-        // Sprawdź nazwę klasy, czasami mogą być używane inne wyjątki dla błędów bazy danych
+        // Sprawdź nazwę klasy, czasami mogą być używane
+        // inne wyjątki dla błędów bazy danych
         String className = throwable.getClass().getName();
         return className.contains("SQL") ||
                 className.contains("Database") ||

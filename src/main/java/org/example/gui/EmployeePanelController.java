@@ -1,7 +1,7 @@
 /*
  * Classname: EmployeePanelController
- * Version information: 1.6
- * Date: 2025-06-06
+ * Version information: 1.7
+ * Date: 2025-06-07
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -33,7 +33,8 @@ import java.util.stream.Collectors;
 
 /**
  * Kontroler odpowiedzialny za logikę widoku panelu pracownika.
- * Obsługuje interakcje związane z zadaniami, zgłoszeniami oraz wylogowaniem.
+ * Obsługuje interakcje związane z zadaniami, zgłoszeniami oraz
+ * wylogowaniem.
  */
 public class EmployeePanelController {
 
@@ -69,7 +70,8 @@ public class EmployeePanelController {
         TableColumn<EmpTask, String> dateCol = new TableColumn<>("Termin");
         dateCol.setCellValueFactory(data -> {
             var d = data.getValue().getDate();
-            return new javafx.beans.property.SimpleStringProperty(d != null ? d.toString() : "brak");
+            return new javafx.beans.property.SimpleStringProperty(d !=
+                    null ? d.toString() : "brak");
         });
 
         taskTable.getColumns().addAll(nameCol, statusCol, dateCol);
@@ -84,7 +86,7 @@ public class EmployeePanelController {
             List<EmpTask> tasks = teRepo.findByEmployee(empId).stream()
                     .map(te -> taskRepo.findTaskById(te.getId().getTaskId()))
                     .filter(Objects::nonNull)
-                    .filter(t -> !"Zakończone".equalsIgnoreCase(t.getStatus()))  // ← tu
+                    .filter(t -> !"Zakończone".equalsIgnoreCase(t.getStatus()))
                     .collect(Collectors.toList());
 
             taskTable.setItems(FXCollections.observableArrayList(tasks));
@@ -96,8 +98,10 @@ public class EmployeePanelController {
                         "-fx-text-fill: white; " +
                         "-fx-font-weight: bold;"
         );
-        updateStatusButton.setOnMouseEntered(e -> { updateStatusButton.setScaleX(1.1); updateStatusButton.setScaleY(1.1); });
-        updateStatusButton.setOnMouseExited(e -> { updateStatusButton.setScaleX(1); updateStatusButton.setScaleY(1); });
+        updateStatusButton.setOnMouseEntered(e -> {
+            updateStatusButton.setScaleY(1.1); });
+        updateStatusButton.setOnMouseExited(e -> { updateStatusButton.setScaleX(1);
+            updateStatusButton.setScaleY(1); });
         updateStatusButton.setOnAction(e -> {
             EmpTask selected = taskTable.getSelectionModel().getSelectedItem();
             if (selected == null) {
@@ -139,8 +143,10 @@ public class EmployeePanelController {
                         "-fx-text-fill: white; " +
                         "-fx-font-weight: bold;"
         );
-        reportProblemButton.setOnMouseEntered(e -> { reportProblemButton.setScaleX(1.1); reportProblemButton.setScaleY(1.1); });
-        reportProblemButton.setOnMouseExited(e -> { reportProblemButton.setScaleX(1); reportProblemButton.setScaleY(1); });
+        reportProblemButton.setOnMouseEntered(e -> { reportProblemButton.setScaleX(1.1);
+            reportProblemButton.setScaleY(1.1); });
+        reportProblemButton.setOnMouseExited(e -> { reportProblemButton.setScaleX(1);
+            reportProblemButton.setScaleY(1); });
         reportProblemButton.setOnAction(e -> showReportIssueWindow());
 
         Button logoutButton = new Button("Wyloguj się");
@@ -149,11 +155,14 @@ public class EmployeePanelController {
                         "-fx-text-fill: white; " +
                         "-fx-font-weight: bold;"
         );
-        logoutButton.setOnMouseEntered(e -> { logoutButton.setScaleX(1.1); logoutButton.setScaleY(1.1); });
-        logoutButton.setOnMouseExited(e -> { logoutButton.setScaleX(1); logoutButton.setScaleY(1); });
+        logoutButton.setOnMouseEntered(e -> { logoutButton.setScaleX(1.1);
+            logoutButton.setScaleY(1.1); });
+        logoutButton.setOnMouseExited(e -> { logoutButton.setScaleX(1);
+            logoutButton.setScaleY(1); });
         logoutButton.setOnAction(e -> logout());
 
-        HBox buttonBox = new HBox(10, updateStatusButton, reportProblemButton, logoutButton);
+        HBox buttonBox = new HBox(10, updateStatusButton, reportProblemButton,
+                logoutButton);
         buttonBox.setAlignment(Pos.CENTER);
 
         layout.getChildren().addAll(taskLabel, taskTable, buttonBox);
@@ -188,8 +197,10 @@ public class EmployeePanelController {
                         "-fx-text-fill: white; " +
                         "-fx-font-weight: bold;"
         );
-        submitButton.setOnMouseEntered(e -> { submitButton.setScaleX(1.1); submitButton.setScaleY(1.1); });
-        submitButton.setOnMouseExited(e -> { submitButton.setScaleX(1); submitButton.setScaleY(1); });
+        submitButton.setOnMouseEntered(e -> { submitButton.setScaleX(1.1);
+            submitButton.setScaleY(1.1); });
+        submitButton.setOnMouseExited(e -> { submitButton.setScaleX(1);
+            submitButton.setScaleY(1); });
         submitButton.setOnAction(e -> {
             String desc = descriptionArea.getText();
             String category = categoryBox.getValue();

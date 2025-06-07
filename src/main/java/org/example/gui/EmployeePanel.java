@@ -1,7 +1,7 @@
 /*
  * Classname: EmployeePanel
- * Version information: 1.1
- * Date: 2025-05-29
+ * Version information: 1.2
+ * Date: 2025-06-07
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -46,7 +46,8 @@ public class EmployeePanel {
         primaryStage.setTitle("Panel pracownika");
         primaryStage.setMinWidth(700);
         primaryStage.setMinHeight(450);
-        logger.debug("Tytuł okna ustawiony na 'Panel pracownika' z minimalnymi rozmiarami");
+        logger.debug("Tytuł okna ustawiony na 'Panel pracownika' z" +
+                " minimalnymi rozmiarami");
 
         root = new BorderPane();
         root.setPadding(new Insets(10));
