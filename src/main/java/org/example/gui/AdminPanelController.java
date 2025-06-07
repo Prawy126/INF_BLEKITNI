@@ -1886,6 +1886,9 @@ public class AdminPanelController {
         loaderStage.setTitle("Backup bazy – trwa…");
         loaderStage.show();
 
+        // Utworzenie tymczasowego obiektu implementującego ILacz dla dostępu do konfiguracji
+        ILacz dbConfig = new ILacz() {};
+
         String os = System.getProperty("os.name").toLowerCase();
         String mysqldumpPath;
         try {
@@ -1918,7 +1921,7 @@ public class AdminPanelController {
             } else {
                 loaderStage.close();
                 showAlert(Alert.AlertType.ERROR, "Nieobsługiwany system",
-                        "System „" + os + "” nie jest obsługiwany.");
+                        "System „" + os + "nie jest obsługiwany.");
                 return;
             }
         } catch (Exception ex) {
@@ -1927,6 +1930,11 @@ public class AdminPanelController {
             showAlert(Alert.AlertType.ERROR, "Błąd", ex.getMessage());
             return;
         }
+
+        // Pobierz dane konfiguracyjne z instancji ILacz
+        final String dbUser = dbConfig.getMySqlUser();
+        final String dbPassword = dbConfig.getMySqlPassword();
+        final String dbName = dbConfig.getDbName();
 
         Task<Path> task = new Task<>() {
             @Override
@@ -1942,8 +1950,8 @@ public class AdminPanelController {
 
                 ProcessBuilder pb = new ProcessBuilder(
                         mysqldumpPath,
-                        "-u", org.example.database.ILacz.MYSQL_USER,
-                        "--password=" + org.example.database.ILacz.MYSQL_PASSWORD,
+                        "-u", dbUser,
+                        "--password=" + dbPassword,
                         "--routines",
                         "--events",
                         "--triggers",
@@ -1953,11 +1961,13 @@ public class AdminPanelController {
                         "--add-drop-database",
                         "--add-drop-table",
                         "--complete-insert",
-                        "--databases", org.example.database.ILacz.DB_NAME
+                        "--databases", dbName
                 );
 
-                String pwd = org.example.database.ILacz.MYSQL_PASSWORD;
-                if (pwd != null && !pwd.isEmpty()) pb.environment().put("MYSQL_PWD", pwd);
+                // Dodaj hasło jako zmienną środowiskową - bezpieczniejsze podejście
+                if (dbPassword != null && !dbPassword.isEmpty()) {
+                    pb.environment().put("MYSQL_PWD", dbPassword);
+                }
 
                 pb.redirectOutput(out);
                 pb.redirectError(ProcessBuilder.Redirect.INHERIT);

@@ -1,10 +1,9 @@
 /*
  * Classname: ILacz
- * Version information: 1.1
- * Date: 2025-05-22
+ * Version information: 1.2
+ * Date: 2025-06-07
  * Copyright notice: © BŁĘKITNI
  */
-
 
 package org.example.database;
 
@@ -13,11 +12,6 @@ package org.example.database;
  * metodę do wczytywania i wykonywania skryptu SQL.
  */
 public interface ILacz {
-
-    /**
-     * Nazwa bazy danych
-     */
-    String DB_NAME = "StonkaDB";
 
     /**
      * Nazwa pliku ze strukturą bazy danych
@@ -32,22 +26,35 @@ public interface ILacz {
     /**
      * URL do serwera MySQL (bez wskazania konkretnej bazy)
      */
-    String MYSQL_SERVER_URL = "jdbc:mysql://localhost:3306/?useSSL=false&serverTimezone=UTC";
+    default String getMySqlServerUrl() {
+        return DatabaseConfig.getMySqlServerUrl();
+    }
 
     /**
      * URL do połączenia z docelową bazą danych
      */
-    String MYSQL_DB_URL = "jdbc:mysql://localhost:3306/StonkaDB?useSSL=false&serverTimezone=UTC";
+    default String getMySqlDbUrl() {
+        return DatabaseConfig.getMySqlDbUrl();
+    }
+
+    /**
+     * Nazwa bazy danych
+     */
+    default String getDbName() {
+        return DatabaseConfig.getDbName();
+    }
 
     /**
      * Użytkownik bazy MySQL
      */
-    String MYSQL_USER = "root";
+    default String getMySqlUser() {
+        return DatabaseConfig.getDbUser();
+    }
 
     /**
      * Hasło użytkownika bazy MySQL
      */
-
-    String MYSQL_PASSWORD = ""; // Zastąp rzeczywistym hasłem do bazy danych
+    default String getMySqlPassword() {
+        return DatabaseConfig.getDbPassword();
+    }
 }
-

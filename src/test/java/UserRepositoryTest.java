@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class UserRepositoryTest {
+class  UserRepositoryTest {
 
     /* ————————————————————————————
        Repo-warstwy, współdzielone w każdym teście

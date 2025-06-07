@@ -1,7 +1,7 @@
 /*
  * Classname: DatabaseBackupExporter
- * Version information: 1.0
- * Date: 2025-06-04
+ * Version information: 1.1
+ * Date: 2025-06-07
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -33,6 +33,9 @@ public class DatabaseBackupExporter implements ILacz {
     public static void exportAllTablesToCsv(String outputFolder)
             throws SQLException,
             IOException {
+        // Utworzenie instancji do dostępu do parametrów połączenia
+        DatabaseBackupExporter exporter = new DatabaseBackupExporter();
+
         // Utwórz folder jeśli nie istnieje
         File folder = new File(outputFolder);
         if (!folder.exists() && !folder.mkdirs()) {
@@ -41,15 +44,15 @@ public class DatabaseBackupExporter implements ILacz {
         }
 
         try (Connection conn = DriverManager.getConnection(
-                MYSQL_DB_URL,
-                MYSQL_USER,
-                MYSQL_PASSWORD)
+                exporter.getMySqlDbUrl(),
+                exporter.getMySqlUser(),
+                exporter.getMySqlPassword())
         ) {
             logger.info("Rozpoczynanie eksportu " +
                     "bazy danych do plików CSV w folderze: {}", outputFolder);
 
             // Pobierz listę wszystkich tabel w bazie danych
-            List<String> tables = getAllTables(conn);
+            List<String> tables = getAllTables(conn, exporter.getDbName());
 
             // Eksportuj każdą tabelę do osobnego pliku CSV
             for (String table : tables) {
@@ -78,15 +81,16 @@ public class DatabaseBackupExporter implements ILacz {
      * Pobiera listę wszystkich tabel w bazie danych.
      *
      * @param conn Połączenie z bazą danych
+     * @param dbName Nazwa bazy danych
      * @return Lista nazw tabel
      * @throws SQLException Jeśli wystąpi błąd SQL
      */
-    private static List<String> getAllTables(Connection conn)
+    private static List<String> getAllTables(Connection conn, String dbName)
             throws SQLException {
         List<String> tables = new ArrayList<>();
         DatabaseMetaData meta = conn.getMetaData();
 
-        try (ResultSet rs = meta.getTables(DB_NAME,
+        try (ResultSet rs = meta.getTables(dbName,
                 null, "%",
                 new String[] {"TABLE"})) {
             while (rs.next()) {

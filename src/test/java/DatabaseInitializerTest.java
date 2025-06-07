@@ -1,12 +1,6 @@
-/*
- * Classname: DatabaseInitializerTest
- * Version information: 1.2
- * Date: 2025-05-22
- * Copyright notice: © BŁĘKITNI
- */
-
-
+import org.example.database.DatabaseConfig;
 import org.example.database.DatabaseInitializer;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -23,11 +17,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class DatabaseInitializerTest {
 
-    private static final String DB_NAME = "StonkaDB";
-    private static final String TEST_URL = "jdbc:mysql://localhost:3306/" + DB_NAME + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-    private static final String ROOT_URL = "jdbc:mysql://localhost:3306/?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-    private static final String USER = "root";
-    private static final String PASS = "";
+    @BeforeAll
+    static void setUp() {
+        // Możemy tutaj ustawić specjalną konfigurację testową
+        // np. używając bazy H2 zamiast MySQL
+    }
 
     @Test
     @Order(1)
@@ -36,7 +30,11 @@ class DatabaseInitializerTest {
         DatabaseInitializer.initialize();
 
         //połączenie z utworzoną bazą
-        try (Connection conn = DriverManager.getConnection(TEST_URL, USER, PASS)) {
+        try (Connection conn = DriverManager.getConnection(
+                DatabaseConfig.getMySqlDbUrl(),
+                DatabaseConfig.getDbUser(),
+                DatabaseConfig.getDbPassword())) {
+
             Statement stmt = conn.createStatement();
 
             // Sprawdzenie czy jakaś przykładowa tabela istnieje
