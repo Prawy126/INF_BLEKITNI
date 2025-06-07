@@ -10,7 +10,7 @@ import java.util.Properties;
 
 public class DatabaseConfig {
     private static final String CONFIG_FILE = "config/database.properties";
-    private static Properties properties = new Properties();
+    static Properties properties = new Properties();
 
     static {
         loadConfig();
@@ -34,7 +34,7 @@ public class DatabaseConfig {
                 properties.setProperty("db.port", "3306");
                 properties.setProperty("db.name", "StonkaDB");
                 properties.setProperty("db.user", "root");
-                properties.setProperty("db.password", "TwojeNoweHaslo");
+                properties.setProperty("db.password", "");
 
                 saveConfig();
             }
