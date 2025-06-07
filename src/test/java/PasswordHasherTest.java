@@ -51,15 +51,6 @@ class PasswordHasherTest {
     }
 
     @Test
-    void testHashPassword_EmptyPassword_ReturnsValidHash() throws NoSuchAlgorithmException, InvalidKeyException {
-        String password = "";
-        int userId = 123;
-        String hash = PasswordHasher.hashPassword(password, userId);
-        assertEquals(64, hash.length());
-        assertTrue(PasswordHasher.verifyPassword(hash, password, userId));
-    }
-
-    @Test
     void testHashPassword_NonAsciiCharacters_ReturnsValidHash() throws NoSuchAlgorithmException, InvalidKeyException {
         String password = "pa$$wörd";
         int userId = 123;

@@ -70,10 +70,10 @@ public class Employee extends Person {
     @Column(name = "Id")
     private int id;
 
-    @Column(name = "Login", nullable = false)
+    @Column(name = "Login", nullable = false, length = 100)
     private String login;
 
-    @Column(name = "Haslo", nullable = false)
+    @Column(name = "Haslo", nullable = false, length = 100)
     private String password;
 
     @ManyToOne
@@ -83,7 +83,7 @@ public class Employee extends Person {
     @Column(name = "Zarobki", precision = 10, scale = 2, nullable = false)
     private BigDecimal salary;
 
-    @Column(name = "Stanowisko", nullable = false)
+    @Column(name = "Stanowisko", nullable = false, length = 100)
     private String position;
 
     @Column(name = "onSickLeave", nullable = false)
@@ -236,17 +236,21 @@ public class Employee extends Person {
 
     /**
      * Ustawia login pracownika.
-     * Weryfikuje czy login nie jest pusty.
-     * W przypadku próby ustawienia pustego loginu, rzuca wyjątek.
+     * Weryfikuje czy login nie jest pusty oraz czy nie przekracza maksymalnej długości (100 znaków).
+     * W przypadku próby ustawienia nieprawidłowego loginu, rzuca wyjątek.
      * Operacja jest logowana na poziomie INFO lub WARN w przypadku błędu.
      *
      * @param login nowy login pracownika
-     * @throws IllegalArgumentException jeśli login jest pusty lub null
+     * @throws IllegalArgumentException jeśli login jest pusty, null lub zbyt długi
      */
     public void setLogin(String login) {
         if (login == null || login.isEmpty()) {
             logger.warn("Próbowano ustawić pusty login");
             throw new IllegalArgumentException("Login nie może być pusty");
+        }
+        if (login.length() > 100) {
+            logger.warn("Próbowano ustawić zbyt długi login: {} znaków", login.length());
+            throw new IllegalArgumentException("Login nie może być dłuższy niż 100 znaków");
         }
         logger.info("Zmieniono login pracownika na: {}", login);
         this.login = login;
@@ -266,17 +270,21 @@ public class Employee extends Person {
 
     /**
      * Ustawia hasło pracownika.
-     * Weryfikuje minimalną długość hasła (co najmniej 8 znaków).
-     * W przypadku próby ustawienia zbyt krótkiego hasła, rzuca wyjątek.
+     * Weryfikuje minimalną długość hasła (co najmniej 8 znaków) oraz maksymalną długość (100 znaków).
+     * W przypadku próby ustawienia nieprawidłowego hasła, rzuca wyjątek.
      * Operacja jest logowana na poziomie INFO lub WARN w przypadku błędu.
      *
      * @param password nowe hasło pracownika
-     * @throws PasswordException jeśli hasło jest zbyt krótkie lub null
+     * @throws PasswordException jeśli hasło jest zbyt krótkie, zbyt długie lub null
      */
     public void setPassword(String password) throws PasswordException {
         if (password == null || password.length() < 8) {
             logger.warn("Próbowano ustawić zbyt krótkie hasło");
             throw new PasswordException("Hasło musi mieć co najmniej 8 znaków");
+        }
+        if (password.length() > 100) {
+            logger.warn("Próbowano ustawić zbyt długie hasło: {} znaków", password.length());
+            throw new PasswordException("Hasło nie może być dłuższe niż 100 znaków");
         }
         logger.info("Zmieniono hasło pracownika");
         this.password = password;
@@ -350,11 +358,17 @@ public class Employee extends Person {
 
     /**
      * Ustawia stanowisko pracownika.
-     * Operacja jest logowana na poziomie INFO.
+     * Weryfikuje czy stanowisko nie przekracza maksymalnej długości (100 znaków).
+     * Operacja jest logowana na poziomie INFO lub WARN w przypadku błędu.
      *
      * @param position nowe stanowisko pracownika
+     * @throws IllegalArgumentException jeśli stanowisko jest zbyt długie
      */
     public void setPosition(String position) {
+        if (position != null && position.length() > 100) {
+            logger.warn("Próbowano ustawić zbyt długie stanowisko: {} znaków", position.length());
+            throw new IllegalArgumentException("Stanowisko nie może być dłuższe niż 100 znaków");
+        }
         logger.info("Zmieniono stanowisko pracownika na: {}", position);
         this.position = position;
     }

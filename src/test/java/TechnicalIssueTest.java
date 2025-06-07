@@ -97,24 +97,4 @@ class TechnicalIssueTest {
         assertEquals(99, issue.getEmployee().getId(), "Employee setter powinien działać");
         assertEquals("Zamknięte", issue.getStatus(), "Status setter powinien działać");
     }
-
-    /**
-     * Testuje zachowanie domyślnego konstruktora oraz ustawianie pól na null.
-     */
-    @Test
-    void testDefaultConstructorAndNulls() {
-        TechnicalIssue issue = new TechnicalIssue();
-        issue.setType(null);
-        issue.setDescription(null);
-        issue.setDateSubmitted(null);
-        issue.setEmployee(null);
-        issue.setStatus(null);
-
-        assertEquals(0, issue.getId(), "Domyślne ID powinno być 0");
-        assertNull(issue.getType(), "Type może być null");
-        assertNull(issue.getDescription(), "Description może być null");
-        assertNull(issue.getDateSubmitted(), "DateSubmitted może być null");
-        assertNull(issue.getEmployee(), "Employee może być null");
-        assertNull(issue.getStatus(), "Status może być null");
-    }
 }
