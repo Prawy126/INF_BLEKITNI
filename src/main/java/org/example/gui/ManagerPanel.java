@@ -1,7 +1,7 @@
 /*
  * Classname: ManagerPanel
- * Version information: 1.0
- * Date: 2025-04-06
+ * Version information: 1.1
+ * Date: 2025-06-07
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -33,7 +33,8 @@ import java.util.Objects;
  */
 public class ManagerPanel {
 
-    private static final Logger logger = LogManager.getLogger(ManagerPanel.class);
+    private static final Logger logger =
+            LogManager.getLogger(ManagerPanel.class);
     private BorderPane root;
     private Stage primaryStage;
     private ManagerPanelController controller;
@@ -153,7 +154,8 @@ public class ManagerPanel {
                 logoutButton
         );
 
-        logger.debug("Menu utworzone pomyślnie z {} przyciskami", menu.getChildren().size() - 1); // -1 dla logoBox
+        logger.debug("Menu utworzone pomyślnie z {} przyciskami",
+                menu.getChildren().size() - 1); // -1 dla logoBox
         return menu;
     }
 
