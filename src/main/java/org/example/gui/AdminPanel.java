@@ -53,8 +53,9 @@ public class AdminPanel {
     public AdminPanel(Stage stage) {
         logger.info("Tworzenie AdminPanel dla stage: {}", stage);
         this.primaryStage = stage;
-        primaryStage.setMinWidth(700);
-        primaryStage.setMinHeight(450);
+        primaryStage.setMinWidth(800);
+        primaryStage.setMinHeight(600);
+        primaryStage.setResizable(false);
         this.controller = new AdminPanelController(this);
         logger.debug("Kontroler AdminPanelController utworzony");
 

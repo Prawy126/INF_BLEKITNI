@@ -47,7 +47,7 @@ public class CashierPanel {
         logger.info("Tworzenie CashierPanel dla stage: {}", primaryStage);
 
         this.primaryStage = primaryStage;
-        primaryStage.setMinWidth(900);
+        primaryStage.setMinWidth(1000);
         primaryStage.setMinHeight(600);
         this.controller = new CashierPanelController(this);
         logger.debug("Kontroler CashierPanelController utworzony");

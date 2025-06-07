@@ -274,6 +274,8 @@ public class CashierPanelController {
      */
     private void showReportDialog(TableView<Report> tableView) {
         Stage dialog = createStyledDialog("Generowanie raportu sprzedaży");
+        dialog.setMinWidth(500);
+        dialog.setMinHeight(450);
 
         Label typeLabel = new Label("Typ raportu:");
         ComboBox<String> typeBox = createStyledComboBox(
@@ -841,14 +843,14 @@ public class CashierPanelController {
         }
     }
 
-
-
     /**
      * Panel zgłoszenia problemu przez kasjera.
      */
     public void showIssueReportPanel() {
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setMinWidth(400);
+        dialog.setMinHeight(300);
         dialog.setTitle("Zgłoszenie problemu");
 
         Label typeLabel = new Label("Typ zgłoszenia:");
@@ -1169,6 +1171,8 @@ public class CashierPanelController {
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setTitle(title);
+        dialog.setMinWidth(400);
+        dialog.setMinHeight(300);
         return dialog;
     }
 
@@ -1349,8 +1353,6 @@ public class CashierPanelController {
         stage.close();
         HelloApplication.showLoginScreen(stage);
     }
-
-
 
     /**
      * Ustawia status „completed” dla WSZYSTKICH zadań przypisanych bieżącemu
