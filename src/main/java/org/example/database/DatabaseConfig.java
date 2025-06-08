@@ -44,7 +44,7 @@ public class DatabaseConfig {
                 properties.setProperty("db.port", "3306");
                 properties.setProperty("db.name", "StonkaDB");
                 properties.setProperty("db.user", "root");
-                properties.setProperty("db.password", "TwojeNoweHaslo");
+                properties.setProperty("db.password", "");
                 System.out.println("[DB-CONFIG] Ustawiono domyślną konfigurację: db.host=localhost, db.port=3306, db.name=StonkaDB, db.user=root, db.password=[USTAWIONE]");
 
                 saveConfig();
