@@ -1,7 +1,7 @@
 /*
  * Classname: LogisticianPanelController
- * Version information: 1.7
- * Date: 2025-06-07
+ * Version information: 1.8
+ * Date: 2025-06-08
  * Copyright notice: © BŁĘKITNI
  */
 
@@ -37,6 +37,7 @@ import pdf.WarehouseRaport;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -188,9 +189,13 @@ public class LogisticianPanelController {
         productCol.setCellValueFactory(cellData -> new SimpleStringProperty(
                 cellData.getValue().getProduct() !=
                         null ? cellData.getValue().getProduct().getName() : ""));
-        employeeCol.setCellValueFactory(cellData -> new SimpleStringProperty(
-                cellData.getValue().getEmployee() !=
-                        null ? cellData.getValue().getEmployee().getLogin() : ""));
+        employeeCol.setCellValueFactory(cellData -> {
+            Employee emp = cellData.getValue().getEmployee();
+            String fullName = emp != null
+                    ? emp.getName() + " " + emp.getSurname()
+                    : "";
+            return new SimpleStringProperty(fullName);
+        });
         qtyCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         priceCol.setCellValueFactory(new PropertyValueFactory<>("price"));
         dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
@@ -225,8 +230,8 @@ public class LogisticianPanelController {
     }
 
     /**
-     * Otwiera prosty dialog filtrowania zamówień po ID zamówienia i
-     * ID produktu.
+     * Otwiera prosty dialog filtrowania zamówień po nazwie produktu,
+     * pracownika, cenie, ilości i dacie złożenia zamówienia
      * Po zatwierdzeniu zastępuje zawartość tabeli wyfiltrowanymi rekordami.
      *
      * @param tableView tabela zamówień, która ma zostać przefiltrowana
@@ -240,50 +245,100 @@ public class LogisticianPanelController {
         grid.setHgap(10);
         grid.setVgap(10);
 
-        Label idLabel = new Label("Id zamówienia:");
-        TextField idField = new TextField();
+        Label productLabel  = new Label("Produkt:");
+        ComboBox<String> productBox = new ComboBox<>(
+                FXCollections.observableArrayList(
+                        new ProductRepository().getAllProducts().stream()
+                                .map(Product::getName)
+                                .collect(Collectors.toList())
+                )
+        );
+        productBox.setPromptText("Wybierz produkt");
 
-        Label productIdLabel = new Label("Id produktu:");
-        TextField productIdField = new TextField();
+        Label employeeLabel = new Label("Pracownik:");
+        ComboBox<String> employeeBox = new ComboBox<>(
+                FXCollections.observableArrayList(
+                        new UserRepository().getAllEmployees().stream()
+                                .map(emp -> emp.getName() + " " + emp.getSurname())
+                                .collect(Collectors.toList())
+                )
+        );
+        employeeBox.setPromptText("Wybierz pracownika");
+
+        Label minQtyLabel   = new Label("Min. ilość:");
+        TextField minQtyField = new TextField();
+
+        Label minPriceLabel = new Label("Min. cena:");
+        TextField minPriceField = new TextField();
+
+        Label minDateLabel  = new Label("Min. data złożenia:");
+        DatePicker minDatePicker = new DatePicker();
 
         Button filterButton = new Button("Filtruj");
         styleLogisticButton(filterButton, "#27AE60");
         filterButton.setOnAction(ev -> {
-            ObservableList<Order> base =
-                    FXCollections.observableArrayList(new OrderRepository().getAllOrders());
-
-            ObservableList<Order> out = base.filtered(o -> {
-                if (!idField.getText().isBlank()) {
+            ObservableList<Order> all = FXCollections.observableArrayList(
+                    new OrderRepository().getAllOrders()
+            );
+            ObservableList<Order> filtered = all.filtered(o -> {
+                // produkt
+                String prodSel = productBox.getValue();
+                if (prodSel != null && !prodSel.isEmpty()) {
+                    if (o.getProduct() == null
+                            || !prodSel.equals(o.getProduct().getName())) {
+                        return false;
+                    }
+                }
+                // pracownik (imię + nazwisko)
+                String empSel = employeeBox.getValue();
+                if (empSel != null && !empSel.isEmpty()) {
+                    String full = o.getEmployee().getName()
+                            + " " + o.getEmployee().getSurname();
+                    if (!empSel.equals(full)) {
+                        return false;
+                    }
+                }
+                // min ilość
+                if (!minQtyField.getText().isBlank()) {
                     try {
-                        if (o.getId() != Integer.parseInt(idField.getText().trim()))
-                            return false;
+                        int minQ = Integer.parseInt(minQtyField.getText().trim());
+                        if (o.getQuantity() < minQ) return false;
                     } catch (NumberFormatException ex) {
                         return false;
                     }
                 }
-                if (!productIdField.getText().isBlank()) {
+                // min cena
+                if (!minPriceField.getText().isBlank()) {
                     try {
-                        if (o.getProduct().getId() != Integer.parseInt(productIdField.getText().trim()))
-                            return false;
-                    } catch (NumberFormatException ex) {
+                        BigDecimal minP = new BigDecimal(minPriceField.getText().trim());
+                        if (o.getPrice().compareTo(minP) < 0) return false;
+                    } catch (Exception ex) {
                         return false;
                     }
+                }
+                // min data
+                if (minDatePicker.getValue() != null) {
+                    LocalDate orderDate = ((java.sql.Date)o.getDate()).toLocalDate();
+                    if (orderDate.isBefore(minDatePicker.getValue())) return false;
                 }
                 return true;
             });
 
-            tableView.setItems(out);
+            tableView.setItems(filtered);
             stage.close();
         });
 
-        grid.add(idLabel, 0, 0);
-        grid.add(idField, 1, 0);
-        grid.add(productIdLabel, 0, 1);
-        grid.add(productIdField, 1, 1);
-        grid.add(filterButton, 1, 2);
+        grid.addRow(0, productLabel,  productBox);
+        grid.addRow(1, employeeLabel, employeeBox);
+        grid.addRow(2, minQtyLabel,   minQtyField);
+        grid.addRow(3, minPriceLabel, minPriceField);
+        grid.addRow(4, minDateLabel,  minDatePicker);
+        grid.add(filterButton, 1, 5);
 
-        stage.setMinWidth(400);
-        stage.setMinHeight(250);
+        Scene scene = new Scene(grid, 500, 350);
+        stage.setScene(scene);
+        stage.setMinWidth(500);
+        stage.setMinHeight(350);
         stage.show();
     }
 
@@ -662,7 +717,7 @@ public class LogisticianPanelController {
     /**
      * Otwiera okienko filtrowania stanów magazynowych.
      * Po zatwierdzeniu pobiera pełny zestaw danych, filtruje
-     * po Id, nazwie i minimalnej ilości
+     * po nazwie produktu i minimalnej ilości
      * i aktualizuje tabelę.
      *
      * @param table tabela stanów magazynowych, która ma zostać przefiltrowana
@@ -673,32 +728,37 @@ public class LogisticianPanelController {
         GridPane g = new GridPane();
         g.setPadding(new Insets(20)); g.setHgap(10); g.setVgap(10);
 
-        TextField idF   = new TextField();
-        TextField nameF = new TextField();
-        TextField qtyF  = new TextField();
+        // ComboBox z nazwami produktów
+        Label nameLabel = new Label("Nazwa produktu:");
+        ComboBox<String> nameCombo = new ComboBox<>(
+                FXCollections.observableArrayList(
+                        productRepository.getAllProducts()
+                                .stream()
+                                .map(org.example.sys.Product::getName)
+                                .distinct()
+                                .sorted()
+                                .collect(Collectors.toList())
+                )
+        );
+        nameCombo.setPromptText("Wybierz produkt");
 
-        g.addRow(0,new Label("Id:"),           idF);
-        g.addRow(1,new Label("Nazwa:"),        nameF);
-        g.addRow(2,new Label("Min. ilość:"),   qtyF);
+        // Pole minimalnej ilości
+        Label minQtyLabel = new Label("Min. ilość:");
+        TextField qtyF = new TextField();
 
         Button filt = new Button("Filtruj");
         styleLogisticButton(filt, "#2980B9");
         filt.setOnAction(ev -> {
+            // Załaduj świeże dane
             refreshStockTable(table);
             ObservableList<StockRow> base = table.getItems();
             ObservableList<StockRow> out = base.filtered(r -> {
-                if (!idF.getText().isBlank()) {
-                    try {
-                        if (r.getId() != Integer.parseInt(idF.getText().trim()))
-                            return false;
-                    } catch (NumberFormatException ex) {
-                        return false;
-                    }
+                // nazwa produktu
+                String selName = nameCombo.getValue();
+                if (selName != null && !selName.isEmpty()) {
+                    if (!r.getName().equals(selName)) return false;
                 }
-                if (!nameF.getText().isBlank() &&
-                        !r.getName().toLowerCase().contains(nameF.getText().toLowerCase())) {
-                    return false;
-                }
+                // minimalna ilość
                 if (!qtyF.getText().isBlank()) {
                     try {
                         int minQty = Integer.parseInt(qtyF.getText().trim());
@@ -713,9 +773,12 @@ public class LogisticianPanelController {
             st.close();
         });
 
-        g.add(filt,1,3);
+        // layout
+        g.addRow(0, nameLabel, nameCombo);
+        g.addRow(1, minQtyLabel, qtyF);
+        g.add(filt, 1, 2);
 
-        st.setScene(new Scene(g,400,250));
+        st.setScene(new Scene(g, 400, 250));
         st.show();
     }
 
