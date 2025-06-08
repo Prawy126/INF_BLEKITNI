@@ -97,14 +97,6 @@ INSERT INTO Transakcje (Id_pracownika, Data) VALUES
 INSERT INTO Transakcje_Produkty (Id_transakcji, Id_produktu, Ilosc) VALUES
 (1, 1, 2), (1, 2, 1), (2, 3, 3), (3, 4, 1), (4, 5, 2), (5, 1, 1), (5, 5, 3);
 
--- Raporty
-INSERT INTO Raporty (Typ_raportu, Data_poczatku, Data_zakonczenia, Id_pracownika, Plik) VALUES
-('Raport miesięczny',      '2025-04-01', '2025-04-30', 1, 'raport_kwiecien.pdf'),
-('Stan magazynu',          '2025-04-01', '2025-04-15', 2, 'magazyn_15kwiecien.pdf'),
-('Sprzedaż dzienna',       '2025-04-10', '2025-04-10', 3, 'sprzedaz_10kwietnia.pdf'),
-('Wnioski o nieobecność',  '2025-04-01', '2025-04-30', 4, 'wnioski_kwiecien.pdf'),
-('Zamówienia i dostawy',   '2025-04-01', '2025-04-20', 5, 'zamowienia_dostawy.pdf');
-
 -- Zgłoszenia techniczne
 INSERT INTO Zgloszenia_techniczne (Typ, Opis, Id_pracownika) VALUES
 ('Awaria sprzętu',        'Nie działa drukarka fiskalna przy kasie nr 1', 2),
