@@ -94,8 +94,8 @@ INSERT INTO Transakcje (Id_pracownika, Data) VALUES
 (5, '2025-04-14');
 
 -- Transakcje_Produkty
-INSERT INTO Transakcje_Produkty (Id_transakcji, Id_produktu) VALUES
-(1, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 1), (5, 5);
+INSERT INTO Transakcje_Produkty (Id_transakcji, Id_produktu, Ilosc) VALUES
+(1, 1, 2), (1, 2, 1), (2, 3, 3), (3, 4, 1), (4, 5, 2), (5, 1, 1), (5, 5, 3);
 
 -- Raporty
 INSERT INTO Raporty (Typ_raportu, Data_poczatku, Data_zakonczenia, Id_pracownika, Plik) VALUES
