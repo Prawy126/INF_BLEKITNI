@@ -1,5 +1,6 @@
 ; Skrypt instalacyjny dla aplikacji Stonka
-; Wygenerowany: 2025-06-08
+; Wygenerowany: 2025-06-08 17:12:36
+; Autor: JakubOpar
 
 #define MyAppName "Stonka"
 #define MyAppVersion "1.0"
@@ -124,13 +125,12 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChang
 
 [Code]
 var
-  MySQLPage: TInputQueryWizardPage;
   DBConfigPage: TInputQueryWizardPage;
+  MySQLPage: TInputQueryWizardPage;
+  EmailConfigPage: TInputQueryWizardPage;
   TestConnectionButton: TNewButton;
   ConnectionStatusLabel: TNewStaticText;
   MySQLRootPassword: String;
-  MySQLAppUsername: String;
-  MySQLAppPassword: String;
   UseExistingMySQL: Boolean;
   MySQLDownloadPath: String;
   MySQLConfigPath: String;
@@ -212,10 +212,11 @@ begin
   WizardForm.Refresh;
   
   if TestDatabaseConnection(
-      Trim(DBConfigPage.Values[0]),
-      Trim(DBConfigPage.Values[1]),
-      Trim(DBConfigPage.Values[3]),
-      Trim(DBConfigPage.Values[4])) then
+      Trim(DBConfigPage.Values[0]),  // Host
+      Trim(DBConfigPage.Values[1]),  // Port
+      Trim(DBConfigPage.Values[3]),  // User
+      Trim(DBConfigPage.Values[4]))  // Password
+  then
   begin
     ConnectionStatusLabel.Caption := 'Połączenie udane!';
     ConnectionStatusLabel.Font.Color := clGreen;
@@ -301,61 +302,10 @@ end;
 procedure CreateMySQLConfigScript();
 var
   FileContents: TStringList;
-  AdminSQLContents: TStringList;
   TrimmedRootPassword: String;
-  TrimmedAppUsername: String;
-  TrimmedAppPassword: String;
-  AdminSQLPath: String;
 begin
   // Przycinanie wszystkich wartości na początku aby zapobiec błędom z dodatkową spacją
   TrimmedRootPassword := Trim(MySQLRootPassword);
-  TrimmedAppUsername := Trim(MySQLAppUsername);
-  TrimmedAppPassword := Trim(MySQLAppPassword);
-  
-  // Ścieżka do tymczasowego pliku SQL dla administratora
-  AdminSQLPath := ExpandConstant('{tmp}\admin_user.sql');
-  
-  // Utworzenie pliku SQL dla administratora bezpośrednio z wstawionymi wartościami
-  AdminSQLContents := TStringList.Create;
-  try
-    AdminSQLContents.Add('USE StonkaDB;');
-    AdminSQLContents.Add('-- Wyświetl diagnostykę');
-    AdminSQLContents.Add('SELECT ''Rozpoczynam dodawanie administratora'' AS ''Status'';');
-    AdminSQLContents.Add('');
-    AdminSQLContents.Add('-- Dodaj adres administratora');
-    AdminSQLContents.Add('INSERT INTO Adresy (Miejscowosc, Numer_domu, Kod_pocztowy, Miasto)');
-    AdminSQLContents.Add('SELECT ''Administrator'', ''1'', ''00-000'', ''System''');
-    AdminSQLContents.Add('WHERE NOT EXISTS (');
-    AdminSQLContents.Add('    SELECT 1 FROM Adresy ');
-    AdminSQLContents.Add('    WHERE Miejscowosc = ''Administrator'' AND Kod_pocztowy = ''00-000''');
-    AdminSQLContents.Add(');');
-    AdminSQLContents.Add('');
-    AdminSQLContents.Add('-- Pobierz ID adresu');
-    AdminSQLContents.Add('SELECT @adres_id := Id FROM Adresy');
-    AdminSQLContents.Add('WHERE Miejscowosc = ''Administrator'' AND Kod_pocztowy = ''00-000'' LIMIT 1;');
-    AdminSQLContents.Add('');
-    AdminSQLContents.Add('SELECT CONCAT(''Użyję ID adresu: '', @adres_id) AS ''Info'';');
-    AdminSQLContents.Add('');
-    AdminSQLContents.Add('-- Sprawdź czy użytkownik już istnieje');
-    AdminSQLContents.Add('SELECT @user_exists := COUNT(*) FROM Pracownicy WHERE Login = ''' + TrimmedAppUsername + ''';');
-    AdminSQLContents.Add('');
-    AdminSQLContents.Add('SELECT CONCAT(''Czy użytkownik istnieje: '', @user_exists) AS ''Info'';');
-    AdminSQLContents.Add('');
-    AdminSQLContents.Add('-- Usuń użytkownika jeśli istnieje');
-    AdminSQLContents.Add('DELETE FROM Pracownicy WHERE Login = ''' + TrimmedAppUsername + ''';');
-    AdminSQLContents.Add('');
-    AdminSQLContents.Add('-- Dodaj nowego użytkownika');
-    AdminSQLContents.Add('INSERT INTO Pracownicy (Imie, Nazwisko, Wiek, Id_adresu, Login, Haslo, Email, Zarobki, Stanowisko, onSickLeave, sickLeaveStartDate, usuniety)');
-    AdminSQLContents.Add('VALUES (''root'', ''root'', 35, @adres_id, ''' + TrimmedAppUsername + ''', ''' + TrimmedAppPassword + ''', ''root.root@example.com'', 4500.00, ''root'', FALSE, NULL, FALSE);');
-    AdminSQLContents.Add('');
-    AdminSQLContents.Add('-- Weryfikacja');
-    AdminSQLContents.Add('SELECT COUNT(*) AS ''Liczba administratorów'' FROM Pracownicy WHERE Login = ''' + TrimmedAppUsername + ''';');
-    
-    // Zapisz plik SQL z wartościami już wstawionymi (nie używamy %USER% i %PASS%)
-    AdminSQLContents.SaveToFile(AdminSQLPath);
-  finally
-    AdminSQLContents.Free;
-  end;
   
   // Teraz tworzymy główny skrypt konfiguracyjny
   FileContents := TStringList.Create;
@@ -372,22 +322,21 @@ begin
     // Konfigurowanie MySQL
     FileContents.Add('echo Ustawianie hasła root...');
     FileContents.Add('set "MYSQL_PATH=C:\Program Files\MySQL\MySQL Server 8.0\bin"');
+    FileContents.Add('if not exist "%MYSQL_PATH%\mysql.exe" (');
+    FileContents.Add('  set "MYSQL_PATH=C:\Program Files (x86)\MySQL\MySQL Server 8.0\bin"');
+    FileContents.Add(')');
     FileContents.Add('if exist "%MYSQL_PATH%\mysql.exe" (');
     FileContents.Add('  "%MYSQL_PATH%\mysqladmin" -u root password "' + TrimmedRootPassword + '"');
     
-    // Tworzenie użytkownika dla aplikacji
-    FileContents.Add('  "%MYSQL_PATH%\mysql" -u root -p' + TrimmedRootPassword + ' -e "CREATE USER IF NOT EXISTS ''"' + TrimmedAppUsername + '"''@''localhost'' IDENTIFIED BY ''"' + TrimmedAppPassword + '"''; GRANT ALL PRIVILEGES ON *.* TO ''"' + TrimmedAppUsername + '"''@''localhost'';"');
-    FileContents.Add('  echo Utworzono użytkownika ' + TrimmedAppUsername);
-    
     // Tworzenie bazy danych i importowanie struktury
     FileContents.Add('  "%MYSQL_PATH%\mysql" -u root -p' + TrimmedRootPassword + ' -e "CREATE DATABASE IF NOT EXISTS StonkaDB CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"');
-    FileContents.Add('  "%MYSQL_PATH%\mysql" -u root -p' + TrimmedRootPassword + ' StonkaDB < "' + ExpandConstant('{app}\sql\Struktura.sql') + '"');
-    
-    // Dodanie użytkownika root do aplikacji za pomocą przygotowanego pliku
-    FileContents.Add('  echo Tworzenie użytkownika administratora aplikacji...');
-    FileContents.Add('  "%MYSQL_PATH%\mysql" -u root -p' + TrimmedRootPassword + ' StonkaDB < "' + AdminSQLPath + '" > "%TEMP%\admin_output.txt" 2>&1');
-    FileContents.Add('  echo Wyświetlam wynik tworzenia administratora:');
-    FileContents.Add('  type "%TEMP%\admin_output.txt"');
+    FileContents.Add('  echo Utworzono bazę danych StonkaDB.');
+    FileContents.Add('  if exist "' + ExpandConstant('{app}\sql\Struktura.sql') + '" (');
+    FileContents.Add('    "%MYSQL_PATH%\mysql" -u root -p' + TrimmedRootPassword + ' StonkaDB < "' + ExpandConstant('{app}\sql\Struktura.sql') + '"');
+    FileContents.Add('    echo Zaimportowano strukturę bazy danych.');
+    FileContents.Add('  ) else (');
+    FileContents.Add('    echo UWAGA: Nie znaleziono pliku Struktura.sql!');
+    FileContents.Add('  )');
     
     // Dodawanie przykładowych danych jeśli istnieją
     FileContents.Add('  if exist "' + ExpandConstant('{app}\sql\Dane.sql') + '" (');
@@ -395,15 +344,8 @@ begin
     FileContents.Add('    echo Zaimportowano przykładowe dane.');
     FileContents.Add('  )');
     
-    // Zapisanie danych połączenia dla aplikacji
-    FileContents.Add('  echo Zapisywanie konfiguracji połączenia dla aplikacji Stonka...');
-    FileContents.Add('  (');
-    FileContents.Add('    echo db.host=localhost');
-    FileContents.Add('    echo db.port=3306');
-    FileContents.Add('    echo db.name=StonkaDB');
-    FileContents.Add('    echo db.user=' + TrimmedAppUsername);
-    FileContents.Add('    echo db.password=' + TrimmedAppPassword);
-    FileContents.Add('  ) > "' + ExpandConstant('{app}\config\database.properties') + '"');
+    FileContents.Add(') else (');
+    FileContents.Add('  echo BŁĄD: Nie znaleziono programu MySQL!');
     FileContents.Add(')');
     
     FileContents.Add('echo Konfiguracja MySQL zakończona.');
@@ -442,42 +384,44 @@ begin
   // Sprawdź czy MySQL jest zainstalowany
   UseExistingMySQL := IsMySQLInstalled();
 
-  // Tworzenie strony konfiguracji MySQL
-  MySQLPage := CreateInputQueryPage(wpSelectTasks,
-    'Konfiguracja MySQL',
-    'Ustawienia bazy danych dla aplikacji Stonka',
-    'Wprowadź dane dostępowe do bazy danych MySQL:');
-    
-  // Jeśli nie ma zainstalowanego MySQL i wybrano jego instalację
+  // Tworzenie strony konfiguracji MySQL (tylko jeśli będziemy instalować MySQL)
   if not UseExistingMySQL then
   begin
+    MySQLPage := CreateInputQueryPage(wpSelectTasks,
+      'Konfiguracja MySQL',
+      'Ustawienia administratora MySQL',
+      'Wprowadź hasło administratora (root) dla MySQL:');
+      
+    // Pytanie tylko o hasło root MySQL
     MySQLPage.Add('Hasło administratora MySQL (root):', True);
-    MySQLPage.Add('Nazwa użytkownika dla aplikacji:', False);
-    MySQLPage.Add('Hasło użytkownika dla aplikacji:', True);
-    
-    // Domyślne wartości
+      
+    // Domyślna wartość
     MySQLPage.Values[0] := 'StrongP@ssw0rd123';
-    MySQLPage.Values[1] := 'root';
-    MySQLPage.Values[2] := 'StrongP@ssw0rd123';
-  end
-  else
-  begin
-    // Jeśli MySQL jest już zainstalowany, pytaj tylko o dane dla aplikacji
-    MySQLPage.Add('Nazwa użytkownika dla aplikacji:', False);
-    MySQLPage.Add('Hasło użytkownika dla aplikacji:', True);
-    
-    // Domyślne wartości
-    MySQLPage.Values[0] := 'root';
-    MySQLPage.Values[1] := 'StrongP@ssw0rd123';
   end;
   
   // Dodanie strony konfiguracji bazy danych
-  DBConfigPage := CreateInputQueryPage(MySQLPage.ID,
-    'Konfiguracja połączenia z bazą danych', 
-    'Wprowadź dane połączenia z bazą MySQL',
-    'Te ustawienia zostaną zapisane w pliku database.properties.');
+  if not UseExistingMySQL then
+  begin
+    if Assigned(MySQLPage) then
+      DBConfigPage := CreateInputQueryPage(MySQLPage.ID,
+        'Konfiguracja połączenia z bazą danych', 
+        'Wprowadź dane połączenia z bazą MySQL',
+        'Te ustawienia zostaną zapisane w pliku database.properties.')
+    else
+      DBConfigPage := CreateInputQueryPage(wpSelectTasks,
+        'Konfiguracja połączenia z bazą danych', 
+        'Wprowadź dane połączenia z bazą MySQL',
+        'Te ustawienia zostaną zapisane w pliku database.properties.');
+  end
+  else
+  begin
+    DBConfigPage := CreateInputQueryPage(wpSelectTasks,
+      'Konfiguracja połączenia z bazą danych', 
+      'Wprowadź dane połączenia z bazą MySQL',
+      'Te ustawienia zostaną zapisane w pliku database.properties.');
+  end;
     
-  // Dodanie pól formularza
+  // Dodanie pól formularza do konfiguracji bazy danych
   DBConfigPage.Add('Host:', False);
   DBConfigPage.Add('Port:', False);
   DBConfigPage.Add('Nazwa bazy danych:', False);
@@ -490,6 +434,20 @@ begin
   DBConfigPage.Values[2] := 'StonkaDB';
   DBConfigPage.Values[3] := 'root';
   DBConfigPage.Values[4] := '';
+  
+  // Tworzenie strony konfiguracji email
+  EmailConfigPage := CreateInputQueryPage(DBConfigPage.ID,
+    'Konfiguracja wysyłania wiadomości email',
+    'Wprowadź dane konta email używanego do wysyłania powiadomień',
+    'Te ustawienia zostaną zapisane w pliku email.properties.');
+
+  // Dodanie pól formularza do konfiguracji email
+  EmailConfigPage.Add('Adres email:', False);
+  EmailConfigPage.Add('Hasło do konta email:', True); // True oznacza pole hasła
+
+  // Domyślne wartości
+  EmailConfigPage.Values[0] := 'powiadomienia@twojafirma.pl';
+  EmailConfigPage.Values[1] := '';
   
   // Dodanie przycisku testowania połączenia
   TestConnectionButton := TNewButton.Create(WizardForm);
@@ -534,15 +492,14 @@ begin
     end;
   end;
   
-  // Przy wejściu na stronę konfiguracji bazy danych, wypełnij domyślne wartości
-  if CurPageID = DBConfigPage.ID then
+  // Przy wejściu na stronę konfiguracji bazy danych
+  if (CurPageID = DBConfigPage.ID) then
   begin
-    // Ustaw domyślne wartości na podstawie poprzedniej strony lub domyślne
-    if not UseExistingMySQL and WizardIsTaskSelected('installmysql') then
+    // Ustaw domyślne hasło takie samo jak dla MySQL
+    if not UseExistingMySQL and WizardIsTaskSelected('installmysql') and Assigned(MySQLPage) then
     begin
-      // Jeśli instalujemy MySQL, użyj danych z MySQLPage
-      DBConfigPage.Values[3] := Trim(MySQLAppUsername); // Użytkownik
-      DBConfigPage.Values[4] := Trim(MySQLAppPassword); // Hasło
+      MySQLRootPassword := Trim(MySQLPage.Values[0]);
+      DBConfigPage.Values[4] := MySQLRootPassword; // Hasło
     end;
   end;
 end;
@@ -553,43 +510,22 @@ begin
   Result := True;
   
   // Walidacja danych MySQL
-  if CurPageID = MySQLPage.ID then
+  if Assigned(MySQLPage) and (CurPageID = MySQLPage.ID) then
   begin
     if not UseExistingMySQL and WizardIsTaskSelected('installmysql') then
     begin
-      MySQLRootPassword := Trim(MySQLPage.Values[0]);  // Używamy Trim()
-      MySQLAppUsername := Trim(MySQLPage.Values[1]);   // Używamy Trim()
-      MySQLAppPassword := Trim(MySQLPage.Values[2]);   // Używamy Trim()
+      MySQLRootPassword := Trim(MySQLPage.Values[0]); // Używamy Trim()
       
       if Length(MySQLRootPassword) < 8 then
       begin
         MsgBox('Hasło administratora MySQL musi mieć co najmniej 8 znaków.', mbError, MB_OK);
         Result := False;
       end;
-    end
-    else
-    begin
-      // Gdy MySQL jest już zainstalowany, indeksy są inne
-      MySQLAppUsername := Trim(MySQLPage.Values[0]);  // Używamy Trim()
-      MySQLAppPassword := Trim(MySQLPage.Values[1]);  // Używamy Trim()
-    end;
-    
-    // Walidacja danych dla obu przypadków
-    if Length(MySQLAppUsername) = 0 then
-    begin
-      MsgBox('Nazwa użytkownika aplikacji nie może być pusta.', mbError, MB_OK);
-      Result := False;
-    end;
-    
-    if Length(MySQLAppPassword) < 8 then
-    begin
-      MsgBox('Hasło użytkownika aplikacji musi mieć co najmniej 8 znaków.', mbError, MB_OK);
-      Result := False;
     end;
   end;
   
   // Walidacja konfiguracji DB
-  if CurPageID = DBConfigPage.ID then
+  if (CurPageID = DBConfigPage.ID) then
   begin
     // Sprawdź czy wszystkie pola są wypełnione
     if (Length(Trim(DBConfigPage.Values[0])) = 0) or
@@ -599,6 +535,29 @@ begin
     begin
       MsgBox('Wszystkie pola konfiguracji bazy danych muszą być wypełnione.', mbError, MB_OK);
       Result := False;
+    end;
+  end;
+  
+  // Walidacja konfiguracji email
+  if (CurPageID = EmailConfigPage.ID) then
+  begin
+    // Sprawdź czy wszystkie pola są wypełnione
+    if (Length(Trim(EmailConfigPage.Values[0])) = 0) or
+       (Length(Trim(EmailConfigPage.Values[1])) = 0) then
+    begin
+      MsgBox('Adres email i hasło muszą być wypełnione.', mbError, MB_OK);
+      Result := False;
+      Exit;
+    end;
+    
+    // Walidacja formatu adresu email
+    if (Pos('@', EmailConfigPage.Values[0]) <= 1) or
+       (Pos('.', EmailConfigPage.Values[0]) <= 3) or
+       (Pos('.', EmailConfigPage.Values[0]) = Length(EmailConfigPage.Values[0])) then
+    begin
+      MsgBox('Podany adres email ma nieprawidłowy format.', mbError, MB_OK);
+      Result := False;
+      Exit;
     end;
   end;
 end;
@@ -620,6 +579,7 @@ procedure CurStepChanged(CurStep: TSetupStep);
 var
   ResultCode: Integer;
   Host, Port, DBName, User, Password: String;
+  EmailAddr, EmailPass: String;
 begin
   if CurStep = ssInstall then
   begin
@@ -648,7 +608,23 @@ begin
       'db.password=' + Password + #13#10,
       False);
       
+    // Zapisz konfigurację email
+    EmailAddr := Trim(EmailConfigPage.Values[0]);
+    EmailPass := Trim(EmailConfigPage.Values[1]);
+    
+    // Zapisz do pliku email.properties
+    SaveStringToFile(ExpandConstant('{app}\config\email.properties'),
+      'email.address=' + EmailAddr + #13#10 +
+      'email.password=' + EmailPass + #13#10,
+      False);
+      
+    // Stwórz też plik PASS.txt dla kompatybilności wstecznej
+    SaveStringToFile(ExpandConstant('{app}\PASS.txt'),
+      EmailAddr + #13#10 +
+      EmailPass + #13#10,
+      False);
+      
     // Informacja dla użytkownika
-    MsgBox('Konfiguracja bazy danych została zapisana. Aplikacja Stonka jest gotowa do użycia.', mbInformation, MB_OK);
+    MsgBox('Konfiguracja bazy danych i email została zapisana. Aplikacja Stonka jest gotowa do użycia.', mbInformation, MB_OK);
   end;
 end;
