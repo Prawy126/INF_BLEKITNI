@@ -8,6 +8,7 @@
 
 package org.example.sys;
 
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -230,7 +231,7 @@ public class EmailSender {
 
             // 2. Znajdź wszystkie aktywne tokeny dla tego użytkownika
             List<PasswordResetToken> validTokens
-                    = userRepo.findValidTokensByUserId((long) employee.getId());
+                    = userRepo.findValidTokensByUserId(employee.getId());
 
             if (validTokens.isEmpty()) {
                 logger.warn("Brak aktywnych tokenów dla użytkownika");
@@ -279,27 +280,49 @@ public class EmailSender {
      *                   zawiera puste dane
      */
     private static String[] readEmailAndPasswordFromFile() throws Exception {
-        Path path = Paths.get("PASS.txt");
-        if (!Files.exists(path)) {
-            logger.error("Brak pliku PASS.txt w katalogu projektu");
-            throw new RuntimeException("Brak pliku konfiguracyjnego: PASS.txt");
+        // Pierwsza próba - odczyt z pliku properties
+        Path configPath = Paths.get("config/email.properties");
+
+        if (Files.exists(configPath)) {
+            // Odczyt z pliku konfiguracyjnego
+            Properties props = new Properties();
+            try (InputStream input = Files.newInputStream(configPath)) {
+                props.load(input);
+            }
+
+            String email = props.getProperty("email.address");
+            String password = props.getProperty("email.password");
+
+            if (email != null && password != null && !email.trim().isEmpty() && !password.trim().isEmpty()) {
+                logger.info("Odczytano dane email z pliku email.properties");
+                return new String[]{email.trim(), password.trim()};
+            }
         }
 
-        List<String> lines = Files.readAllLines(path);
-        if (lines.size() < 2) {
-            logger.error("Plik PASS.txt ma nieprawidłową liczbę linii");
-            throw new RuntimeException("Plik PASS.txt musi zawierać 2 linie:" +
-                    " email i hasło");
+        // Druga próba - odczyt ze starego pliku PASS.txt
+        Path oldPath = Paths.get("PASS.txt");
+        if (Files.exists(oldPath)) {
+            logger.warn("Używanie przestarzałego pliku PASS.txt. Zalecana migracja do email.properties");
+
+            List<String> lines = Files.readAllLines(oldPath);
+            if (lines.size() < 2) {
+                logger.error("Plik PASS.txt ma nieprawidłową liczbę linii");
+                throw new RuntimeException("Plik PASS.txt musi zawierać 2 linie: email i hasło");
+            }
+
+            String email = lines.get(0).trim();
+            String password = lines.get(1).trim();
+
+            if (email.isEmpty() || password.isEmpty()) {
+                logger.error("Email lub hasło w PASS.txt są puste");
+                throw new RuntimeException("Email lub hasło w PASS.txt są puste");
+            }
+
+            return new String[]{email, password};
         }
 
-        String email = lines.get(0).trim();
-        String password = lines.get(1).trim();
-
-        if (email.isEmpty() || password.isEmpty()) {
-            logger.error("Email lub hasło w PASS.txt są puste");
-            throw new RuntimeException("Email lub hasło w PASS.txt są puste");
-        }
-
-        return new String[]{email, password};
+        // Żaden z plików nie istnieje
+        logger.error("Nie znaleziono pliku konfiguracyjnego z danymi email");
+        throw new RuntimeException("Brak pliku konfiguracyjnego: email.properties lub PASS.txt");
     }
 }

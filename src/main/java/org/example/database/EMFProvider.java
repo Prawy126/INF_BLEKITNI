@@ -122,6 +122,7 @@ public class EMFProvider {
                         managedClasses.add("org.example.sys.TechnicalIssue");
                         managedClasses.add("org.example.sys.Report");
                         managedClasses.add("org.example.sys.Order");
+                        managedClasses.add("org.example.sys.PasswordResetToken");
 
                         // dodaj pozostałe klasy encyjne, które używasz
 

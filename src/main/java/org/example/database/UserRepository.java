@@ -805,22 +805,22 @@ public class UserRepository {
      * @param userId identyfikator pracownika
      * @return lista ważnych tokenów
      */
-    public List<PasswordResetToken> findValidTokensByUserId(long userId) {
+    public List<PasswordResetToken> findValidTokensByUserId(Integer userId) {
         logger.debug("findValidTokensByUserId() – userId={}", userId);
         EntityManager em = EMFProvider.get().createEntityManager();
         try {
+            // Używamy parametru z aktualnym czasem zamiast CURRENT_TIMESTAMP
             List<PasswordResetToken> tokens = em.createQuery(
                             "SELECT t FROM PasswordResetToken t "
                                     + " WHERE t.userId = :userId "
-                                    + "   AND t.expirationTime " +
-                                    "> CURRENT_TIMESTAMP "
+                                    + "   AND t.expirationTime > :now "
                                     + "   AND t.used = FALSE",
                             PasswordResetToken.class)
                     .setParameter("userId", userId)
+                    .setParameter("now", java.time.LocalDateTime.now()) // Używamy tego samego czasu co przy tworzeniu
                     .getResultList();
-            logger.info("findValidTokensByUserId() " +
-                            "– znaleziono {} tokenów",
-                    tokens.size());
+
+            logger.info("findValidTokensByUserId() – znaleziono {} tokenów", tokens.size());
             return tokens;
         } catch (Exception e) {
             logger.error("findValidTokensByUserId() – błąd", e);
