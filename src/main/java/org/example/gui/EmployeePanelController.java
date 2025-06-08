@@ -244,6 +244,9 @@ public class EmployeePanelController {
                 categoryLabel, categoryBox,
                 submitButton
         );
+        Scene scene = new Scene(layout, 400, 350);
+        issueStage.setScene(scene);
+
         issueStage.setMinWidth(400);
         issueStage.setMinHeight(350);
         issueStage.show();
