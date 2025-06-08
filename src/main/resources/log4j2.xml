@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN">
+<Configuration status="INFO">
+    <Properties>
+        <Property name="LOG_DIR">${sys:app.logs.dir}</Property>
+        <Property name="PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Property>
+    </Properties>
     <Appenders>
         <!-- Konsola (dla developerów) -->
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <PatternLayout pattern="${PATTERN}"/>
         </Console>
 
         <!-- Plik główny (rotacja dzienna) -->
-        <RollingFile name="File" fileName="logs/app.log"
-                     filePattern="logs/app-%d{yyyy-MM-dd}.log.gz">
-            <PatternLayout>
-                <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Pattern>
-            </PatternLayout>
+        <RollingFile name="File" fileName="${LOG_DIR}/app.log"
+                     filePattern="${LOG_DIR}/app-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${PATTERN}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>
@@ -19,11 +21,9 @@
         </RollingFile>
 
         <!-- Plik błędów (tylko ERROR) -->
-        <RollingFile name="ErrorFile" fileName="logs/errors.log"
-                     filePattern="logs/errors-%d{yyyy-MM-dd}.log.gz">
-            <PatternLayout>
-                <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Pattern>
-            </PatternLayout>
+        <RollingFile name="ErrorFile" fileName="${LOG_DIR}/errors.log"
+                     filePattern="${LOG_DIR}/errors-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="${PATTERN}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>
@@ -35,6 +35,7 @@
         <!-- Logger dla błędów -->
         <Logger name="ERROR" level="ERROR" additivity="false">
             <AppenderRef ref="ErrorFile"/>
+            <AppenderRef ref="Console"/>
         </Logger>
 
         <Logger name="org.example.gui.AdminPanelController" level="DEBUG"/>

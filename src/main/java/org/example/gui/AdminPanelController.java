@@ -42,6 +42,7 @@ import org.apache.logging.log4j.Logger;
 import org.example.database.*;
 import org.example.pdflib.ConfigManager;
 import org.example.sys.*;
+import org.example.utils.AppPaths;
 import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
 
@@ -797,7 +798,7 @@ public class AdminPanelController {
         // Przycisk do otwierania folderu z logami
         Button openLogsButton = new Button("Otwórz folder z logami");
         styleAdminButton(openLogsButton, "#9B59B6");
-        openLogsButton.setOnAction(e -> openLogsDirectory("logs"));
+        openLogsButton.setOnAction(e -> openLogsDirectory());
 
         Button configurePDF = new Button("Konfiguruj raporty PDF");
         styleAdminButton(configurePDF, "#2980B9");
@@ -824,11 +825,15 @@ public class AdminPanelController {
     }
 
     private void exportDatabaseToCsv() {
+        // Użyj AppPaths do uzyskania katalogu CSV
+        Path folder = AppPaths.getBackupCsvDirectory();
 
-        File folder = new File("backup-csv");
-        if (!folder.exists() && !folder.mkdirs()) {
+        // Upewnij się, że katalog istnieje
+        try {
+            Files.createDirectories(folder);
+        } catch (IOException e) {
             showAlert(Alert.AlertType.ERROR, "Błąd",
-                    "Nie można utworzyć katalogu:\n" + folder.getAbsolutePath());
+                    "Nie można utworzyć katalogu:\n" + folder.toAbsolutePath());
             return;
         }
 
@@ -849,8 +854,8 @@ public class AdminPanelController {
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() throws Exception {
-                logger.info("Rozpoczęcie eksportu CSV do: {}", folder.getAbsolutePath());
-                DatabaseBackupExporter.exportAllTablesToCsv(folder.getAbsolutePath());
+                logger.info("Rozpoczęcie eksportu CSV do: {}", folder.toAbsolutePath());
+                DatabaseBackupExporter.exportAllTablesToCsv(folder.toString());
                 return null;
             }
         };
@@ -858,7 +863,7 @@ public class AdminPanelController {
         task.setOnSucceeded(ev -> Platform.runLater(() -> {
             loaderStage.close();
             showAlert(Alert.AlertType.INFORMATION, "Eksport zakończony",
-                    "Pliki CSV znajdują się w:\n" + folder.getAbsolutePath());
+                    "Pliki CSV znajdują się w:\n" + folder.toAbsolutePath());
         }));
 
         task.setOnFailed(ev -> Platform.runLater(() -> {
@@ -872,8 +877,12 @@ public class AdminPanelController {
         new Thread(task, "CsvExportTask").start();
     }
 
-    public void openLogsDirectory(String path) {
+    public void openLogsDirectory() {
         try {
+            // Użyj AppPaths do uzyskania ścieżki katalogu logów
+            Path logsDir = AppPaths.getLogsDirectory();
+            String path = logsDir.toAbsolutePath().toString();
+
             String os = System.getProperty("os.name").toLowerCase();
             ProcessBuilder pb;
 
@@ -889,8 +898,7 @@ public class AdminPanelController {
 
             pb.start();
         } catch (Exception e) {
-            e.printStackTrace();
-            // Obsługa błędu - np. wyświetlenie komunikatu użytkownikowi
+            logger.error("Nie można otworzyć katalogu logów", e);
             showAlert(Alert.AlertType.ERROR, "Błąd",
                     "Nie można otworzyć katalogu logów: " + e.getMessage());
         }
@@ -1940,13 +1948,12 @@ public class AdminPanelController {
             @Override
             protected Path call() throws Exception {
 
-                String ts   = java.time.LocalDateTime.now().toString().replace(":", "-");
+                String ts = java.time.LocalDateTime.now().toString().replace(":", "-");
                 String name = "stonkadb-backup-" + ts + ".sql";
 
-                File backupDir = new File("backups");
-                if (!backupDir.exists()) backupDir.mkdirs();
-
-                File out = new File(backupDir, name);
+                // Użyj AppPaths do uzyskania katalogu backupu
+                Path backupDir = AppPaths.getBackupDirectory();
+                Path backupFile = backupDir.resolve(name);
 
                 ProcessBuilder pb = new ProcessBuilder(
                         mysqldumpPath,
@@ -1969,14 +1976,14 @@ public class AdminPanelController {
                     pb.environment().put("MYSQL_PWD", dbPassword);
                 }
 
-                pb.redirectOutput(out);
+                pb.redirectOutput(backupFile.toFile());
                 pb.redirectError(ProcessBuilder.Redirect.INHERIT);
 
                 Process proc = pb.start();
                 if (proc.waitFor() != 0)
                     throw new IOException("mysqldump zakończył się nie-zerowym kodem.");
 
-                return out.toPath();
+                return backupFile;
             }
         };
 

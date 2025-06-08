@@ -44,11 +44,15 @@ public class DatabaseConfig {
                 properties.setProperty("db.port", "3306");
                 properties.setProperty("db.name", "StonkaDB");
                 properties.setProperty("db.user", "root");
-                properties.setProperty("db.password", "");
+                properties.setProperty("db.password", "TwojeNoweHaslo");
                 System.out.println("[DB-CONFIG] Ustawiono domyślną konfigurację: db.host=localhost, db.port=3306, db.name=StonkaDB, db.user=root, db.password=[USTAWIONE]");
 
                 saveConfig();
             }
+
+            // Usunięto wywołanie generatora persistence.xml
+            System.out.println("[DB-CONFIG] Konfiguracja bazy danych gotowa do użycia przez EMFProvider");
+
         } catch (IOException e) {
             System.err.println("[DB-CONFIG] BŁĄD podczas ładowania konfiguracji: " + e.getMessage());
             e.printStackTrace();
@@ -60,6 +64,16 @@ public class DatabaseConfig {
         try (FileOutputStream fos = new FileOutputStream(CONFIG_FILE)) {
             properties.store(fos, "Database Configuration");
             System.out.println("[DB-CONFIG] Konfiguracja zapisana pomyślnie");
+
+            // Usunięto wywołanie generatora persistence.xml
+            System.out.println("[DB-CONFIG] Zmiany konfiguracji będą zastosowane przy następnym użyciu EMFProvider");
+
+            // Opcjonalnie: resetuj EMFProvider aby zastosować nowe ustawienia
+            if (EMFProvider.isInitialized()) {
+                System.out.println("[DB-CONFIG] Resetowanie EntityManagerFactory aby zastosować nowe ustawienia");
+                EMFProvider.close();
+            }
+
         } catch (IOException e) {
             System.err.println("[DB-CONFIG] BŁĄD podczas zapisywania konfiguracji: " + e.getMessage());
             throw e;

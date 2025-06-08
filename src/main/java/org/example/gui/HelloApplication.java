@@ -38,6 +38,7 @@ import org.example.sys.ConfigPdf;
 import org.example.sys.Employee;
 import org.example.sys.Login;
 import org.example.sys.PasswordHasher;
+import org.example.utils.AppPaths;
 
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -54,6 +55,16 @@ public class HelloApplication extends Application {
     // Flaga wskazująca, czy wystąpił błąd krytyczny
     private static final AtomicBoolean criticalErrorOccurred =
             new AtomicBoolean(false);
+    static {
+        try {
+            // AppPaths zostanie zainicjalizowane automatycznie przez swój statyczny blok
+            // i ustawi właściwość app.logs.dir
+            System.out.println("Katalog logów aplikacji: " + AppPaths.getLogsDirectory());
+        } catch (Exception e) {
+            System.err.println("BŁĄD podczas inicjalizacji ścieżek aplikacji: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
     private static final Logger logger =
             LogManager.getLogger(HelloApplication.class);
     private static String errorMessage = "";

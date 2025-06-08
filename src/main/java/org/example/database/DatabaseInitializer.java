@@ -1,5 +1,6 @@
 package org.example.database;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -15,10 +16,17 @@ public class DatabaseInitializer implements ILacz {
      * Inicjalizuje bazę danych.
      */
     public static void initialize() {
+        System.out.println("[DB-INIT] Rozpoczynam inicjalizację bazy danych");
+
+        // Upewniamy się, że konfiguracja jest załadowana
+        DatabaseConfig.loadConfig();
+
         DatabaseInitializer initializer = new DatabaseInitializer();
         initializer.createDatabaseIfNotExists();
         initializer.executeStructureScript();
         //initializer.executeDataScript();
+
+        System.out.println("[DB-INIT] Inicjalizacja bazy danych zakończona pomyślnie");
     }
 
     /**

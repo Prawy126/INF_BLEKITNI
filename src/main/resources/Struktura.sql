@@ -121,6 +121,7 @@ CREATE TABLE IF NOT EXISTS Transakcje (
 CREATE TABLE IF NOT EXISTS Transakcje_Produkty (
     Id_transakcji  INT,
     Id_produktu    INT,
+    Ilosc          INT NOT NULL,
     PRIMARY KEY (Id_transakcji, Id_produktu),
     FOREIGN KEY (Id_transakcji) REFERENCES Transakcje(Id),
     FOREIGN KEY (Id_produktu)   REFERENCES Produkty(Id)
@@ -166,5 +167,3 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 ALTER TABLE Zadania
     ADD COLUMN usuniety BOOLEAN DEFAULT FALSE;
 
-ALTER TABLE Pracownicy
-MODIFY COLUMN usuniety BOOLEAN NOT NULL DEFAULT FALSE;
