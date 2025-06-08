@@ -298,7 +298,6 @@ begin
   end;
 end;
 
-// Tworzenie skryptu konfiguracji MySQL
 procedure CreateMySQLConfigScript();
 var
   FileContents: TStringList;
@@ -316,32 +315,43 @@ begin
   // Ścieżka do tymczasowego pliku SQL dla administratora
   AdminSQLPath := ExpandConstant('{tmp}\admin_user.sql');
   
-  // Utworzenie pliku SQL dla administratora
+  // Utworzenie pliku SQL dla administratora bezpośrednio z wstawionymi wartościami
   AdminSQLContents := TStringList.Create;
   try
-    AdminSQLContents.Add('-- Tworzenie użytkownika administratora');
-    AdminSQLContents.Add('SET @adres_exists = (SELECT COUNT(*) FROM Adresy WHERE Miejscowosc = ''Administrator'' AND Kod_pocztowy = ''00-000'');');
+    AdminSQLContents.Add('USE StonkaDB;');
+    AdminSQLContents.Add('-- Wyświetl diagnostykę');
+    AdminSQLContents.Add('SELECT ''Rozpoczynam dodawanie administratora'' AS ''Status'';');
     AdminSQLContents.Add('');
-    AdminSQLContents.Add('-- Dodaj adres tylko jeśli nie istnieje');
+    AdminSQLContents.Add('-- Dodaj adres administratora');
     AdminSQLContents.Add('INSERT INTO Adresy (Miejscowosc, Numer_domu, Kod_pocztowy, Miasto)');
     AdminSQLContents.Add('SELECT ''Administrator'', ''1'', ''00-000'', ''System''');
-    AdminSQLContents.Add('WHERE @adres_exists = 0;');
+    AdminSQLContents.Add('WHERE NOT EXISTS (');
+    AdminSQLContents.Add('    SELECT 1 FROM Adresy ');
+    AdminSQLContents.Add('    WHERE Miejscowosc = ''Administrator'' AND Kod_pocztowy = ''00-000''');
+    AdminSQLContents.Add(');');
     AdminSQLContents.Add('');
     AdminSQLContents.Add('-- Pobierz ID adresu');
-    AdminSQLContents.Add('SET @adres_id = (SELECT Id FROM Adresy WHERE Miejscowosc = ''Administrator'' AND Kod_pocztowy = ''00-000'' LIMIT 1);');
+    AdminSQLContents.Add('SELECT @adres_id := Id FROM Adresy');
+    AdminSQLContents.Add('WHERE Miejscowosc = ''Administrator'' AND Kod_pocztowy = ''00-000'' LIMIT 1;');
     AdminSQLContents.Add('');
-    AdminSQLContents.Add('-- Sprawdź czy użytkownik istnieje');
-    AdminSQLContents.Add('SET @user_exists = (SELECT COUNT(*) FROM Pracownicy WHERE Login = ''' + TrimmedAppUsername + ''');');
+    AdminSQLContents.Add('SELECT CONCAT(''Użyję ID adresu: '', @adres_id) AS ''Info'';');
     AdminSQLContents.Add('');
-    AdminSQLContents.Add('-- Dodaj użytkownika administratora');
+    AdminSQLContents.Add('-- Sprawdź czy użytkownik już istnieje');
+    AdminSQLContents.Add('SELECT @user_exists := COUNT(*) FROM Pracownicy WHERE Login = ''' + TrimmedAppUsername + ''';');
+    AdminSQLContents.Add('');
+    AdminSQLContents.Add('SELECT CONCAT(''Czy użytkownik istnieje: '', @user_exists) AS ''Info'';');
+    AdminSQLContents.Add('');
+    AdminSQLContents.Add('-- Usuń użytkownika jeśli istnieje');
+    AdminSQLContents.Add('DELETE FROM Pracownicy WHERE Login = ''' + TrimmedAppUsername + ''';');
+    AdminSQLContents.Add('');
+    AdminSQLContents.Add('-- Dodaj nowego użytkownika');
     AdminSQLContents.Add('INSERT INTO Pracownicy (Imie, Nazwisko, Wiek, Id_adresu, Login, Haslo, Email, Zarobki, Stanowisko, onSickLeave, sickLeaveStartDate, usuniety)');
-    AdminSQLContents.Add('SELECT ''root'', ''root'', 35, @adres_id, ''' + TrimmedAppUsername + ''', ''' + TrimmedAppPassword + ''', ''root.root@example.com'', 4500.00, ''root'', FALSE, NULL, FALSE');
-    AdminSQLContents.Add('WHERE @user_exists = 0;');
+    AdminSQLContents.Add('VALUES (''root'', ''root'', 35, @adres_id, ''' + TrimmedAppUsername + ''', ''' + TrimmedAppPassword + ''', ''root.root@example.com'', 4500.00, ''root'', FALSE, NULL, FALSE);');
     AdminSQLContents.Add('');
-    AdminSQLContents.Add('-- Aktualizuj hasło jeśli użytkownik już istnieje');
-    AdminSQLContents.Add('UPDATE Pracownicy SET Haslo = ''' + TrimmedAppPassword + ''' WHERE Login = ''' + TrimmedAppUsername + ''';');
+    AdminSQLContents.Add('-- Weryfikacja');
+    AdminSQLContents.Add('SELECT COUNT(*) AS ''Liczba administratorów'' FROM Pracownicy WHERE Login = ''' + TrimmedAppUsername + ''';');
     
-    // Zapisz plik SQL
+    // Zapisz plik SQL z wartościami już wstawionymi (nie używamy %USER% i %PASS%)
     AdminSQLContents.SaveToFile(AdminSQLPath);
   finally
     AdminSQLContents.Free;
@@ -373,19 +383,17 @@ begin
     FileContents.Add('  "%MYSQL_PATH%\mysql" -u root -p' + TrimmedRootPassword + ' -e "CREATE DATABASE IF NOT EXISTS StonkaDB CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"');
     FileContents.Add('  "%MYSQL_PATH%\mysql" -u root -p' + TrimmedRootPassword + ' StonkaDB < "' + ExpandConstant('{app}\sql\Struktura.sql') + '"');
     
+    // Dodanie użytkownika root do aplikacji za pomocą przygotowanego pliku
+    FileContents.Add('  echo Tworzenie użytkownika administratora aplikacji...');
+    FileContents.Add('  "%MYSQL_PATH%\mysql" -u root -p' + TrimmedRootPassword + ' StonkaDB < "' + AdminSQLPath + '" > "%TEMP%\admin_output.txt" 2>&1');
+    FileContents.Add('  echo Wyświetlam wynik tworzenia administratora:');
+    FileContents.Add('  type "%TEMP%\admin_output.txt"');
+    
     // Dodawanie przykładowych danych jeśli istnieją
     FileContents.Add('  if exist "' + ExpandConstant('{app}\sql\Dane.sql') + '" (');
     FileContents.Add('    "%MYSQL_PATH%\mysql" -u root -p' + TrimmedRootPassword + ' StonkaDB < "' + ExpandConstant('{app}\sql\Dane.sql') + '"');
     FileContents.Add('    echo Zaimportowano przykładowe dane.');
     FileContents.Add('  )');
-    
-    // Dodanie użytkownika root do aplikacji za pomocą przygotowanego pliku
-    FileContents.Add('  echo Tworzenie użytkownika administratora aplikacji...');
-    FileContents.Add('  "%MYSQL_PATH%\mysql" -u root -p' + TrimmedRootPassword + ' StonkaDB < "' + AdminSQLPath + '"');
-    
-    // Diagnostyka - wyświetl czy istnieje użytkownik
-    FileContents.Add('  echo Sprawdzanie czy użytkownik został utworzony...');
-    FileContents.Add('  "%MYSQL_PATH%\mysql" -u root -p' + TrimmedRootPassword + ' StonkaDB -e "SELECT COUNT(*) AS ''Liczba administratorów'' FROM Pracownicy WHERE Login = ''"' + TrimmedAppUsername + '"'';"');
     
     // Zapisanie danych połączenia dla aplikacji
     FileContents.Add('  echo Zapisywanie konfiguracji połączenia dla aplikacji Stonka...');

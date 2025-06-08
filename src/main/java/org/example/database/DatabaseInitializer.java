@@ -24,7 +24,7 @@ public class DatabaseInitializer implements ILacz {
         DatabaseInitializer initializer = new DatabaseInitializer();
         initializer.createDatabaseIfNotExists();
         initializer.executeStructureScript();
-        //initializer.executeDataScript();
+        initializer.executeDataScript();
 
         System.out.println("[DB-INIT] Inicjalizacja bazy danych zakończona pomyślnie");
     }

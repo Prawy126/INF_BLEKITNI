@@ -312,7 +312,7 @@ public class AdminPanelController {
         AddressRepository addressRepository = new AddressRepository();
         ComboBox<Address> addressComboBox = new ComboBox<>();
         addressComboBox.getItems().addAll(addressRepository.getAllAddresses());
-        addressComboBox.setValue(selected.getAddress()); // ustawiamy istniejący
+        addressComboBox.setValue(selected.getAddress());
         addressComboBox.setPromptText("Wybierz adres");
 
         Button addNewAddressBtn = new Button("Dodaj nowy adres");
@@ -371,7 +371,6 @@ public class AdminPanelController {
                 String newLogin = loginField.getText().trim();
                 String newEmail = emailField.getText().trim();
 
-
                 if(!nameField.getText().matches("[A-Za-z]+")) {
                     showAlert(Alert.AlertType.ERROR,
                             "Nieprawidłowe imię",
@@ -386,7 +385,6 @@ public class AdminPanelController {
                     return;
                 }
 
-                // Walidacja loginu: odrzucamy znaki specjalne
                 if (!newLogin.matches("[A-Za-z0-9]+")) {
                     showAlert(Alert.AlertType.ERROR,
                             "Nieprawidłowy login",
@@ -394,7 +392,6 @@ public class AdminPanelController {
                     return;
                 }
 
-                // Walidacja e-mailu: e-mail w formacie .+@.+\..+
                 if (!newEmail.matches(".+@.+\\..+")) {
                     showAlert(Alert.AlertType.ERROR,
                             "Nieprawidłowy email",
@@ -404,14 +401,28 @@ public class AdminPanelController {
 
                 showLoadingIndicator();
 
+                // Aktualizacja danych użytkownika
                 selected.setName(nameField.getText().trim());
                 selected.setSurname(surnameField.getText().trim());
                 selected.setLogin(newLogin);
                 selected.setEmail(emailField.getText().trim());
                 selected.setAddress(addressComboBox.getValue());
+
+                // Haszowanie nowego hasła (jeśli podane)
                 if (!passwordField.getText().isEmpty()) {
-                    selected.setPassword(passwordField.getText());
+                    try {
+                        String newPassword = passwordField.getText();
+                        String hashedPassword = PasswordHasher.hashPassword(newPassword, selected.getId());
+                        selected.setPassword(hashedPassword);
+                    } catch (NoSuchAlgorithmException | InvalidKeyException ex) {
+                        showAlert(Alert.AlertType.ERROR,
+                                "Błąd bezpieczeństwa",
+                                "Nie udało się zaszyfrować hasła: " + ex.getMessage());
+                        showUserManagement();
+                        return;
+                    }
                 }
+
                 selected.setPosition(positionBox.getValue());
                 selected.setAge(Integer.parseInt(ageField.getText().trim()));
                 selected.setSalary(new BigDecimal(salaryField.getText().trim()));
