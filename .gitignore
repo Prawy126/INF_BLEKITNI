@@ -54,8 +54,6 @@ backup-csv/
 
 instalator/stonka-setup.exe
 
-src/main/distribution/jre
-
 src/main/distribution/jre/
 target/dist/
 target/*.exe
