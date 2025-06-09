@@ -1,1 +1,6 @@
-przed instalacją 
+PRZED INSTALACJĄ:
+- aplikacja musi mieć zainstalowaną bazę danych mysql 
+- java jest instalowana automatycznie 
+- w instalatorze konfiguruje się połączenie z bazą danych, a aplikacją
+- w instalatorze konfiguruje się email którego,
+  będzie używać aplikacja do wysyłania wiadomości
