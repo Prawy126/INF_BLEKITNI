@@ -73,7 +73,8 @@ public class CashierPanelController {
     }
 
     /**
-     * Ekran sprzedaży - przycisk do rozpoczęcia nowej transakcji.
+     * Ekran sprzedaży - przycisk do rozpoczęcia
+     * nowej transakcji.
      */
     public void showSalesScreen() {
         VBox layout = new VBox(15);
@@ -89,7 +90,8 @@ public class CashierPanelController {
     }
 
     /**
-     * Okno nowej transakcji z wyszukiwarką produktów i koszykiem.
+     * Okno nowej transakcji z wyszukiwarką produktów
+     * i koszykiem.
      */
     private void startNewTransaction() {
         Stage dialog = createStyledDialog("Nowa transakcja");
@@ -267,7 +269,8 @@ public class CashierPanelController {
     }
 
     /**
-     * Oblicza granice dat dla raportów dziennych, miesięcznych, rocznych.
+     * Oblicza granice dat dla raportów dziennych,
+     * miesięcznych, rocznych.
      */
     private LocalDate[] calculateReportDates(PeriodType periodType,
                                              LocalDate selectedDate) {
@@ -404,7 +407,8 @@ public class CashierPanelController {
     }
 
     /**
-     * Zapisuje w bazie informację o próbie wygenerowania raportu bez danych.
+     * Zapisuje w bazie informację o próbie wygenerowania
+     * raportu bez danych.
      */
     private void saveEmptyReportInfo(PeriodType periodType,
                                      LocalDate startDate,
@@ -1475,8 +1479,8 @@ public class CashierPanelController {
      * i przechodząc do ekranu logowania.
      */
     /**
-     * Wylogowuje kasjera – nie pozwala, jeśli w bieżącej sesji (ani w bazie)
-     * nie ma raportu dziennego.
+     * Wylogowuje kasjera – nie pozwala, jeśli w bieżącej sesji
+     * (ani w bazie) nie ma raportu dziennego.
      */
     public void logout() {
         log.info("Wylogowanie rozpoczęte. Flaga raportu przed " +
@@ -1510,9 +1514,10 @@ public class CashierPanelController {
     }
 
     /**
-     * Ustawia status „completed” dla WSZYSTKICH zadań przypisanych bieżącemu
-     * pracownikowi i rozpoczętych DZISIAJ.  Aktualizacja odbywa się w jednej
-     * transakcji na każdym rekordzie, dzięki czemu zmiany są trwałe.
+     * Ustawia status „completed” dla WSZYSTKICH zadań przypisanych
+     * bieżącemu pracownikowi i rozpoczętych DZISIAJ.
+     * Aktualizacja odbywa się w jednej transakcji
+     * na każdym rekordzie, dzięki czemu zmiany są trwałe.
      */
     public void completeAllTasksForEmployee(int employeeId) {
         try (TaskEmployeeRepository repo = new TaskEmployeeRepository()) {

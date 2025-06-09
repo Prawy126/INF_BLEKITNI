@@ -28,8 +28,10 @@ import org.apache.logging.log4j.Logger;
 import java.util.Objects;
 
 /**
- * Panel kierownika, zawiera menu boczne oraz centralny panel widoku.
- * Pozwala nawigować po funkcjach przypisanych do roli kierownika.
+ * Panel kierownika, zawiera menu boczne oraz centralny
+ * panel widoku.
+ * Pozwala nawigować po funkcjach przypisanych
+ * do roli kierownika.
  */
 public class ManagerPanel {
 
@@ -267,7 +269,8 @@ public class ManagerPanel {
     }
 
     /**
-     * Ustawia podany przycisk jako aktywny, resetując styl poprzedniego.
+     * Ustawia podany przycisk jako aktywny,
+     * resetując styl poprzedniego.
      */
     private void setActiveButton(Button button) {
         String defaultStyle = "-fx-background-color: #2980B9; -fx-text-fill:" +

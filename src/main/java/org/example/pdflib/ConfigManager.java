@@ -21,7 +21,8 @@ import org.example.utils.AppPaths;
 public class ConfigManager {
 
     private static final String CONFIG_FILE = "config.properties";
-    private static final Logger logger = LogManager.getLogger(ConfigManager.class);
+    private static final Logger logger = LogManager.getLogger(
+            ConfigManager.class);
     private static Properties props = new Properties();
 
     static {
@@ -38,19 +39,24 @@ public class ConfigManager {
             if (Files.exists(configFile)) {
                 try (InputStream input = Files.newInputStream(configFile)) {
                     props.load(input);
-                    logger.debug("Wczytano konfigurację z {}", configFile);
+                    logger.debug("Wczytano konfigurację z {}",
+                            configFile);
                 }
             } else {
                 // Ustaw domyślne wartości
-                props.setProperty("pdf.output.path", AppPaths.getReportsDirectory().toString());
-                props.setProperty("pdf.logo.path", AppPaths.getResourceFile("logo.png").toString());
+                props.setProperty("pdf.output.path",
+                        AppPaths.getReportsDirectory().toString());
+                props.setProperty("pdf.logo.path", AppPaths.getResourceFile(
+                        "logo.png").toString());
                 props.setProperty("logging.enabled", "true");
 
                 saveProperties();
-                logger.info("Utworzono domyślny plik konfiguracyjny w {}", configFile);
+                logger.info("Utworzono domyślny plik konfiguracyjny " +
+                        "w {}", configFile);
             }
         } catch (IOException e) {
-            logger.error("Nie można wczytać pliku konfiguracyjnego: {}", configFile, e);
+            logger.error("Nie można wczytać pliku " +
+                    "konfiguracyjnego: {}", configFile, e);
         }
     }
 
@@ -67,7 +73,8 @@ public class ConfigManager {
                 logger.debug("Zapisano konfigurację do {}", configFile);
             }
         } catch (IOException e) {
-            logger.error("Nie można zapisać pliku konfiguracyjnego: {}", configFile, e);
+            logger.error("Nie można zapisać pliku " +
+                    "konfiguracyjnego: {}", configFile, e);
         }
     }
 
@@ -79,7 +86,8 @@ public class ConfigManager {
     }
 
     public static boolean isLoggingEnabled() {
-        String value = props.getProperty("logging.enabled", "true");
+        String value = props.getProperty("logging.enabled",
+                "true");
         logger.trace("Wczytano wartość logging.enabled: {}", value);
         return Boolean.parseBoolean(value);
     }
@@ -87,13 +95,15 @@ public class ConfigManager {
     public static void setLoggingEnabled(boolean on) {
         props.setProperty("logging.enabled", Boolean.toString(on));
         saveProperties();
-        logger.info("Logowanie zostało {}.", on ? "włączone" : "wyłączone");
+        logger.info("Logowanie zostało {}.", on
+                ? "włączone" : "wyłączone");
     }
 
     public static void setReportPath(String path) {
         props.setProperty("pdf.output.path", path);
         saveProperties();
-        logger.info("Zaktualizowano ścieżkę wyjściową PDF na: {}", path);
+        logger.info("Zaktualizowano ścieżkę wyjściową PDF na: {}",
+                path);
     }
 
     /**

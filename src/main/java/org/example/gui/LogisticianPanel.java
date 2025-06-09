@@ -240,8 +240,8 @@ public class LogisticianPanel {
     }
 
     /**
-     * Ustawia przycisk jako aktywny, przywracając domyślny styl poprzedniemu
-     * i nadając ciemniejszy odcień nowemu.
+     * Ustawia przycisk jako aktywny, przywracając domyślny
+     * styl poprzedniemu i nadając ciemniejszy odcień nowemu.
      */
     private void setActiveButton(Button button) {
         String defaultStyle = "-fx-background-color: #2980B9;" +

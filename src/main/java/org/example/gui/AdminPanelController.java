@@ -751,7 +751,8 @@ public class AdminPanelController {
     /**
      * Usuwa zaznaczonego użytkownika asynchronicznie.
      * Zabezpiecza przed usunięciem użytkownika z rolą "root".
-     * Zabezpiecza przed usunięciem własnego konta przez administratora.
+     * Zabezpiecza przed usunięciem własnego konta przez
+     * administratora.
      * Usuwa zaznaczonego użytkownika (soft-delete) i odświeża tabelę.
      */
     private void removeSelectedUser() {
@@ -1256,19 +1257,19 @@ public class AdminPanelController {
     }
 
     /**
-     * Generuje PDF z KPI (StatsRaportGenerator) na podstawie wybranych
-     * filtrów.
+     * Generuje PDF z KPI (StatsRaportGenerator) na podstawie
+     * wybranych filtrów.
      *
      * @param from       początek okresu (inclusive)
      * @param to         koniec okresu (inclusive)
-     * @param positions  lista nazw stanowisk, które mają się znaleźć w
-     *                   raporcie
-     * @param priors     lista priorytetów (HIGH/MEDIUM/LOW), do filtrowania
-     *                   zadań
+     * @param positions  lista nazw stanowisk, które mają się znaleźć
+     *                   w raporcie
+     * @param priors     lista priorytetów (HIGH/MEDIUM/LOW),
+     *                   do filtrowania zadań
      */
     /**
-     * Generuje PDF z KPI (StatsRaportGenerator) na podstawie wybranych
-     * filtrów.
+     * Generuje PDF z KPI (StatsRaportGenerator) na podstawie
+     * wybranych filtrów.
      */
     private void generateStatsPDF(LocalDate from,
                                   LocalDate to,
@@ -1362,9 +1363,12 @@ public class AdminPanelController {
     /**
      * Generuje PDF z raportem zadań (TaskRaportGenerator).
      *
-     * @param period    domenowy typ okresu (enum PeriodType) – będzie
-     *                  zmapowany na wewnętrzny TaskRaportGenerator.PeriodType
-     * @param statuses  lista statusów zadań do uwzględnienia w raporcie
+     * @param period    domenowy typ okresu
+     *                  (enum PeriodType) – będzie
+     *                  zmapowany na wewnętrzny
+     *                  TaskRaportGenerator.PeriodType
+     * @param statuses  lista statusów zadań do uwzględnienia
+     *                  w raporcie
      */
     /* dokładnie ta jedna linijka jest kluczowa */
     private void generateTaskPDF(PeriodType period, List<String> statuses) {
@@ -1479,7 +1483,8 @@ public class AdminPanelController {
     }
 
     /**
-     * Generuje PDF z raportem obciążenia pracowników (WorkloadReportGenerator).
+     * Generuje PDF z raportem obciążenia pracowników
+     * (WorkloadReportGenerator).
      *
      * @param from       początek okresu raportowania (inclusive)
      * @param to         koniec okresu raportowania (inclusive)
@@ -1746,7 +1751,8 @@ public class AdminPanelController {
      * Pokazuje dialog z filtrami dla wskazanego raportu i okresu.
      * Po wybraniu filtrów wywołuje odpowiednią metodę generującą PDF.
      *
-     * @param reportType  typ raportu: "KPI", "Zadania" lub "Obciążenie"
+     * @param reportType  typ raportu: "KPI", "Zadania"
+     *                    lub "Obciążenie"
      * @param from        początek okresu (inclusive)
      * @param to          koniec okresu (inclusive)
      */

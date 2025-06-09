@@ -47,7 +47,8 @@ public class EmployeePanelController {
     }
 
     /**
-     * Wyświetla główny panel pracownika z listą zadań i przyciskami akcji.
+     * Wyświetla główny panel pracownika z listą zadań
+     * i przyciskami akcji.
      */
     public void showEmployeePanel() {
         VBox layout = new VBox(15);

@@ -46,9 +46,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Główna klasa uruchamiająca aplikację GUI dla hipermarketu Stonka.
- * Zawiera logikę interfejsu logowania i przekierowywania użytkownika
- * na odpowiedni panel w zależności od roli.
+ * Główna klasa uruchamiająca aplikację GUI
+ * dla hipermarketu Stonka.
+ * Zawiera logikę interfejsu logowania
+ * i przekierowywania użytkownika na odpowiedni panel
+ * w zależności od roli.
  */
 public class HelloApplication extends Application {
 
@@ -340,7 +342,8 @@ public class HelloApplication extends Application {
     }
 
     /**
-     * Wyświetla komunikat o błędzie bazy danych i zamyka aplikację.
+     * Wyświetla komunikat o błędzie bazy danych
+     * i zamyka aplikację.
      *
      * @param stage główna scena aplikacji
      * @param message komunikat błędu
@@ -938,7 +941,8 @@ public class HelloApplication extends Application {
     }
 
     /**
-     * Sprawdza czy wyjątek jest związany z dostępem do bazy danych.
+     * Sprawdza czy wyjątek jest związany z dostępem
+     * do bazy danych.
      */
     private static boolean isDataAccessException(Throwable throwable) {
         // Sprawdź czy sam wyjątek jest SQLException

@@ -141,7 +141,8 @@ public class LogisticianPanelController {
 
 
     /**
-     * Ładuje i wyświetla w tabeli aktualne stany magazynowe (id, nazwa, ilość).
+     * Ładuje i wyświetla w tabeli aktualne
+     * stany magazynowe (id, nazwa, ilość).
      *
      * @param table tabela do wypełnienia danymi
      */
@@ -242,11 +243,14 @@ public class LogisticianPanelController {
     }
 
     /**
-     * Otwiera prosty dialog filtrowania zamówień po nazwie produktu,
-     * pracownika, cenie, ilości i dacie złożenia zamówienia
-     * Po zatwierdzeniu zastępuje zawartość tabeli wyfiltrowanymi rekordami.
+     * Otwiera prosty dialog filtrowania zamówień
+     * po nazwie produktu, pracownika, cenie, ilości
+     * i dacie złożenia zamówienia
+     * Po zatwierdzeniu zastępuje zawartość tabeli
+     * wyfiltrowanymi rekordami.
      *
-     * @param tableView tabela zamówień, która ma zostać przefiltrowana
+     * @param tableView tabela zamówień,
+     *                  która ma zostać przefiltrowana
      */
     private void showFilterOrderDialog(TableView<Order> tableView) {
         Stage stage = new Stage();
@@ -440,10 +444,12 @@ public class LogisticianPanelController {
     }
 
     /**
-     * Pokazuje systemowy FileChooser do wybrania katalogu i pliku .pdf.
+     * Pokazuje systemowy FileChooser do wybrania katalogu
+     * i pliku .pdf.
      *
      * @param stage okno-rodzic dla FileChooser
-     * @param outputPath pole tekstowe, w które wpisany zostanie wybrany path
+     * @param outputPath pole tekstowe,
+     *                   w które wpisany zostanie wybrany path
      */
     private void handleBrowseButton(Stage stage, TextField outputPath) {
         FileChooser fileChooser = new FileChooser();
@@ -463,7 +469,8 @@ public class LogisticianPanelController {
      *
      * @param selectedCategories lista wybranych kategorii
      * @param lowStockThreshold próg niskiego stanu
-     * @param stage dialog-rodzic, który zostanie zamknięty po wygenerowaniu
+     * @param stage dialog-rodzic, który zostanie zamknięty
+     *              po wygenerowaniu
      */
     private void handleGenerateButton(List<String> selectedCategories,
                                       int lowStockThreshold,
@@ -608,10 +615,12 @@ public class LogisticianPanelController {
 
     /**
      * Otwiera formularz dodawania nowego zamówienia.
-     * Pole "Produkt" zastąpiono ComboBoxem wypełnionym nazwami produktów.
+     * Pole "Produkt" zastąpiono ComboBoxem wypełnionym
+     * nazwami produktów.
      * Pole "Ilość" oraz "Data" pozostały bez zmian.
-     * ID pracownika pobierane jest automatycznie z zalogowanego użytkownika,
-     * a cena jest liczona jako (cena jednostkowa produktu * ilość).
+     * ID pracownika pobierane jest automatycznie
+     * z zalogowanego użytkownika, a cena jest liczona
+     * jako (cena jednostkowa produktu * ilość).
      */
     private void showAddOrderForm() {
         Stage stage = new Stage();
@@ -767,7 +776,8 @@ public class LogisticianPanelController {
      * po nazwie produktu i minimalnej ilości
      * i aktualizuje tabelę.
      *
-     * @param table tabela stanów magazynowych, która ma zostać przefiltrowana
+     * @param table tabela stanów magazynowych,
+     *              która ma zostać przefiltrowana
      */
     private void showFilterStockDialog(TableView<StockRow> table) {
         Stage st = new Stage();
@@ -832,8 +842,8 @@ public class LogisticianPanelController {
     /**
      * Wyświetla okno formularza filtrowania produktów.
      * Pola: Id, Nazwa, Cena, Ilość w magazynie.
-     * Przycisk „Filtruj” zamyka okno bez dalszej logiki filtrowania
-     * (symulacja działania).
+     * Przycisk „Filtruj” zamyka okno bez dalszej
+     * logiki filtrowania (symulacja działania).
      */
     private void showFilterProductDialog() {
         Stage stage = new Stage();
@@ -945,7 +955,8 @@ public class LogisticianPanelController {
     }
 
     /**
-     * Wyświetla prosty alert z podanym typem, tytułem i treścią.
+     * Wyświetla prosty alert z podanym typem, tytułem i
+     * treścią.
      *
      * @param type typ alertu (INFORMATION, WARNING, ERROR)
      * @param title tytuł okna alertu
@@ -1001,8 +1012,9 @@ public class LogisticianPanelController {
 
     /**
      * Wyświetla formularz dodawania nowego produktu.
-     * @param stockTable referencja do tabeli stanów magazynowych,
-     *                   którą odświeżamy po zapisie
+     * @param stockTable referencja do tabeli stanów
+     *                   magazynowych, którą odświeżamy
+     *                   po zapisie
      */
     private void showAddProductDialog(TableView<StockRow> stockTable) {
         Stage stage = new Stage();
@@ -1134,7 +1146,8 @@ public class LogisticianPanelController {
      * wraz z jego stanem magazynowym.
      * - Pola: Nazwa, Kategoria, Cena, Ilość w magazynie.
      * - Wypełnia je wartościami z bazy.
-     * - Po zatwierdzeniu waliduje i aktualizuje Product oraz Warehouse.
+     * - Po zatwierdzeniu waliduje i aktualizuje Product
+     * oraz Warehouse.
      *
      * @param table tabela stanów magazynowych, z
      *              której czytamy zaznaczony wiersz
