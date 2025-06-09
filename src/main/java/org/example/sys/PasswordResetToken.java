@@ -11,9 +11,11 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Klasa reprezentująca token do resetowania hasła użytkownika w systemie.
+ * Klasa reprezentująca token do resetowania hasła użytkownika w
+ * systemie.
  * Mapowana na tabelę "password_reset_tokens" w bazie danych.
- * Zawiera informacje o kodzie resetowania, użytkowniku, terminie ważności
+ * Zawiera informacje o kodzie resetowania, użytkowniku, terminie
+ * ważności
  * oraz statusie wykorzystania tokenu.
  */
 @Entity
@@ -85,7 +87,8 @@ public class PasswordResetToken {
     }
 
     /**
-     * Pobiera identyfikator użytkownika, dla którego token został wygenerowany.
+     * Pobiera identyfikator użytkownika, dla którego token
+     * został wygenerowany.
      *
      * @return identyfikator użytkownika
      */

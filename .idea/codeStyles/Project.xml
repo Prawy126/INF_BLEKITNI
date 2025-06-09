@@ -1,5 +1,6 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
+    <option name="RIGHT_MARGIN" value="70" />
     <codeStyleSettings language="JAVA">
       <option name="RIGHT_MARGIN" value="80" />
       <option name="CALL_PARAMETERS_WRAP" value="1" />

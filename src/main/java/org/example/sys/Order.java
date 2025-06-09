@@ -28,7 +28,8 @@ import java.util.Date;
 /**
  * Klasa reprezentująca zamówienie w systemie.
  * Mapowana na tabelę "Zamowienia" w bazie danych.
- * Zawiera informacje o produkcie, pracowniku, ilości, cenie i dacie zamówienia.
+ * Zawiera informacje o produkcie, pracowniku, ilości, cenie i dacie
+ * zamówienia.
  * Implementuje logikę biznesową związaną z zarządzaniem zamówieniami,
  * w tym walidację ceny i ilości.
  */
@@ -52,7 +53,8 @@ public class Order {
 
     /**
      * Produkt, który jest przedmiotem zamówienia.
-     * Relacja wiele-do-jednego, gdzie wiele zamówień może dotyczyć jednego produktu.
+     * Relacja wiele-do-jednego, gdzie wiele zamówień może dotyczyć
+     * jednego produktu.
      */
     @ManyToOne
     @JoinColumn(name = "Id_produktu", nullable = false)
@@ -60,7 +62,8 @@ public class Order {
 
     /**
      * Pracownik realizujący zamówienie.
-     * Relacja wiele-do-jednego, gdzie wiele zamówień może być przypisanych do jednego pracownika.
+     * Relacja wiele-do-jednego, gdzie wiele zamówień może być
+     * przypisanych do jednego pracownika.
      */
     @ManyToOne
     @JoinColumn(name = "Id_pracownika", nullable = false)
@@ -109,7 +112,8 @@ public class Order {
      * @param quantity Ilość zamówionego produktu, musi być większa od zera
      * @param price    Cena zamówienia, musi być większa od zera
      * @param date     Data zamówienia
-     * @throws IllegalArgumentException gdy ilość lub cena nie są większe od zera
+     * @throws IllegalArgumentException gdy ilość lub cena nie są większe
+     * od zera
      */
     public Order(Product product,
                  Employee employee,
@@ -207,7 +211,8 @@ public class Order {
     /**
      * Ustawia ilość zamawianego produktu.
      * Wykonuje walidację - ilość musi być większa od zera.
-     * W przypadku nieprawidłowej wartości rzuca wyjątek IllegalArgumentException.
+     * W przypadku nieprawidłowej wartości rzuca wyjątek
+     * IllegalArgumentException.
      * Operacja jest logowana na poziomie INFO lub WARN w przypadku błędu.
      *
      * @param quantity nowa ilość produktu, musi być większa od zera
@@ -236,11 +241,13 @@ public class Order {
     /**
      * Ustawia cenę zamówienia.
      * Wykonuje walidację - cena musi być większa od zera.
-     * W przypadku nieprawidłowej wartości rzuca wyjątek IllegalArgumentException.
+     * W przypadku nieprawidłowej wartości rzuca wyjątek
+     * IllegalArgumentException.
      * Operacja jest logowana na poziomie INFO lub WARN w przypadku błędu.
      *
      * @param price nowa cena zamówienia, musi być większa od zera
-     * @throws IllegalArgumentException gdy cena nie jest większa od zera lub jest null
+     * @throws IllegalArgumentException gdy cena nie jest większa
+     * od zera lub jest null
      */
     public void setPrice(BigDecimal price) {
         if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {

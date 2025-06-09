@@ -22,7 +22,8 @@ import org.apache.logging.log4j.Logger;
 /**
  * Klasa reprezentująca stan magazynowy dla produktów w systemie.
  * Mapowana na tabelę "StanyMagazynowe" w bazie danych.
- * Przechowuje informacje o produkcie i jego dostępnej ilości w magazynie.
+ * Przechowuje informacje o produkcie i jego dostępnej ilości
+ * w magazynie.
  * Jako klucz główny wykorzystuje identyfikator produktu
  * (relacja jeden-do-jednego).
  */

@@ -18,7 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Klasa reprezentująca rolę menedżera – logiczną nakładkę na encję Employee.
+ * Klasa reprezentująca rolę menedżera – logiczną nakładkę na encję
+ * Employee.
  */
 public class Manager {
 

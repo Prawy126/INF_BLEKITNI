@@ -40,14 +40,16 @@ public class TaskEmployee {
             = LogManager.getLogger(TaskEmployee.class);
 
     /**
-     * Złożony identyfikator encji, składający się z ID zadania i ID pracownika.
+     * Złożony identyfikator encji, składający się z ID zadania
+     * i ID pracownika.
      */
     @EmbeddedId
     private TaskEmployeeId id;
 
     /**
      * Zadanie powiązane z encją.
-     * Relacja wiele-do-jednego, wiele przypisań może dotyczyć jednego zadania.
+     * Relacja wiele-do-jednego, wiele przypisań może dotyczyć jednego
+     * zadania.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("taskId")
@@ -56,7 +58,8 @@ public class TaskEmployee {
 
     /**
      * Pracownik powiązany z encją.
-     * Relacja wiele-do-jednego, wiele przypisań może dotyczyć jednego pracownika.
+     * Relacja wiele-do-jednego, wiele przypisań może dotyczyć jednego
+     * pracownika.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("employeeId")

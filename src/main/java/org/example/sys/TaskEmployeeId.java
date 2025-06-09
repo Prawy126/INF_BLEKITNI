@@ -20,7 +20,8 @@ import java.util.Objects;
 /**
  * Klasa reprezentująca złożony klucz główny (EmbeddedId)
  * dla encji TaskEmployee (połączenie taskId + employeeId).
- * Implementuje Serializable, co jest wymagane dla kluczy złożonych w JPA.
+ * Implementuje Serializable, co jest wymagane dla kluczy złożonych
+ * w JPA.
  * Zawiera metody equals() i hashCode() niezbędne do prawidłowego
  * porównywania identyfikatorów w kontekście JPA.
  */

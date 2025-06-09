@@ -17,15 +17,19 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Klasa reprezentująca złożony klucz główny dla encji TransactionProduct.
- * Implementuje interfejs Serializable, co jest wymagane dla kluczy złożonych w JPA.
- * Składa się z identyfikatora transakcji oraz identyfikatora produktu.
+ * Klasa reprezentująca złożony klucz główny dla encji
+ * TransactionProduct.
+ * Implementuje interfejs Serializable, co jest wymagane dla kluczy
+ * złożonych w JPA.
+ * Składa się z identyfikatora transakcji oraz identyfikatora
+ * produktu.
  */
 @Embeddable
 public class TransactionProductId implements Serializable {
 
     /**
-     * Logger do rejestrowania zdarzeń związanych z klasą TransactionProductId.
+     * Logger do rejestrowania zdarzeń związanych z klasą
+     * TransactionProductId.
      */
     private static final Logger logger
             = LogManager.getLogger(TransactionProductId.class);

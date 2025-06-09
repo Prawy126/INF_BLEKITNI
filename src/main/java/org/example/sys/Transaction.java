@@ -21,7 +21,8 @@ import java.util.List;
  * Klasa reprezentująca transakcję w systemie.
  * Mapowana na tabelę "Transakcje" w bazie danych.
  * Zawiera informacje o pracowniku, dacie oraz produktach.
- * Obsługuje relację z produktami poprzez tabelę pośredniczącą TransactionProduct.
+ * Obsługuje relację z produktami poprzez tabelę pośredniczącą
+ * TransactionProduct.
  */
 @Entity
 @Table(name = "Transakcje")
@@ -149,8 +150,10 @@ public class Transaction {
 
     /**
      * Usuwa produkt z transakcji.
-     * Wyszukuje i usuwa obiekt TransactionProduct powiązany z podanym produktem.
-     * Operacja jest logowana na poziomie INFO lub WARN w przypadku niepowodzenia.
+     * Wyszukuje i usuwa obiekt TransactionProduct powiązany z podanym
+     * produktem.
+     * Operacja jest logowana na poziomie INFO lub WARN w przypadku
+     * niepowodzenia.
      *
      * @param product produkt do usunięcia
      */
@@ -169,7 +172,8 @@ public class Transaction {
 
     /**
      * Metoda pomocnicza do zachowania kompatybilności z istniejącym kodem.
-     * Zwraca listę produktów przypisanych do tej transakcji bez informacji o ilości.
+     * Zwraca listę produktów przypisanych do tej transakcji bez
+     * informacji o ilości.
      * Operacja jest logowana na poziomie DEBUG.
      *
      * @return lista produktów w transakcji

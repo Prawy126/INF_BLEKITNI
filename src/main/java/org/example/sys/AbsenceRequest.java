@@ -90,8 +90,8 @@ public class AbsenceRequest {
 
     /**
      * Pracownik składający wniosek o nieobecność.
-     * Relacja wiele-do-jednego, gdzie wiele wniosków może być złożonych przez
-     * jednego pracownika.
+     * Relacja wiele-do-jednego, gdzie wiele wniosków może być złożonych
+     * przez jednego pracownika.
      */
     @ManyToOne
     @JoinColumn(name = "Id_pracownika", nullable = false)
@@ -159,7 +159,8 @@ public class AbsenceRequest {
 
     /**
      * Konstruktor pełnoparametrowy.
-     * Inicjalizuje wszystkie pola wniosku o nieobecność oraz loguje utworzenie
+     * Inicjalizuje wszystkie pola wniosku o nieobecność oraz loguje
+     * utworzenie
      * wniosku.
      *
      * @param requestType typ wniosku o nieobecność
@@ -371,7 +372,8 @@ public class AbsenceRequest {
     }
 
     /**
-     * Przesłonięta metoda toString zwracająca tekstową reprezentację wniosku.
+     * Przesłonięta metoda toString zwracająca tekstową reprezentację
+     * wniosku.
      * Zawiera wszystkie istotne informacje o wniosku, w tym dane pracownika.
      * Operacja jest logowana na poziomie TRACE.
      *
