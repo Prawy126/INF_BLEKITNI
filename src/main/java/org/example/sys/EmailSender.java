@@ -293,7 +293,8 @@ public class EmailSender {
             String email = props.getProperty("email.address");
             String password = props.getProperty("email.password");
 
-            if (email != null && password != null && !email.trim().isEmpty() && !password.trim().isEmpty()) {
+            if (email != null && password != null && !email.trim().isEmpty()
+                    && !password.trim().isEmpty()) {
                 logger.info("Odczytano dane email z pliku email.properties");
                 return new String[]{email.trim(), password.trim()};
             }
@@ -302,12 +303,14 @@ public class EmailSender {
         // Druga próba - odczyt ze starego pliku PASS.txt
         Path oldPath = Paths.get("PASS.txt");
         if (Files.exists(oldPath)) {
-            logger.warn("Używanie przestarzałego pliku PASS.txt. Zalecana migracja do email.properties");
+            logger.warn("Używanie przestarzałego pliku PASS.txt." +
+                    " Zalecana migracja do email.properties");
 
             List<String> lines = Files.readAllLines(oldPath);
             if (lines.size() < 2) {
                 logger.error("Plik PASS.txt ma nieprawidłową liczbę linii");
-                throw new RuntimeException("Plik PASS.txt musi zawierać 2 linie: email i hasło");
+                throw new RuntimeException("Plik PASS.txt musi zawierać 2 linie: email" +
+                        " i hasło");
             }
 
             String email = lines.get(0).trim();
@@ -323,6 +326,7 @@ public class EmailSender {
 
         // Żaden z plików nie istnieje
         logger.error("Nie znaleziono pliku konfiguracyjnego z danymi email");
-        throw new RuntimeException("Brak pliku konfiguracyjnego: email.properties lub PASS.txt");
+        throw new RuntimeException("Brak pliku konfiguracyjnego: email.properties" +
+                " lub PASS.txt");
     }
 }

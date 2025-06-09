@@ -35,7 +35,8 @@ import java.util.List;
 public class TransactionRepository {
 
     /**
-     * Logger do rejestrowania zdarzeń związanych z klasą TransactionRepository.
+     * Logger do rejestrowania zdarzeń związanych z klasą
+     * TransactionRepository.
      */
     private static final Logger logger = LogManager.getLogger(
             TransactionRepository.class);
@@ -281,7 +282,8 @@ public class TransactionRepository {
     }
 
     /**
-     * Dodaje produkt do transakcji lub aktualizuje ilość, jeśli już istnieje.
+     * Dodaje produkt do transakcji lub aktualizuje ilość,
+     * jeśli już istnieje.
      * Operacja jest wykonywana w transakcji bazodanowej.
      *
      * @param transaction transakcja, do której dodawany jest produkt
@@ -352,7 +354,8 @@ public class TransactionRepository {
 
     /**
      * Wyszukuje transakcje powiązane z pracownikiem o podanym ID.
-     * W przypadku błędu, wyjątek jest logowany i zwracana jest pusta lista.
+     * W przypadku błędu, wyjątek jest logowany i zwracana
+     * jest pusta lista.
      *
      * @param employeeId identyfikator pracownika
      * @return lista transakcji danego pracownika

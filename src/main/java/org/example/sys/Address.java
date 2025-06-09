@@ -223,7 +223,8 @@ public class Address {
     /**
      * Przesłonięta metoda toString z logowaniem.
      * Zwraca reprezentację tekstową adresu w formacie:
-     * [miejscowość], ul. [numer domu]/[numer mieszkania], [kod pocztowy] [miasto]
+     * [miejscowość], ul. [numer domu]/[numer mieszkania], [kod pocztowy]
+     * [miasto]
      *
      * Numer mieszkania jest dodawany tylko jeśli jest określony.
      *

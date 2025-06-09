@@ -39,7 +39,8 @@ public class TechnicalIssue {
             = LogManager.getLogger(TechnicalIssue.class);
 
     /**
-     * Unikalny identyfikator zgłoszenia technicznego generowany automatycznie.
+     * Unikalny identyfikator zgłoszenia technicznego generowany
+     * automatycznie.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

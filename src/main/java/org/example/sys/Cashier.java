@@ -17,7 +17,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Klasa reprezentująca rolę kasjera – logiczną nakładkę na encję Employee.
+ * Klasa reprezentująca rolę kasjera – logiczną nakładkę na encję
+ * Employee.
  */
 public class Cashier {
 
