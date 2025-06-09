@@ -74,6 +74,9 @@ Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\target\dist\stonka.ico"; DestDir:
 Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\target\dist\run.bat"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\target\dist\Projekt-1.0-SNAPSHOT.jar"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 
+; Środowisko uruchomieniowe Java (JRE)
+Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\target\dist\jre\*"; DestDir: "{app}\jre"; Flags: ignoreversion recursesubdirs createallsubdirs
+
 ; Biblioteki (wszystkie pliki JAR)
 Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\target\dist\lib\*"; DestDir: "{app}\lib"; Flags: ignoreversion recursesubdirs createallsubdirs
 
@@ -87,12 +90,6 @@ Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\target\dist\sql\*"; DestDir: "{ap
 Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\src\main\resources\*"; DestDir: "{app}\resources"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
 Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\src\main\resources\images\*"; DestDir: "{app}\resources\images"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
 Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\src\main\resources\templates\*"; DestDir: "{app}\resources\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
-
-; Domyślny plik konfiguracyjny - opcjonalnie, jeśli masz gotowy szablon
-Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\src\main\resources\default_config.properties"; DestName: "config.properties"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist skipifsourcedoesntexist
-
-; Log4j konfiguracja
-Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\src\main\resources\log4j2.xml"; DestDir: "{app}\config"; Flags: ignoreversion skipifsourcedoesntexist
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\stonka.ico"
