@@ -52,7 +52,8 @@ public class WarehouseRepository {
             tx.begin();
             em.persist(state);
             tx.commit();
-            logger.info("addWarehouseState() – dodano state: {}", state);
+            logger.info("addWarehouseState() – " +
+                    "dodano state: {}", state);
         } catch (Exception ex) {
             logger.error("addWarehouseState() " +
                     "– błąd podczas dodawania stanu", ex);

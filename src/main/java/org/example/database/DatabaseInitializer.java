@@ -26,7 +26,8 @@ public class DatabaseInitializer implements ILacz {
         initializer.executeStructureScript();
         initializer.executeDataScript();
 
-        System.out.println("[DB-INIT] Inicjalizacja bazy danych zakończona pomyślnie");
+        System.out.println("[DB-INIT] Inicjalizacja bazy danych " +
+                "zakończona pomyślnie");
     }
 
     /**
@@ -39,10 +40,12 @@ public class DatabaseInitializer implements ILacz {
                 DatabaseConfig.getDbPassword())) {
 
             Statement stmt = conn.createStatement();
-            stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS " + DatabaseConfig.getDbName());
+            stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS " +
+                    DatabaseConfig.getDbName());
 
         } catch (SQLException e) {
-            System.err.println("Błąd podczas tworzenia bazy danych: " + e.getMessage());
+            System.err.println("Błąd podczas tworzenia bazy danych: "
+                    + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -79,7 +82,8 @@ public class DatabaseInitializer implements ILacz {
             }
 
         } catch (SQLException e) {
-            System.err.println("Błąd podczas wykonywania skryptu " + filename + ": " + e.getMessage());
+            System.err.println("Błąd podczas wykonywania skryptu " +
+                    filename + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -88,13 +92,16 @@ public class DatabaseInitializer implements ILacz {
      * Ładuje skrypt SQL z zasobów.
      */
     private String loadSqlScript(String filename) {
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream(filename);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+        try (InputStream is = getClass().getClassLoader()
+                .getResourceAsStream(filename);
+             BufferedReader reader = new BufferedReader(
+                     new InputStreamReader(is))) {
 
             return reader.lines().collect(Collectors.joining("\n"));
 
         } catch (Exception e) {
-            System.err.println("Błąd podczas ładowania skryptu " + filename + ": " + e.getMessage());
+            System.err.println("Błąd podczas ładowania skryptu " +
+                    filename + ": " + e.getMessage());
             e.printStackTrace();
             return "";
         }

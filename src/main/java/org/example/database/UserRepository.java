@@ -251,16 +251,19 @@ public class UserRepository {
         EntityManager em = EMFProvider.get().createEntityManager();
         try {
             TypedQuery<Employee> query = em.createQuery(
-                    "SELECT e FROM Employee e ORDER BY e.id DESC", Employee.class);
+                    "SELECT e FROM Employee e ORDER BY e.id DESC",
+                    Employee.class);
             query.setMaxResults(1);
             List<Employee> results = query.getResultList();
 
             if (!results.isEmpty()) {
                 Employee employee = results.get(0);
-                logger.debug("findEmployeeWithHighestId() – znaleziono: {}", employee);
+                logger.debug("findEmployeeWithHighestId() " +
+                        "– znaleziono: {}", employee);
                 return employee;
             } else {
-                logger.warn("findEmployeeWithHighestId() – nie znaleziono żadnego pracownika");
+                logger.warn("findEmployeeWithHighestId() – " +
+                        "nie znaleziono żadnego pracownika");
                 return null;
             }
         } catch (Exception ex) {
@@ -742,7 +745,8 @@ public class UserRepository {
         EntityManager em = EMFProvider.get().createEntityManager();
         try {
             Employee employee = em.createQuery(
-                            "SELECT e FROM Employee e WHERE e.email = :email "
+                            "SELECT e FROM Employee e WHERE " +
+                                    "e.email = :email "
                                     + "AND e.deleted = FALSE",
                             Employee.class)
                     .setParameter("email", email)
@@ -817,10 +821,11 @@ public class UserRepository {
                                     + "   AND t.used = FALSE",
                             PasswordResetToken.class)
                     .setParameter("userId", userId)
-                    .setParameter("now", java.time.LocalDateTime.now()) // Używamy tego samego czasu co przy tworzeniu
+                    .setParameter("now", java.time.LocalDateTime.now())
                     .getResultList();
 
-            logger.info("findValidTokensByUserId() – znaleziono {} tokenów", tokens.size());
+            logger.info("findValidTokensByUserId() – znaleziono {} " +
+                    "tokenów", tokens.size());
             return tokens;
         } catch (Exception e) {
             logger.error("findValidTokensByUserId() – błąd", e);
