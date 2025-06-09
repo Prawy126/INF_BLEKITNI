@@ -84,7 +84,8 @@ public class AdminPanel {
 
         // Domyślnie wyświetl widok użytkowników - asynchronicznie
         Platform.runLater(() -> {
-            logger.debug("Wyświetlanie domyślnego widoku zarządzania użytkownikami");
+            logger.debug("Wyświetlanie domyślnego widoku zarządzania " +
+                    "użytkownikami");
             controller.showUserManagement();
         });
     }
@@ -103,7 +104,8 @@ public class AdminPanel {
                             getClass().getResourceAsStream("/logo.png")
                     ), 100, 100, true, true);
                 } catch (Exception e) {
-                    logger.error("Błąd podczas ładowania logo: {}", e.getMessage(), e);
+                    logger.error("Błąd podczas ładowania logo: {}",
+                            e.getMessage(), e);
                     throw e;
                 }
             }
@@ -138,7 +140,8 @@ public class AdminPanel {
                 try {
                     return createMenu();
                 } catch (Exception e) {
-                    logger.error("Błąd podczas tworzenia menu: {}", e.getMessage(), e);
+                    logger.error("Błąd podczas tworzenia menu: {}",
+                            e.getMessage(), e);
                     throw e;
                 }
             }
@@ -225,7 +228,8 @@ public class AdminPanel {
             controller.showIssuesPanel();
         });
 
-        Button logoutButton = createStyledButton("Wyloguj", "#E74C3C");
+        Button logoutButton = createStyledButton("Wyloguj",
+                "#E74C3C");
         logoutButton.setOnAction(e -> {
             logger.info("Użytkownik wylogowuje się z panelu administratora");
             controller.logout();

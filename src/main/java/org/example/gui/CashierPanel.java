@@ -37,7 +37,8 @@ import java.util.Optional;
  */
 public class CashierPanel {
 
-    private static final Logger logger = LogManager.getLogger(CashierPanel.class);
+    private static final Logger logger = LogManager.getLogger(
+            CashierPanel.class);
     private BorderPane root;
     private Stage primaryStage;
     private CashierPanelController controller;
@@ -45,7 +46,8 @@ public class CashierPanel {
     private Button activeButton;
 
     public CashierPanel(Stage primaryStage) {
-        logger.info("Tworzenie CashierPanel dla stage: {}", primaryStage);
+        logger.info("Tworzenie CashierPanel dla stage: {}",
+                primaryStage);
 
         this.primaryStage = primaryStage;
         primaryStage.setMinWidth(1000);
@@ -61,7 +63,8 @@ public class CashierPanel {
             primaryStage.getIcons().add(logoImage);
             logger.debug("Logo dodane jako ikona okna");
         } catch (Exception e) {
-            logger.error("Błąd podczas ładowania logo: {}", e.getMessage(), e);
+            logger.error("Błąd podczas ładowania logo: {}",
+                    e.getMessage(), e);
         }
 
         primaryStage.setTitle("Panel kasjera");
@@ -98,11 +101,13 @@ public class CashierPanel {
             // Sprawdź, czy raport został wygenerowany w bieżącej sesji
             // lub wcześniej dzisiaj
             logger.debug("Sprawdzanie statusu raportu dziennego");
-            boolean reportGenerated = controller.isReportGeneratedInCurrentSession() ||
+            boolean reportGenerated = controller
+                    .isReportGeneratedInCurrentSession() ||
                     controller.isDailyReportGeneratedToday();
 
             if (!reportGenerated) {
-                logger.warn("Raport dzienny nie został wygenerowany - zapobieganie zamknięciu");
+                logger.warn("Raport dzienny nie został " +
+                        "wygenerowany - zapobieganie zamknięciu");
                 event.consume(); // Zapobiega zamknięciu okna
 
                 // Wyświetl alert z pytaniem
@@ -110,20 +115,23 @@ public class CashierPanel {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Uwaga");
                 alert.setHeaderText("Nie wygenerowano raportu dziennego");
-                alert.setContentText("Czy na pewno chcesz zamknąć aplikację bez" +
+                alert.setContentText("Czy na pewno chcesz zamknąć aplikację " +
+                        "bez" +
                         " wygenerowania raportu dziennego?");
 
                 Optional<ButtonType> result = alert.showAndWait();
                 if (result.isPresent() && result.get() == ButtonType.OK) {
                     // Użytkownik potwierdził zamknięcie - usuń handler i zamknij
-                    logger.info("Użytkownik potwierdził zamknięcie bez raportu");
+                    logger.info("Użytkownik potwierdził zamknięcie " +
+                            "bez raportu");
                     primaryStage.setOnCloseRequest(null);
                     Platform.exit();
                 } else {
                     logger.info("Użytkownik anulował zamknięcie");
                 }
             } else {
-                logger.debug("Raport dzienny został wygenerowany - zezwalanie na zamknięcie");
+                logger.debug("Raport dzienny został " +
+                        "wygenerowany - zezwalanie na zamknięcie");
             }
         });
 
@@ -145,10 +153,12 @@ public class CashierPanel {
         // Logo w lewym górnym rogu
         Image image = null;
         try {
-            image = new Image(getClass().getResourceAsStream("/logo.png"));
+            image = new Image(getClass().getResourceAsStream(
+                    "/logo.png"));
             logger.debug("Logo dla menu załadowane pomyślnie");
         } catch (Exception e) {
-            logger.error("Błąd podczas ładowania logo dla menu: {}", e.getMessage(), e);
+            logger.error("Błąd podczas ładowania logo dla " +
+                    "menu: {}", e.getMessage(), e);
         }
 
         ImageView logo = new ImageView(image);
@@ -191,7 +201,8 @@ public class CashierPanel {
         });
 
         // Przycisk wniosku o nieobecność
-        Button absenceButton = createStyledButton("Złóż wniosek o nieobecność");
+        Button absenceButton = createStyledButton("Złóż wniosek " +
+                "o nieobecność");
         absenceButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Złóż wniosek o nieobecność'");
             setActiveButton(absenceButton);
@@ -199,7 +210,8 @@ public class CashierPanel {
         });
 
         // Przycisk wylogowania (czerwony)
-        Button logoutButton = createStyledButton("Wyloguj się", "#E74C3C");
+        Button logoutButton = createStyledButton("Wyloguj się",
+                "#E74C3C");
         logoutButton.setOnAction(e -> {
             logger.info("Rozpoczęcie procesu wylogowania");
             // Używamy flagi z kontrolera zamiast lokalnej flagi

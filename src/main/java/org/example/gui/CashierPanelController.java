@@ -81,7 +81,8 @@ public class CashierPanelController {
         layout.setAlignment(Pos.CENTER);
 
         Button newTransactionButton =
-                cashierPanel.createStyledButton("Rozpocznij nową transakcję");
+                cashierPanel.createStyledButton("Rozpocznij nową " +
+                        "transakcję");
         newTransactionButton.setOnAction(e -> startNewTransaction());
         layout.getChildren().add(newTransactionButton);
         cashierPanel.setCenterPane(layout);
@@ -95,24 +96,29 @@ public class CashierPanelController {
         dialog.setMinWidth(800);
         dialog.setMinHeight(600);
 
-        ObservableList<TransactionItem> cartItems = FXCollections.observableArrayList();
+        ObservableList<TransactionItem> cartItems = FXCollections
+                .observableArrayList();
         BorderPane mainLayout = new BorderPane();
         mainLayout.setPadding(new Insets(20));
 
         // Lewa strona: wyszukiwanie produktów
         VBox productSearchBox = new VBox(10);
         Label searchLabel = new Label("Wyszukaj produkt:");
-        TextField searchField = createStyledTextField("Wpisz nazwę produktu...");
-        TableView<Product> productTable = createProductTableWithSearch(searchField);
+        TextField searchField = createStyledTextField("Wpisz nazwę " +
+                "produktu...");
+        TableView<Product> productTable = createProductTableWithSearch(
+                searchField);
 
         HBox quantityBox = new HBox(10);
         Label quantityLabel = new Label("Ilość:");
         Spinner<Integer> quantitySpinner = new Spinner<>(1, 100, 1);
         quantitySpinner.setEditable(true);
         quantitySpinner.setPrefWidth(100);
-        Button addToCartButton = cashierPanel.createStyledButton("Dodaj do koszyka");
+        Button addToCartButton = cashierPanel.createStyledButton("Dodaj " +
+                "do koszyka");
 
-        quantityBox.getChildren().addAll(quantityLabel, quantitySpinner, addToCartButton);
+        quantityBox.getChildren().addAll(quantityLabel, quantitySpinner,
+                addToCartButton);
         quantityBox.setAlignment(Pos.CENTER_LEFT);
 
         productSearchBox.getChildren().addAll(searchLabel, searchField,
@@ -132,8 +138,10 @@ public class CashierPanelController {
         totalBox.setAlignment(Pos.CENTER_RIGHT);
 
         HBox buttonBox = new HBox(10);
-        Button confirmButton = cashierPanel.createStyledButton("Zatwierdź transakcję", "#27AE60");
-        Button cancelButton  = cashierPanel.createStyledButton("Anuluj", "#E74C3C");
+        Button confirmButton = cashierPanel.createStyledButton(
+                "Zatwierdź transakcję", "#27AE60");
+        Button cancelButton  = cashierPanel.createStyledButton("Anuluj",
+                "#E74C3C");
         buttonBox.getChildren().addAll(confirmButton, cancelButton);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
 
@@ -148,7 +156,8 @@ public class CashierPanelController {
 
                 if (availableQuantity < quantity) {
                     showNotification("Błąd",
-                            "Niewystarczająca ilość produktu. Dostępne: " + availableQuantity);
+                            "Niewystarczająca ilość produktu. " +
+                                    "Dostępne: " + availableQuantity);
                     return;
                 }
                 boolean found = false;
@@ -157,7 +166,9 @@ public class CashierPanelController {
                         int newQuantity = item.getQuantity() + quantity;
                         if (newQuantity > availableQuantity) {
                             showNotification("Błąd",
-                                    "Niewystarczająca ilość produktu. Dostępne: " + availableQuantity);
+                                    "Niewystarczająca ilość " +
+                                            "produktu. Dostępne: "
+                                            + availableQuantity);
                             return;
                         }
                         item.setQuantity(newQuantity);
@@ -166,7 +177,8 @@ public class CashierPanelController {
                     }
                 }
                 if (!found) {
-                    cartItems.add(new TransactionItem(selectedProduct, quantity));
+                    cartItems.add(new TransactionItem(selectedProduct,
+                            quantity));
                 }
                 cartTable.refresh();
                 updateTotalPrice(cartItems, totalPriceLabel);
@@ -175,8 +187,10 @@ public class CashierPanelController {
 
         confirmButton.setOnAction(e -> {
             if (cartItems.isEmpty()) {
-                showNotification("Błąd", "Koszyk jest pusty. Dodaj produkty do koszyka.");
-                log.info("Potwierdzenie zamknięcia zmiany – flaga raportu: {}",
+                showNotification("Błąd", "Koszyk jest pusty. " +
+                        "Dodaj produkty do koszyka.");
+                log.info("Potwierdzenie zamknięcia zmiany – flaga " +
+                                "raportu: {}",
                         reportGeneratedInCurrentSession);
                 return;
             }
@@ -210,11 +224,13 @@ public class CashierPanelController {
 
         HBox buttons = new HBox(10);
         Button newReportButton =
-                cashierPanel.createStyledButton("Nowy raport", "#27AE60");
+                cashierPanel.createStyledButton("Nowy raport",
+                        "#27AE60");
         buttons.getChildren().addAll(newReportButton);
         buttons.setAlignment(Pos.CENTER);
 
-        newReportButton.setOnAction(e -> showReportDialog(tableView));
+        newReportButton.setOnAction(
+                e -> showReportDialog(tableView));
 
         layout.getChildren().addAll(titleLabel, tableView, buttons);
         cashierPanel.setCenterPane(layout);
@@ -242,7 +258,8 @@ public class CashierPanelController {
         List<Report> filtered = new ArrayList<>();
         for (Report r : allReports) {
             if (r.getEmployee() !=
-                    null && r.getEmployee().getId() == currentEmployee.getId()) {
+                    null && r.getEmployee().getId() == currentEmployee
+                    .getId()) {
                 filtered.add(r);
             }
         }
@@ -258,11 +275,13 @@ public class CashierPanelController {
             case DAILY   -> new LocalDate[]{selectedDate, selectedDate};
             case MONTHLY -> {
                 LocalDate start = selectedDate.withDayOfMonth(1);
-                yield new LocalDate[]{start, start.plusMonths(1).minusDays(1)};
+                yield new LocalDate[]{start, start.plusMonths(1).
+                        minusDays(1)};
             }
             case YEARLY  -> {
                 LocalDate start = selectedDate.withDayOfYear(1);
-                yield new LocalDate[]{start, start.plusYears(1).minusDays(1)};
+                yield new LocalDate[]{start, start.plusYears(1).
+                        minusDays(1)};
             }
         };
     }
@@ -292,15 +311,18 @@ public class CashierPanelController {
         Label categoryLabel = new Label("Kategorie (opcjonalnie):");
         ListView<String> categoryListView = new ListView<>();
         categoryListView.setPrefHeight(150);
-        categoryListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        categoryListView.getSelectionModel().setSelectionMode(
+                SelectionMode.MULTIPLE);
         ProductRepository productRepo = new ProductRepository();
         categoryListView.setItems(FXCollections.observableArrayList(
                 productRepo.getCategories()));
         productRepo.close();
 
-        Button generateBtn = cashierPanel.createStyledButton("Generuj raport",
+        Button generateBtn = cashierPanel.createStyledButton("Generuj " +
+                        "raport",
                 "#2980B9");
-        Button cancelBtn   = cashierPanel.createStyledButton("Anuluj", "#E74C3C");
+        Button cancelBtn   = cashierPanel.createStyledButton("Anuluj",
+                "#E74C3C");
 
         HBox buttonBox = new HBox(10, generateBtn, cancelBtn);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
@@ -309,7 +331,8 @@ public class CashierPanelController {
             String reportTypeStr = typeBox.getValue();
             LocalDate selectedDate = datePicker.getValue();
             List<String> selectedCategories =
-                    new ArrayList<>(categoryListView.getSelectionModel().getSelectedItems());
+                    new ArrayList<>(categoryListView.getSelectionModel()
+                            .getSelectedItems());
 
             if (selectedDate == null) {
                 showNotification("Błąd", "Wybierz datę raportu.");
@@ -318,17 +341,22 @@ public class CashierPanelController {
 
             try {
                 PeriodType periodType = getPeriodTypeFromString(reportTypeStr);
-                LocalDate[] dates = calculateReportDates(periodType, selectedDate);
+                LocalDate[] dates = calculateReportDates(periodType,
+                        selectedDate);
 
-                Date d1 = Date.from(dates[0].atStartOfDay(ZoneId.systemDefault()).toInstant());
-                Date d2 = Date.from(dates[1].atTime(23,59,59).atZone(
+                Date d1 = Date.from(dates[0].atStartOfDay(ZoneId
+                        .systemDefault()).toInstant());
+                Date d2 = Date.from(dates[1].atTime(
+                        23,59,59).atZone(
                         ZoneId.systemDefault()).toInstant());
                 List<Transaction> transactions =
-                        transactionRepository.getTransactionsBetweenDates(d1, d2);
+                        transactionRepository.getTransactionsBetweenDates(
+                                d1, d2);
 
                 if (transactions.isEmpty()) {
                     saveEmptyReportInfo(periodType, dates[0], dates[1]);
-                    showNotification("Brak danych", "Nie znaleziono transakcji w wybranym okresie.");
+                    showNotification("Brak danych", "Nie " +
+                            "znaleziono transakcji w wybranym okresie.");
                     // Od razu odświeżamy tabelę raportów:
                     refreshReportTable(tableView);
                     dialog.close();
@@ -338,7 +366,8 @@ public class CashierPanelController {
                 String reportPath = generateSalesReport(periodType, dates[0],
                         dates[1], selectedCategories);
                 saveReportInfo(periodType, dates[0], dates[1], reportPath);
-                showNotification("Sukces", "Raport zapisano: " + reportPath);
+                showNotification("Sukces", "Raport zapisano: "
+                        + reportPath);
                 // Po udanym wygenerowaniu od razu odświeżamy tabelę w panelu kasjera:
                 refreshReportTable(tableView);
 
@@ -346,7 +375,8 @@ public class CashierPanelController {
             } catch (Exception ex) {
                 ex.printStackTrace();
                 showNotification("Błąd",
-                        "Nie udało się wygenerować raportu: " + ex.getMessage());
+                        "Nie udało się wygenerować raportu: "
+                                + ex.getMessage());
             }
         });
 
@@ -380,7 +410,8 @@ public class CashierPanelController {
                                      LocalDate startDate,
                                      LocalDate endDate) {
         Employee current = userRepository.getCurrentEmployee();
-        if (current == null) throw new IllegalStateException("Nie jesteś zalogowany.");
+        if (current == null) throw new IllegalStateException("Nie jesteś " +
+                "zalogowany.");
 
         Report report = new Report();
         report.setEmployee(current);
@@ -408,16 +439,19 @@ public class CashierPanelController {
                                 LocalDate endDate,
                                 String reportPath) {
         Employee current = userRepository.getCurrentEmployee();
-        if (current == null) throw new IllegalStateException("Nie jesteś zalogowany.");
+        if (current == null) throw new IllegalStateException("Nie jesteś " +
+                "zalogowany.");
 
         switch (periodType) {
             case MONTHLY -> {
                 startDate = startDate.withDayOfMonth(1);
-                endDate   = startDate.plusMonths(1).minusDays(1);
+                endDate   = startDate.plusMonths(1).minusDays(
+                        1);
             }
             case YEARLY  -> {
                 startDate = startDate.withDayOfYear(1);
-                endDate   = startDate.plusYears(1).minusDays(1);
+                endDate   = startDate.plusYears(1).minusDays(
+                        1);
             }
             default -> {}
         }
@@ -445,36 +479,50 @@ public class CashierPanelController {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         idColumn.setPrefWidth(50);
 
-        TableColumn<Report, String> typeColumn = new TableColumn<>("Typ raportu");
-        typeColumn.setCellValueFactory(new PropertyValueFactory<>("reportType"));
+        TableColumn<Report, String> typeColumn = new TableColumn<>(
+                "Typ raportu");
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>(
+                "reportType"));
         typeColumn.setPrefWidth(120);
 
-        TableColumn<Report, LocalDate> dateStartColumn = new TableColumn<>("Od");
-        dateStartColumn.setCellValueFactory(new PropertyValueFactory<>("startDate"));
+        TableColumn<Report, LocalDate> dateStartColumn = new TableColumn<>(
+                "Od");
+        dateStartColumn.setCellValueFactory(new PropertyValueFactory<>(
+                "startDate"));
         dateStartColumn.setPrefWidth(100);
 
-        TableColumn<Report, LocalDate> dateEndColumn = new TableColumn<>("Do");
-        dateEndColumn.setCellValueFactory(new PropertyValueFactory<>("endDate"));
+        TableColumn<Report, LocalDate> dateEndColumn = new TableColumn<>(
+                "Do");
+        dateEndColumn.setCellValueFactory(new PropertyValueFactory<>(
+                "endDate"));
         dateEndColumn.setPrefWidth(100);
 
-        TableColumn<Report, String> employeeColumn = new TableColumn<>("Wygenerował");
-        employeeColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getEmployee().getName() + " " +
+        TableColumn<Report, String> employeeColumn = new TableColumn<>(
+                "Wygenerował");
+        employeeColumn.setCellValueFactory(
+                cellData ->
+                new SimpleStringProperty(cellData.getValue().getEmployee()
+                        .getName() + " " +
                         cellData.getValue().getEmployee().getSurname()));
         employeeColumn.setPrefWidth(150);
 
         TableColumn<Report, Void> actionsColumn = new TableColumn<>("Akcje");
         actionsColumn.setPrefWidth(200);
-        actionsColumn.setCellFactory(param -> new TableCell<>() {
+        actionsColumn.setCellFactory(
+                param -> new TableCell<>() {
             private final Button viewButton = new Button("Podgląd");
             private final Button openButton = new Button("Otwórz");
             private final Button deleteButton = new Button("Usuń");
-            private final HBox pane = new HBox(5, viewButton, openButton, deleteButton);
+            private final HBox pane = new HBox(5, viewButton, openButton,
+                    deleteButton);
 
             {
-                viewButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
-                openButton.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white;");
-                deleteButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
+                viewButton.setStyle("-fx-background-color: #3498DB; " +
+                        "-fx-text-fill: white;");
+                openButton.setStyle("-fx-background-color: #27AE60; " +
+                        "-fx-text-fill: white;");
+                deleteButton.setStyle("-fx-background-color: #E74C3C; " +
+                        "-fx-text-fill: white;");
 
                 viewButton.setOnAction(event -> {
                     Report report = getTableView().getItems().get(getIndex());
@@ -514,13 +562,15 @@ public class CashierPanelController {
     private void openReportFile(String filePath) {
         File file = new File(filePath);
         if (!file.exists()) {
-            showNotification("Błąd", "Plik nie istnieje: " + filePath);
+            showNotification("Błąd", "Plik nie istnieje: "
+                    + filePath);
             return;
         }
 
         // Pobierz informację o systemie operacyjnym
         String os = System.getProperty("os.name").toLowerCase();
-        log.info("Próba otwarcia raportu: {}, system: {}", filePath, os);
+        log.info("Próba otwarcia raportu: {}, system: {}", filePath,
+                os);
 
         // Użyj wątku w tle aby nie blokować interfejsu użytkownika
         new Thread(() -> {
@@ -534,7 +584,8 @@ public class CashierPanelController {
                         success = true;
                         log.info("Otwarto plik używając Desktop API");
                     } catch (IOException e) {
-                        log.warn("Nie udało się otworzyć pliku przez Desktop API: {}", e.getMessage());
+                        log.warn("Nie udało się otworzyć pliku przez " +
+                                "Desktop API: {}", e.getMessage());
                     }
                 }
 
@@ -542,10 +593,12 @@ public class CashierPanelController {
                 // na Linuksie
                 if (!success && (os.contains("nix") || os.contains("nux")
                         || os.contains("unix"))) {
-                    log.info("Próbuję alternatywnych metod otwarcia pliku na Linuksie");
+                    log.info("Próbuję alternatywnych metod otwarcia pliku " +
+                            "na Linuksie");
 
                     // Lista programów do wypróbowania
-                    String[] commands = {"xdg-open", "gnome-open", "kde-open", "gio open",
+                    String[] commands = {"xdg-open", "gnome-open", "kde-open",
+                            "gio open",
                             "gvfs-open"};
 
                     for (String cmd : commands) {
@@ -553,7 +606,8 @@ public class CashierPanelController {
 
                         try {
                             log.info("Próba użycia komendy: {}", cmd);
-                            ProcessBuilder pb = new ProcessBuilder(cmd.split(" ")[0],
+                            ProcessBuilder pb = new ProcessBuilder(cmd.split(
+                                    " ")[0],
                                     file.getAbsolutePath());
                             pb.redirectError(ProcessBuilder.Redirect.DISCARD);
                             pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
@@ -561,18 +615,22 @@ public class CashierPanelController {
                             Process process = pb.start();
 
                             // Użyj wykonawcy z timeoutem, aby nie blokować wątku na zawsze
-                            boolean exited = process.waitFor(3, TimeUnit.SECONDS);
+                            boolean exited = process.waitFor(
+                                    3, TimeUnit.SECONDS);
 
                             if (exited && process.exitValue() == 0) {
                                 success = true;
-                                log.info("Plik otwarty pomyślnie używając: {}", cmd);
+                                log.info("Plik otwarty pomyślnie " +
+                                        "używając: {}", cmd);
                             } else {
                                 // Upewnij się, że proces jest zakończony
                                 process.destroy();
-                                log.warn("Komenda {} nie powiodła się", cmd);
+                                log.warn("Komenda {} nie " +
+                                        "powiodła się", cmd);
                             }
                         } catch (Exception e) {
-                            log.warn("Błąd przy użyciu komendy {}: {}", cmd, e.getMessage());
+                            log.warn("Błąd przy użyciu " +
+                                    "komendy {}: {}", cmd, e.getMessage());
                         }
                     }
 
@@ -580,23 +638,29 @@ public class CashierPanelController {
                     if (!success) {
                         try {
                             log.info("Próba otwarcia w przeglądarce");
-                            String[] browsers = {"firefox", "google-chrome", "chromium-browser"};
+                            String[] browsers = {"firefox", "google-chrome",
+                                    "chromium-browser"};
 
                             for (String browser : browsers) {
                                 try {
-                                    ProcessBuilder pb = new ProcessBuilder(browser, file.toURI().toString());
-                                    pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+                                    ProcessBuilder pb = new ProcessBuilder(
+                                            browser, file.toURI().toString());
+                                    pb.redirectError(ProcessBuilder.Redirect
+                                            .DISCARD);
                                     pb.start();
                                     success = true;
-                                    log.info("Plik otwarty w przeglądarce: {}", browser);
+                                    log.info("Plik otwarty " +
+                                            "w przeglądarce: {}", browser);
                                     break;
                                 } catch (IOException e) {
-                                    log.warn("Nie udało się otworzyć w przeglądarce {}: {}",
+                                    log.warn("Nie udało się otworzyć " +
+                                                    "w przeglądarce {}: {}",
                                             browser, e.getMessage());
                                 }
                             }
                         } catch (Exception e) {
-                            log.error("Błąd podczas próby otwarcia w przeglądarce: {}", e.getMessage());
+                            log.error("Błąd podczas próby otwarcia " +
+                                    "w przeglądarce: {}", e.getMessage());
                         }
                     }
                 }
@@ -606,19 +670,23 @@ public class CashierPanelController {
                 javafx.application.Platform.runLater(() -> {
                     if (!finalSuccess) {
                         showNotification("Informacja",
-                                "Nie można automatycznie otworzyć pliku. Lokalizacja pliku: " + filePath);
+                                "Nie można automatycznie otworzyć " +
+                                        "pliku. Lokalizacja pliku: " + filePath);
                     }
                 });
 
             } catch (Exception e) {
-                log.error("Błąd podczas otwierania pliku: {}", e.getMessage(), e);
+                log.error("Błąd podczas otwierania pliku: {}",
+                        e.getMessage(), e);
                 javafx.application.Platform.runLater(() ->
-                        showNotification("Błąd", "Nie można otworzyć pliku: " + e.getMessage()));
+                        showNotification("Błąd", "Nie można " +
+                                "otworzyć pliku: " + e.getMessage()));
             }
         }).start();
     }
 
-    private void confirmAndDeleteReport(Report report, TableView<Report> tableView) {
+    private void confirmAndDeleteReport(Report report,
+                                        TableView<Report> tableView) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Potwierdzenie usunięcia");
         alert.setHeaderText("Czy na pewno chcesz usunąć ten raport?");
@@ -650,7 +718,8 @@ public class CashierPanelController {
         infoGrid.add(new Label("Typ raportu:"), 0, row);
         infoGrid.add(new Label(report.getReportType()), 1, row++);
         infoGrid.add(new Label("Okres:"), 0, row);
-        infoGrid.add(new Label(report.getStartDate() + " - " + report.getEndDate()),
+        infoGrid.add(new Label(report.getStartDate() + " - "
+                        + report.getEndDate()),
                 1, row++);
         infoGrid.add(new Label("Wygenerował:"), 0, row);
         infoGrid.add(new Label(report.getEmployee().getName() + " " +
@@ -659,14 +728,18 @@ public class CashierPanelController {
         infoGrid.add(new Label(report.getFilePath()), 1, row++);
 
         HBox buttonBox = new HBox(10);
-        Button openButton = cashierPanel.createStyledButton("Otwórz plik", "#27AE60");
-        Button closeButton = cashierPanel.createStyledButton("Zamknij", "#7F8C8D");
-        openButton.setOnAction(e -> openReportFile(report.getFilePath()));
+        Button openButton = cashierPanel.createStyledButton(
+                "Otwórz plik", "#27AE60");
+        Button closeButton = cashierPanel.createStyledButton(
+                "Zamknij", "#7F8C8D");
+        openButton.setOnAction(e -> openReportFile(
+                report.getFilePath()));
         closeButton.setOnAction(e -> dialog.close());
         buttonBox.getChildren().addAll(openButton, closeButton);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
 
-        content.getChildren().addAll(titleLabel, infoGrid, new Separator(), buttonBox);
+        content.getChildren().addAll(titleLabel, infoGrid, new Separator(),
+                buttonBox);
         dialog.setScene(new Scene(content));
         dialog.showAndWait();
     }
@@ -677,7 +750,8 @@ public class CashierPanelController {
         // Możliwość symulacji generowania
     }
 
-    private TableView<Product> createProductTableWithSearch(TextField searchField) {
+    private TableView<Product> createProductTableWithSearch(
+            TextField searchField) {
         TableView<Product> table = new TableView<>();
         table.setMinHeight(300);
 
@@ -688,8 +762,10 @@ public class CashierPanelController {
         TableColumn<Product, String> nameCol = new TableColumn<>("Nazwa");
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-        TableColumn<Product, String> categoryCol = new TableColumn<>("Kategoria");
-        categoryCol.setCellValueFactory(new PropertyValueFactory<>("category"));
+        TableColumn<Product, String> categoryCol = new TableColumn<>(
+                "Kategoria");
+        categoryCol.setCellValueFactory(new PropertyValueFactory<>(
+                "category"));
 
         // Kolumna „Cena” – wartości wyrównujemy do prawej:
         TableColumn<Product, Double> priceCol = new TableColumn<>("Cena");
@@ -705,7 +781,8 @@ public class CashierPanelController {
         });
         stockCol.setStyle("-fx-alignment: CENTER-RIGHT;");
 
-        table.getColumns().addAll(idCol, nameCol, categoryCol, priceCol, stockCol);
+        table.getColumns().addAll(idCol, nameCol, categoryCol, priceCol,
+                stockCol);
 
         ProductRepository productRepo = new ProductRepository();
         ObservableList<Product> productList =
@@ -713,12 +790,17 @@ public class CashierPanelController {
         productRepo.close();
         table.setItems(productList);
 
-        searchField.textProperty().addListener((obs, oldVal, newVal) -> {
-            ObservableList<Product> filtered = FXCollections.observableArrayList();
+        searchField.textProperty().addListener((
+                obs, oldVal,
+                newVal) -> {
+            ObservableList<Product> filtered
+                    = FXCollections.observableArrayList();
             for (Product p : productList) {
                 if (newVal == null || newVal.isEmpty()
-                        || p.getName().toLowerCase().contains(newVal.toLowerCase())
-                        || p.getCategory().toLowerCase().contains(newVal.toLowerCase())) {
+                        || p.getName().toLowerCase().contains(newVal
+                        .toLowerCase())
+                        || p.getCategory().toLowerCase().contains(newVal
+                        .toLowerCase())) {
                     filtered.add(p);
                 }
             }
@@ -733,7 +815,8 @@ public class CashierPanelController {
         WarehouseRepository warehouseRepo = new WarehouseRepository();
         int qty = 0;
         try {
-            Warehouse state = warehouseRepo.findStateByProductId(product.getId());
+            Warehouse state = warehouseRepo.findStateByProductId(
+                    product.getId());
             if (state != null) qty = state.getQuantity();
         } finally {
             warehouseRepo.close();
@@ -745,12 +828,15 @@ public class CashierPanelController {
         TableView<TransactionItem> table = new TableView<>();
         table.setMinHeight(300);
 
-        TableColumn<TransactionItem, String> nameCol = new TableColumn<>("Nazwa");
+        TableColumn<TransactionItem, String> nameCol = new TableColumn<>(
+                "Nazwa");
         nameCol.setCellValueFactory(cd ->
                 new SimpleStringProperty(cd.getValue().getProduct().getName()));
 
-        TableColumn<TransactionItem, Integer> quantityCol = new TableColumn<>("Ilość");
-        quantityCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        TableColumn<TransactionItem, Integer> quantityCol = new TableColumn<>(
+                "Ilość");
+        quantityCol.setCellValueFactory(new PropertyValueFactory<>(
+                "quantity"));
         quantityCol.setCellFactory(TextFieldTableCell.forTableColumn(
                 new IntegerStringConverter()));
         quantityCol.setOnEditCommit(ev -> {
@@ -762,24 +848,32 @@ public class CashierPanelController {
                 updateTotalPrice(table.getItems(), null);
             } else {
                 table.refresh();
-                showNotification("Błąd", "Nieprawidłowa ilość. Maksymalna: " + maxQty);
+                showNotification("Błąd", "Nieprawidłowa ilość. " +
+                        "Maksymalna: " + maxQty);
             }
         });
 
-        TableColumn<TransactionItem, Double> priceCol = new TableColumn<>("Cena jedn.");
+        TableColumn<TransactionItem, Double> priceCol = new TableColumn<>(
+                "Cena jedn.");
         priceCol.setCellValueFactory(cd ->
-                new SimpleDoubleProperty(cd.getValue().getProduct().getPrice().doubleValue()).asObject());
+                new SimpleDoubleProperty(cd.getValue().getProduct().getPrice()
+                        .doubleValue()).asObject());
 
-        TableColumn<TransactionItem, Double> totalCol = new TableColumn<>("Suma");
+        TableColumn<TransactionItem, Double> totalCol = new TableColumn<>(
+                "Suma");
         totalCol.setCellValueFactory(cd ->
                 new SimpleDoubleProperty(cd.getValue().getTotal()).asObject());
 
-        TableColumn<TransactionItem, Void> actionCol = new TableColumn<>("Akcje");
-        actionCol.setCellFactory(p -> new TableCell<>() {
+        TableColumn<TransactionItem, Void> actionCol = new TableColumn<>(
+                "Akcje");
+        actionCol.setCellFactory(
+                p -> new TableCell<>() {
             private final Button removeButton = new Button("Usuń");
-            { removeButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
+            { removeButton.setStyle("-fx-background-color: #E74C3C; " +
+                    "-fx-text-fill: white;");
                 removeButton.setOnAction(e -> {
-                    TransactionItem item = getTableView().getItems().get(getIndex());
+                    TransactionItem item = getTableView().getItems()
+                            .get(getIndex());
                     getTableView().getItems().remove(item);
                     updateTotalPrice(getTableView().getItems(), null);
                 });
@@ -791,7 +885,8 @@ public class CashierPanelController {
             }
         });
 
-        table.getColumns().addAll(nameCol, quantityCol, priceCol, totalCol, actionCol);
+        table.getColumns().addAll(nameCol, quantityCol, priceCol, totalCol,
+                actionCol);
         table.setEditable(true);
         return table;
     }
@@ -800,7 +895,8 @@ public class CashierPanelController {
                                   Label totalLabel) {
         double total = 0;
         for (TransactionItem ti : items) total += ti.getTotal();
-        if (totalLabel != null) totalLabel.setText(String.format("%.2f zł", total));
+        if (totalLabel != null) totalLabel.setText(String.format("%.2f zł",
+                total));
     }
 
     private void saveTransaction(ObservableList<TransactionItem> items,
@@ -828,20 +924,24 @@ public class CashierPanelController {
                 whRepo.setProductQuantity(pid, avail - qty);
 
                 TransactionProduct tp = new TransactionProduct();
-                tp.setTransaction(transactionRepository.findTransactionById(txId));
+                tp.setTransaction(transactionRepository
+                        .findTransactionById(txId));
                 tp.setProduct(item.getProduct());
                 tp.setQuantity(qty);
 
-                TransactionProductRepository tpRepo = new TransactionProductRepository();
+                TransactionProductRepository tpRepo
+                        = new TransactionProductRepository();
                 tpRepo.addTransactionProduct(tp);
             }
 
-            showNotification("Sukces", "Transakcja zapisana pomyślnie.");
+            showNotification("Sukces", "Transakcja zapisana " +
+                    "pomyślnie.");
             dialog.close();
 
         } catch (Exception e) {
             e.printStackTrace();
-            showNotification("Błąd", "Wystąpił błąd podczas zapisu: " + e.getMessage());
+            showNotification("Błąd", "Wystąpił błąd podczas " +
+                    "zapisu: " + e.getMessage());
         }
     }
 
@@ -856,7 +956,8 @@ public class CashierPanelController {
         dialog.setTitle("Zgłoszenie problemu");
 
         Label typeLabel = new Label("Typ zgłoszenia:");
-        ComboBox<String> typeBox = new ComboBox<>(FXCollections.observableArrayList(
+        ComboBox<String> typeBox = new ComboBox<>(FXCollections
+                .observableArrayList(
                 "Awaria sprzętu", "Błąd oprogramowania", "Inne"));
 
         Label descLabel = new Label("Opis:");
@@ -864,11 +965,14 @@ public class CashierPanelController {
         description.setPromptText("Opisz problem...");
 
         Button sendButton = new Button("Wyślij");
-        sendButton.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white;" +
+        sendButton.setStyle("-fx-background-color: #27AE60; " +
+                "-fx-text-fill: white;" +
                 " -fx-font-weight: bold;");
         sendButton.setOnAction(e -> {
-            if (typeBox.getValue() == null || description.getText().trim().isEmpty()) {
-                showNotification("Błąd", "Uzupełnij wszystkie pola.");
+            if (typeBox.getValue() == null || description.getText().trim()
+                    .isEmpty()) {
+                showNotification("Błąd", "Uzupełnij wszystkie " +
+                        "pola.");
             } else {
                 try {
                     // Pobierz aktualnie zalogowanego pracownika
@@ -877,7 +981,8 @@ public class CashierPanelController {
 
                     if (currentEmployee == null) {
                         showNotification("Błąd",
-                                "Nie można zidentyfikować zalogowanego użytkownika.");
+                                "Nie można zidentyfikować " +
+                                        "zalogowanego użytkownika.");
                         userRepo.close();
                         return;
                     }
@@ -901,16 +1006,19 @@ public class CashierPanelController {
                     issue.setStatus("Nowe");
 
                     // Zapisz zgłoszenie w bazie danych
-                    TechnicalIssueRepository issueRepo = new TechnicalIssueRepository();
+                    TechnicalIssueRepository issueRepo
+                            = new TechnicalIssueRepository();
                     issueRepo.addIssue(issue);
 
                     // Wyświetl komunikat sukcesu
-                    showNotification("Sukces", "Zgłoszenie techniczne zostało" +
+                    showNotification("Sukces", "Zgłoszenie " +
+                            "techniczne zostało" +
                             " wysłane");
 
                     // Loguj wysłanie zgłoszenia
                     Logger logger = LogManager.getLogger(getClass());
-                    logger.info("Użytkownik {} wysłał zgłoszenie techniczne typu: {}",
+                    logger.info("Użytkownik {} wysłał zgłoszenie " +
+                                    "techniczne typu: {}",
                             currentEmployee.getLogin(), typeBox.getValue());
 
                     // Zamknij okno dialogowe
@@ -920,9 +1028,11 @@ public class CashierPanelController {
                     userRepo.close();
                 } catch (Exception ex) {
                     Logger logger = LogManager.getLogger(getClass());
-                    logger.error("Błąd podczas wysyłania zgłoszenia technicznego", ex);
+                    logger.error("Błąd podczas wysyłania zgłoszenia " +
+                            "technicznego", ex);
                     showNotification("Błąd",
-                            "Wystąpił problem podczas wysyłania zgłoszenia. Spróbuj ponownie.");
+                            "Wystąpił problem podczas wysyłania " +
+                                    "zgłoszenia. Spróbuj ponownie.");
                 }
             }
         });
@@ -935,7 +1045,8 @@ public class CashierPanelController {
         HBox buttonBox = new HBox(10, sendButton, cancelButton);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
 
-        VBox root = new VBox(15, typeLabel, typeBox, descLabel, description, buttonBox);
+        VBox root = new VBox(15, typeLabel, typeBox, descLabel, description,
+                buttonBox);
         root.setPadding(new Insets(20));
 
         dialog.setScene(new Scene(root));
@@ -953,22 +1064,26 @@ public class CashierPanelController {
         log.info("Otwarto panel zamknięcia zmiany. Flaga raportu: {}",
                 reportGeneratedInCurrentSession);
         if (!reportGeneratedInCurrentSession) {
-            Label warning = new Label("Uwaga: Nie wygenerowano jeszcze raportu dziennego!");
+            Label warning = new Label("Uwaga: Nie wygenerowano jeszcze " +
+                    "raportu dziennego!");
             warning.setStyle("-fx-text-fill: #E74C3C; -fx-font-weight: bold;");
-            Button genBtn = cashierPanel.createStyledButton("Wygeneruj raport dzienny",
+            Button genBtn = cashierPanel.createStyledButton("Wygeneruj " +
+                            "raport dzienny",
                     "#3498DB");
             genBtn.setOnAction(e -> {
                 showReportDialog();
                 // Ustaw flagę po wygenerowaniu raportu
                 //reportGeneratedInCurrentSession = isDailyReportGeneratedToday();
-                log.info("Po wygenerowaniu raportu (przez guzik): flaga reportGeneratedInCurrentSession = {}",
+                log.info("Po wygenerowaniu raportu (przez guzik): " +
+                                "flaga reportGeneratedInCurrentSession = {}",
                         reportGeneratedInCurrentSession);
             });
             layout.getChildren().addAll(warning, genBtn);
         }
 
         Button confirmButton =
-                cashierPanel.createStyledButton("Potwierdź zamknięcie zmiany",
+                cashierPanel.createStyledButton("Potwierdź zamknięcie " +
+                                "zmiany",
                 "#E67E22");
         confirmButton.setOnAction(e -> {
 
@@ -978,17 +1093,20 @@ public class CashierPanelController {
                 alert.setHeaderText("Nie wygenerowano raportu dziennego");
                 alert.getDialogPane().setMinWidth(400);
                 alert.getDialogPane().setMinHeight(200);
-                alert.setContentText("Przed zamknięciem zmiany wygeneruj raport dzienny.");
+                alert.setContentText("Przed zamknięciem zmiany wygeneruj " +
+                        "raport dzienny.");
                 ButtonType gen = new ButtonType("Generuj raport");
                 ButtonType ign = new ButtonType("Ignoruj i zamknij");
-                ButtonType canc = new ButtonType("Anuluj", ButtonBar.ButtonData.CANCEL_CLOSE);
+                ButtonType canc = new ButtonType("Anuluj", ButtonBar
+                        .ButtonData.CANCEL_CLOSE);
                 alert.getButtonTypes().setAll(gen, ign, canc);
 
                 Optional<ButtonType> res = alert.showAndWait();
                 if (res.isPresent()) {
                     if (res.get() == gen) {
                         showReportDialog();
-                        //reportGeneratedInCurrentSession = isDailyReportGeneratedToday();
+                        //reportGeneratedInCurrentSession
+                        // = isDailyReportGeneratedToday();
                         return;
                     } else if (res.get() == canc) {
                         return;
@@ -1074,8 +1192,10 @@ public class CashierPanelController {
         info.setStyle("-fx-font-weight: bold;");
 
         Label typeLabel = new Label("Typ wniosku:");
-        ComboBox<String> typeCombo = new ComboBox<>(FXCollections.observableArrayList(
-                "Urlop wypoczynkowy", "Urlop na żądanie", "Zwolnienie lekarskie", "Inne"));
+        ComboBox<String> typeCombo = new ComboBox<>(FXCollections
+                .observableArrayList(
+                "Urlop wypoczynkowy", "Urlop na żądanie",
+                        "Zwolnienie lekarskie", "Inne"));
         typeCombo.setValue("Urlop wypoczynkowy");
 
         Label reasonLabel = new Label("Opis:");
@@ -1087,9 +1207,11 @@ public class CashierPanelController {
         Label toDateLabel = new Label("Data do:");
         DatePicker toDatePicker = new DatePicker();
 
-        Button submit = cashierPanel.createStyledButton("Wyślij wniosek", "#27AE60");
+        Button submit = cashierPanel.createStyledButton("Wyślij wniosek",
+                "#27AE60");
         submit.setOnAction(e -> {
-            if (validateAbsenceForm(reasonField.getText(), fromDatePicker.getValue(),
+            if (validateAbsenceForm(reasonField.getText(),
+                    fromDatePicker.getValue(),
                     toDatePicker.getValue())) {
                 try {
                     // Tworzenie obiektu wniosku o nieobecność
@@ -1105,26 +1227,32 @@ public class CashierPanelController {
                     request.setDescription(reasonField.getText());
 
                     // Konwersja LocalDate na Date
-                    Date startDate = java.sql.Date.valueOf(fromDatePicker.getValue());
-                    Date endDate = java.sql.Date.valueOf(toDatePicker.getValue());
+                    Date startDate = java.sql.Date.valueOf(
+                            fromDatePicker.getValue());
+                    Date endDate = java.sql.Date.valueOf(
+                            toDatePicker.getValue());
                     request.setStartDate(startDate);
                     request.setEndDate(endDate);
 
                     // Status domyślnie ustawiony na PENDING (nie trzeba ustawiać)
 
                     // Zapisanie wniosku w bazie danych
-                    AbsenceRequestRepository repository = new AbsenceRequestRepository();
+                    AbsenceRequestRepository repository
+                            = new AbsenceRequestRepository();
                     repository.addRequest(request);
 
                     log.info("Wysłano wniosek o nieobecność: {}",
                             typeCombo.getValue());
 
-                    showNotification("Sukces", "Wniosek został wysłany.");
+                    showNotification("Sukces", "Wniosek " +
+                            "został wysłany.");
                     stage.close();
                 } catch (Exception ex) {
-                    log.error("Błąd podczas wysyłania wniosku o nieobecność", ex);
+                    log.error("Błąd podczas wysyłania wniosku " +
+                            "o nieobecność", ex);
                     showNotification("Błąd",
-                            "Wystąpił problem podczas wysyłania wniosku. Spróbuj ponownie.");
+                            "Wystąpił problem podczas wysyłania " +
+                                    "wniosku. Spróbuj ponownie.");
                 }
             }
         });
@@ -1149,7 +1277,8 @@ public class CashierPanelController {
     private boolean validateAbsenceForm(String reason, LocalDate from,
                                         LocalDate to) {
         if (reason == null || reason.trim().isEmpty()) {
-            showNotification("Błąd", "Musisz podać powód nieobecności");
+            showNotification("Błąd", "Musisz podać powód " +
+                    "nieobecności");
             return false;
         }
         if (from == null || to == null) {
@@ -1157,7 +1286,8 @@ public class CashierPanelController {
             return false;
         }
         if (from.isAfter(to)) {
-            showNotification("Błąd", "Data od nie może być później niż do");
+            showNotification("Błąd", "Data od nie może być " +
+                    "później niż do");
             return false;
         }
         return true;
@@ -1166,7 +1296,8 @@ public class CashierPanelController {
     private void animateDialog(Stage dialog, Pane root) {
         FadeTransition ft = new FadeTransition(Duration.millis(300), root);
         ft.setFromValue(0.0); ft.setToValue(1.0);
-        TranslateTransition tt = new TranslateTransition(Duration.millis(300), root);
+        TranslateTransition tt = new TranslateTransition(Duration.millis(
+                300), root);
         tt.setFromY(-20); tt.setToY(0);
         new ParallelTransition(ft, tt).play();
     }
@@ -1188,7 +1319,8 @@ public class CashierPanelController {
     }
 
     private <T> ComboBox<T> createStyledComboBox(T... items) {
-        ComboBox<T> box = new ComboBox<>(FXCollections.observableArrayList(items));
+        ComboBox<T> box = new ComboBox<>(FXCollections
+                .observableArrayList(items));
         box.setStyle("-fx-background-color: #E0E0E0; -fx-padding: 6px;");
         return box;
     }
@@ -1221,26 +1353,31 @@ public class CashierPanelController {
     private String generateSalesReport(PeriodType periodType,
                                        LocalDate startDate,
                                        LocalDate endDate,
-                                       List<String> categories) throws Exception {
+                                       List<String> categories)
+            throws Exception {
 
         List<SalesReportGenerator.SalesRecord> salesData =
                 getSalesDataForReport(startDate, endDate);
         if (salesData.isEmpty()) {
-            throw new SalesReportGenerator.NoDataException("Brak danych transakcji");
+            throw new SalesReportGenerator.NoDataException("Brak danych " +
+                    "transakcji");
         }
 
         String logoPath = ConfigManager.getLogoPath();
         if (logoPath == null || logoPath.isBlank()) {
             // Jeżeli nie ustawiono żadnej ścieżki, pokaż komunikat i przerwij
             showNotification("Błąd",
-                    "Brak skonfigurowanego logo. Ustaw logo w panelu administratora.");
+                    "Brak skonfigurowanego logo. Ustaw logo " +
+                            "w panelu administratora.");
             throw new IllegalStateException("Brak logo w konfiguracji");
         }
         File logoFile = new File(logoPath);
         if (!logoFile.exists() || !logoFile.isFile()) {
             // Ścieżka jest pusta lub plik nie istnieje
-            showNotification("Błąd", "Plik logo nie istnieje: " + logoPath);
-            throw new IllegalStateException("Plik logo nie został odnaleziony: " + logoPath);
+            showNotification("Błąd", "Plik logo nie istnieje: "
+                    + logoPath);
+            throw new IllegalStateException("Plik logo nie został odnaleziony: "
+                    + logoPath);
         }
 
         SalesReportGenerator gen = new SalesReportGenerator();
@@ -1252,9 +1389,11 @@ public class CashierPanelController {
         if (outputDir == null || outputDir.trim().isEmpty()) {
             // Jeśli ścieżka nie jest ustawiona, użyj domyślnej wartości
             outputDir = REPORTS_DIRECTORY;
-            log.info("Używam domyślnej ścieżki raportów: {}", outputDir);
+            log.info("Używam domyślnej ścieżki raportów: {}",
+                    outputDir);
         } else {
-            log.info("Używam ścieżki raportów z konfiguracji: {}", outputDir);
+            log.info("Używam ścieżki raportów z konfiguracji: {}",
+                    outputDir);
         }
 
         // Upewnij się, że katalog istnieje
@@ -1270,16 +1409,19 @@ public class CashierPanelController {
                 endDate.format(DateTimeFormatter.BASIC_ISO_DATE));
         String outputPath = outputDir + File.separator + fileName;
 
-        pdf.SalesReportGenerator.PeriodType pdfType = toPdfPeriodType(periodType);
+        pdf.SalesReportGenerator.PeriodType pdfType = toPdfPeriodType(
+                periodType);
         gen.generateReport(outputPath, pdfType, categories ==
                 null ? List.of() : categories);
 
         return new File(outputPath).getAbsolutePath();
     }
 
-    private List<SalesReportGenerator.SalesRecord> getSalesDataForReport(LocalDate startDate,
-                                                                         LocalDate endDate) {
-        Date d1 = Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    private List<SalesReportGenerator.SalesRecord> getSalesDataForReport(
+            LocalDate startDate,
+            LocalDate endDate) {
+        Date d1 = Date.from(startDate.atStartOfDay(ZoneId.systemDefault())
+                .toInstant());
         Date d2 = Date.from(endDate.atTime(23,59,59).atZone(
                 ZoneId.systemDefault()).toInstant());
 
@@ -1288,7 +1430,8 @@ public class CashierPanelController {
         List<SalesReportGenerator.SalesRecord> out = new ArrayList<>();
         for (Transaction tx : txs) {
             LocalDateTime txTime = LocalDateTime.ofInstant(
-                    Instant.ofEpochMilli(tx.getDate().getTime()), ZoneId.systemDefault());
+                    Instant.ofEpochMilli(tx.getDate().getTime()),
+                    ZoneId.systemDefault());
             for (TransactionProduct tp : tx.getTransactionProducts()) {
                 Product p = tp.getProduct();
                 int qty = tp.getQuantity();
@@ -1300,7 +1443,8 @@ public class CashierPanelController {
         return out;
     }
 
-    private pdf.SalesReportGenerator.PeriodType toPdfPeriodType(PeriodType periodType) {
+    private pdf.SalesReportGenerator.PeriodType toPdfPeriodType(
+            PeriodType periodType) {
         return switch (periodType) {
             case DAILY   -> pdf.SalesReportGenerator.PeriodType.DAILY;
             case MONTHLY -> pdf.SalesReportGenerator.PeriodType.MONTHLY;
@@ -1322,7 +1466,8 @@ public class CashierPanelController {
         public Product getProduct() { return product; }
         public int getQuantity() { return quantity; }
         public void setQuantity(int quantity) { this.quantity = quantity; }
-        public double getTotal() { return product.getPrice().doubleValue() * quantity; }
+        public double getTotal() { return product.getPrice()
+                .doubleValue() * quantity; }
     }
 
     /**
@@ -1334,7 +1479,8 @@ public class CashierPanelController {
      * nie ma raportu dziennego.
      */
     public void logout() {
-        log.info("Wylogowanie rozpoczęte. Flaga raportu przed walidacją: {}",
+        log.info("Wylogowanie rozpoczęte. Flaga raportu przed " +
+                        "walidacją: {}",
                 reportGeneratedInCurrentSession);
         System.out.println("Używana klasa logera: " + log.getClass());
         if (!reportGeneratedInCurrentSession) {
@@ -1343,7 +1489,8 @@ public class CashierPanelController {
             warn.setTitle("Brak raportu dziennego");
             warn.getDialogPane().setMinWidth(400);
             warn.getDialogPane().setMinHeight(200);
-            warn.setHeaderText("Musisz wygenerować raport dzienny przed wylogowaniem.");
+            warn.setHeaderText("Musisz wygenerować raport dzienny przed " +
+                    "wylogowaniem.");
             warn.showAndWait();
             return;
         }
@@ -1373,7 +1520,8 @@ public class CashierPanelController {
             List<TaskEmployee> todays =
                     repo.findEmployeeTasksForDate(employeeId, LocalDate.now());
 
-            log.info("completeAllTasksForEmployee() – zamykam {} zadań pracownika {} ({}).",
+            log.info("completeAllTasksForEmployee() – zamykam {} " +
+                            "zadań pracownika {} ({}).",
                     todays.size(), employeeId, LocalDate.now());
 
             for (TaskEmployee te : todays) {
@@ -1381,7 +1529,8 @@ public class CashierPanelController {
                 te.setEndTime(LocalDateTime.now());
                 te.getTask().setStatus("completed"); // aktualizujemy encję Task
 
-                repo.updateTaskStatus(te.getTask().getId(), "Zakończone");
+                repo.updateTaskStatus(te.getTask().getId(),
+                        "Zakończone");
                 // zapis w bazie
             }
         }
