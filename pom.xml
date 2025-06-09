@@ -266,8 +266,8 @@
                             <!-- Poprawna ścieżka do ikony -->
                             <icon>${project.basedir}/src/main/resources/distribution/stonka.ico</icon>
                             <jre>
-                                <path>%JAVA_HOME%</path>
-                                <minVersion>17</minVersion>
+                                <path>./jre</path>
+                                <minVersion>22</minVersion>
                                 <requiresJdk>false</requiresJdk>
                                 <opts>
                                     <opt>--module-path lib</opt>
@@ -305,32 +305,45 @@
                         </goals>
                         <configuration>
                             <target>
+
+                                <!-- Kopiowanie lib -->
                                 <mkdir dir="${project.build.directory}/dist/lib"/>
                                 <copy todir="${project.build.directory}/dist/lib">
                                     <fileset dir="${project.build.directory}/lib"/>
                                 </copy>
+
+                                <!-- Plik .exe -->
                                 <copy file="${project.build.directory}/stonka.exe"
                                       tofile="${project.build.directory}/dist/stonka.exe"/>
+
+                                <!-- Ikona -->
                                 <copy file="${project.basedir}/src/main/resources/distribution/stonka.ico"
                                       tofile="${project.build.directory}/dist/stonka.ico"/>
 
-                                <!-- Kopiowanie plików SQL -->
+                                <!-- SQL -->
                                 <mkdir dir="${project.build.directory}/dist/sql"/>
                                 <copy todir="${project.build.directory}/dist/sql">
                                     <fileset dir="${project.basedir}/src/main/resources/distribution/sql"/>
                                 </copy>
 
-                                <!-- Kopiowanie plików konfiguracyjnych -->
+                                <!-- Konfiguracja -->
                                 <mkdir dir="${project.build.directory}/dist/config"/>
                                 <copy todir="${project.build.directory}/dist/config">
                                     <fileset dir="${project.basedir}/src/main/resources/distribution/config"/>
                                 </copy>
 
-                                <!-- Pliki BAT -->
+                                <!-- BAT -->
                                 <copy file="${project.basedir}/src/main/resources/distribution/configure_database.bat"
                                       tofile="${project.build.directory}/dist/configure_database.bat"/>
                                 <copy file="${project.basedir}/src/main/resources/distribution/run.bat"
                                       tofile="${project.build.directory}/dist/run.bat"/>
+
+                                <!-- Dodajemy tutaj folder jre -->
+                                <mkdir dir="${project.build.directory}/dist/jre"/>
+                                <copy todir="${project.build.directory}/dist/jre">
+                                    <fileset dir="${basedir}/src/main/distribution/jre"/>
+                                </copy>
+
                             </target>
                         </configuration>
                     </execution>
@@ -369,18 +382,35 @@
                         <configuration>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                             <resources>
+                                <!-- Pliki tekstowe z filtrowaniem -->
                                 <resource>
                                     <directory>src/main/resources/distribution</directory>
                                     <filtering>true</filtering>
                                     <excludes>
+                                        <!-- Wyklucz wszystkie pliki binarne i foldery -->
                                         <exclude>**/*.exe</exclude>
                                         <exclude>**/*.ico</exclude>
                                         <exclude>**/*.jar</exclude>
                                         <exclude>**/*.bin</exclude>
                                         <exclude>**/*.dat</exclude>
+                                        <exclude>**/*.dll</exclude>
+                                        <exclude>**/*.so</exclude>
+                                        <exclude>**/*.dylib</exclude>
+                                        <exclude>**/*.jsa</exclude>
+                                        <exclude>**/*.jmod</exclude>
+                                        <exclude>**/*.pak</exclude>
+                                        <exclude>**/*.png</exclude>
+                                        <exclude>**/*.jpg</exclude>
+                                        <exclude>**/*.gif</exclude>
+                                        <exclude>**/*.ttf</exclude>
+                                        <exclude>**/*.woff</exclude>
+                                        <exclude>**/*.woff2</exclude>
+                                        <exclude>**/*.pdf</exclude>
+                                        <exclude>**/*.sql</exclude>
                                     </excludes>
                                 </resource>
-                                <!-- Osobna sekcja dla plików binarnych bez filtrowania -->
+
+                                <!-- Pliki binarne bez filtrowania -->
                                 <resource>
                                     <directory>src/main/resources/distribution</directory>
                                     <filtering>false</filtering>
@@ -390,6 +420,20 @@
                                         <include>**/*.jar</include>
                                         <include>**/*.bin</include>
                                         <include>**/*.dat</include>
+                                        <include>**/*.dll</include>
+                                        <include>**/*.so</include>
+                                        <include>**/*.dylib</include>
+                                        <include>**/*.jsa</include>
+                                        <include>**/*.jmod</include>
+                                        <include>**/*.pak</include>
+                                        <include>**/*.png</include>
+                                        <include>**/*.jpg</include>
+                                        <include>**/*.gif</include>
+                                        <include>**/*.ttf</include>
+                                        <include>**/*.woff</include>
+                                        <include>**/*.woff2</include>
+                                        <include>**/*.pdf</include>
+                                        <include>**/*.sql</include>
                                     </includes>
                                 </resource>
                             </resources>
