@@ -334,7 +334,7 @@ public class AdminPanelController {
 
         ComboBox<String> positionBox = new ComboBox<>();
         positionBox.getItems().addAll("Kasjer", "Kierownik", "Admin",
-                "Logistyk");
+                "Logistyk", "Pracownik");
         positionBox.setValue(selected.getPosition());
 
         TextField ageField = new TextField(String.valueOf(selected.getAge()));
@@ -562,7 +562,7 @@ public class AdminPanelController {
 
         ComboBox<String> positionComboBox = new ComboBox<>();
         positionComboBox.getItems().addAll("Kasjer", "Kierownik", "Admin",
-                "Logistyk");
+                "Logistyk","Pracownik");
         positionComboBox.setPromptText("Stanowisko");
 
         TextField ageField = new TextField();
@@ -715,8 +715,7 @@ public class AdminPanelController {
 
                 addTask.setOnSucceeded(evt -> {
                     showAlert(Alert.AlertType.INFORMATION, "Sukces",
-                            "Dodano nowego użytkownika z bezpiecznym" +
-                                    " hasłem!");
+                            "Dodano nowego użytkownika!");
                     showUserManagement();
                 });
 
