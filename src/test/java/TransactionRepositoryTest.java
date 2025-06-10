@@ -52,7 +52,8 @@ class TransactionRepositoryTest {
 
         // pick an existing employee
         List<Employee> emps = userRepo.getAllEmployees();
-        assertFalse(emps.isEmpty(), "At least one employee must exist");
+        assertFalse(emps.isEmpty(),
+                "Musi istnieć co najmniej jeden pracownik");
         employee = emps.get(0);
     }
 
@@ -68,14 +69,14 @@ class TransactionRepositoryTest {
         tx2.setDate(toDate);
 
         assertDoesNotThrow(() -> transactionRepo.addTransaction(tx1),
-                "Should add tx1 without exception");
+                "Należy dodać tx1 bez wyjątku");
         assertTrue(tx1.getId() > 0,
-                "tx1 should receive an ID");
+                "tx1 powinien otrzymać ID");
 
         assertDoesNotThrow(() -> transactionRepo.addTransaction(tx2),
-                "Should add tx2 without exception");
+                "Należy dodać tx2 bez wyjątku");
         assertTrue(tx2.getId() > 0,
-                "tx2 should receive an ID");
+                "tx2 powinien otrzymać ID");
     }
 
     @Test
@@ -84,15 +85,15 @@ class TransactionRepositoryTest {
         List<Transaction> all = transactionRepo.getAllTransactions();
         assertTrue(all.stream().anyMatch(
                 t -> t.getId() == tx1.getId()),
-                "tx1 must be in all transactions");
+                "tx1 musi być we wszystkich transakcjach");
         assertTrue(all.stream().anyMatch(
                 t -> t.getId() == tx2.getId()),
-                "tx2 must be in all transactions");
+                "tx2 musi być we wszystkich transakcjach");
 
         Transaction loaded = transactionRepo.findTransactionById(tx1.getId());
-        assertNotNull(loaded, "Should find tx1 by ID");
+        assertNotNull(loaded, "Powinno znaleźć tx1 po ID");
         assertEquals(exactDate, loaded.getDate(),
-                "Loaded tx1 should have correct date");
+                "Załadowany tx1 powinien mieć poprawną datę");
     }
 
     @Test
@@ -103,13 +104,14 @@ class TransactionRepositoryTest {
                 .findByEmployee(employee.getId());
         assertTrue(byEmp.stream().allMatch(
                 t -> t.getEmployee().getId() == employee.getId()),
-                "All results must belong to the same employee");
+                "Wszystkie wyniki muszą należeć do tego samego " +
+                        "pracownika");
 
         // by exact date
         List<Transaction> byExact = transactionRepo.findByDate(exactDate);
         assertTrue(byExact.stream().allMatch(
                 t -> t.getDate().equals(exactDate)),
-                "All results must match the exact date");
+                "Wszystkie wyniki muszą odpowiadać dokładnej dacie");
 
         // by date range – dodatkowo sprawdzamy też lokalnie zakres dat
         List<Transaction> allTransactions
@@ -125,10 +127,10 @@ class TransactionRepositoryTest {
 
         assertTrue(inRange.stream().anyMatch(
                 t -> t.getId() == tx1.getId()),
-                "tx1 should appear in the date range");
+                "tx1 powinien pojawić się w zakresie dat");
         assertTrue(inRange.stream().anyMatch(
                 t -> t.getId() == tx2.getId()),
-                "tx2 should appear in the date range");
+                "tx2 powinien pojawić się w zakresie dat");
     }
 
     @Test
@@ -136,15 +138,16 @@ class TransactionRepositoryTest {
     void testDelete() {
         assertDoesNotThrow(() -> transactionRepo
                         .removeTransactions(tx1.getId()),
-                "Should delete tx1 without exception");
+                "Należy usunąć tx1 bez wyjątku");
 
         assertNull(transactionRepo.findTransactionById(tx1.getId()),
-                "Deleted transaction should no longer be found");
+                "Usunięta transakcja nie powinna być już dostępna");
 
         List<Transaction> allAfter = transactionRepo.getAllTransactions();
         assertTrue(allAfter.stream().noneMatch(
                 t -> t.getId() == tx1.getId()),
-                "Deleted transaction must not appear in list");
+                "Usunięta transakcja nie powinna pojawiać się " +
+                        "na liście");
     }
 
     @AfterAll
