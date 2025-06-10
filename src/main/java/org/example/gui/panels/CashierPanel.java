@@ -27,6 +27,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.gui.controllers.CashierPanelController;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -94,12 +95,9 @@ public class CashierPanel {
         primaryStage.setScene(scene);
         logger.debug("Scena ustawiona");
 
-        // Obsługa próby zamknięcia okna - używamy metod z kontrolera
         primaryStage.setOnCloseRequest(event -> {
             logger.info("Próba zamknięcia okna panelu kasjera");
 
-            // Sprawdź, czy raport został wygenerowany w bieżącej sesji
-            // lub wcześniej dzisiaj
             logger.debug("Sprawdzanie statusu raportu dziennego");
             boolean reportGenerated = controller
                     .isReportGeneratedInCurrentSession() ||
@@ -108,9 +106,8 @@ public class CashierPanel {
             if (!reportGenerated) {
                 logger.warn("Raport dzienny nie został " +
                         "wygenerowany - zapobieganie zamknięciu");
-                event.consume(); // Zapobiega zamknięciu okna
+                event.consume();
 
-                // Wyświetl alert z pytaniem
                 logger.debug("Wyświetlanie alertu ostrzegawczego");
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Uwaga");
@@ -121,7 +118,6 @@ public class CashierPanel {
 
                 Optional<ButtonType> result = alert.showAndWait();
                 if (result.isPresent() && result.get() == ButtonType.OK) {
-                    // Użytkownik potwierdził zamknięcie - usuń handler i zamknij
                     logger.info("Użytkownik potwierdził zamknięcie " +
                             "bez raportu");
                     primaryStage.setOnCloseRequest(null);
@@ -150,7 +146,6 @@ public class CashierPanel {
         );
         menu.setAlignment(Pos.TOP_LEFT);
 
-        // Logo w lewym górnym rogu
         Image image = null;
         try {
             image = new Image(getClass().getResourceAsStream(
@@ -176,7 +171,6 @@ public class CashierPanel {
             controller.showSalesScreen();
         });
 
-        // Przycisk raportów sprzedaży
         Button reportsButton = createStyledButton("Raporty sprzedaży");
         reportsButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Raporty sprzedaży'");
@@ -214,7 +208,6 @@ public class CashierPanel {
                 "#E74C3C");
         logoutButton.setOnAction(e -> {
             logger.info("Rozpoczęcie procesu wylogowania");
-            // Używamy flagi z kontrolera zamiast lokalnej flagi
             controller.logout();
         });
 
@@ -239,7 +232,7 @@ public class CashierPanel {
      * @param text etykieta przycisku
      * @return gotowy przycisk
      */
-    Button createStyledButton(String text) {
+    public Button createStyledButton(String text) {
         return createStyledButton(text, "#2980B9");
     }
 
@@ -250,7 +243,7 @@ public class CashierPanel {
      * @param color kolor tła przycisku
      * @return gotowy przycisk
      */
-    Button createStyledButton(String text, String color) {
+    public Button createStyledButton(String text, String color) {
         logger.debug("Tworzenie stylizowanego przycisku: '{}'", text);
         Button button = new Button(text);
         button.setStyle(
@@ -341,14 +334,6 @@ public class CashierPanel {
 
     public CashierPanelController getController() {
         return this.controller;
-    }
-
-    /**
-     * Resetuje handler zamknięcia okna.
-     */
-    public void resetCloseRequestHandler() {
-        logger.debug("Resetowanie handlera zamknięcia okna");
-        primaryStage.setOnCloseRequest(null);
     }
 
     /**

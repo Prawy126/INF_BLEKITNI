@@ -1,6 +1,6 @@
 /*
- * Classname: LogisticianPanel
- * Version information: 1.2
+ * Classname: ManagerPanel
+ * Version information: 1.1
  * Date: 2025-06-07
  * Copyright notice: © BŁĘKITNI
  */
@@ -18,41 +18,43 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.gui.controllers.ManagerPanelController;
 
 import java.util.Objects;
 
 /**
- * Klasa reprezentująca panel logistyka w aplikacji GUI.
+ * Panel kierownika, zawiera menu boczne oraz centralny
+ * panel widoku.
+ * Pozwala nawigować po funkcjach przypisanych
+ * do roli kierownika.
  */
-public class LogisticianPanel {
+public class ManagerPanel {
 
     private static final Logger logger =
-            LogManager.getLogger(LogisticianPanel.class);
+            LogManager.getLogger(ManagerPanel.class);
     private BorderPane root;
     private Stage primaryStage;
-    private LogisticianPanelController controller;
+    private ManagerPanelController controller;
     private Image logoImage;
     private Button activeButton;
 
     /**
-     * Konstruktor klasy LogisticianPanel.
+     * Konstruktor panelu kierownika.
      *
-     * @param primaryStage główna scena przypisana do panelu
+     * @param stage główne okno aplikacji
      */
-    public LogisticianPanel(Stage primaryStage) {
-        logger.info("Tworzenie LogisticianPanel " +
-                "dla stage: {}", primaryStage);
+    public ManagerPanel(Stage stage) {
+        logger.info("Tworzenie ManagerPanel dla stage: {}", stage);
 
-        this.primaryStage = primaryStage;
-        primaryStage.setMinWidth(700);
-        primaryStage.setMinHeight(450);
-        this.controller = new LogisticianPanelController(this);
-        logger.debug("Kontroler LogisticianPanelController utworzony");
+        this.primaryStage = stage;
+        this.controller = new ManagerPanelController(this);
+        logger.debug("Kontroler ManagerPanelController utworzony");
 
         try {
             logoImage = new Image(Objects.requireNonNull(
@@ -66,8 +68,11 @@ public class LogisticianPanel {
                     e.getMessage(), e);
         }
 
-        primaryStage.setTitle("Panel logistyka");
-        logger.debug("Tytuł okna ustawiony na 'Panel logistyka'");
+        primaryStage.setTitle("Panel kierownika");
+        primaryStage.setMinWidth(700);
+        primaryStage.setMinHeight(450);
+        logger.debug("Tytuł okna ustawiony na 'Panel kierownika' " +
+                "z minimalnymi rozmiarami");
 
         root = new BorderPane();
         root.setPadding(new Insets(10));
@@ -78,43 +83,47 @@ public class LogisticianPanel {
         VBox menu = createMenu();
         root.setLeft(menu);
 
-        logger.debug("Wyświetlanie domyślnego widoku raportów magazynowych");
-        controller.showInventoryReports(); // domyślny widok
+        logger.debug("Wyświetlanie domyślnego panelu zadań");
+        controller.showTaskPanel();
 
         logger.debug("Uruchamianie animacji menu");
         animateFadeIn(menu, 1000);
         animateSlideDown(menu, 800);
 
-        Scene scene = new Scene(root, 700, 450);
+        Scene scene = new Scene(root, 800, 600);
         primaryStage.setScene(scene);
         logger.debug("Scena utworzona i ustawiona");
 
-        logger.info("Wyświetlanie głównego okna panelu logistyka");
+        logger.info("Wyświetlanie głównego okna panelu kierownika");
         primaryStage.show();
     }
 
     /**
-     * Tworzy menu boczne z logo i przyciskami.
+     * Tworzy panel boczny z przyciskami menu.
+     *
+     * @return VBox z elementami menu
      */
     private VBox createMenu() {
         logger.debug("Tworzenie menu nawigacyjnego");
-        VBox menu = new VBox(10);
-        menu.setPadding(new Insets(10));
+        VBox menu = new VBox(15);
+        menu.setPadding(new Insets(20));
+        menu.setStyle(
+                "-fx-background-color: #E0E0E0; " +
+                        "-fx-border-radius: 10; " +
+                        "-fx-background-radius: 10;"
+        );
         menu.setAlignment(Pos.TOP_LEFT);
-        menu.setStyle("-fx-background-color: #E0E0E0; " +
-                "-fx-border-radius: 10;" +
-                " -fx-background-radius: 10;");
 
-        // logo
         Image image = null;
         try {
-            image = new Image(Objects.requireNonNull(
-                    getClass().getResourceAsStream("/logo.png")
-            ));
+            image = new Image(
+                    Objects.requireNonNull(getClass().getResourceAsStream(
+                            "/logo.png"))
+            );
             logger.debug("Logo dla menu załadowane pomyślnie");
         } catch (Exception e) {
-            logger.error("Błąd podczas ładowania logo " +
-                    "dla menu: {}", e.getMessage(), e);
+            logger.error("Błąd podczas ładowania logo dla menu: {}",
+                    e.getMessage(), e);
         }
 
         ImageView logo = new ImageView(image);
@@ -124,76 +133,76 @@ public class LogisticianPanel {
             logo.setPreserveRatio(true);
         }
 
-        // przyciski
-        Button inventoryButton = createStyledButton("Zarządzanie " +
-                "magazynem");
-        inventoryButton.setOnAction(e -> {
-            logger.debug("Kliknięto przycisk 'Zarządzanie magazynem'");
-            setActiveButton(inventoryButton);
-            controller.showInventoryManagement();
-        });
+        VBox logoBox = new VBox(logo);
+        logoBox.setAlignment(Pos.CENTER);
 
-        Button ordersButton = createStyledButton("Zamówienia");
-        ordersButton.setOnAction(e -> {
-            logger.debug("Kliknięto przycisk 'Zamówienia'");
-            setActiveButton(ordersButton);
-            controller.showOrdersPanel();
-        });
-
-        Button reportsButton = createStyledButton("Raporty magazynowe");
-        reportsButton.setOnAction(e -> {
-            logger.debug("Kliknięto przycisk 'Raporty magazynowe'");
-            setActiveButton(reportsButton);
-            controller.showInventoryReports();
-        });
-
-        Button closeShiftBtn   = createStyledButton("Zamknij zmianę",
-                "#E67E22");
-        closeShiftBtn.setOnAction(
-                e -> controller.showCloseShiftPanel());
-
-        Button absenceButton = createStyledButton("Złóż wniosek " +
-                "o nieobecność");
-        absenceButton.setOnAction(e -> {
-            logger.debug("Kliknięto przycisk 'Złóż wniosek o nieobecność'");
-            setActiveButton(absenceButton);
-            controller.showAbsenceRequestForm();
-        });
-
-
-        Button logoutButton = createStyledButton("Wyloguj",
+        Button tasksButton = createStyledButton("Zadania dla pracowników");
+        Button absenceButton = createStyledButton("Wnioski o nieobecność");
+        Button logoutButton = createStyledButton("Wyloguj się",
                 "#E74C3C");
+
+        tasksButton.setOnAction(e -> {
+            logger.debug("Kliknięto przycisk 'Zadania dla pracowników'");
+            setActiveButton(tasksButton);
+            controller.showTaskPanel();
+        });
+
+        absenceButton.setOnAction(e -> {
+            logger.debug("Kliknięto przycisk 'Wnioski o nieobecność'");
+            setActiveButton(absenceButton);
+            controller.showAbsencePanel();
+        });
+
         logoutButton.setOnAction(e -> {
             logger.info("Rozpoczęcie procesu wylogowania");
             controller.logout();
         });
 
-        menu.getChildren().addAll(logo, inventoryButton, ordersButton,
-                reportsButton, absenceButton, closeShiftBtn,  logoutButton);
-        logger.debug("Menu utworzone pomyślnie z {} przyciskami",
-                menu.getChildren().size() - 1); // -1 dla logo
+        menu.getChildren().addAll(
+                logoBox,
+                tasksButton,
+                absenceButton,
+                logoutButton
+        );
 
-        setActiveButton(reportsButton);
+        logger.debug("Menu utworzone pomyślnie z {} przyciskami",
+                menu.getChildren().size() - 1); // -1 dla logoBox
+        setActiveButton(tasksButton);
         return menu;
     }
 
     /**
-     * Stylizuje przyciski jak w panelu admina.
+     * Tworzy przycisk ze stylowaniem domyślnym (niebieski).
+     *
+     * @param text tekst przycisku
+     * @return przycisk z domyślnym stylem
      */
     private Button createStyledButton(String text) {
         return createStyledButton(text, "#2980B9");
     }
 
+    /**
+     * Tworzy przycisk z określonym kolorem tła.
+     *
+     * @param text  tekst przycisku
+     * @param color kolor tła (hex)
+     * @return wystylizowany przycisk
+     */
     private Button createStyledButton(String text, String color) {
         logger.debug("Tworzenie stylizowanego przycisku: '{}'", text);
         Button button = new Button(text);
-        button.setStyle("-fx-background-color: " + color
-                + "; -fx-text-fill: white; -fx-font-weight: bold;");
+        button.setStyle(
+                "-fx-background-color: " + color + "; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-font-weight: bold;"
+        );
 
+        // Efekt powiększenia po najechaniu
         button.setOnMouseEntered(e -> {
             logger.trace("Najechano na przycisk: '{}'", text);
             ScaleTransition scale = new ScaleTransition(
-                    Duration.millis(200), button);
+                    Duration.millis(200), button
+            );
             scale.setToX(1.1);
             scale.setToY(1.1);
             scale.play();
@@ -202,7 +211,8 @@ public class LogisticianPanel {
         button.setOnMouseExited(e -> {
             logger.trace("Zjechano z przycisku: '{}'", text);
             ScaleTransition scale = new ScaleTransition(
-                    Duration.millis(200), button);
+                    Duration.millis(200), button
+            );
             scale.setToX(1);
             scale.setToY(1);
             scale.play();
@@ -211,47 +221,68 @@ public class LogisticianPanel {
         return button;
     }
 
+    /**
+     * Animacja płynnego pojawiania się elementu.
+     */
     private void animateFadeIn(VBox element, int duration) {
         logger.debug("Animowanie efektu fadeIn dla menu");
         FadeTransition fade = new FadeTransition(
-                Duration.millis(duration), element);
+                Duration.millis(duration),
+                element
+        );
         fade.setFromValue(0);
         fade.setToValue(1);
         fade.play();
     }
 
+    /**
+     * Animacja przesunięcia elementu z góry w dół.
+     */
     private void animateSlideDown(VBox element, int duration) {
         logger.debug("Animowanie efektu slideDown dla menu");
         TranslateTransition slide = new TranslateTransition(
-                Duration.millis(duration), element);
+                Duration.millis(duration),
+                element
+        );
         slide.setFromY(-50);
         slide.setToY(0);
         slide.setInterpolator(Interpolator.EASE_BOTH);
         slide.play();
     }
 
-    public void setCenterPane(javafx.scene.layout.Pane pane) {
+    /**
+     * Ustawia centralny panel aplikacji.
+     *
+     * @param pane widok do wyświetlenia
+     */
+    public void setCenterPane(Pane pane) {
         logger.debug("Ustawianie nowego panelu centralnego");
         root.setCenter(pane);
     }
 
+    /**
+     * Zwraca obiekt Stage przypisany do panelu kierownika.
+     *
+     * @return główna scena
+     */
     public Stage getPrimaryStage() {
         return primaryStage;
     }
 
     /**
-     * Ustawia przycisk jako aktywny, przywracając domyślny
-     * styl poprzedniemu i nadając ciemniejszy odcień nowemu.
+     * Ustawia podany przycisk jako aktywny,
+     * resetując styl poprzedniego.
      */
     private void setActiveButton(Button button) {
-        String defaultStyle = "-fx-background-color: #2980B9;" +
-                " -fx-text-fill: white; -fx-font-weight: bold;";
-        String activeStyle  = "-fx-background-color: #1A5276;" +
-                " -fx-text-fill: white; -fx-font-weight: bold;";
+        String defaultStyle = "-fx-background-color: #2980B9; -fx-text-fill:" +
+                " white; -fx-font-weight: bold;";
+        String activeStyle  = "-fx-background-color: #1A5276; -fx-text-fill:" +
+                " white; -fx-font-weight: bold;";
         if (activeButton != null) {
             activeButton.setStyle(defaultStyle);
         }
         activeButton = button;
         activeButton.setStyle(activeStyle);
     }
+
 }

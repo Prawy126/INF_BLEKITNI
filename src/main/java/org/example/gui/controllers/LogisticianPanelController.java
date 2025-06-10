@@ -92,7 +92,6 @@ public class LogisticianPanelController {
         Label title = new Label("Zarządzanie magazynem");
         title.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
-        /* -------- tabela stanów magazynowych -------- */
         TableView<StockRow> table = new TableView<>();
         table.setMinHeight(250);
 
@@ -108,7 +107,6 @@ public class LogisticianPanelController {
         table.getColumns().addAll(idCol, nameCol, qtyCol);
         refreshStockTable(table);
 
-        /* -------- przyciski -------- */
         Button filterBtn  = new Button("Filtruj");
         styleLogisticButton(filterBtn, "#2980B9");
         filterBtn.setOnAction(e -> showFilterStockDialog(table));
@@ -125,7 +123,6 @@ public class LogisticianPanelController {
         styleLogisticButton(addProductBtn, "#27AE60");
         addProductBtn.setOnAction(e -> showAddProductDialog(table));
 
-        // –––––––––– PRZYCISK EDYTUJĄCY PRODUKT ––––––––––
         Button editProductBtn = new Button("Edytuj produkt");
         styleLogisticButton(editProductBtn, "#E67E22");
         editProductBtn.setOnAction(
@@ -554,7 +551,6 @@ public class LogisticianPanelController {
             showAlert(Alert.AlertType.INFORMATION, "Sukces",
                     "Raport zapisany: " + targetFile.getAbsolutePath());
             stage.close();
-            // raport został wygenerowany w tej sesji
             reportGeneratedInCurrentSession = true;
             logger.info("Raport magazynowy wygenerowany: {}",
                     targetFile.getAbsolutePath());
@@ -631,15 +627,14 @@ public class LogisticianPanelController {
         grid.setHgap(10);
         grid.setVgap(10);
 
-        // 1) Etykieta i ComboBox na produkt
         Label productLabel = new Label("Produkt:");
         ComboBox<Product> productComboBox = new ComboBox<>();
         productComboBox.setPrefWidth(200);
         productComboBox.setPromptText("Wybierz produkt");
-        // Wypełniamy ComboBox wszystkimi produktami
+
         List<Product> allProducts = productRepository.getAllProducts();
+
         productComboBox.getItems().addAll(allProducts);
-        // Wyświetlamy w liście tylko nazwę produktu
         productComboBox.setCellFactory(
                 cb -> new ListCell<>() {
             @Override
@@ -664,7 +659,7 @@ public class LogisticianPanelController {
         Button submit = new Button("Zapisz");
         styleLogisticButton(submit, "#27AE60");
         submit.setOnAction(ev -> {
-            // 3) Sprawdzenie, czy wszystkie niezbędne pola wypełniono
+
             if (productComboBox.getValue() == null
                     || quantityField.getText().isBlank()) {
                 showAlert(Alert.AlertType.WARNING,
@@ -674,7 +669,6 @@ public class LogisticianPanelController {
             }
 
             try {
-                // 4) Parsowanie ilości
                 int qty = Integer.parseInt(quantityField.getText().trim());
                 if (qty <= 0) {
                     showAlert(Alert.AlertType.WARNING,
@@ -683,7 +677,6 @@ public class LogisticianPanelController {
                     return;
                 }
 
-                // 5) Pobranie zalogowanego pracownika
                 UserRepository ur = new UserRepository();
                 Employee empl = ur.getCurrentEmployee();
                 if (empl == null) {
@@ -694,40 +687,33 @@ public class LogisticianPanelController {
                     return;
                 }
 
-                // 6) Pobranie wybranego produktu z ComboBoxa
                 Product prod = productComboBox.getValue();
 
-                // 7) Obliczenie ceny: cena jednostkowa * ilość
                 BigDecimal unitPrice = prod.getPrice();
                 BigDecimal totalPrice = unitPrice.multiply(
                         BigDecimal.valueOf(qty));
 
-                // 8) Utworzenie i zapis zamówienia z dzisiejszą datą (LocalDate.now())
                 Order ord = new Order();
                 ord.setProduct(prod);
                 ord.setEmployee(empl);
                 ord.setQuantity(qty);
                 ord.setPrice(totalPrice);
-                // zamiast datePicker używamy LocalDate.now():
                 ord.setDate(java.sql.Date.valueOf(
                         java.time.LocalDate.now()));
 
                 OrderRepository or = new OrderRepository();
                 or.addOrder(ord);
 
-                // 9) AKTUALIZACJA STANU MAGAZYNOWEGO (tak jak wcześniej)
                 try {
                     Warehouse stan = warehouseRepository
                             .findStateByProductId(prod.getId());
 
                     if (stan == null) {
-                        // jeśli nie ma jeszcze wpisu, tworzymy nowy
                         stan = new Warehouse();
                         stan.setProductId(prod.getId());
                         stan.setQuantity(Math.max(0, qty));
                         warehouseRepository.addWarehouseState(stan);
                     } else {
-                        // jeśli jest, inkrementujemy
                         int newQty = stan.getQuantity() + qty;
                         if (newQty < 0) newQty = 0;
                         stan.setQuantity(newQty);
@@ -738,7 +724,6 @@ public class LogisticianPanelController {
                             "magazynowego", ex);
                 }
 
-                // 10) Komunikat o sukcesie i zamknięcie formularza
                 showAlert(Alert.AlertType.INFORMATION,
                         "Sukces",
                         "Zapisano zamówienie (ID=" + ord.getId() +
@@ -759,7 +744,6 @@ public class LogisticianPanelController {
             }
         });
 
-        // 11) Układ w siatce (bez DatePickera)
         grid.add(productLabel,    0, 0);
         grid.add(productComboBox, 1, 0);
         grid.add(qtyLabel,        0, 1);
@@ -837,47 +821,6 @@ public class LogisticianPanelController {
 
         st.setScene(new Scene(g, 400, 250));
         st.show();
-    }
-
-    /**
-     * Wyświetla okno formularza filtrowania produktów.
-     * Pola: Id, Nazwa, Cena, Ilość w magazynie.
-     * Przycisk „Filtruj” zamyka okno bez dalszej
-     * logiki filtrowania (symulacja działania).
-     */
-    private void showFilterProductDialog() {
-        Stage stage = new Stage();
-        stage.setTitle("Filtrowanie produktów");
-
-        GridPane grid = new GridPane();
-        grid.setPadding(new Insets(20));
-        grid.setHgap(10);
-        grid.setVgap(10);
-
-        Label idLabel = new Label("Id:");
-        TextField idField = new TextField();
-
-        Label nameLabel = new Label("Nazwa:");
-        TextField nameField = new TextField();
-
-        Label priceLabel = new Label("Cena:");
-        TextField priceField = new TextField();
-
-        Label stockLabel = new Label("Ilość w magazynie:");
-        TextField stockField = new TextField();
-
-        Button filterButton = new Button("Filtruj");
-        styleLogisticButton(filterButton, "#2980B9");
-        filterButton.setOnAction(e -> stage.close());
-
-        grid.add(idLabel, 0, 0);       grid.add(idField, 1, 0);
-        grid.add(nameLabel, 0, 1);     grid.add(nameField, 1, 1);
-        grid.add(priceLabel, 0, 2);    grid.add(priceField, 1, 2);
-        grid.add(stockLabel, 0, 3);    grid.add(stockField, 1, 3);
-        grid.add(filterButton, 1, 4);
-
-        stage.setScene(new Scene(grid, 360, 250));
-        stage.show();
     }
 
     /**
@@ -972,19 +915,6 @@ public class LogisticianPanelController {
         alert.showAndWait();
     }
 
-    /** Reprezentuje pojedynczy stan magazynowy w tabeli */
-    public static class StockRow {
-        private final int id;
-        private final String name;
-        private final int quantity;
-        public StockRow(int id, String name, int quantity) {
-            this.id = id; this.name = name; this.quantity = quantity;
-        }
-        public int getId() { return id; }
-        public String getName() { return name; }
-        public int getQuantity() { return quantity; }
-    }
-
     /**
      * Zamyka aplikację i powraca do okna logowania.
      */
@@ -1045,7 +975,6 @@ public class LogisticianPanelController {
         styleLogisticButton(saveBtn, "#27AE60");
         saveBtn.setOnAction(ev -> {
 
-            /* ---- podstawowa weryfikacja pustych pól ---- */
             if (nameField.getText().isBlank() ||
                     categoryField.getText().isBlank() ||
                     priceField.getText().isBlank() ||
@@ -1056,8 +985,6 @@ public class LogisticianPanelController {
                 return;
             }
 
-            /* ---- sprawdzenie, czy nazwa i kategoria to TYLKO litery/spacje ---- */
-            // [\\p{L}] = dowolna litera unicode, spacja dozwolona
             String lettersOnlyRegex = "[\\p{L} ]+";
             if (!nameField.getText().matches(lettersOnlyRegex) ||
                     !categoryField.getText().matches(lettersOnlyRegex)) {
@@ -1067,7 +994,6 @@ public class LogisticianPanelController {
                 return;
             }
 
-            /* ---- cena ---- */
             BigDecimal price;
             try {
                 price = new BigDecimal(priceField.getText().trim().replace(
@@ -1085,7 +1011,6 @@ public class LogisticianPanelController {
                 return;
             }
 
-            /* ---- początkowy stan ---- */
             int initQty;
             try {
                 initQty = Integer.parseInt(qtyField.getText().trim());
@@ -1103,7 +1028,6 @@ public class LogisticianPanelController {
                 return;
             }
 
-            /* ---- zapis w bazie ---- */
             try {
                 Product p = new Product();
                 p.setName(nameField.getText().trim());
@@ -1222,7 +1146,6 @@ public class LogisticianPanelController {
                 return;
             }
 
-            // 3a) Nazwa i Kategoria – tylko litery i spacje:
             String lettersOnlyRegex = "[\\p{L} ]+";
             if (!newName.matches(lettersOnlyRegex)
                     || !newCat.matches(lettersOnlyRegex)) {
@@ -1232,7 +1155,6 @@ public class LogisticianPanelController {
                 return;
             }
 
-            // 3b) Cena – dodatnia liczba:
             BigDecimal newPrice;
             try {
                 newPrice = new BigDecimal(newPriceText);
@@ -1248,7 +1170,6 @@ public class LogisticianPanelController {
                 return;
             }
 
-            // 3c) Ilość – liczba całkowita ≥ 0:
             int newQty;
             try {
                 newQty = Integer.parseInt(newQtyText);
@@ -1264,19 +1185,15 @@ public class LogisticianPanelController {
                 return;
             }
 
-            // 4) Zapisz zmiany w bazie:
             try {
-                // 4a) Zaktualizuj dane Product
                 prod.setName(newName);
                 prod.setCategory(newCat);
                 prod.setPrice(newPrice);
-                // załóżmy, że taka metoda istnieje w ProductRepository
+
                 pr.updateProduct(prod);
 
-                // 4b) Zaktualizuj stan magazynowy
                 warehouseRepository.setProductQuantity(prod.getId(), newQty);
 
-                // 4c) Odśwież widok tabeli
                 refreshStockTable(table);
 
                 showAlert(Alert.AlertType.INFORMATION, "Sukces",

@@ -31,7 +31,6 @@ import org.example.sys.*;
 
 import org.example.pdflib.ConfigManager;
 import pdf.SalesReportGenerator;
-import org.hibernate.Session;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.awt.Desktop;
@@ -55,7 +54,6 @@ public class CashierPanelController {
     private final UserRepository userRepository;
     private boolean reportGeneratedInCurrentSession = false;
 
-    // Ścieżka do katalogu z raportami
     private static final String REPORTS_DIRECTORY = "reports";
 
     public CashierPanelController(CashierPanel cashierPanel) {
@@ -65,7 +63,6 @@ public class CashierPanelController {
         this.userRepository = new UserRepository();
         this.reportGeneratedInCurrentSession = false;
 
-        // Utworzenie katalogu na raporty, jeśli nie istnieje
         File reportsDir = new File(REPORTS_DIRECTORY);
         if (!reportsDir.exists()) {
             reportsDir.mkdirs();
@@ -371,7 +368,6 @@ public class CashierPanelController {
                 saveReportInfo(periodType, dates[0], dates[1], reportPath);
                 showNotification("Sukces", "Raport zapisano: "
                         + reportPath);
-                // Po udanym wygenerowaniu od razu odświeżamy tabelę w panelu kasjera:
                 refreshReportTable(tableView);
 
                 dialog.close();
@@ -748,12 +744,6 @@ public class CashierPanelController {
         dialog.showAndWait();
     }
 
-    private void simulateGenerateReport(String reportType,
-                                        LocalDate date,
-                                        List<Transaction> transactions) {
-        // Możliwość symulacji generowania
-    }
-
     private TableView<Product> createProductTableWithSearch(
             TextField searchField) {
         TableView<Product> table = new TableView<>();
@@ -912,14 +902,12 @@ public class CashierPanelController {
                 return;
             }
 
-            // 1) Zapisz transakcję
             Transaction tx = new Transaction();
             tx.setEmployee(current);
             tx.setDate(new Date());
             transactionRepository.addTransaction(tx);
             int txId = tx.getId();
 
-            // 2) Aktualizuj stan magazynowy i zapisuj pozycje
             WarehouseRepository whRepo = new WarehouseRepository();
             for (TransactionItem item : items) {
                 int pid = item.getProduct().getId();
@@ -979,7 +967,6 @@ public class CashierPanelController {
                         "pola.");
             } else {
                 try {
-                    // Pobierz aktualnie zalogowanego pracownika
                     UserRepository userRepo = new UserRepository();
                     Employee currentEmployee = userRepo.getCurrentEmployee();
 
@@ -991,45 +978,30 @@ public class CashierPanelController {
                         return;
                     }
 
-                    // Utwórz nowe zgłoszenie techniczne
                     TechnicalIssue issue = new TechnicalIssue();
 
-                    // Ustaw typ zgłoszenia
                     issue.setType(typeBox.getValue());
-
-                    // Ustaw opis problemu
                     issue.setDescription(description.getText().trim());
-
-                    // Ustaw datę zgłoszenia na dzisiejszą
                     issue.setDateSubmitted(LocalDate.now());
-
-                    // Ustaw pracownika zgłaszającego
                     issue.setEmployee(currentEmployee);
-
-                    // Ustaw domyślny status "Nowe"
                     issue.setStatus("Nowe");
 
-                    // Zapisz zgłoszenie w bazie danych
                     TechnicalIssueRepository issueRepo
                             = new TechnicalIssueRepository();
                     issueRepo.addIssue(issue);
 
-                    // Wyświetl komunikat sukcesu
                     showNotification("Sukces", "Zgłoszenie " +
                             "techniczne zostało" +
                             " wysłane");
 
-                    // Loguj wysłanie zgłoszenia
                     Logger logger = LogManager.getLogger(getClass());
                     logger.info("Użytkownik {} wysłał zgłoszenie " +
                                     "techniczne typu: {}",
                             currentEmployee.getLogin(), typeBox.getValue());
 
-                    // Zamknij okno dialogowe
                     dialog.close();
-
-                    // Zamknij repozytoria
                     userRepo.close();
+
                 } catch (Exception ex) {
                     Logger logger = LogManager.getLogger(getClass());
                     logger.error("Błąd podczas wysyłania zgłoszenia " +
@@ -1076,8 +1048,6 @@ public class CashierPanelController {
                     "#3498DB");
             genBtn.setOnAction(e -> {
                 showReportDialog();
-                // Ustaw flagę po wygenerowaniu raportu
-                //reportGeneratedInCurrentSession = isDailyReportGeneratedToday();
                 log.info("Po wygenerowaniu raportu (przez guzik): " +
                                 "flaga reportGeneratedInCurrentSession = {}",
                         reportGeneratedInCurrentSession);
@@ -1109,8 +1079,6 @@ public class CashierPanelController {
                 if (res.isPresent()) {
                     if (res.get() == gen) {
                         showReportDialog();
-                        //reportGeneratedInCurrentSession
-                        // = isDailyReportGeneratedToday();
                         return;
                     } else if (res.get() == canc) {
                         return;
@@ -1162,16 +1130,6 @@ public class CashierPanelController {
         return !todays.isEmpty();
     }
 
-    public void markReportAsGenerated() {
-        this.reportGeneratedInCurrentSession = true;
-        log.info("Flaga raportu ustawiona ręcznie na true.");
-    }
-
-    public void checkReportFlagState(String panelName) {
-        System.out.println("Flaga przed przejściem do " +
-                panelName + ": " + reportGeneratedInCurrentSession);
-    }
-
     /**
      * Formularz wniosku o nieobecność.
      */
@@ -1218,19 +1176,12 @@ public class CashierPanelController {
                     fromDatePicker.getValue(),
                     toDatePicker.getValue())) {
                 try {
-                    // Tworzenie obiektu wniosku o nieobecność
                     AbsenceRequest request = new AbsenceRequest();
 
-                    // Ustawienie pracownika
                     request.setEmployee(current);
-
-                    // Ustawienie typu wniosku na podstawie wybranej opcji z combobox
                     request.setRequestType(typeCombo.getValue());
-
-                    // Ustawienie opisu
                     request.setDescription(reasonField.getText());
 
-                    // Konwersja LocalDate na Date
                     Date startDate = java.sql.Date.valueOf(
                             fromDatePicker.getValue());
                     Date endDate = java.sql.Date.valueOf(
@@ -1238,9 +1189,6 @@ public class CashierPanelController {
                     request.setStartDate(startDate);
                     request.setEndDate(endDate);
 
-                    // Status domyślnie ustawiony na PENDING (nie trzeba ustawiać)
-
-                    // Zapisanie wniosku w bazie danych
                     AbsenceRequestRepository repository
                             = new AbsenceRequestRepository();
                     repository.addRequest(request);
@@ -1454,24 +1402,6 @@ public class CashierPanelController {
             case MONTHLY -> pdf.SalesReportGenerator.PeriodType.MONTHLY;
             case YEARLY  -> pdf.SalesReportGenerator.PeriodType.YEARLY;
         };
-    }
-
-    /**
-     * Klasa pomocnicza reprezentująca pozycję w koszyku.
-     */
-    public static class TransactionItem {
-        private final Product product;
-        private int quantity;
-
-        public TransactionItem(Product product, int quantity) {
-            this.product = product;
-            this.quantity = quantity;
-        }
-        public Product getProduct() { return product; }
-        public int getQuantity() { return quantity; }
-        public void setQuantity(int quantity) { this.quantity = quantity; }
-        public double getTotal() { return product.getPrice()
-                .doubleValue() * quantity; }
     }
 
     /**

@@ -20,7 +20,6 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -46,19 +45,16 @@ import org.example.utils.AppPaths;
 import org.example.wyjatki.PasswordException;
 import org.example.wyjatki.SalaryException;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.time.LocalTime;
-import java.time.temporal.TemporalAdjusters;
 
 import pdf.StatsRaportGenerator;
 import pdf.TaskRaportGenerator;
@@ -81,7 +77,6 @@ public class AdminPanelController {
     private final UserRepository userRepository;
     private TableView<Employee> tableView;
     private final TechnicalIssueRepository technicalIssueRepository;
-    private TableView<TechnicalIssue> issuesTableView;
 
     // Executor do operacji asynchronicznych
     private static final ExecutorService executor =
@@ -91,7 +86,6 @@ public class AdminPanelController {
 
     // Cache widoków dla lepszej wydajności
     private VBox userManagementView;
-    private VBox configPanelView;
     private VBox reportsPanelView;
     private VBox issuesPanelView;
 
@@ -649,7 +643,6 @@ public class AdminPanelController {
                     return;
                 }
 
-                // NOWA FUNKCJONALNOŚĆ: Sprawdzenie unikalności loginu
                 UserRepository checkRepo = new UserRepository();
                 Employee existingEmployee = checkRepo.findByLogin(loginText);
                 if (existingEmployee != null) {
@@ -681,20 +674,16 @@ public class AdminPanelController {
                 Task<Void> addTask = new Task<>() {
                     @Override
                     protected Void call() throws Exception {
-                        // 1. Dodajemy użytkownika z niezahaszowanym hasłem
                         userRepository.addEmployee(newEmployee);
 
-                        // 2. Pobieramy użytkownika z najwyższym ID (zakładamy, że to ten, którego właśnie dodaliśmy)
                         Employee addedEmployee = userRepository
                                 .findEmployeeWithHighestId();
 
                         if (addedEmployee != null) {
                             try {
-                                // 3. Hashujemy hasło z użyciem faktycznego ID z bazy danych
                                 String hashedPassword = PasswordHasher.hashPassword(
                                         plainPassword, addedEmployee.getId());
 
-                                // 4. Aktualizujemy hasło użytkownika
                                 addedEmployee.setPassword(hashedPassword);
                                 userRepository.updateEmployee(addedEmployee);
 
@@ -776,8 +765,6 @@ public class AdminPanelController {
             return;
         }
 
-        // Sprawdź, czy admin próbuje usunąć własne konto
-        // Pobierz aktualnie zalogowanego użytkownika
         UserRepository repo = new UserRepository();
         Employee currentUser = repo.getCurrentEmployee();
 
@@ -803,7 +790,7 @@ public class AdminPanelController {
             if (response == ButtonType.OK) {
                 try {
                     userRepository.removeEmployee(selected);
-                    refreshEmployeeList(); // ponowne załadowanie aktywnych
+                    refreshEmployeeList();
                     showAlert(
                             Alert.AlertType.INFORMATION,
                             "Sukces",
@@ -860,9 +847,8 @@ public class AdminPanelController {
         styleAdminButton(backupButton, "#27AE60");
         backupButton.setOnAction(e -> performDatabaseBackup());
 
-        // DODANY PRZYCISK DO EKSPORTU CSV
         Button exportCsvButton = new Button("Eksportuj bazę danych do CSV");
-        styleAdminButton(exportCsvButton, "#16A085");  // Inny kolor dla odróżnienia
+        styleAdminButton(exportCsvButton, "#16A085");
         exportCsvButton.setOnAction(e -> exportDatabaseToCsv());
 
         layout.getChildren().addAll(
@@ -870,17 +856,15 @@ public class AdminPanelController {
                 openLogsButton,
                 configurePDF,
                 backupButton,
-                exportCsvButton  // DODANY PRZYCISK
+                exportCsvButton
         );
 
         return layout;
     }
 
     private void exportDatabaseToCsv() {
-        // Użyj AppPaths do uzyskania katalogu CSV
         Path folder = AppPaths.getBackupCsvDirectory();
 
-        // Upewnij się, że katalog istnieje
         try {
             Files.createDirectories(folder);
         } catch (IOException e) {
@@ -890,7 +874,6 @@ public class AdminPanelController {
             return;
         }
 
-        /* ---------- loader ---------- */
         Stage loaderStage = new Stage();
         loaderStage.initOwner(primaryStage);
         loaderStage.initModality(Modality.APPLICATION_MODAL);
@@ -903,7 +886,6 @@ public class AdminPanelController {
         loaderStage.setTitle("Eksport CSV – trwa…");
         loaderStage.show();
 
-        /* ---------- zadanie ---------- */
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() throws Exception {
@@ -934,7 +916,6 @@ public class AdminPanelController {
 
     public void openLogsDirectory() {
         try {
-            // Użyj AppPaths do uzyskania ścieżki katalogu logów
             Path logsDir = AppPaths.getLogsDirectory();
             String path = logsDir.toAbsolutePath().toString();
 
@@ -1464,12 +1445,10 @@ public class AdminPanelController {
                         alert.setContentText("Proszę poprawić zakres dat.");
                         alert.showAndWait();
 
-                        // Zapobiegaj zamknięciu dialogu
                         return null;
                     }
                 }
 
-                // Kontynuuj generowanie raportu, jeśli daty są poprawne
                 generateWorkloadPDF(start.getValue(), end.getValue(),
                         new ArrayList<>(positionsList.getSelectionModel()
                                 .getSelectedItems()),
@@ -1578,7 +1557,6 @@ public class AdminPanelController {
                 .toList();
 
         logger.info("Po filtracji dat: {} zadań", filteredTasks.size());
-        // Logowanie podsumowania listy TaskRecord
         logger.debug("Podsumowanie TaskRecords: {}",
                 filteredTasks.stream()
                 .map(r -> String.format("{taskName=%s, " +
@@ -1642,11 +1620,15 @@ public class AdminPanelController {
 
         return fetchTaskSimpleData(start, end);
     }
-
-
-    /* ------------------------------------------------------------ */
-    /* Obciążenie – WorkloadReportGenerator                         */
-    /* ------------------------------------------------------------ */
+    /**
+     * Pobiera dane do raportu obciążenia pracowników
+     * (WorkloadReportGenerator) w postaci listy obiektów
+     * EmployeeWorkload.
+     *
+     * @param from  początek okresu raportowania (inclusive)
+     * @param to    koniec okresu raportowania (inclusive)
+     * @return lista obiektów EmployeeWorkload z danymi o obciążeniu
+     */
     private List<WorkloadReportGenerator.EmployeeWorkload> fetchWorkloadData(
             LocalDate from,
             LocalDate to) {
@@ -1679,7 +1661,17 @@ public class AdminPanelController {
         return workloadData;
     }
 
-    // =====================  METODY POMOCNICZE  ====================
+
+    /**
+     * Sprawdza, czy data d mieści się w podanym zakresie
+     * (inclusive).
+     *
+     * @param d   data do sprawdzenia
+     * @param from początek zakresu (inclusive)
+     * @param to   koniec zakresu (inclusive)
+     * @return true, jeśli data jest w zakresie, false w przeciwnym
+     *         przypadku
+     */
     private static boolean inRange(Date d, LocalDate from, LocalDate to) {
         if (d == null) return false;
         LocalDate ld = toLocalDate(d);
@@ -1695,7 +1687,6 @@ public class AdminPanelController {
         }
     }
 
-    /** LocalTime → liczba godzin, np. 02:30 ⇒ 2.5 */
     private static double hours(LocalTime t) {
         return t.getHour() + t.getMinute() / 60d;
     }
@@ -1715,7 +1706,6 @@ public class AdminPanelController {
             };
             task.setOnSucceeded(e -> {
                 issuesPanelView = task.getValue();
-                // Na FX-thread następuje ustawienie widoku, a następnie odświeżenie danych
                 Platform.runLater(() -> {
                     adminPanel.setCenterPane(issuesPanelView);
                     @SuppressWarnings("unchecked")
@@ -1744,150 +1734,6 @@ public class AdminPanelController {
                 refreshIssuesTable(tbl);
             });
         }
-    }
-
-    /**
-     * Pokazuje dialog z filtrami dla wskazanego raportu i okresu.
-     * Po wybraniu filtrów wywołuje odpowiednią metodę generującą PDF.
-     *
-     * @param reportType  typ raportu: "KPI", "Zadania"
-     *                    lub "Obciążenie"
-     * @param from        początek okresu (inclusive)
-     * @param to          koniec okresu (inclusive)
-     */
-    private void showFilterDialogForReport(String reportType,
-                                           LocalDate from,
-                                           LocalDate to) {
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle("Filtruj raport: " + reportType);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK,
-                ButtonType.CANCEL);
-
-        dialog.getDialogPane().setMinWidth(450);
-        dialog.getDialogPane().setMinHeight(320);
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-
-        switch (reportType) {
-            case "KPI" -> {
-                // --- KPI: daty, stanowiska, priorytety ---
-                DatePicker dpFrom = new DatePicker(from);
-                DatePicker dpTo   = new DatePicker(to);
-                ListView<String> positionsList = new ListView<>(
-                        FXCollections.observableArrayList("Kasjer",
-                                "Logistyk", "Pracownik")
-                );
-                positionsList.getSelectionModel().setSelectionMode(
-                        SelectionMode.MULTIPLE);
-                ListView<StatsRaportGenerator.Priority> prioList
-                        = new ListView<>(
-                        FXCollections.observableArrayList(StatsRaportGenerator
-                                .Priority.values())
-                );
-                prioList.getSelectionModel().setSelectionMode(
-                        SelectionMode.MULTIPLE);
-
-                grid.addRow(0, new Label("Data od:"), dpFrom,
-                        new Label("Data do:"), dpTo);
-                grid.addRow(1, new Label("Stanowiska:"), positionsList);
-                grid.addRow(2, new Label("Priorytety:"), prioList);
-
-                dialog.getDialogPane().setContent(grid);
-                dialog.setResultConverter(bt -> {
-                    if (bt == ButtonType.OK) {
-                        generateStatsPDF(
-                                dpFrom.getValue(),
-                                dpTo.getValue(),
-                                new ArrayList<>(positionsList
-                                        .getSelectionModel()
-                                        .getSelectedItems()),
-                                new ArrayList<>(prioList.getSelectionModel()
-                                        .getSelectedItems())
-                        );
-                    }
-                    return null;
-                });
-            }
-            case "Zadania" -> {
-                // --- Zadania: okres + statusy ---
-                ComboBox<PeriodType> periodCombo = new ComboBox<>();
-                periodCombo.getItems().addAll(PeriodType.values());
-                // albo po prostu PeriodType.DAILY
-                periodCombo.setValue(PeriodType.fromDisplay(reportType));
-
-                ListView<String> statusList = new ListView<>(
-                        FXCollections.observableArrayList("Zakończone",
-                                "W trakcie", "Opóźnione")
-                );
-                statusList.getSelectionModel().setSelectionMode(
-                        SelectionMode.MULTIPLE);
-
-                grid.addRow(0, new Label("Okres:"), periodCombo);
-                grid.addRow(1, new Label("Statusy:"), statusList);
-
-                dialog.getDialogPane().setContent(grid);
-                dialog.setResultConverter(bt -> {
-                    if (bt == ButtonType.OK) {
-                        generateTaskPDF(
-                                periodCombo.getValue(),
-                                new ArrayList<>(statusList.getSelectionModel()
-                                        .getSelectedItems())
-                        );
-                    }
-                    return null;
-                });
-            }
-            case "Obciążenie" -> {
-                // --- Obciążenie: daty, stanowiska, rodzaje obciążenia ---
-                DatePicker dpFrom = new DatePicker(from);
-                DatePicker dpTo   = new DatePicker(to);
-                ListView<String> positionsList = new ListView<>(
-                        FXCollections.observableArrayList("Kasjer",
-                                "Logistyk", "Pracownik")
-                );
-                positionsList.getSelectionModel().setSelectionMode(
-                        SelectionMode.MULTIPLE);
-                ListView<String> loadStatusList = new ListView<>(
-                        FXCollections.observableArrayList("Przeciążenie",
-                                "Niedociążenie", "Optymalne")
-                );
-                loadStatusList.getSelectionModel().setSelectionMode(
-                        SelectionMode.MULTIPLE);
-
-                grid.addRow(0, new Label("Data od:"), dpFrom,
-                        new Label("Data do:"), dpTo);
-                grid.addRow(1, new Label("Stanowiska:"), positionsList);
-                grid.addRow(2, new Label("Statusy obciążenia:"),
-                        loadStatusList);
-
-                dialog.getDialogPane().setContent(grid);
-                dialog.setResultConverter(bt -> {
-                    if (bt == ButtonType.OK) {
-                        generateWorkloadPDF(
-                                dpFrom.getValue(),
-                                dpTo.getValue(),
-                                new ArrayList<>(positionsList
-                                        .getSelectionModel()
-                                        .getSelectedItems()),
-                                new ArrayList<>(loadStatusList
-                                        .getSelectionModel().getSelectedItems())
-                        );
-                    }
-                    return null;
-                });
-            }
-            default -> {
-                // w razie nieznanego typu
-                showAlert(Alert.AlertType.ERROR,
-                        "Nieznany typ raportu",
-                        "ReportType = " + reportType);
-                return;
-            }
-        }
-
-        dialog.showAndWait();
     }
 
     /**
@@ -1956,7 +1802,6 @@ public class AdminPanelController {
 
         tbl.getColumns().addAll(idCol, typeCol, dateCol, statusCol);
 
-        // --- przyciski poniżej tabeli ---
         Button details = new Button("Pokaż szczegóły");
         styleAdminButton(details,"#2980B9");
         details.setOnAction(e -> showIssueDetails(tbl));
@@ -2023,7 +1868,6 @@ public class AdminPanelController {
      * Wylogowuje użytkownika i uruchamia okno logowania.
      */
     public void logout() {
-        // Zamknij połączenia z bazą danych
         Task<Void> closeTask = new Task<>() {
             @Override
             protected Void call() throws Exception {
@@ -2062,7 +1906,8 @@ public class AdminPanelController {
         loaderStage.setTitle("Backup bazy – trwa…");
         loaderStage.show();
 
-        // Utworzenie tymczasowego obiektu implementującego ILacz dla dostępu do konfiguracji
+        // Utworzenie tymczasowego obiektu implementującego
+        // ILacz dla dostępu do konfiguracji
         ILacz dbConfig = new ILacz() {};
 
         String os = System.getProperty("os.name").toLowerCase();
@@ -2147,7 +1992,6 @@ public class AdminPanelController {
                         "--databases", dbName
                 );
 
-                // Dodaj hasło jako zmienną środowiskową - bezpieczniejsze podejście
                 if (dbPassword != null && !dbPassword.isEmpty()) {
                     pb.environment().put("MYSQL_PWD", dbPassword);
                 }
@@ -2241,7 +2085,6 @@ public class AdminPanelController {
         VBox layout = new VBox(10);
         layout.setPadding(new Insets(20));
 
-        // --------------- Kontrolki formularza ---------------
         TextField town = new TextField();
         town.setPromptText("Miejscowość");
 
@@ -2260,7 +2103,6 @@ public class AdminPanelController {
         Button saveButton = new Button("Zapisz adres");
         styleAdminButton(saveButton, "#27AE60");
 
-        // --------------- Obsługa przycisku Zapisz ---------------
         saveButton.setOnAction(e -> {
             String sTown = town.getText().trim();
             String sHouse = houseNumber.getText().trim();
@@ -2278,8 +2120,6 @@ public class AdminPanelController {
                 return;
             }
 
-            // 2. Walidacja formatu Miejscowości i Miasta: tylko litery i spacje
-            //    (bez cyfr i znaków specjalnych)
             if (!sTown.matches("[A-Za-zĄĆĘŁŃÓŚŹŻąćęłńóśźż\\s\\-]+")) {
                 showAlert(Alert.AlertType.ERROR,
                         "Błąd",
@@ -2295,9 +2135,6 @@ public class AdminPanelController {
                 return;
             }
 
-            // 3. Walidacja formatu Numeru domu:
-            //    dopuszczamy cyfry, ewentualnie litery (np. "12", "12A") lub
-            //    fragment typu "12B" (bez dalszych znaków), maksymalnie dwie litery.
             if (!sHouse.matches("\\d{1,4}[A-Za-z]{0,2}")) {
                 showAlert(Alert.AlertType.ERROR,
                         "Błąd",
@@ -2307,8 +2144,6 @@ public class AdminPanelController {
                 return;
             }
 
-            // 4. Walidacja formatu Numeru mieszkania (jeśli podano):
-            //    dopuszczamy albo puste, albo tylko cyfry, np. "3" lub "12".
             if (!sApartment.isEmpty() && !sApartment.matches(
                     "\\d{1,4}")) {
                 showAlert(Alert.AlertType.ERROR,
@@ -2318,7 +2153,6 @@ public class AdminPanelController {
                 return;
             }
 
-            // 5. Walidacja formatu kodu pocztowego: wzorzec "dd-ddd"
             if (!sZip.matches("\\d{2}-\\d{3}")) {
                 showAlert(Alert.AlertType.ERROR,
                         "Błąd",
@@ -2327,12 +2161,10 @@ public class AdminPanelController {
                 return;
             }
 
-            // 6. Po przejściu wszystkich walidacji, zapisujemy nowy adres
             AddressRepository repo = new AddressRepository();
             Address newAddress = new Address();
             newAddress.setTown(sTown);
             newAddress.setHouseNumber(sHouse);
-            // numer mieszkania ustawiamy tylko jeśli zostało podane
             newAddress.setApartmentNumber(sApartment.isEmpty()
                     ? null : sApartment);
             newAddress.setZipCode(sZip);
@@ -2348,8 +2180,6 @@ public class AdminPanelController {
                 return;
             }
 
-            // 7. Odświeżamy ComboBox z adresami i ustawiamy nowo dodany
-            // adres jako wybrany
             List<Address> updatedList = repo.getAllAddresses();
             addressComboBox.getItems().clear();
             addressComboBox.getItems().addAll(updatedList);
@@ -2358,8 +2188,6 @@ public class AdminPanelController {
             stage.close();
         });
 
-        // Dodajemy etykietę nad polami i układamy wszystkie kontrolki
-        // w jednym VBox-ie
         layout.getChildren().addAll(
                 new Label("Nowy adres:"),
                 town,
@@ -2391,40 +2219,6 @@ public class AdminPanelController {
             button.setScaleX(1);
             button.setScaleY(1);
         });
-    }
-
-    /**
-     * Otwiera eksplorator plików (Windows Explorer lub xdg-open)
-     * ustawiony na katalogu projektu.
-     */
-    private void openProjectDirectory() {
-        try {
-            String projectDir = System.getProperty("user.dir");
-            File dir = new File(projectDir);
-            if (!dir.exists()) {
-                // W razie czego spróbuj aktualny katalog
-                dir = new File(".");
-            }
-
-            String os = System.getProperty("os.name").toLowerCase();
-            ProcessBuilder pb;
-            if (os.contains("win")) {
-                // Windows Explorer
-                pb = new ProcessBuilder("explorer",
-                        dir.getAbsolutePath());
-            } else {
-                // Linux / Unix / macOS (zakładamy xdg-open)
-                pb = new ProcessBuilder("xdg-open",
-                        dir.getAbsolutePath());
-            }
-            pb.inheritIO();
-            pb.start();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Błąd",
-                    "Nie udało się otworzyć katalogu projektu:\n"
-                            + ex.getMessage());
-        }
     }
 
 }
