@@ -13,7 +13,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.database.ILacz;
-import org.example.database.UserRepository;
+import org.example.database.repositories.UserRepository;
 import org.example.gui.*;
 import javax.mail.MessagingException;
 import java.util.Random;
@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 // Importy Log4j2
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.gui.panels.*;
 
 /**
  * Klasa odpowiedzialna za logikę logowania użytkowników do systemu.

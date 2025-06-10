@@ -33,7 +33,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.database.DatabaseErrorHandler;
 import org.example.database.EMFProvider;
-import org.example.database.UserRepository;
+import org.example.database.repositories.UserRepository;
 import org.example.sys.ConfigPdf;
 import org.example.sys.Employee;
 import org.example.sys.Login;
@@ -59,8 +59,6 @@ public class HelloApplication extends Application {
             new AtomicBoolean(false);
     static {
         try {
-            // AppPaths zostanie zainicjalizowane automatycznie przez swój statyczny blok
-            // i ustawi właściwość app.logs.dir
             System.out.println("Katalog logów aplikacji: "
                     + AppPaths.getLogsDirectory());
         } catch (Exception e) {
@@ -206,7 +204,6 @@ public class HelloApplication extends Application {
             passwordField.setStyle("-fx-background-color: #FFD966; " +
                     "-fx-padding: 5;");
 
-            // Pozwól na logowanie klawiszem Enter z pola hasła
             passwordField.setOnKeyPressed(event -> {
                 switch (event.getCode()) {
                     case ENTER:
@@ -642,8 +639,6 @@ public class HelloApplication extends Application {
         emailLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
         emailLabel.setTextFill(Color.DARKSLATEGRAY);
 
-        // Pole tekstowe umożliwiające wpisanie alfanumerycznego
-        // kodu (maks. 6 znaków)
         TextField codeField = new TextField();
         codeField.setPromptText("Wprowadź kod weryfikacyjny");
         codeField.setMaxWidth(150);
@@ -809,7 +804,6 @@ public class HelloApplication extends Application {
                             "Problem techniczny",
                             "Wystąpił błąd podczas aktualizacji " +
                                     "hasła: " + ex.getMessage());
-                } finally {
                 }
             }
         });

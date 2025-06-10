@@ -5,7 +5,7 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.gui;
+package org.example.gui.elements;
 
 import javafx.scene.control.Alert;
 

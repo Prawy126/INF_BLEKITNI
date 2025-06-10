@@ -5,7 +5,7 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.gui;
+package org.example.gui.panels;
 
 import javafx.geometry.Insets;
 import javafx.scene.Scene;

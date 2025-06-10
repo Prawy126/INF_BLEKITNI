@@ -5,7 +5,7 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.gui;
+package org.example.gui.controllers;
 
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -20,11 +20,13 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import org.example.database.AbsenceRequestRepository;
-import org.example.database.EmpTaskRepository;
-import org.example.database.TaskEmployeeRepository;
-import org.example.database.UserRepository;
+import org.example.database.repositories.AbsenceRequestRepository;
+import org.example.database.repositories.EmpTaskRepository;
+import org.example.database.repositories.TaskEmployeeRepository;
+import org.example.database.repositories.UserRepository;
 
+import org.example.gui.HelloApplication;
+import org.example.gui.panels.ManagerPanel;
 import org.example.sys.AbsenceRequest;
 import org.example.sys.Employee;
 import org.example.sys.EmpTask;

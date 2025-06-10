@@ -27,7 +27,7 @@ import javax.mail.internet.MimeMessage;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.database.UserRepository;
+import org.example.database.repositories.UserRepository;
 import org.mindrot.jbcrypt.BCrypt;
 
 import static org.example.sys.Login.generateRandomCode;

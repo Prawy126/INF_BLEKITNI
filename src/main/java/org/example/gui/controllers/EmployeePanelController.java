@@ -5,7 +5,7 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.gui;
+package org.example.gui.controllers;
 
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -17,10 +17,12 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.example.database.EmpTaskRepository;
-import org.example.database.TaskEmployeeRepository;
-import org.example.database.UserRepository;
-import org.example.database.TechnicalIssueRepository;
+import org.example.database.repositories.EmpTaskRepository;
+import org.example.database.repositories.TaskEmployeeRepository;
+import org.example.database.repositories.UserRepository;
+import org.example.database.repositories.TechnicalIssueRepository;
+import org.example.gui.panels.EmployeePanel;
+import org.example.gui.HelloApplication;
 import org.example.sys.EmpTask;
 import org.example.sys.Employee;
 import org.example.sys.TechnicalIssue;
@@ -28,7 +30,6 @@ import org.example.sys.TechnicalIssue;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**

@@ -5,7 +5,7 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.gui;
+package org.example.gui.controllers;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -39,6 +39,12 @@ import javafx.stage.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.database.*;
+import org.example.database.repositories.AddressRepository;
+import org.example.database.repositories.EmpTaskRepository;
+import org.example.database.repositories.TechnicalIssueRepository;
+import org.example.database.repositories.UserRepository;
+import org.example.gui.panels.AdminPanel;
+import org.example.gui.HelloApplication;
 import org.example.pdflib.ConfigManager;
 import org.example.sys.*;
 import org.example.utils.AppPaths;

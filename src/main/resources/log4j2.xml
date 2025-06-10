@@ -38,7 +38,7 @@
             <AppenderRef ref="Console"/>
         </Logger>
 
-        <Logger name="org.example.gui.AdminPanelController" level="DEBUG"/>
+        <Logger name="org.example.gui.controllers.AdminPanelController" level="DEBUG"/>
 
         <!-- Główny logger -->
         <Root level="info">

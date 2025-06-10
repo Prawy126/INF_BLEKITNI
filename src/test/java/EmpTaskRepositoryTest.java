@@ -6,7 +6,7 @@
  */
 
 
-import org.example.database.EmpTaskRepository;
+import org.example.database.repositories.EmpTaskRepository;
 import org.example.sys.EmpTask;
 
 import org.junit.jupiter.api.Test;

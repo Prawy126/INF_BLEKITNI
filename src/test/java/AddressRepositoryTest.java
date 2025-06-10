@@ -6,7 +6,7 @@
  */
 
 
-import org.example.database.AddressRepository;
+import org.example.database.repositories.AddressRepository;
 import org.example.sys.Address;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;

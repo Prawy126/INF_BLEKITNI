@@ -6,8 +6,8 @@
  */
 
 
-import org.example.database.TransactionRepository;
-import org.example.database.UserRepository;
+import org.example.database.repositories.TransactionRepository;
+import org.example.database.repositories.UserRepository;
 import org.example.sys.Employee;
 import org.example.sys.Transaction;
 

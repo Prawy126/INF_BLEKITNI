@@ -32,7 +32,13 @@ module org.example.gui {
     exports org.example.gui;
     exports org.example.sys;
     exports org.example.database;
-    exports org.example.hypermarket;
     exports org.example.pdflib;
     exports org.example.wyjatki;
+    exports org.example.gui.controllers;
+    opens org.example.gui.controllers to javafx.fxml;
+    exports org.example.gui.panels;
+    opens org.example.gui.panels to javafx.fxml;
+    exports org.example.gui.elements;
+    opens org.example.gui.elements to javafx.fxml;
+    exports org.example.database.repositories;
 }

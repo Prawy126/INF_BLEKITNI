@@ -5,12 +5,11 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.database;
+package org.example.database.repositories;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.database.EMFProvider;
 import pdf.WorkloadReportGenerator.EmployeeWorkload;
 
 import java.sql.Date;

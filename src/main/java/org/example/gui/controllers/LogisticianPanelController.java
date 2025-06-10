@@ -5,7 +5,7 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.gui;
+package org.example.gui.controllers;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -29,7 +29,9 @@ import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.example.database.*;
+import org.example.database.repositories.*;
+import org.example.gui.HelloApplication;
+import org.example.gui.panels.LogisticianPanel;
 import org.example.pdflib.ConfigManager;
 import org.example.sys.*;
 

@@ -6,8 +6,8 @@
  */
 
 
-import org.example.database.AddressRepository;
-import org.example.database.UserRepository;
+import org.example.database.repositories.AddressRepository;
+import org.example.database.repositories.UserRepository;
 import org.example.sys.Address;
 import org.example.sys.Employee;
 import org.example.wyjatki.SalaryException;

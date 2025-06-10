@@ -5,7 +5,7 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.gui;
+package org.example.gui.panels;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;

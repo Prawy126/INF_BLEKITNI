@@ -6,7 +6,7 @@
  */
 
 
-import org.example.database.ProductRepository;
+import org.example.database.repositories.ProductRepository;
 import org.example.sys.Product;
 
 import org.junit.jupiter.api.Test;

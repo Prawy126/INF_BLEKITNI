@@ -6,8 +6,8 @@
  */
 
 
-import org.example.database.ProductRepository;
-import org.example.database.WarehouseRepository;
+import org.example.database.repositories.ProductRepository;
+import org.example.database.repositories.WarehouseRepository;
 import org.example.sys.Product;
 import org.example.sys.Warehouse;
 

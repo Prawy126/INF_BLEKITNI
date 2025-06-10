@@ -6,9 +6,9 @@
  */
 
 
-import org.example.database.OrderRepository;
-import org.example.database.ProductRepository;
-import org.example.database.UserRepository;
+import org.example.database.repositories.OrderRepository;
+import org.example.database.repositories.ProductRepository;
+import org.example.database.repositories.UserRepository;
 import org.example.sys.Employee;
 import org.example.sys.Product;
 import org.example.sys.Order;

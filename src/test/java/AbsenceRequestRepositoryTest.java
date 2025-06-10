@@ -11,8 +11,8 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 
-import org.example.database.AbsenceRequestRepository;
-import org.example.database.UserRepository;
+import org.example.database.repositories.AbsenceRequestRepository;
+import org.example.database.repositories.UserRepository;
 import org.example.sys.AbsenceRequest;
 import org.example.sys.AbsenceRequest.RequestStatus;
 import org.example.sys.Employee;

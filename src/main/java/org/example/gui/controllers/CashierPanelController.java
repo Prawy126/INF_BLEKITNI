@@ -5,7 +5,7 @@
  * Copyright notice: © BŁĘKITNI
  */
 
-package org.example.gui;
+package org.example.gui.controllers;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
@@ -26,7 +26,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.converter.IntegerStringConverter;
-import org.example.database.*;
+import org.example.database.repositories.*;
+import org.example.gui.panels.CashierPanel;
+import org.example.gui.HelloApplication;
 import org.example.sys.*;
 
 import org.example.pdflib.ConfigManager;

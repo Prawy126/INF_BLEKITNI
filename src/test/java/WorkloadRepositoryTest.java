@@ -6,7 +6,7 @@
  */
 
 
-import org.example.database.WorkloadRepository;
+import org.example.database.repositories.WorkloadRepository;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;

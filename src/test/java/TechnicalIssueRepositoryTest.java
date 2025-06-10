@@ -6,8 +6,8 @@
  */
 
 
-import org.example.database.TechnicalIssueRepository;
-import org.example.database.UserRepository;
+import org.example.database.repositories.TechnicalIssueRepository;
+import org.example.database.repositories.UserRepository;
 import org.example.sys.Employee;
 import org.example.sys.TechnicalIssue;
 
