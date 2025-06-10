@@ -71,14 +71,16 @@ public class ManagerPanelController {
 
         TableColumn<EmpTask, String> nameCol = new TableColumn<>("Zadanie");
         nameCol.setCellValueFactory(
-                data -> new javafx.beans.property.SimpleStringProperty(
+                data -> new javafx.beans.property
+                        .SimpleStringProperty(
                         data.getValue().getName()
                 )
         );
 
         TableColumn<EmpTask, String> dateCol = new TableColumn<>("Termin");
         dateCol.setCellValueFactory(
-                data -> new javafx.beans.property.SimpleStringProperty(
+                data -> new javafx.beans.property
+                        .SimpleStringProperty(
                         data.getValue().getDate() != null
                                 ? data.getValue().getDate().toString()
                                 : "brak daty"
@@ -87,12 +89,14 @@ public class ManagerPanelController {
 
         TableColumn<EmpTask, String> statusCol = new TableColumn<>("Status");
         statusCol.setCellValueFactory(
-                data -> new javafx.beans.property.SimpleStringProperty(
+                data -> new javafx.beans.property
+                        .SimpleStringProperty(
                         data.getValue().getStatus()
                 )
         );
 
-        TableColumn<EmpTask, String> employeeCol = new TableColumn<>("Pracownik");
+        TableColumn<EmpTask, String> employeeCol = new TableColumn<>(
+                "Pracownik");
         employeeCol.setCellValueFactory(
                 data -> {
                     EmpTask task = data.getValue();
@@ -102,7 +106,8 @@ public class ManagerPanelController {
                                 emp.getName() + " " + emp.getSurname()
                         );
                     } else {
-                        return new javafx.beans.property.SimpleStringProperty("Brak");
+                        return new javafx.beans.property.SimpleStringProperty(
+                                "Brak");
                     }
                 }
         );
@@ -116,39 +121,49 @@ public class ManagerPanelController {
         Button addTaskButton = new Button("Dodaj zadanie");
         addTaskButton.setStyle("-fx-background-color: #2980B9;" +
                 " -fx-text-fill: white; -fx-font-weight: bold;");
-        addTaskButton.setOnMouseEntered(e -> { addTaskButton.setScaleX(1.1);
+        addTaskButton.setOnMouseEntered(
+                e -> { addTaskButton.setScaleX(1.1);
             addTaskButton.setScaleY(1.1); });
-        addTaskButton.setOnMouseExited(e -> { addTaskButton.setScaleX(1);
+        addTaskButton.setOnMouseExited(
+                e -> { addTaskButton.setScaleX(1);
             addTaskButton.setScaleY(1); });
         addTaskButton.setOnAction(e -> showAddTaskPanel());
 
         Button assignEmployeeButton = new Button("Przypisz pracownika");
         assignEmployeeButton.setStyle("-fx-background-color: #3498DB;" +
                 " -fx-text-fill: white; -fx-font-weight: bold;");
-        assignEmployeeButton.setOnMouseEntered(e -> { assignEmployeeButton.setScaleX(1.1);
+        assignEmployeeButton.setOnMouseEntered(
+                e -> { assignEmployeeButton.setScaleX(1.1);
             assignEmployeeButton.setScaleY(1.1); });
-        assignEmployeeButton.setOnMouseExited(e -> { assignEmployeeButton.setScaleX(1);
+        assignEmployeeButton.setOnMouseExited(
+                e -> { assignEmployeeButton.setScaleX(1);
             assignEmployeeButton.setScaleY(1); });
-        assignEmployeeButton.setOnAction(e -> showAssignEmployeeDialog());
+        assignEmployeeButton.setOnAction(
+                e -> showAssignEmployeeDialog());
 
         Button editButton = new Button("Edytuj zadanie");
         editButton.setStyle("-fx-background-color: #F39C12;" +
                 " -fx-text-fill: white; -fx-font-weight: bold;");
-        editButton.setOnMouseEntered(e -> { editButton.setScaleX(1.1);
+        editButton.setOnMouseEntered(
+                e -> { editButton.setScaleX(1.1);
             editButton.setScaleY(1.1); });
-        editButton.setOnMouseExited(e -> { editButton.setScaleX(1);
+        editButton.setOnMouseExited(
+                e -> { editButton.setScaleX(1);
             editButton.setScaleY(1); });
 
         Button deleteButton = new Button("Archiwizuj zadanie");
         deleteButton.setStyle("-fx-background-color: #E74C3C;" +
                 " -fx-text-fill: white; -fx-font-weight: bold;");
-        deleteButton.setOnMouseEntered(e -> { deleteButton.setScaleX(1.1);
+        deleteButton.setOnMouseEntered(
+                e -> { deleteButton.setScaleX(1.1);
             deleteButton.setScaleY(1.1); });
-        deleteButton.setOnMouseExited(e -> { deleteButton.setScaleX(1);
+        deleteButton.setOnMouseExited(
+                e -> { deleteButton.setScaleX(1);
             deleteButton.setScaleY(1); });
 
         editButton.setOnAction(e -> {
-            EmpTask selectedTask = taskTable.getSelectionModel().getSelectedItem();
+            EmpTask selectedTask = taskTable.getSelectionModel()
+                    .getSelectedItem();
             if (selectedTask != null) {
                 showEditTaskDialog(selectedTask);
             } else {
@@ -158,7 +173,8 @@ public class ManagerPanelController {
         });
 
         deleteButton.setOnAction(e -> {
-            EmpTask selectedTask = taskTable.getSelectionModel().getSelectedItem();
+            EmpTask selectedTask = taskTable.getSelectionModel()
+                    .getSelectedItem();
             if (selectedTask != null) {
                 // Użycie miękkiego usuwania zamiast trwałego usunięcia
                 boolean success = taskRepository.softDeleteTask(selectedTask);
@@ -221,35 +237,43 @@ public class ManagerPanelController {
         backButton.setOnAction(e -> showTaskPanel());
 
         Button saveButton = new Button("Zapisz");
-        saveButton.setStyle("-fx-background-color: #2980B9; -fx-text-fill: white;");
+        saveButton.setStyle("-fx-background-color: #2980B9; " +
+                "-fx-text-fill: white;");
         saveButton.setOnAction(e -> {
             try {
                 String name             = nameField.getText();
                 String description      = descriptionArea.getText();
                 String status           = statusCombo.getValue();
-                Date date               = Date.valueOf(deadlinePicker.getValue());
+                Date date               = Date.valueOf(
+                        deadlinePicker.getValue());
                 LocalTime timeOfShift   = LocalTime.now();
 
-                if (name.isEmpty() || description.isEmpty() || status == null || date == null) {
-                    showAlert(Alert.AlertType.WARNING, "Błąd", "Wypełnij wszystkie pola.");
+                if (name.isEmpty() || description.isEmpty() || status == null
+                        || date == null) {
+                    showAlert(Alert.AlertType.WARNING, "Błąd",
+                            "Wypełnij wszystkie pola.");
                     return;
                 }
 
                 if (date.before(Date.valueOf(java.time.LocalDate.now()))) {
-                    showAlert(Alert.AlertType.WARNING, "Błąd", "Termin nie może być w przeszłości.");
+                    showAlert(Alert.AlertType.WARNING, "Błąd",
+                            "Termin nie może być w przeszłości.");
                     return;
                 }
 
-                EmpTask newTask = new EmpTask(name, date, status, description, timeOfShift);
+                EmpTask newTask = new EmpTask(name, date, status, description,
+                        timeOfShift);
                 taskRepository.addTask(newTask);
 
-                showAlert(Alert.AlertType.INFORMATION, "Sukces", "Zadanie dodane!");
+                showAlert(Alert.AlertType.INFORMATION, "Sukces",
+                        "Zadanie dodane!");
                 showTaskPanel();
 
             } catch (Exception ex) {
                 ex.printStackTrace();
                 showAlert(Alert.AlertType.ERROR, "Błąd",
-                        "Nie udało się dodać zadania: " + ex.getMessage());
+                        "Nie udało się dodać zadania: "
+                                + ex.getMessage());
             }
         });
 
@@ -280,66 +304,82 @@ public class ManagerPanelController {
         absenceTable.setMinHeight(300);
         absenceTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        TableColumn<AbsenceRequest, Integer> idColumn = new TableColumn<>("ID");
-        idColumn.setCellValueFactory(data ->
+        TableColumn<AbsenceRequest, Integer> idColumn
+                = new TableColumn<>("ID");
+        idColumn.setCellValueFactory(
+                data ->
                 new javafx.beans.property.SimpleIntegerProperty(
                 data.getValue().getId()).asObject());
         idColumn.setPrefWidth(50);
 
         TableColumn<AbsenceRequest, String> typeColumn =
                 new TableColumn<>("Typ wniosku");
-        typeColumn.setCellValueFactory(data ->
+        typeColumn.setCellValueFactory(
+                data ->
                 new javafx.beans.property.SimpleStringProperty(
                 data.getValue().getRequestType()));
         typeColumn.setPrefWidth(150);
 
         TableColumn<AbsenceRequest, String> employeeColumn =
                 new TableColumn<>("Pracownik");
-        employeeColumn.setCellValueFactory(data -> {
+        employeeColumn.setCellValueFactory(
+                data -> {
             Employee employee = data.getValue().getEmployee();
             if (employee != null) {
                 return new javafx.beans.property.SimpleStringProperty(
                         employee.getName() + " " + employee.getSurname());
             } else {
-                return new javafx.beans.property.SimpleStringProperty("Nieznany");
+                return new javafx.beans.property.SimpleStringProperty(
+                        "Nieznany");
             }
         });
         employeeColumn.setPrefWidth(150);
 
-        TableColumn<AbsenceRequest, String> fromDateColumn = new TableColumn<>("Od");
-        fromDateColumn.setCellValueFactory(data -> {
+        TableColumn<AbsenceRequest, String> fromDateColumn
+                = new TableColumn<>("Od");
+        fromDateColumn.setCellValueFactory(
+                data -> {
             java.util.Date utilStart = data.getValue().getStartDate();
             if (utilStart != null) {
                 java.sql.Date sqlStart = new java.sql.Date(utilStart.getTime());
-                return new javafx.beans.property.SimpleStringProperty(sqlStart.toString());
+                return new javafx.beans.property.SimpleStringProperty(
+                        sqlStart.toString());
             } else {
-                return new javafx.beans.property.SimpleStringProperty("Brak daty");
+                return new javafx.beans.property.SimpleStringProperty(
+                        "Brak daty");
             }
         });
         fromDateColumn.setPrefWidth(100);
 
-        TableColumn<AbsenceRequest, String> toDateColumn = new TableColumn<>("Do");
-        toDateColumn.setCellValueFactory(data -> {
+        TableColumn<AbsenceRequest, String> toDateColumn
+                = new TableColumn<>("Do");
+        toDateColumn.setCellValueFactory(
+                data -> {
             java.util.Date utilEnd = data.getValue().getEndDate();
             if (utilEnd != null) {
                 java.sql.Date sqlEnd = new java.sql.Date(utilEnd.getTime());
-                return new javafx.beans.property.SimpleStringProperty(sqlEnd.toString());
+                return new javafx.beans.property.SimpleStringProperty(
+                        sqlEnd.toString());
             } else {
-                return new javafx.beans.property.SimpleStringProperty("Brak daty");
+                return new javafx.beans.property.SimpleStringProperty(
+                        "Brak daty");
             }
         });
         toDateColumn.setPrefWidth(100);
 
         // Dodanie nowej kolumny statusu
-        TableColumn<AbsenceRequest, String> statusColumn = new TableColumn<>("Status");
-        statusColumn.setCellValueFactory(data ->
+        TableColumn<AbsenceRequest, String> statusColumn
+                = new TableColumn<>("Status");
+        statusColumn.setCellValueFactory(
+                data ->
                 new javafx.beans.property.SimpleStringProperty(
                 data.getValue().getStatus().toString()));
         statusColumn.setPrefWidth(100);
 
         TableColumn<AbsenceRequest, String> descriptionColumn =
                 new TableColumn<>("Opis");
-        descriptionColumn.setCellValueFactory(data ->
+        descriptionColumn.setCellValueFactory(
+                data ->
                 new javafx.beans.property.SimpleStringProperty(
                 data.getValue().getDescription()));
         descriptionColumn.setPrefWidth(200);
@@ -349,24 +389,29 @@ public class ManagerPanelController {
                 fromDateColumn, toDateColumn, statusColumn, descriptionColumn
         );
 
-        AbsenceRequestRepository absenceRepository = new AbsenceRequestRepository();
+        AbsenceRequestRepository absenceRepository
+                = new AbsenceRequestRepository();
         try {
             absenceTable.getItems().addAll(absenceRepository.getAllRequests());
         } catch (Exception e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Błąd",
-                    "Nie udało się załadować wniosków: " + e.getMessage());
+                    "Nie udało się załadować wniosków: "
+                            + e.getMessage());
         }
 
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER);
 
         Button approveButton = new Button("Zatwierdź");
-        approveButton.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white;");
+        approveButton.setStyle("-fx-background-color: #27AE60; " +
+                "-fx-text-fill: white;");
         Button rejectButton = new Button("Odrzuć");
-        rejectButton.setStyle("-fx-background-color: #E74C3C; -fx-text-fill: white;");
+        rejectButton.setStyle("-fx-background-color: #E74C3C; " +
+                "-fx-text-fill: white;");
         Button refreshButton = new Button("Odśwież");
-        refreshButton.setStyle("-fx-background-color: #3498DB; -fx-text-fill: white;");
+        refreshButton.setStyle("-fx-background-color: #3498DB; " +
+                "-fx-text-fill: white;");
 
         approveButton.setOnAction(e -> {
             AbsenceRequest selectedRequest =
@@ -374,21 +419,25 @@ public class ManagerPanelController {
             if (selectedRequest != null) {
                 try {
                     // Zmiana statusu zamiast modyfikacji opisu
-                    selectedRequest.setStatus(AbsenceRequest.RequestStatus.ACCEPTED);
+                    selectedRequest.setStatus(
+                            AbsenceRequest.RequestStatus.ACCEPTED);
                     absenceRepository.updateRequest(selectedRequest);
 
-                    if (selectedRequest.getRequestType().toLowerCase().contains("chorob")) {
+                    if (selectedRequest.getRequestType().toLowerCase()
+                            .contains("chorob")) {
                         Employee employee = selectedRequest.getEmployee();
                         employee.startSickLeave(selectedRequest.getStartDate());
                         userRepository.updateEmployee(employee);
                     }
                     showAlert(Alert.AlertType.INFORMATION, "Sukces",
                             "Wniosek został zatwierdzony.");
-                    absenceTable.getItems().setAll(absenceRepository.getAllRequests());
+                    absenceTable.getItems().setAll(absenceRepository
+                            .getAllRequests());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     showAlert(Alert.AlertType.ERROR, "Błąd",
-                            "Nie udało się zatwierdzić wniosku: " + ex.getMessage());
+                            "Nie udało się zatwierdzić wniosku: "
+                                    + ex.getMessage());
                 }
             } else {
                 showAlert(Alert.AlertType.WARNING, "Błąd",
@@ -402,15 +451,18 @@ public class ManagerPanelController {
             if (selectedRequest != null) {
                 try {
                     // Zmiana statusu zamiast modyfikacji opisu
-                    selectedRequest.setStatus(AbsenceRequest.RequestStatus.REJECTED);
+                    selectedRequest.setStatus(
+                            AbsenceRequest.RequestStatus.REJECTED);
                     absenceRepository.updateRequest(selectedRequest);
                     showAlert(Alert.AlertType.INFORMATION, "Sukces",
                             "Wniosek został odrzucony.");
-                    absenceTable.getItems().setAll(absenceRepository.getAllRequests());
+                    absenceTable.getItems().setAll(
+                            absenceRepository.getAllRequests());
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     showAlert(Alert.AlertType.ERROR, "Błąd",
-                            "Nie udało się odrzucić wniosku: " + ex.getMessage());
+                            "Nie udało się odrzucić wniosku: "
+                                    + ex.getMessage());
                 }
             } else {
                 showAlert(Alert.AlertType.WARNING, "Błąd",
@@ -446,7 +498,8 @@ public class ManagerPanelController {
         ComboBox<EmpTask> taskComboBox = new ComboBox<>();
         List<EmpTask> allTasks = taskRepository.getAllTasks();
         taskComboBox.setItems(FXCollections.observableArrayList(allTasks));
-        taskComboBox.setCellFactory(param -> new ListCell<>() {
+        taskComboBox.setCellFactory(
+                param -> new ListCell<>() {
             @Override
             protected void updateItem(EmpTask item, boolean empty) {
                 super.updateItem(item, empty);
@@ -465,21 +518,25 @@ public class ManagerPanelController {
         ComboBox<Employee> employeeComboBox = new ComboBox<>();
         List<Employee> allEmployees = userRepository.getAllEmployees();
         List<Employee> workers = allEmployees.stream()
-                .filter(emp -> "Pracownik".equalsIgnoreCase(emp.getPosition()))
+                .filter(emp -> "Pracownik".equalsIgnoreCase(
+                        emp.getPosition()))
                 .toList();
         employeeComboBox.setItems(FXCollections.observableArrayList(workers));
-        employeeComboBox.setCellFactory(param -> new ListCell<>() {
+        employeeComboBox.setCellFactory(
+                param -> new ListCell<>() {
             @Override
             protected void updateItem(Employee item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.getName() + " " + item.getSurname());
+                setText(empty || item == null ? null : item.getName() + " "
+                        + item.getSurname());
             }
         });
         employeeComboBox.setButtonCell(new ListCell<>() {
             @Override
             protected void updateItem(Employee item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.getName() + " " + item.getSurname());
+                setText(empty || item == null ? null : item.getName() + " "
+                        + item.getSurname());
             }
         });
 
@@ -494,8 +551,10 @@ public class ManagerPanelController {
             Employee selectedEmployee = employeeComboBox.getValue();
             if (selectedTask != null && selectedEmployee != null) {
                 try {
-                    TaskEmployee te = new TaskEmployee(selectedTask, selectedEmployee);
-                    TaskEmployeeRepository teRepo = new TaskEmployeeRepository();
+                    TaskEmployee te = new TaskEmployee(selectedTask,
+                            selectedEmployee);
+                    TaskEmployeeRepository teRepo
+                            = new TaskEmployeeRepository();
                     teRepo.add(te);
                     teRepo.close();
 
@@ -507,7 +566,8 @@ public class ManagerPanelController {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     showAlert(Alert.AlertType.ERROR, "Błąd",
-                            "Nie udało się przypisać pracownika: " + ex.getMessage());
+                            "Nie udało się przypisać pracownika: "
+                                    + ex.getMessage());
                 }
             } else {
                 showAlert(Alert.AlertType.WARNING, "Błąd",
@@ -553,7 +613,8 @@ public class ManagerPanelController {
 
         Label statusLabel = new Label("Status:");
         ComboBox<String> statusCombo = new ComboBox<>();
-        statusCombo.getItems().addAll("Nowe", "W trakcie", "Zakończone", "Opóźnione");
+        statusCombo.getItems().addAll("Nowe", "W trakcie", "Zakończone",
+                "Opóźnione");
         statusCombo.setValue(task.getStatus());
 
         Label dateLabel = new Label("Termin:");
@@ -582,17 +643,23 @@ public class ManagerPanelController {
 
                         java.sql.Date date = null;
                         if (deadlinePicker.getValue() != null) {
-                            date = java.sql.Date.valueOf(deadlinePicker.getValue());
+                            date = java.sql.Date.valueOf(
+                                    deadlinePicker.getValue());
                             task.setDate(date);
                         }
 
-                        if (name.isEmpty() || description.isEmpty() || status == null || date == null) {
-                            showAlert(Alert.AlertType.WARNING, "Błąd", "Wypełnij wszystkie pola.");
+                        if (name.isEmpty() || description.isEmpty()
+                                || status == null || date == null) {
+                            showAlert(Alert.AlertType.WARNING, "Błąd",
+                                    "Wypełnij wszystkie pola.");
                             return;
                         }
 
-                        if (date.before(Date.valueOf(java.time.LocalDate.now()))) {
-                            showAlert(Alert.AlertType.WARNING, "Błąd", "Termin nie może być w przeszłości.");
+                        if (date.before(Date.valueOf(
+                                java.time.LocalDate.now()))) {
+                            showAlert(Alert.AlertType.WARNING, "Błąd",
+                                    "Termin nie może być " +
+                                            "w przeszłości.");
                             return;
                         }
 
@@ -605,7 +672,8 @@ public class ManagerPanelController {
             } catch (Exception ex) {
                 ex.printStackTrace();
                 showAlert(Alert.AlertType.ERROR, "Błąd",
-                        "Nie udało się zaktualizować zadania: " + ex.getMessage());
+                        "Nie udało się zaktualizować zadania: "
+                                + ex.getMessage());
             }
         });
 
@@ -646,7 +714,8 @@ public class ManagerPanelController {
      * @param title  tytuł
      * @param header nagłówek
      */
-    private void showAlert(Alert.AlertType type, String title, String header) {
+    private void showAlert(Alert.AlertType type, String title,
+                           String header) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(header);

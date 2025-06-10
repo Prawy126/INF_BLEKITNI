@@ -47,7 +47,8 @@ public class EmployeePanelController {
     }
 
     /**
-     * Wyświetla główny panel pracownika z listą zadań i przyciskami akcji.
+     * Wyświetla główny panel pracownika z listą zadań
+     * i przyciskami akcji.
      */
     public void showEmployeePanel() {
         VBox layout = new VBox(15);
@@ -84,9 +85,11 @@ public class EmployeePanelController {
             EmpTaskRepository taskRepo = new EmpTaskRepository();
 
             List<EmpTask> tasks = teRepo.findByEmployee(empId).stream()
-                    .map(te -> taskRepo.findTaskById(te.getId().getTaskId()))
+                    .map(te -> taskRepo.findTaskById(te.getId().
+                            getTaskId()))
                     .filter(Objects::nonNull)
-                    .filter(t -> !"Zakończone".equalsIgnoreCase(t.getStatus()))
+                    .filter(t -> !"Zakończone".equalsIgnoreCase(
+                            t.getStatus()))
                     .collect(Collectors.toList());
 
             taskTable.setItems(FXCollections.observableArrayList(tasks));
@@ -100,13 +103,15 @@ public class EmployeePanelController {
         );
         updateStatusButton.setOnMouseEntered(e -> {
             updateStatusButton.setScaleY(1.1); });
-        updateStatusButton.setOnMouseExited(e -> { updateStatusButton.setScaleX(1);
+        updateStatusButton.setOnMouseExited(
+                e -> { updateStatusButton.setScaleX(1);
             updateStatusButton.setScaleY(1); });
         updateStatusButton.setOnAction(e -> {
             EmpTask selected = taskTable.getSelectionModel().getSelectedItem();
             if (selected == null) {
                 Alert a = new Alert(Alert.AlertType.WARNING,
-                        "Wybierz zadanie do zaktualizowania statusu.", ButtonType.OK);
+                        "Wybierz zadanie do zaktualizowania statusu.",
+                        ButtonType.OK);
                 a.setTitle("Brak wyboru");
                 a.setHeaderText("Nie wybrano zadania");
                 a.getDialogPane().setMinWidth(400);
@@ -133,7 +138,8 @@ public class EmployeePanelController {
                 taskTable.refresh();
             }
             Alert info = new Alert(Alert.AlertType.INFORMATION,
-                    "Status zaktualizowano na: " + nextStatus, ButtonType.OK);
+                    "Status zaktualizowano na: " + nextStatus,
+                    ButtonType.OK);
             info.setTitle("Zaktualizowane");
             info.getDialogPane().setMinWidth(400);
             info.getDialogPane().setMinHeight(200);
@@ -147,11 +153,14 @@ public class EmployeePanelController {
                         "-fx-text-fill: white; " +
                         "-fx-font-weight: bold;"
         );
-        reportProblemButton.setOnMouseEntered(e -> { reportProblemButton.setScaleX(1.1);
+        reportProblemButton.setOnMouseEntered(
+                e -> { reportProblemButton.setScaleX(1.1);
             reportProblemButton.setScaleY(1.1); });
-        reportProblemButton.setOnMouseExited(e -> { reportProblemButton.setScaleX(1);
+        reportProblemButton.setOnMouseExited(
+                e -> { reportProblemButton.setScaleX(1);
             reportProblemButton.setScaleY(1); });
-        reportProblemButton.setOnAction(e -> showReportIssueWindow());
+        reportProblemButton.setOnAction(
+                e -> showReportIssueWindow());
 
         Button logoutButton = new Button("Wyloguj się");
         logoutButton.setStyle(
@@ -159,13 +168,16 @@ public class EmployeePanelController {
                         "-fx-text-fill: white; " +
                         "-fx-font-weight: bold;"
         );
-        logoutButton.setOnMouseEntered(e -> { logoutButton.setScaleX(1.1);
+        logoutButton.setOnMouseEntered(
+                e -> { logoutButton.setScaleX(1.1);
             logoutButton.setScaleY(1.1); });
-        logoutButton.setOnMouseExited(e -> { logoutButton.setScaleX(1);
+        logoutButton.setOnMouseExited(
+                e -> { logoutButton.setScaleX(1);
             logoutButton.setScaleY(1); });
         logoutButton.setOnAction(e -> logout());
 
-        HBox buttonBox = new HBox(10, updateStatusButton, reportProblemButton,
+        HBox buttonBox = new HBox(10, updateStatusButton,
+                reportProblemButton,
                 logoutButton);
         buttonBox.setAlignment(Pos.CENTER);
 
@@ -179,7 +191,8 @@ public class EmployeePanelController {
     public void showReportIssueWindow() {
         Stage issueStage = new Stage();
         issueStage.setTitle("Panel pracownika - Zgłoszenie problemu");
-        issueStage.getIcons().add(new Image(getClass().getResourceAsStream("/logo.png")));
+        issueStage.getIcons().add(new Image(getClass().getResourceAsStream(
+                "/logo.png")));
 
         VBox layout = new VBox(15);
         layout.setPadding(new Insets(20));
@@ -192,7 +205,8 @@ public class EmployeePanelController {
 
         Label categoryLabel = new Label("Kategoria");
         ComboBox<String> categoryBox = new ComboBox<>();
-        categoryBox.getItems().addAll("Awaria sprzętu", "Błąd oprogramowania", "Inne");
+        categoryBox.getItems().addAll("Awaria sprzętu", "Błąd " +
+                "oprogramowania", "Inne");
         categoryBox.setValue("Awaria sprzętu");
 
         Button submitButton = new Button("Wyślij");
@@ -201,16 +215,19 @@ public class EmployeePanelController {
                         "-fx-text-fill: white; " +
                         "-fx-font-weight: bold;"
         );
-        submitButton.setOnMouseEntered(e -> { submitButton.setScaleX(1.1);
+        submitButton.setOnMouseEntered(
+                e -> { submitButton.setScaleX(1.1);
             submitButton.setScaleY(1.1); });
-        submitButton.setOnMouseExited(e -> { submitButton.setScaleX(1);
+        submitButton.setOnMouseExited(
+                e -> { submitButton.setScaleX(1);
             submitButton.setScaleY(1); });
         submitButton.setOnAction(e -> {
             String desc = descriptionArea.getText();
             String category = categoryBox.getValue();
             if (desc.isEmpty() || category == null) {
                 Alert alert = new Alert(Alert.AlertType.WARNING,
-                        "Aby zgłosić problem, wpisz opis i wybierz kategorię.", ButtonType.OK);
+                        "Aby zgłosić problem, wpisz opis i wybierz " +
+                                "kategorię.", ButtonType.OK);
                 alert.setTitle("Błąd");
                 alert.setHeaderText("Uzupełnij wszystkie pola");
                 alert.getDialogPane().setMinWidth(400);
@@ -229,7 +246,8 @@ public class EmployeePanelController {
                     new TechnicalIssueRepository().addIssue(issue);
                 }
                 Alert alert = new Alert(Alert.AlertType.INFORMATION,
-                        "Dziękujemy za przesłanie zgłoszenia.", ButtonType.OK);
+                        "Dziękujemy za przesłanie zgłoszenia.",
+                        ButtonType.OK);
                 alert.setTitle("Zgłoszono");
                 alert.getDialogPane().setMinWidth(400);
                 alert.getDialogPane().setMinHeight(200);

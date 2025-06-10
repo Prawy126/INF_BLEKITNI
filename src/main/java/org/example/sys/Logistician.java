@@ -17,7 +17,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Klasa reprezentująca rolę logistyka – logiczną "nakładkę" na encję Employee.
+ * Klasa reprezentująca rolę logistyka – logiczną "nakładkę" na
+ * encję Employee.
  */
 public class Logistician {
 

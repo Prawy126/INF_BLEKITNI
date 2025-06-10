@@ -55,7 +55,8 @@ public class LogisticianPanelController {
     private final Stage primaryStage;
     private static final Logger logger =
             LogManager.getLogger(LogisticianPanelController.class);
-    private final ProductRepository productRepository = new ProductRepository();
+    private final ProductRepository productRepository
+            = new ProductRepository();
     private final WarehouseRepository warehouseRepository =
             new WarehouseRepository();
     private boolean reportGeneratedInCurrentSession;
@@ -69,14 +70,16 @@ public class LogisticianPanelController {
         this.logisticianPanel = logisticianPanel;
         this.primaryStage = logisticianPanel.getPrimaryStage();
         reportGeneratedInCurrentSession = false;
-        logger.info("LogisticianPanelController utworzony i przypisany do panelu wartość {}",
+        logger.info("LogisticianPanelController utworzony " +
+                        "i przypisany do panelu wartość {}",
                 logisticianPanel);
         this.primaryStage.setOnCloseRequest(event -> {
             if (!reportGeneratedInCurrentSession) {
                 event.consume();  // Zatrzymaj zamknięcie
                 showAlert(Alert.AlertType.ERROR,
                         "Zamknięcie zablokowane",
-                        "Musisz wygenerować raport, aby zamknąć aplikację.");
+                        "Musisz wygenerować raport, aby zamknąć " +
+                                "aplikację.");
             }
         });
         logger.debug("Ustawiono obsługę zdarzenia zamknięcia okna");
@@ -125,7 +128,8 @@ public class LogisticianPanelController {
         // –––––––––– PRZYCISK EDYTUJĄCY PRODUKT ––––––––––
         Button editProductBtn = new Button("Edytuj produkt");
         styleLogisticButton(editProductBtn, "#E67E22");
-        editProductBtn.setOnAction(e -> showEditProductDialog(table));
+        editProductBtn.setOnAction(
+                e -> showEditProductDialog(table));
 
         HBox btnBox = new HBox(10, filterBtn, refreshBtn, reportsBtn,
                 addProductBtn, editProductBtn);
@@ -137,13 +141,15 @@ public class LogisticianPanelController {
 
 
     /**
-     * Ładuje i wyświetla w tabeli aktualne stany magazynowe (id, nazwa, ilość).
+     * Ładuje i wyświetla w tabeli aktualne
+     * stany magazynowe (id, nazwa, ilość).
      *
      * @param table tabela do wypełnienia danymi
      */
     private void refreshStockTable(TableView<StockRow> table) {
         try {
-            Map<Integer,Integer> qtyById = warehouseRepository.getAllStates()
+            Map<Integer,Integer> qtyById
+                    = warehouseRepository.getAllStates()
                     .stream()
                     .collect(Collectors.toMap(Warehouse::getProductId,
                             Warehouse::getQuantity));
@@ -159,7 +165,8 @@ public class LogisticianPanelController {
             table.setItems(FXCollections.observableArrayList(rows));
         } catch (Exception ex) {
             logger.error("Błąd ładowania stanów",ex);
-            showAlert(ERROR,"Błąd","Nie udało się pobrać stanów magazynowych");
+            showAlert(ERROR,"Błąd","Nie udało się pobrać " +
+                    "stanów magazynowych");
         }
     }
 
@@ -179,16 +186,21 @@ public class LogisticianPanelController {
         tableView.setMinHeight(200);
 
         TableColumn<Order, Integer> idCol = new TableColumn<>("Id");
-        TableColumn<Order, String> productCol = new TableColumn<>("Produkt");
-        TableColumn<Order, String> employeeCol = new TableColumn<>("Pracownik");
+        TableColumn<Order, String> productCol = new TableColumn<>(
+                "Produkt");
+        TableColumn<Order, String> employeeCol = new TableColumn<>(
+                "Pracownik");
         TableColumn<Order, Integer> qtyCol = new TableColumn<>("Ilość");
         TableColumn<Order, BigDecimal> priceCol = new TableColumn<>("Cena");
-        TableColumn<Order, Date> dateCol = new TableColumn<>("Data złożenia");
+        TableColumn<Order, Date> dateCol = new TableColumn<>(
+                "Data złożenia");
 
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        productCol.setCellValueFactory(cellData -> new SimpleStringProperty(
+        productCol.setCellValueFactory(
+                cellData -> new SimpleStringProperty(
                 cellData.getValue().getProduct() !=
-                        null ? cellData.getValue().getProduct().getName() : ""));
+                        null ? cellData.getValue().getProduct()
+                        .getName() : ""));
         employeeCol.setCellValueFactory(cellData -> {
             Employee emp = cellData.getValue().getEmployee();
             String fullName = emp != null
@@ -213,7 +225,8 @@ public class LogisticianPanelController {
 
         Button filterButton = new Button("Filtruj");
         styleLogisticButton(filterButton, "#2980B9");
-        filterButton.setOnAction(e -> showFilterOrderDialog(tableView));
+        filterButton.setOnAction(
+                e -> showFilterOrderDialog(tableView));
 
         Button refreshBtn = new Button("Odśwież");
         styleLogisticButton(refreshBtn, "#3498DB");
@@ -230,11 +243,14 @@ public class LogisticianPanelController {
     }
 
     /**
-     * Otwiera prosty dialog filtrowania zamówień po nazwie produktu,
-     * pracownika, cenie, ilości i dacie złożenia zamówienia
-     * Po zatwierdzeniu zastępuje zawartość tabeli wyfiltrowanymi rekordami.
+     * Otwiera prosty dialog filtrowania zamówień
+     * po nazwie produktu, pracownika, cenie, ilości
+     * i dacie złożenia zamówienia
+     * Po zatwierdzeniu zastępuje zawartość tabeli
+     * wyfiltrowanymi rekordami.
      *
-     * @param tableView tabela zamówień, która ma zostać przefiltrowana
+     * @param tableView tabela zamówień,
+     *                  która ma zostać przefiltrowana
      */
     private void showFilterOrderDialog(TableView<Order> tableView) {
         Stage stage = new Stage();
@@ -259,7 +275,8 @@ public class LogisticianPanelController {
         ComboBox<String> employeeBox = new ComboBox<>(
                 FXCollections.observableArrayList(
                         new UserRepository().getAllEmployees().stream()
-                                .map(emp -> emp.getName() + " " + emp.getSurname())
+                                .map(emp -> emp.getName() + " "
+                                        + emp.getSurname())
                                 .collect(Collectors.toList())
                 )
         );
@@ -301,7 +318,8 @@ public class LogisticianPanelController {
                 // min ilość
                 if (!minQtyField.getText().isBlank()) {
                     try {
-                        int minQ = Integer.parseInt(minQtyField.getText().trim());
+                        int minQ = Integer.parseInt(
+                                minQtyField.getText().trim());
                         if (o.getQuantity() < minQ) return false;
                     } catch (NumberFormatException ex) {
                         return false;
@@ -310,7 +328,8 @@ public class LogisticianPanelController {
                 // min cena
                 if (!minPriceField.getText().isBlank()) {
                     try {
-                        BigDecimal minP = new BigDecimal(minPriceField.getText().trim());
+                        BigDecimal minP = new BigDecimal(
+                                minPriceField.getText().trim());
                         if (o.getPrice().compareTo(minP) < 0) return false;
                     } catch (Exception ex) {
                         return false;
@@ -318,8 +337,10 @@ public class LogisticianPanelController {
                 }
                 // min data
                 if (minDatePicker.getValue() != null) {
-                    LocalDate orderDate = ((java.sql.Date)o.getDate()).toLocalDate();
-                    if (orderDate.isBefore(minDatePicker.getValue())) return false;
+                    LocalDate orderDate = ((java.sql.Date)o.getDate())
+                            .toLocalDate();
+                    if (orderDate.isBefore(minDatePicker.getValue()))
+                        return false;
                 }
                 return true;
             });
@@ -383,12 +404,16 @@ public class LogisticianPanelController {
         } catch (Exception ex) {
             logger.error("Błąd pobierania kategorii", ex);
         }
-        categoriesList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        categoriesList.getSelectionModel().setSelectionMode(
+                SelectionMode.MULTIPLE);
 
-        Label thresholdLabel = new Label("Próg niskiego stanu magazynowego:");
-        Spinner<Integer> thresholdSpinner = new Spinner<>(1, 100, 5);
+        Label thresholdLabel
+                = new Label("Próg niskiego stanu " + "magazynowego:");
+        Spinner<Integer> thresholdSpinner
+                = new Spinner<>(1, 100, 5);
 
-        Label pathInfoLabel = new Label("Plik zostanie zapisany w katalogu:");
+        Label pathInfoLabel = new Label("Plik zostanie zapisany " +
+                "w katalogu:");
         TextField pathDisplay = new TextField();
         pathDisplay.setEditable(false);
         pathDisplay.setFocusTraversable(false);
@@ -399,7 +424,8 @@ public class LogisticianPanelController {
         styleLogisticButton(generate, "#27AE60");
         generate.setOnAction(e ->
                 handleGenerateButton(
-                        new ArrayList<>(categoriesList.getSelectionModel().getSelectedItems()),
+                        new ArrayList<>(categoriesList.getSelectionModel()
+                                .getSelectedItems()),
                         thresholdSpinner.getValue(),
                         stage
                 )
@@ -418,15 +444,18 @@ public class LogisticianPanelController {
     }
 
     /**
-     * Pokazuje systemowy FileChooser do wybrania katalogu i pliku .pdf.
+     * Pokazuje systemowy FileChooser do wybrania katalogu
+     * i pliku .pdf.
      *
      * @param stage okno-rodzic dla FileChooser
-     * @param outputPath pole tekstowe, w które wpisany zostanie wybrany path
+     * @param outputPath pole tekstowe,
+     *                   w które wpisany zostanie wybrany path
      */
     private void handleBrowseButton(Stage stage, TextField outputPath) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+                new FileChooser.ExtensionFilter("PDF Files",
+                        "*.pdf"));
         File file = fileChooser.showSaveDialog(stage);
         if (file != null) {
             outputPath.setText(file.getAbsolutePath());
@@ -440,7 +469,8 @@ public class LogisticianPanelController {
      *
      * @param selectedCategories lista wybranych kategorii
      * @param lowStockThreshold próg niskiego stanu
-     * @param stage dialog-rodzic, który zostanie zamknięty po wygenerowaniu
+     * @param stage dialog-rodzic, który zostanie zamknięty
+     *              po wygenerowaniu
      */
     private void handleGenerateButton(List<String> selectedCategories,
                                       int lowStockThreshold,
@@ -449,17 +479,22 @@ public class LogisticianPanelController {
         String basePath = ConfigManager.getReportPath();
         if (basePath == null || basePath.isBlank()) {
             showAlert(Alert.AlertType.WARNING, "Brak ścieżki",
-                    "Ustaw domyślną ścieżkę zapisu raportów w ustawieniach administratora.");
+                    "Ustaw domyślną ścieżkę zapisu raportów " +
+                            "w ustawieniach administratora.");
             return;
         }
 
         String timestamp =
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        File targetFile = new File(basePath, "warehouse-report-" + timestamp + ".pdf");
+                LocalDateTime.now().format(DateTimeFormatter
+                        .ofPattern("yyyyMMdd_HHmmss"));
+        File targetFile = new File(basePath, "warehouse-report-"
+                + timestamp + ".pdf");
 
         try {
-            List<org.example.sys.Product> products = productRepository.getAllProducts();
-            Map<Integer, Integer> qtyById = warehouseRepository.getAllStates()
+            List<org.example.sys.Product> products
+                    = productRepository.getAllProducts();
+            Map<Integer, Integer> qtyById
+                    = warehouseRepository.getAllStates()
                     .stream()
                     .collect(Collectors.toMap(
                             org.example.sys.Warehouse::getProductId,
@@ -469,24 +504,30 @@ public class LogisticianPanelController {
             List<org.example.sys.Product> filteredProducts = products.stream()
                     .filter(p ->
                             selectedCategories.isEmpty() ||
-                                    selectedCategories.contains(p.getCategory()))
+                                    selectedCategories.contains(
+                                            p.getCategory()))
                     .toList();
 
-            WarehouseRaport.ProductDataExtractor<org.example.sys.Product> extractor =
+            WarehouseRaport.
+                    ProductDataExtractor<org.example.sys.Product> extractor =
                     new WarehouseRaport.ProductDataExtractor<>() {
-                        public String getName(org.example.sys.Product p)     { return p.getName(); }
-                        public String getCategory(org.example.sys.Product p) { return p.getCategory(); }
+                        public String getName(org.example.sys.Product p)     {
+                            return p.getName(); }
+                        public String getCategory(org.example.sys.Product p) {
+                            return p.getCategory(); }
                         public double getPrice(org.example.sys.Product p)    {
                             return p.getPrice().doubleValue(); }
                         public int getQuantity(org.example.sys.Product p)    {
-                            return qtyById.getOrDefault(p.getId(), 0); }
+                            return qtyById.getOrDefault(p.getId(),
+                                    0); }
                     };
 
             String logoPath = ConfigManager.getLogoPath();
             if (logoPath == null || logoPath.isBlank()) {
                 showAlert(Alert.AlertType.ERROR,
                         "Brak logo",
-                        "W konfiguracji nie ustawiono ścieżki do logo. Ustaw logo w" +
+                        "W konfiguracji nie ustawiono ścieżki " +
+                                "do logo. Ustaw logo w" +
                                 " panelu administratora.");
                 return;
             }
@@ -495,7 +536,8 @@ public class LogisticianPanelController {
             if (!logoFile.exists() || !logoFile.isFile()) {
                 showAlert(Alert.AlertType.ERROR,
                         "Niepoprawny plik logo",
-                        "Nie odnaleziono pliku logo pod ścieżką: " + logoPath);
+                        "Nie odnaleziono pliku logo pod ścieżką: "
+                                + logoPath);
                 return;
             }
 
@@ -514,13 +556,16 @@ public class LogisticianPanelController {
             stage.close();
             // raport został wygenerowany w tej sesji
             reportGeneratedInCurrentSession = true;
-            logger.info("Raport magazynowy wygenerowany: {}", targetFile.getAbsolutePath());
-            logger.info("Flag reportGeneratedInCurrentSession ustawiona na true");
+            logger.info("Raport magazynowy wygenerowany: {}",
+                    targetFile.getAbsolutePath());
+            logger.info("Flag reportGeneratedInCurrentSession ustawiona " +
+                    "na true");
 
         } catch (Exception ex) {
             logger.error("Błąd generowania raportu", ex);
             showAlert(ERROR, "Błąd",
-                    "Generowanie raportu nie powiodło się: " + ex.getMessage());
+                    "Generowanie raportu nie powiodło się: "
+                            + ex.getMessage());
         }
     }
 
@@ -547,13 +592,15 @@ public class LogisticianPanelController {
 
                 ButtonType cancelBtn = new ButtonType("Anuluj",
                         ButtonBar.ButtonData.CANCEL_CLOSE);
-                ButtonType forceExit = new ButtonType("Zamknij mimo wszystko",
+                ButtonType forceExit = new ButtonType("Zamknij mimo " +
+                        "wszystko",
                         ButtonBar.ButtonData.OK_DONE);
                 alert.getButtonTypes().setAll(cancelBtn, forceExit);
 
                 Optional<ButtonType> result = alert.showAndWait();
                 if (result.isPresent() && result.get() == forceExit) {
-                    logger.warn("Forsowne wylogowanie logistyka bez raportu dziennego");
+                    logger.warn("Forsowne wylogowanie logistyka bez raportu " +
+                            "dziennego");
                     reportGeneratedInCurrentSession = false;
                     logoutByForce();
                 }
@@ -568,10 +615,12 @@ public class LogisticianPanelController {
 
     /**
      * Otwiera formularz dodawania nowego zamówienia.
-     * Pole "Produkt" zastąpiono ComboBoxem wypełnionym nazwami produktów.
+     * Pole "Produkt" zastąpiono ComboBoxem wypełnionym
+     * nazwami produktów.
      * Pole "Ilość" oraz "Data" pozostały bez zmian.
-     * ID pracownika pobierane jest automatycznie z zalogowanego użytkownika,
-     * a cena jest liczona jako (cena jednostkowa produktu * ilość).
+     * ID pracownika pobierane jest automatycznie
+     * z zalogowanego użytkownika, a cena jest liczona
+     * jako (cena jednostkowa produktu * ilość).
      */
     private void showAddOrderForm() {
         Stage stage = new Stage();
@@ -591,7 +640,8 @@ public class LogisticianPanelController {
         List<Product> allProducts = productRepository.getAllProducts();
         productComboBox.getItems().addAll(allProducts);
         // Wyświetlamy w liście tylko nazwę produktu
-        productComboBox.setCellFactory(cb -> new ListCell<>() {
+        productComboBox.setCellFactory(
+                cb -> new ListCell<>() {
             @Override
             protected void updateItem(Product item, boolean empty) {
                 super.updateItem(item, empty);
@@ -639,7 +689,8 @@ public class LogisticianPanelController {
                 if (empl == null) {
                     showAlert(Alert.AlertType.ERROR,
                             "Błąd",
-                            "Brak zalogowanego pracownika. Zaloguj się ponownie.");
+                            "Brak zalogowanego pracownika. " +
+                                    "Zaloguj się ponownie.");
                     return;
                 }
 
@@ -648,7 +699,8 @@ public class LogisticianPanelController {
 
                 // 7) Obliczenie ceny: cena jednostkowa * ilość
                 BigDecimal unitPrice = prod.getPrice();
-                BigDecimal totalPrice = unitPrice.multiply(BigDecimal.valueOf(qty));
+                BigDecimal totalPrice = unitPrice.multiply(
+                        BigDecimal.valueOf(qty));
 
                 // 8) Utworzenie i zapis zamówienia z dzisiejszą datą (LocalDate.now())
                 Order ord = new Order();
@@ -657,14 +709,16 @@ public class LogisticianPanelController {
                 ord.setQuantity(qty);
                 ord.setPrice(totalPrice);
                 // zamiast datePicker używamy LocalDate.now():
-                ord.setDate(java.sql.Date.valueOf(java.time.LocalDate.now()));
+                ord.setDate(java.sql.Date.valueOf(
+                        java.time.LocalDate.now()));
 
                 OrderRepository or = new OrderRepository();
                 or.addOrder(ord);
 
                 // 9) AKTUALIZACJA STANU MAGAZYNOWEGO (tak jak wcześniej)
                 try {
-                    Warehouse stan = warehouseRepository.findStateByProductId(prod.getId());
+                    Warehouse stan = warehouseRepository
+                            .findStateByProductId(prod.getId());
 
                     if (stan == null) {
                         // jeśli nie ma jeszcze wpisu, tworzymy nowy
@@ -680,7 +734,8 @@ public class LogisticianPanelController {
                         warehouseRepository.updateState(stan);
                     }
                 } catch (Exception ex) {
-                    logger.error("Błąd aktualizacji stanu magazynowego", ex);
+                    logger.error("Błąd aktualizacji stanu " +
+                            "magazynowego", ex);
                 }
 
                 // 10) Komunikat o sukcesie i zamknięcie formularza
@@ -699,7 +754,8 @@ public class LogisticianPanelController {
                 logger.error("Błąd dodawania zamówienia", ex);
                 showAlert(Alert.AlertType.ERROR,
                         "Błąd",
-                        "Nie udało się dodać zamówienia:\n" + ex.getMessage());
+                        "Nie udało się dodać zamówienia:\n"
+                                + ex.getMessage());
             }
         });
 
@@ -720,7 +776,8 @@ public class LogisticianPanelController {
      * po nazwie produktu i minimalnej ilości
      * i aktualizuje tabelę.
      *
-     * @param table tabela stanów magazynowych, która ma zostać przefiltrowana
+     * @param table tabela stanów magazynowych,
+     *              która ma zostać przefiltrowana
      */
     private void showFilterStockDialog(TableView<StockRow> table) {
         Stage st = new Stage();
@@ -785,8 +842,8 @@ public class LogisticianPanelController {
     /**
      * Wyświetla okno formularza filtrowania produktów.
      * Pola: Id, Nazwa, Cena, Ilość w magazynie.
-     * Przycisk „Filtruj” zamyka okno bez dalszej logiki filtrowania
-     * (symulacja działania).
+     * Przycisk „Filtruj” zamyka okno bez dalszej
+     * logiki filtrowania (symulacja działania).
      */
     private void showFilterProductDialog() {
         Stage stage = new Stage();
@@ -859,30 +916,38 @@ public class LogisticianPanelController {
                 UserRepository ur = new UserRepository();
                 Employee emp = ur.getCurrentEmployee();
                 if (emp == null) {
-                    showAlert(ERROR,"Błąd","Brak zalogowanego pracownika");
+                    showAlert(ERROR,"Błąd","Brak zalogowanego " +
+                            "pracownika");
                     return;
                 }
 
                 AbsenceRequest ar = new AbsenceRequest();
                 ar.setRequestType("Inny");
                 ar.setDescription(reasonField.getText());
-                ar.setStartDate(java.sql.Date.valueOf(fromDatePicker.getValue()));
-                ar.setEndDate  (java.sql.Date.valueOf(toDatePicker.getValue()));
+                ar.setStartDate(java.sql.Date.valueOf(
+                        fromDatePicker.getValue()));
+                ar.setEndDate  (java.sql.Date.valueOf(
+                        toDatePicker.getValue()));
                 ar.setEmployee(emp);
 
                 new AbsenceRequestRepository().addRequest(ar);
-                showAlert(Alert.AlertType.INFORMATION, "Sukces", "Wniosek zapisany");
+                showAlert(Alert.AlertType.INFORMATION, "Sukces",
+                        "Wniosek zapisany");
                 stage.close();
 
             } catch (Exception ex) {
                 logger.error("Błąd zapisu wniosku", ex);
-                showAlert(ERROR, "Błąd", "Nie udało się zapisać wniosku");
+                showAlert(ERROR, "Błąd", "Nie udało się " +
+                        "zapisać wniosku");
             }
         });
 
-        grid.add(reasonLabel, 0, 0);   grid.add(reasonField, 1, 0);
-        grid.add(fromDateLabel, 0, 1); grid.add(fromDatePicker, 1, 1);
-        grid.add(toDateLabel, 0, 2);   grid.add(toDatePicker, 1, 2);
+        grid.add(reasonLabel, 0, 0);   grid.add(reasonField,
+                1, 0);
+        grid.add(fromDateLabel, 0, 1); grid.add(fromDatePicker,
+                1, 1);
+        grid.add(toDateLabel, 0, 2);   grid.add(toDatePicker,
+                1, 2);
         grid.add(submitButton, 1, 3);
 
         stage.setScene(new Scene(grid, 400, 300));
@@ -890,7 +955,8 @@ public class LogisticianPanelController {
     }
 
     /**
-     * Wyświetla prosty alert z podanym typem, tytułem i treścią.
+     * Wyświetla prosty alert z podanym typem, tytułem i
+     * treścią.
      *
      * @param type typ alertu (INFORMATION, WARNING, ERROR)
      * @param title tytuł okna alertu
@@ -926,7 +992,8 @@ public class LogisticianPanelController {
         if (!reportGeneratedInCurrentSession) {
             showAlert(Alert.AlertType.ERROR,
                     "Wylogowanie zablokowane",
-                    "Musisz najpierw wygenerować raport dzienny, aby się wylogować.");
+                    "Musisz najpierw wygenerować raport dzienny, " +
+                            "aby się wylogować.");
             return;
         }
 
@@ -945,8 +1012,9 @@ public class LogisticianPanelController {
 
     /**
      * Wyświetla formularz dodawania nowego produktu.
-     * @param stockTable referencja do tabeli stanów magazynowych,
-     *                   którą odświeżamy po zapisie
+     * @param stockTable referencja do tabeli stanów
+     *                   magazynowych, którą odświeżamy
+     *                   po zapisie
      */
     private void showAddProductDialog(TableView<StockRow> stockTable) {
         Stage stage = new Stage();
@@ -983,7 +1051,8 @@ public class LogisticianPanelController {
                     priceField.getText().isBlank() ||
                     qtyField.getText().isBlank()) {
                 showAlert(Alert.AlertType.WARNING, "Brak danych",
-                        "Uzupełnij wszystkie pola (nazwa, kategoria, cena, stan).");
+                        "Uzupełnij wszystkie pola (nazwa, kategoria, " +
+                                "cena, stan).");
                 return;
             }
 
@@ -993,21 +1062,25 @@ public class LogisticianPanelController {
             if (!nameField.getText().matches(lettersOnlyRegex) ||
                     !categoryField.getText().matches(lettersOnlyRegex)) {
                 showAlert(Alert.AlertType.WARNING, "Nieprawidłowe dane",
-                        "Pola 'Nazwa' i 'Kategoria' mogą zawierać wyłącznie litery oraz spacje.");
+                        "Pola 'Nazwa' i 'Kategoria' mogą zawierać " +
+                                "wyłącznie litery oraz spacje.");
                 return;
             }
 
             /* ---- cena ---- */
             BigDecimal price;
             try {
-                price = new BigDecimal(priceField.getText().trim().replace(',', '.'));
+                price = new BigDecimal(priceField.getText().trim().replace(
+                        ',', '.'));
                 if (price.compareTo(BigDecimal.ZERO) <= 0) {
-                    showAlert(Alert.AlertType.WARNING, "Nieprawidłowa cena",
+                    showAlert(Alert.AlertType.WARNING, "Nieprawidłowa " +
+                                    "cena",
                             "Cena musi być dodatnią liczbą.");
                     return;
                 }
             } catch (NumberFormatException ex) {
-                showAlert(Alert.AlertType.ERROR, "Nieprawidłowy format ceny",
+                showAlert(Alert.AlertType.ERROR, "Nieprawidłowy format " +
+                                "ceny",
                         "Podaj poprawną liczbę (np. 12.99).");
                 return;
             }
@@ -1017,13 +1090,16 @@ public class LogisticianPanelController {
             try {
                 initQty = Integer.parseInt(qtyField.getText().trim());
                 if (initQty < 0) {
-                    showAlert(Alert.AlertType.WARNING, "Nieprawidłowa ilość",
+                    showAlert(Alert.AlertType.WARNING,
+                            "Nieprawidłowa ilość",
                             "Ilość początkowa nie może być ujemna.");
                     return;
                 }
             } catch (NumberFormatException ex) {
-                showAlert(Alert.AlertType.ERROR, "Nieprawidłowy format ilości",
-                        "Pole 'Początkowy stan' musi być liczbą całkowitą.");
+                showAlert(Alert.AlertType.ERROR, "Nieprawidłowy format " +
+                                "ilości",
+                        "Pole 'Początkowy stan' musi być liczbą " +
+                                "całkowitą.");
                 return;
             }
 
@@ -1042,14 +1118,16 @@ public class LogisticianPanelController {
 
                 showAlert(Alert.AlertType.INFORMATION, "Sukces",
                         "Dodano produkt: " + p.getName() +
-                                " (ID=" + p.getId() + "), stan początkowy: " + initQty);
+                                " (ID=" + p.getId() + "), stan początkowy: "
+                                + initQty);
 
                 stage.close();
                 if (stockTable != null) refreshStockTable(stockTable);
             } catch (Exception ex) {
                 logger.error("Błąd podczas dodawania produktu", ex);
                 showAlert(Alert.AlertType.ERROR, "Błąd",
-                        "Nie udało się dodać produktu:\n" + ex.getMessage());
+                        "Nie udało się dodać produktu:\n"
+                                + ex.getMessage());
             }
         });
 
@@ -1068,7 +1146,8 @@ public class LogisticianPanelController {
      * wraz z jego stanem magazynowym.
      * - Pola: Nazwa, Kategoria, Cena, Ilość w magazynie.
      * - Wypełnia je wartościami z bazy.
-     * - Po zatwierdzeniu waliduje i aktualizuje Product oraz Warehouse.
+     * - Po zatwierdzeniu waliduje i aktualizuje Product
+     * oraz Warehouse.
      *
      * @param table tabela stanów magazynowych, z
      *              której czytamy zaznaczony wiersz
@@ -1090,12 +1169,14 @@ public class LogisticianPanelController {
 
         if (prod == null) {
             showAlert(Alert.AlertType.ERROR, "Błąd",
-                    "Nie znaleziono produktu o ID=" + selected.getId());
+                    "Nie znaleziono produktu o ID="
+                            + selected.getId());
             return;
         }
 
         // 2) Pobierz stan magazynowy dla tego produktu
-        Warehouse stanMag = warehouseRepository.findStateByProductId(prod.getId());
+        Warehouse stanMag = warehouseRepository.findStateByProductId(
+                prod.getId());
         int currentQty = (stanMag != null ? stanMag.getQuantity() : 0);
 
         // 3) Zbuduj nowe okienko
@@ -1129,21 +1210,25 @@ public class LogisticianPanelController {
             // WALIDACJA PÓL:
             String newName = nameField.getText().trim();
             String newCat  = categoryField.getText().trim();
-            String newPriceText = priceField.getText().trim().replace(',', '.');
+            String newPriceText = priceField.getText().trim().replace(
+                    ',', '.');
             String newQtyText   = qtyField.getText().trim();
 
             if (newName.isBlank() || newCat.isBlank()
                     || newPriceText.isBlank() || newQtyText.isBlank()) {
                 showAlert(Alert.AlertType.WARNING, "Brak danych",
-                        "Uzupełnij wszystkie pola (nazwa, kategoria, cena, ilość).");
+                        "Uzupełnij wszystkie pola (nazwa, kategoria, " +
+                                "cena, ilość).");
                 return;
             }
 
             // 3a) Nazwa i Kategoria – tylko litery i spacje:
             String lettersOnlyRegex = "[\\p{L} ]+";
-            if (!newName.matches(lettersOnlyRegex) || !newCat.matches(lettersOnlyRegex)) {
+            if (!newName.matches(lettersOnlyRegex)
+                    || !newCat.matches(lettersOnlyRegex)) {
                 showAlert(Alert.AlertType.WARNING, "Nieprawidłowe dane",
-                        "Pola 'Nazwa' i 'Kategoria' mogą zawierać wyłącznie litery oraz spacje.");
+                        "Pola 'Nazwa' i 'Kategoria' mogą zawierać " +
+                                "wyłącznie litery oraz spacje.");
                 return;
             }
 
@@ -1152,7 +1237,8 @@ public class LogisticianPanelController {
             try {
                 newPrice = new BigDecimal(newPriceText);
                 if (newPrice.compareTo(BigDecimal.ZERO) <= 0) {
-                    showAlert(Alert.AlertType.WARNING, "Nieprawidłowa cena",
+                    showAlert(Alert.AlertType.WARNING, "Nieprawidłowa " +
+                                    "cena",
                             "Cena musi być dodatnią liczbą.");
                     return;
                 }
@@ -1167,7 +1253,8 @@ public class LogisticianPanelController {
             try {
                 newQty = Integer.parseInt(newQtyText);
                 if (newQty < 0) {
-                    showAlert(Alert.AlertType.WARNING, "Nieprawidłowa ilość",
+                    showAlert(Alert.AlertType.WARNING, "Nieprawidłowa " +
+                                    "ilość",
                             "Ilość nie może być ujemna.");
                     return;
                 }
@@ -1193,12 +1280,14 @@ public class LogisticianPanelController {
                 refreshStockTable(table);
 
                 showAlert(Alert.AlertType.INFORMATION, "Sukces",
-                        "Zapisano zmiany dla produktu \"" + newName + "\".");
+                        "Zapisano zmiany dla produktu \"" + newName
+                                + "\".");
                 stage.close();
             } catch (Exception ex) {
                 logger.error("Błąd przy aktualizacji produktu", ex);
                 showAlert(Alert.AlertType.ERROR, "Błąd",
-                        "Nie udało się zapisać zmian:\n" + ex.getMessage());
+                        "Nie udało się zapisać zmian:\n"
+                                + ex.getMessage());
             }
         });
 
@@ -1245,7 +1334,8 @@ public class LogisticianPanelController {
         try {
             new HelloApplication().start(new Stage());
         } catch (Exception e) {
-            logger.error("Błąd przy starcie ekranu logowania (forsowne)", e);
+            logger.error("Błąd przy starcie ekranu logowania " +
+                    "(forsowne)", e);
         }
     }
 

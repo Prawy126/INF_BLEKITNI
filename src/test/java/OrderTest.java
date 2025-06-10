@@ -21,12 +21,14 @@ class OrderTest {
 
     @Test
     void testConstructorAndGetters() {
-        Product product = new Product("Laptop", "Elektronika", 2500.00);
+        Product product = new Product("Laptop",
+                "Elektronika", 2500.00);
         Employee employee = new Employee();
         employee.setLogin("test_user");
         Date date = new Date();
 
-        Order order = new Order(product, employee, 10, new BigDecimal("25000.00"), date);
+        Order order = new Order(product, employee,
+                10, new BigDecimal("25000.00"), date);
 
         assertEquals(product, order.getProduct());
         assertEquals(employee, order.getEmployee());
@@ -39,7 +41,8 @@ class OrderTest {
     void testSettersAndToString() {
         Order order = new Order();
 
-        Product product = new Product("Tablet", "Elektronika", 1000.00);
+        Product product = new Product(
+                "Tablet", "Elektronika", 1000.00);
         Employee employee = new Employee();
         employee.setLogin("admin");
         Date date = new Date();

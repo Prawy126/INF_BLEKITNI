@@ -19,7 +19,8 @@ import java.util.Objects;
 
 public class EmployeePanel {
 
-    private static final Logger logger = LogManager.getLogger(EmployeePanel.class);
+    private static final Logger logger = LogManager.getLogger(
+            EmployeePanel.class);
     private BorderPane root;
     private Stage primaryStage;
     private EmployeePanelController controller;
@@ -40,7 +41,8 @@ public class EmployeePanel {
             primaryStage.getIcons().add(logoImage);
             logger.debug("Logo dodane jako ikona okna");
         } catch (Exception e) {
-            logger.error("Błąd podczas ładowania logo: {}", e.getMessage(), e);
+            logger.error("Błąd podczas ładowania logo: {}",
+                    e.getMessage(), e);
         }
 
         primaryStage.setTitle("Panel pracownika");

@@ -24,7 +24,8 @@ public class EmailValidator {
      * Sprawdza, czy podany adres e-mail jest poprawny.
      *
      * @param email Adres e-mail do sprawdzenia.
-     * @return true, jeśli adres e-mail jest poprawny, false w przeciwnym razie.
+     * @return true, jeśli adres e-mail jest poprawny, false w przeciwnym
+     * razie.
      */
     public static boolean isValid(String email) {
         logger.debug("Rozpoczynanie walidacji adresu e-mail: {}",

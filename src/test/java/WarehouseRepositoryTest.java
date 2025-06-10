@@ -45,10 +45,12 @@ class WarehouseRepositoryTest {
     @Order(1)
     void testAddProductAndWarehouse() {
         // 1. add a product for FK
-        testProduct = new Product("Jogurt truskawkowy", "Nabiał", 3.49);
+        testProduct = new Product("Jogurt truskawkowy",
+                "Nabiał", 3.49);
         assertDoesNotThrow(() -> productRepo.addProduct(testProduct),
                 "Should add product without exception");
-        assertTrue(testProduct.getId() > 0, "Product should have an ID");
+        assertTrue(testProduct.getId() > 0,
+                "Product should have an ID");
 
         // 2. add stock record
         testWarehouse = new Warehouse(testProduct, 120);
@@ -63,7 +65,8 @@ class WarehouseRepositoryTest {
     void testFindAllAndUpdate() {
         // 3. fetch all stock records
         List<Warehouse> all = warehouseRepo.getAllStates();
-        assertTrue(all.stream().anyMatch(w -> w.getProduct().getId() == testProduct.getId()),
+        assertTrue(all.stream().anyMatch(
+                w -> w.getProduct().getId() == testProduct.getId()),
                 "New warehouse record should appear in list");
 
         // 4. update quantity
@@ -71,9 +74,11 @@ class WarehouseRepositoryTest {
         assertDoesNotThrow(() -> warehouseRepo.updateState(testWarehouse),
                 "Should update warehouse record without exception");
 
-        Warehouse reloaded = warehouseRepo.findStateByProductId(testProduct.getId());
+        Warehouse reloaded = warehouseRepo
+                .findStateByProductId(testProduct.getId());
         assertNotNull(reloaded, "Reloaded record must not be null");
-        assertEquals(100, reloaded.getQuantity(), "Quantity should be updated to 100");
+        assertEquals(100, reloaded.getQuantity(),
+                "Quantity should be updated to 100");
     }
 
     @Test
@@ -82,22 +87,27 @@ class WarehouseRepositoryTest {
         // quantity == 100
         List<Warehouse> eq100 = warehouseRepo.findByQuantity(100);
         assertTrue(eq100.stream()
-                .allMatch(w -> w.getQuantity() == 100), "All must have quantity 100");
+                .allMatch(w -> w.getQuantity() == 100),
+                "All must have quantity 100");
 
         // quantity < 110
         List<Warehouse> lt110 = warehouseRepo.findByQuantityLowerThan(110);
         assertTrue(lt110.stream()
-                .allMatch(w -> w.getQuantity() < 110), "All must have quantity < 110");
+                .allMatch(w -> w.getQuantity() < 110),
+                "All must have quantity < 110");
 
         // quantity > 50
         List<Warehouse> gt50 = warehouseRepo.findByQuantityGreaterThan(50);
         assertTrue(gt50.stream()
-                .allMatch(w -> w.getQuantity() > 50), "All must have quantity > 50");
+                .allMatch(w -> w.getQuantity() > 50),
+                "All must have quantity > 50");
 
         // between 80 and 120
         List<Warehouse> between = warehouseRepo.findByQuantityBetween(80, 120);
         assertTrue(between.stream()
-                        .anyMatch(w -> w.getProduct().getId() == testProduct.getId()),
+                        .anyMatch(
+                                w -> w.getProduct().getId()
+                                        == testProduct.getId()),
                 "Record should appear in [80,120] range");
     }
 
@@ -107,12 +117,16 @@ class WarehouseRepositoryTest {
         assertDoesNotThrow(() -> warehouseRepo.removeState(testProduct.getId()),
                 "Should delete warehouse record without exception");
 
-        Warehouse gone = warehouseRepo.findStateByProductId(testProduct.getId());
-        assertNull(gone, "Deleted warehouse record should no longer be found");
+        Warehouse gone = warehouseRepo
+                .findStateByProductId(testProduct.getId());
+        assertNull(gone, "Deleted warehouse record " +
+                "should no longer be found");
 
         List<Warehouse> allAfter = warehouseRepo.getAllStates();
         assertTrue(allAfter.stream()
-                        .noneMatch(w -> w.getProduct().getId() == testProduct.getId()),
+                        .noneMatch(
+                                w -> w.getProduct().getId()
+                                        == testProduct.getId()),
                 "Deleted record must not appear in list");
     }
 

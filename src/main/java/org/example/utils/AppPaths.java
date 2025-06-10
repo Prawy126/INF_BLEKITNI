@@ -42,7 +42,8 @@ public class AppPaths {
         try {
             initialize();
         } catch (Exception e) {
-            System.err.println("BŁĄD podczas inicjalizacji AppPaths: " + e.getMessage());
+            System.err.println("BŁĄD podczas inicjalizacji AppPaths: "
+                    + e.getMessage());
             e.printStackTrace();
             // Ustaw fallbackowe ścieżki
             applicationHome = Paths.get(".");
@@ -83,11 +84,14 @@ public class AppPaths {
                 applicationHome = jarFile.getParentFile().toPath();
 
                 // Sprawdź, czy jest zainstalowana
-                isInstalled = applicationHome.toString().contains("Program Files") ||
-                        applicationHome.toString().contains("ProgramFiles") ||
-                        applicationHome.toString().contains("Program Files (x86)") ||
-                        applicationHome.toString().contains("/usr/local") ||
-                        applicationHome.toString().contains("/opt");
+                isInstalled = applicationHome.toString()
+                        .contains("Program Files")
+                        || applicationHome.toString()
+                        .contains("ProgramFiles")
+                        || applicationHome.toString()
+                        .contains("Program Files (x86)")
+                        || applicationHome.toString().contains("/usr/local")
+                        || applicationHome.toString().contains("/opt");
             } else {
                 // Aplikacja działa z IDE
                 applicationHome = Paths.get(System.getProperty("user.dir"));
@@ -99,7 +103,8 @@ public class AppPaths {
             if (os.contains("win")) {
                 String appData = System.getenv("LOCALAPPDATA");
                 if (appData == null) {
-                    appData = System.getProperty("user.home") + "\\AppData\\Local";
+                    appData = System.getProperty("user.home")
+                            + "\\AppData\\Local";
                 }
                 userDataDir = Paths.get(appData, APP_NAME);
             }
@@ -110,7 +115,8 @@ public class AppPaths {
             else {
                 String xdgDataHome = System.getenv("XDG_DATA_HOME");
                 if (xdgDataHome == null) {
-                    xdgDataHome = System.getProperty("user.home") + "/.local/share";
+                    xdgDataHome = System.getProperty("user.home")
+                            + "/.local/share";
                 }
                 userDataDir = Paths.get(xdgDataHome, APP_NAME.toLowerCase());
             }
@@ -146,13 +152,15 @@ public class AppPaths {
 
             initialized = true;
 
-            System.out.println("Ścieżki aplikacji zainicjalizowane pomyślnie:");
+            System.out.println("Ścieżki aplikacji zainicjalizowane " +
+                    "pomyślnie:");
             System.out.println("Katalog domowy: " + applicationHome);
             System.out.println("Katalog danych użytkownika: " + userDataDir);
             System.out.println("Katalog logów: " + logsDir);
         }
         catch (Exception e) {
-            System.err.println("BŁĄD podczas inicjalizacji ścieżek aplikacji: " + e.getMessage());
+            System.err.println("BŁĄD podczas inicjalizacji ścieżek aplikacji: "
+                    + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Inicjalizacja ścieżek nieudana", e);
         }

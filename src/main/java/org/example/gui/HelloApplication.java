@@ -46,9 +46,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Główna klasa uruchamiająca aplikację GUI dla hipermarketu Stonka.
- * Zawiera logikę interfejsu logowania i przekierowywania użytkownika
- * na odpowiedni panel w zależności od roli.
+ * Główna klasa uruchamiająca aplikację GUI
+ * dla hipermarketu Stonka.
+ * Zawiera logikę interfejsu logowania
+ * i przekierowywania użytkownika na odpowiedni panel
+ * w zależności od roli.
  */
 public class HelloApplication extends Application {
 
@@ -59,9 +61,11 @@ public class HelloApplication extends Application {
         try {
             // AppPaths zostanie zainicjalizowane automatycznie przez swój statyczny blok
             // i ustawi właściwość app.logs.dir
-            System.out.println("Katalog logów aplikacji: " + AppPaths.getLogsDirectory());
+            System.out.println("Katalog logów aplikacji: "
+                    + AppPaths.getLogsDirectory());
         } catch (Exception e) {
-            System.err.println("BŁĄD podczas inicjalizacji ścieżek aplikacji: " + e.getMessage());
+            System.err.println("BŁĄD podczas inicjalizacji ścieżek aplikacji: "
+                    + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -93,7 +97,8 @@ public class HelloApplication extends Application {
             showAlert(
                     Alert.AlertType.ERROR,
                     "Błąd",
-                    "Wystąpił błąd podczas wyświetlania ekranu logowania",
+                    "Wystąpił błąd podczas wyświetlania ekranu " +
+                            "logowania",
                     e.getMessage()
             );
         }
@@ -104,7 +109,8 @@ public class HelloApplication extends Application {
         logger.debug("Rozpoczęcie metody start()");
 
         if (criticalErrorOccurred.get()) {
-            logger.error("Wykryto błąd krytyczny, wyświetlam komunikat o błędzie");
+            logger.error("Wykryto błąd krytyczny, wyświetlam komunikat " +
+                    "o błędzie");
             showDatabaseErrorAndExit(primaryStage, errorMessage);
             return;
         }
@@ -116,38 +122,46 @@ public class HelloApplication extends Application {
                 configPdf = new ConfigPdf();
                 logger.debug("ConfigPdf zainicjalizowany pomyślnie");
             } catch (Exception e) {
-                logger.warn("Błąd podczas inicjalizacji ConfigPdf: {}", e.getMessage(), e);
+                logger.warn("Błąd podczas inicjalizacji " +
+                        "ConfigPdf: {}", e.getMessage(), e);
             }
 
             logger.debug("Tworzenie głównego kontenera VBox");
             VBox root = new VBox(20);
             root.setAlignment(Pos.CENTER);
-            root.setStyle("-fx-background-color: lightblue; -fx-padding: 30;");
+            root.setStyle("-fx-background-color: lightblue; " +
+                    "-fx-padding: 30;");
 
             logger.debug("Ładowanie obrazu logo");
             Image image = null;
             try {
-                InputStream logoStream = getClass().getResourceAsStream("/logo.png");
+                InputStream logoStream = getClass().getResourceAsStream(
+                        "/logo.png");
                 if (logoStream != null) {
                     image = new Image(logoStream);
                     logger.debug("Obraz logo załadowany pomyślnie");
                 } else {
                     logger.error("Nie znaleziono pliku logo.png w zasobach");
                     InputStream defaultLogoStream =
-                            getClass().getResourceAsStream("/default_logo.png");
+                            getClass().getResourceAsStream(
+                                    "/default_logo.png");
                     if (defaultLogoStream != null) {
                         image = new Image(defaultLogoStream);
                         logger.debug("Użyto domyślnego obrazu logo");
                     } else {
-                        image = new Image("data:image/png;base64,iVBORw0KGgoAAAANS" +
-                                "UhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=");
+                        image = new Image(
+                                "data:image/png;base64,iVBORw0KGgoAAAANS" +
+                                "UhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk" +
+                                        "YAAAAAYAAjCB0C8AAAAASUVORK5CYII=");
                         logger.debug("Użyto pustego obrazu logo");
                     }
                 }
             } catch (Exception e) {
-                logger.error("BŁĄD podczas ładowania logo: {}", e.getMessage(), e);
+                logger.error("BŁĄD podczas ładowania " +
+                        "logo: {}", e.getMessage(), e);
                 image = new Image("data:image/png;base64,iVBORw0KGgoAAAANS" +
-                        "UhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=");
+                        "UhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAA" +
+                        "jCB0C8AAAAASUVORK5CYII=");
                 logger.debug("Użyto pustego obrazu logo po błędzie");
             }
 
@@ -159,7 +173,8 @@ public class HelloApplication extends Application {
                 primaryStage.getIcons().add(image);
                 logger.debug("Dodano ikonę do primaryStage");
             } catch (Exception e) {
-                logger.warn("Nie można ustawić ikony aplikacji: {}", e.getMessage());
+                logger.warn("Nie można ustawić ikony " +
+                        "aplikacji: {}", e.getMessage());
             }
 
             logger.debug("Tworzenie etykiet");
@@ -168,7 +183,8 @@ public class HelloApplication extends Application {
             titleLabel.setOpacity(0);
 
             Label welcomeLabel = new Label("Witamy w Stonce");
-            welcomeLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD, 16));
+            welcomeLabel.setFont(Font.font("Arial", FontWeight.SEMI_BOLD,
+                    16));
             welcomeLabel.setOpacity(0);
 
             logger.debug("Tworzenie siatki formularza");
@@ -181,12 +197,14 @@ public class HelloApplication extends Application {
             Label loginLabel = new Label("Login");
             TextField loginField = new TextField();
             loginField.setPromptText("Tutaj podaj login");
-            loginField.setStyle("-fx-background-color: #FFD966; -fx-padding: 5;");
+            loginField.setStyle("-fx-background-color: #FFD966; " +
+                    "-fx-padding: 5;");
 
             Label passwordLabel = new Label("Hasło");
             PasswordField passwordField = new PasswordField();
             passwordField.setPromptText("Tutaj podaj hasło");
-            passwordField.setStyle("-fx-background-color: #FFD966; -fx-padding: 5;");
+            passwordField.setStyle("-fx-background-color: #FFD966; " +
+                    "-fx-padding: 5;");
 
             // Pozwól na logowanie klawiszem Enter z pola hasła
             passwordField.setOnKeyPressed(event -> {
@@ -200,12 +218,14 @@ public class HelloApplication extends Application {
                                     root
                             );
                         } catch (Exception ex) {
-                            logger.error("BŁĄD podczas logowania przez ENTER: {}", ex.getMessage(), ex);
+                            logger.error("BŁĄD podczas logowania " +
+                                    "przez ENTER: {}", ex.getMessage(), ex);
                             showAlert(
                                     Alert.AlertType.ERROR,
                                     "Błąd logowania",
                                     "Nie można zalogować",
-                                    "Wystąpił błąd podczas próby logowania: " + ex.getMessage()
+                                    "Wystąpił błąd podczas próby " +
+                                            "logowania: " + ex.getMessage()
                             );
                         }
                         break;
@@ -232,12 +252,14 @@ public class HelloApplication extends Application {
                             root
                     );
                 } catch (Exception ex) {
-                    logger.error("BŁĄD podczas logowania: {}", ex.getMessage(), ex);
+                    logger.error("BŁĄD podczas logowania: {}",
+                            ex.getMessage(), ex);
                     showAlert(
                             Alert.AlertType.ERROR,
                             "Błąd logowania",
                             "Nie można zalogować",
-                            "Wystąpił błąd podczas próby logowania: " + ex.getMessage()
+                            "Wystąpił błąd podczas próby logowania: "
+                                    + ex.getMessage()
                     );
                 }
             });
@@ -249,7 +271,8 @@ public class HelloApplication extends Application {
                 try {
                     showResetPasswordWindow();
                 } catch (Exception ex) {
-                    logger.error("BŁĄD podczas otwierania okna resetowania hasła: {}",
+                    logger.error("BŁĄD podczas otwierania okna " +
+                                    "resetowania hasła: {}",
                             ex.getMessage(), ex);
                     showAlert(
                             Alert.AlertType.ERROR,
@@ -260,7 +283,8 @@ public class HelloApplication extends Application {
                 }
             });
 
-            topButtonBox.getChildren().addAll(loginButton, resetPasswordButton);
+            topButtonBox.getChildren().addAll(loginButton,
+                    resetPasswordButton);
 
             HBox bottomButtonBox = new HBox(15);
             bottomButtonBox.setAlignment(Pos.CENTER);
@@ -303,7 +327,8 @@ public class HelloApplication extends Application {
             logger.debug("primaryStage.show() wykonane");
 
         } catch (Exception e) {
-            logger.error("BŁĄD KRYTYCZNY w start(): {}", e.getMessage(), e);
+            logger.error("BŁĄD KRYTYCZNY w start(): {}",
+                    e.getMessage(), e);
             showAlert(
                     Alert.AlertType.ERROR,
                     "Błąd",
@@ -317,7 +342,8 @@ public class HelloApplication extends Application {
     }
 
     /**
-     * Wyświetla komunikat o błędzie bazy danych i zamyka aplikację.
+     * Wyświetla komunikat o błędzie bazy danych
+     * i zamyka aplikację.
      *
      * @param stage główna scena aplikacji
      * @param message komunikat błędu
@@ -335,7 +361,8 @@ public class HelloApplication extends Application {
         errorTitle.setStyle("-fx-text-fill: #C62828;");
 
         Label errorDetails =
-                new Label("Nie można uruchomić aplikacji z powodu problemów z bazą danych:");
+                new Label("Nie można uruchomić aplikacji z powodu " +
+                        "problemów z bazą danych:");
         errorDetails.setFont(Font.font("Arial", 14));
 
         TextArea errorText = new TextArea(message);
@@ -357,7 +384,8 @@ public class HelloApplication extends Application {
         );
 
         Button exitButton = new Button("Zamknij aplikację");
-        exitButton.setStyle("-fx-background-color: #C62828; -fx-text-fill: white;");
+        exitButton.setStyle("-fx-background-color: #C62828; " +
+                "-fx-text-fill: white;");
         exitButton.setOnAction(e -> Platform.exit());
 
         errorBox.getChildren().addAll(
@@ -395,8 +423,10 @@ public class HelloApplication extends Application {
             alert.setContentText(content);
             alert.showAndWait();
         } catch (Exception e) {
-            logger.error("BŁĄD podczas wyświetlania alertu: {}", e.getMessage(), e);
-            logger.error("ALERT [{}]: {} - {}\n{}", type, title, header, content);
+            logger.error("BŁĄD podczas wyświetlania alertu: {}",
+                    e.getMessage(), e);
+            logger.error("ALERT [{}]: {} - {}\n{}", type, title,
+                    header, content);
         }
     }
 
@@ -462,7 +492,8 @@ public class HelloApplication extends Application {
                     scale.setToY(1.1);
                     scale.play();
                 } catch (Exception ex) {
-                    System.err.println("OSTRZEŻENIE: Błąd animacji przycisku (mouseEntered): "
+                    System.err.println("OSTRZEŻENIE: Błąd animacji " +
+                            "przycisku (mouseEntered): "
                             + ex.getMessage());
                 }
             });
@@ -476,12 +507,14 @@ public class HelloApplication extends Application {
                     scale.setToY(1);
                     scale.play();
                 } catch (Exception ex) {
-                    System.err.println("OSTRZEŻENIE: Błąd animacji przycisku (mouseExited): "
+                    System.err.println("OSTRZEŻENIE: Błąd animacji " +
+                            "przycisku (mouseExited): "
                             + ex.getMessage());
                 }
             });
         } catch (Exception e) {
-            System.err.println("OSTRZEŻENIE: Błąd podczas stylizacji przycisku: "
+            System.err.println("OSTRZEŻENIE: Błąd podczas stylizacji " +
+                    "przycisku: "
                     + e.getMessage());
             // Ustaw podstawowy styl bez animacji
             button.setStyle("-fx-background-color: " + color + ";");
@@ -501,14 +534,17 @@ public class HelloApplication extends Application {
 
             confirmExit.showAndWait().ifPresent(response -> {
                 if (response == ButtonType.OK) {
-                    System.out.println("DEBUG: Zamykanie aplikacji potwierdzone");
+                    System.out.println("DEBUG: Zamykanie aplikacji " +
+                            "potwierdzone");
                     Platform.exit();
                 } else {
-                    System.out.println("DEBUG: Anulowano zamykanie aplikacji");
+                    System.out.println("DEBUG: Anulowano zamykanie " +
+                            "aplikacji");
                 }
             });
         } catch (Exception e) {
-            System.err.println("BŁĄD podczas zamykania aplikacji: " + e.getMessage());
+            System.err.println("BŁĄD podczas zamykania aplikacji: "
+                    + e.getMessage());
             e.printStackTrace();
             // Zamknij aplikację mimo błędu
             Platform.exit();
@@ -534,7 +570,8 @@ public class HelloApplication extends Application {
 
         Button sendCodeButton = new Button("Wyślij kod odzyskiwania");
         sendCodeButton.setOnAction(e -> {
-            System.out.println("DEBUG: Próba wysłania kodu resetowania hasła");
+            System.out.println("DEBUG: Próba wysłania kodu resetowania " +
+                    "hasła");
             String email = emailField.getText();
             if (email.isEmpty()) {
                 System.out.println("DEBUG: Brak adresu email");
@@ -542,17 +579,20 @@ public class HelloApplication extends Application {
                         Alert.AlertType.ERROR,
                         "Błąd",
                         "Brak adresu email",
-                        "Proszę podać adres e-mail, na który ma zostać wysłany kod."
+                        "Proszę podać adres e-mail, na który ma " +
+                                "zostać wysłany kod."
                 );
             } else {
                 this.resetEmail = email;
                 try {
-                    System.out.println("DEBUG: Wysyłanie kodu resetowania na email: " + email);
+                    System.out.println("DEBUG: Wysyłanie kodu resetowania " +
+                            "na email: " + email);
                     Login.sendResetCode(email);
                     resetStage.close();
                     showVerificationWindow();
                 } catch (Exception ex) {
-                    System.err.println("BŁĄD podczas wysyłania kodu resetowania: "
+                    System.err.println("BŁĄD podczas wysyłania kodu " +
+                            "resetowania: "
                             + ex.getMessage());
                     ex.printStackTrace();
                     showAlert(
@@ -565,7 +605,8 @@ public class HelloApplication extends Application {
             }
         });
 
-        resetLayout.getChildren().addAll(emailLabel, emailField, sendCodeButton);
+        resetLayout.getChildren().addAll(emailLabel, emailField,
+                sendCodeButton);
 
         Scene resetScene = new Scene(resetLayout, 300, 200);
         resetStage.setScene(resetScene);
@@ -606,7 +647,8 @@ public class HelloApplication extends Application {
         TextField codeField = new TextField();
         codeField.setPromptText("Wprowadź kod weryfikacyjny");
         codeField.setMaxWidth(150);
-        codeField.setTextFormatter(new TextFormatter<>(new DefaultStringConverter(),
+        codeField.setTextFormatter(
+                new TextFormatter<>(new DefaultStringConverter(),
                 "", change -> {
             // Pozwól na dowolne znaki, ograniczając długość do 6
             return change.getControlNewText().length() <= 6 ? change : null;
@@ -644,14 +686,17 @@ public class HelloApplication extends Application {
                 showAlert(Alert.AlertType.ERROR,
                         "Błąd",
                         "Niepoprawny kod",
-                        "Podany kod jest nieprawidłowy lub wygasł. Spróbuj ponownie.");
+                        "Podany kod jest nieprawidłowy lub wygasł. " +
+                                "Spróbuj ponownie.");
             }
         });
 
         Button resendButton = new Button("Wyślij kod ponownie");
-        resendButton.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white;");
+        resendButton.setStyle("-fx-background-color: #2196F3; " +
+                "-fx-text-fill: white;");
         resendButton.setOnAction(e -> {
-            logger.info("Wysyłanie kodu ponownie do: {}", this.resetEmail);
+            logger.info("Wysyłanie kodu ponownie " +
+                    "do: {}", this.resetEmail);
             Login.sendResetCode(this.resetEmail);
             showAlert(Alert.AlertType.INFORMATION,
                     "Kod wysłany",
@@ -677,7 +722,8 @@ public class HelloApplication extends Application {
 
 
     private void showNewPasswordWindow(String userEmail) {
-        logger.debug("Otwieranie okna ustawiania nowego hasła dla: {}", userEmail);
+        logger.debug("Otwieranie okna ustawiania nowego hasła " +
+                "dla: {}", userEmail);
 
         Stage passwordStage = new Stage();
         passwordStage.setTitle("Ustaw nowe hasło");
@@ -695,7 +741,8 @@ public class HelloApplication extends Application {
         repeatPasswordField.setPromptText("Powtórz nowe hasło");
 
         Button submitButton = new Button("Zapisz nowe hasło");
-        submitButton.setStyle("-fx-background-color: #27AE60; -fx-text-fill: white;");
+        submitButton.setStyle("-fx-background-color: #27AE60; " +
+                "-fx-text-fill: white;");
         submitButton.setOnAction(e -> {
             logger.debug("Próba zapisania nowego hasła");
             String newPass = newPasswordField.getText();
@@ -703,22 +750,27 @@ public class HelloApplication extends Application {
 
             if (newPass.isEmpty() || repeatPass.isEmpty()) {
                 logger.warn("Puste pola hasła");
-                showAlert(Alert.AlertType.ERROR, "Błąd", "Puste pola",
+                showAlert(Alert.AlertType.ERROR, "Błąd",
+                        "Puste pola",
                         "Proszę wypełnić oba pola hasła.");
             } else if (!newPass.equals(repeatPass)) {
                 logger.warn("Hasła nie są zgodne");
-                showAlert(Alert.AlertType.ERROR, "Błąd", "Hasła nie są zgodne",
+                showAlert(Alert.AlertType.ERROR, "Błąd",
+                        "Hasła nie są zgodne",
                         "Upewnij się, że oba hasła są identyczne.");
             } else if (newPass.length() < 8) {
-                logger.warn("Hasło za krótkie: {} znaków", newPass.length());
-                showAlert(Alert.AlertType.ERROR, "Błąd", "Hasło za krótkie",
+                logger.warn("Hasło za krótkie: {} znaków",
+                        newPass.length());
+                showAlert(Alert.AlertType.ERROR, "Błąd",
+                        "Hasło za krótkie",
                         "Hasło musi mieć co najmniej 8 znaków.");
             } else {
                 logger.info("Walidacja hasła pomyślna");
 
                 UserRepository userRepo = new UserRepository();
                 try {
-                    Employee employee = userRepo.findByEmail(userEmail).stream()
+                    Employee employee = userRepo.findByEmail(userEmail)
+                            .stream()
                             .filter(emp -> !emp.isDeleted())
                             .findFirst()
                             .orElse(null);
@@ -731,8 +783,10 @@ public class HelloApplication extends Application {
                         return;
                     }
 
-                    String hashedPassword = PasswordHasher.hashPassword(newPass, employee.getId());
-                    boolean success = userRepo.updatePasswordByEmail(userEmail, hashedPassword);
+                    String hashedPassword = PasswordHasher.hashPassword(
+                            newPass, employee.getId());
+                    boolean success = userRepo.updatePasswordByEmail(
+                            userEmail, hashedPassword);
 
                     if (success) {
                         logger.info("Hasło zaktualizowane pomyślnie");
@@ -748,11 +802,13 @@ public class HelloApplication extends Application {
                                 "Nie udało się zaktualizować hasła.");
                     }
                 } catch (Exception ex) {
-                    logger.error("Błąd podczas aktualizacji hasła: {}", ex.getMessage(), ex);
+                    logger.error("Błąd podczas aktualizacji " +
+                            "hasła: {}", ex.getMessage(), ex);
                     showAlert(Alert.AlertType.ERROR,
                             "Błąd",
                             "Problem techniczny",
-                            "Wystąpił błąd podczas aktualizacji hasła: " + ex.getMessage());
+                            "Wystąpił błąd podczas aktualizacji " +
+                                    "hasła: " + ex.getMessage());
                 } finally {
                 }
             }
@@ -776,7 +832,8 @@ public class HelloApplication extends Application {
         logger.info("Rozpoczęcie metody main()");
 
         // Globalny handler wyjątków - łapie wszystkie niezłapane wyjątki
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+        Thread.setDefaultUncaughtExceptionHandler((
+                thread, throwable) -> {
             logger.fatal("NIEZŁAPANY WYJĄTEK w wątku {}: {}",
                     thread.getName(), throwable.getMessage(), throwable);
 
@@ -785,7 +842,8 @@ public class HelloApplication extends Application {
                 DatabaseErrorHandler.showDatabaseError(
                         throwable,
                         "Nieoczekiwany błąd bazy danych",
-                        "Wystąpił nieoczekiwany błąd podczas operacji na bazie danych",
+                        "Wystąpił nieoczekiwany błąd podczas " +
+                                "operacji na bazie danych",
                         false
                 );
             } else {
@@ -807,7 +865,8 @@ public class HelloApplication extends Application {
                 org.example.database.DatabaseInitializer.initialize();
                 logger.info("Baza danych zainicjalizowana pomyślnie");
             } catch (Exception e) {
-                logger.error("BŁĄD podczas inicjalizacji bazy danych: {}", e.getMessage(), e);
+                logger.error("BŁĄD podczas inicjalizacji " +
+                        "bazy danych: {}", e.getMessage(), e);
 
                 // Użyj nowego handlera błędów bazy danych
                 DatabaseErrorHandler.showDatabaseError(
@@ -830,7 +889,8 @@ public class HelloApplication extends Application {
                         String hashed = PasswordHasher.hashPassword(raw, emp.getId());
                         emp.setPassword(hashed);
                         userRepo.updateEmployee(emp);
-                        logger.debug("Zhashowano i zaktualizowano pracownika id={}", emp.getId());
+                        logger.debug("Zhashowano i zaktualizowano " +
+                                "pracownika id={}", emp.getId());
                     }
                 }
                 logger.info("Migracja haseł zakończona");
@@ -867,7 +927,8 @@ public class HelloApplication extends Application {
                     showAlert(
                             Alert.AlertType.ERROR,
                             "Błąd krytyczny",
-                            "Wystąpił krytyczny błąd podczas uruchamiania aplikacji",
+                            "Wystąpił krytyczny błąd podczas " +
+                                    "uruchamiania aplikacji",
                             e.getMessage()
                     );
                     Platform.exit();
@@ -880,7 +941,8 @@ public class HelloApplication extends Application {
     }
 
     /**
-     * Sprawdza czy wyjątek jest związany z dostępem do bazy danych.
+     * Sprawdza czy wyjątek jest związany z dostępem
+     * do bazy danych.
      */
     private static boolean isDataAccessException(Throwable throwable) {
         // Sprawdź czy sam wyjątek jest SQLException

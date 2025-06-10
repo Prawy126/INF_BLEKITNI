@@ -236,12 +236,14 @@ public class Employee extends Person {
 
     /**
      * Ustawia login pracownika.
-     * Weryfikuje czy login nie jest pusty oraz czy nie przekracza maksymalnej długości (100 znaków).
+     * Weryfikuje czy login nie jest pusty oraz czy nie przekracza
+     * maksymalnej długości (100 znaków).
      * W przypadku próby ustawienia nieprawidłowego loginu, rzuca wyjątek.
      * Operacja jest logowana na poziomie INFO lub WARN w przypadku błędu.
      *
      * @param login nowy login pracownika
-     * @throws IllegalArgumentException jeśli login jest pusty, null lub zbyt długi
+     * @throws IllegalArgumentException jeśli login jest pusty, null lub
+     * zbyt długi
      */
     public void setLogin(String login) {
         if (login == null || login.isEmpty()) {
@@ -270,12 +272,14 @@ public class Employee extends Person {
 
     /**
      * Ustawia hasło pracownika.
-     * Weryfikuje minimalną długość hasła (co najmniej 8 znaków) oraz maksymalną długość (100 znaków).
+     * Weryfikuje minimalną długość hasła (co najmniej 8 znaków) oraz
+     * maksymalną długość (100 znaków).
      * W przypadku próby ustawienia nieprawidłowego hasła, rzuca wyjątek.
      * Operacja jest logowana na poziomie INFO lub WARN w przypadku błędu.
      *
      * @param password nowe hasło pracownika
-     * @throws PasswordException jeśli hasło jest zbyt krótkie, zbyt długie lub null
+     * @throws PasswordException jeśli hasło jest zbyt krótkie, zbyt długie
+     * lub null
      */
     public void setPassword(String password) throws PasswordException {
         if (password == null || password.length() < 8) {
@@ -283,7 +287,8 @@ public class Employee extends Person {
             throw new PasswordException("Hasło musi mieć co najmniej 8 znaków");
         }
         if (password.length() > 100) {
-            logger.warn("Próbowano ustawić zbyt długie hasło: {} znaków", password.length());
+            logger.warn("Próbowano ustawić zbyt długie hasło: {} znaków",
+                    password.length());
             throw new PasswordException("Hasło nie może być dłuższe niż 100 znaków");
         }
         logger.info("Zmieniono hasło pracownika");
@@ -358,7 +363,8 @@ public class Employee extends Person {
 
     /**
      * Ustawia stanowisko pracownika.
-     * Weryfikuje czy stanowisko nie przekracza maksymalnej długości (100 znaków).
+     * Weryfikuje czy stanowisko nie przekracza maksymalnej długości
+     * (100 znaków).
      * Operacja jest logowana na poziomie INFO lub WARN w przypadku błędu.
      *
      * @param position nowe stanowisko pracownika
@@ -366,8 +372,10 @@ public class Employee extends Person {
      */
     public void setPosition(String position) {
         if (position != null && position.length() > 100) {
-            logger.warn("Próbowano ustawić zbyt długie stanowisko: {} znaków", position.length());
-            throw new IllegalArgumentException("Stanowisko nie może być dłuższe niż 100 znaków");
+            logger.warn("Próbowano ustawić zbyt długie stanowisko: {} znaków",
+                    position.length());
+            throw new IllegalArgumentException("Stanowisko nie może być dłuższe" +
+                    " niż 100 znaków");
         }
         logger.info("Zmieniono stanowisko pracownika na: {}", position);
         this.position = position;
@@ -474,7 +482,8 @@ public class Employee extends Person {
      * Sprawdza czy zadanie istnieje przed jego usunięciem.
      * Operacja jest logowana na poziomie INFO lub WARN w przypadku błędu.
      *
-     * @param taskEmployee obiekt powiązania zadania z pracownikiem do usunięcia
+     * @param taskEmployee obiekt powiązania zadania z pracownikiem do
+     *                    usunięcia
      */
     public void removeTaskEmployee(TaskEmployee taskEmployee) {
         if (taskEmployee != null && taskEmployees.contains(taskEmployee)) {

@@ -77,7 +77,8 @@ class  UserRepositoryTest {
 
         assertDoesNotThrow(() -> addressRepo.addAddress(testAddress),
                 "Should persist address without exception");
-        assertTrue(testAddress.getId() > 0, "Address should get an ID");
+        assertTrue(testAddress.getId() > 0,
+                "Address should get an ID");
 
         /* 2. Dodajemy pracownika powiązanego z tym adresem  */
         testEmployee = new Employee(
@@ -87,7 +88,8 @@ class  UserRepositoryTest {
         );
         assertDoesNotThrow(() -> userRepo.addEmployee(testEmployee),
                 "Should persist employee without exception");
-        assertTrue(testEmployee.getId() > 0, "Employee should get an ID");
+        assertTrue(testEmployee.getId() > 0,
+                "Employee should get an ID");
     }
 
     /* :::::::::::::::::::::::::::::::
@@ -97,7 +99,8 @@ class  UserRepositoryTest {
     void testFindersByRoleAndLogin() {
         /* 3. pobieramy kasjerów  */
         List<Employee> kasjerzy = userRepo.getCashiers();
-        assertTrue(kasjerzy.stream().anyMatch(e -> e.getId() == testEmployee.getId()),
+        assertTrue(kasjerzy.stream().anyMatch(
+                e -> e.getId() == testEmployee.getId()),
                 "New cashier should appear in kasjerzy");
 
         /* 4. wyszukaj tylko po loginie  */
@@ -106,8 +109,10 @@ class  UserRepositoryTest {
         assertEquals(testEmployee.getId(), byLogin.getId());
 
         /* 5. wyszukaj po loginie i haśle  */
-        Employee byLoginPass = userRepo.findByLoginAndPassword(TEST_LOGIN, TEST_PASSWORD);
-        assertNotNull(byLoginPass, "Login + password should authenticate");
+        Employee byLoginPass
+                = userRepo.findByLoginAndPassword(TEST_LOGIN, TEST_PASSWORD);
+        assertNotNull(byLoginPass,
+                "Login + password should authenticate");
         assertEquals(testEmployee.getId(), byLoginPass.getId());
     }
 
@@ -118,7 +123,8 @@ class  UserRepositoryTest {
     void testCurrentEmployeeAndLookups() {
         /* 6. getCurrentEmployee  */
         Employee current = userRepo.getCurrentEmployee();
-        assertNotNull(current, "Current logged-in employee must be set");
+        assertNotNull(current,
+                "Current logged-in employee must be set");
         assertEquals(testEmployee.getId(), current.getId());
 
         /* 7. znajdź po ID  */
@@ -126,16 +132,21 @@ class  UserRepositoryTest {
         assertNotNull(byId);
 
         /* 8a. wyszukaj po fragmencie imienia  */
-        List<Employee> byName = userRepo.findByName("chał");
-        assertTrue(byName.stream().anyMatch(e -> e.getId() == testEmployee.getId()));
+        List<Employee> byName = userRepo.findByName(
+                "chał");
+        assertTrue(byName.stream().anyMatch(
+                e -> e.getId() == testEmployee.getId()));
 
         /* 8b. wyszukaj po fragmencie nazwiska  */
-        List<Employee> bySurname = userRepo.findBySurname("Brzo");
-        assertTrue(bySurname.stream().anyMatch(e -> e.getId() == testEmployee.getId()));
+        List<Employee> bySurname = userRepo.findBySurname(
+                "Brzo");
+        assertTrue(bySurname.stream().anyMatch(
+                e -> e.getId() == testEmployee.getId()));
 
         /* 8c. wyszukaj po wieku  */
         List<Employee> byAge = userRepo.findByAge(20, 30);
-        assertTrue(byAge.stream().anyMatch(e -> e.getId() == testEmployee.getId()));
+        assertTrue(byAge.stream().anyMatch(
+                e -> e.getId() == testEmployee.getId()));
     }
 
     /* :::::::::::::::::::::::::::::::
@@ -145,29 +156,36 @@ class  UserRepositoryTest {
     void testAddressEmailSalaryPositionAndSickLeave() {
         /* 9a. wyszukaj po ID adresu  */
         List<Employee> byAddress = userRepo.findByAddress(testAddress.getId());
-        assertTrue(byAddress.stream().anyMatch(e -> e.getId() == testEmployee.getId()));
+        assertTrue(byAddress.stream().anyMatch(
+                e -> e.getId() == testEmployee.getId()));
 
         /* 9b. zaktualizuj e-mail i wyszukaj po fragmencie  */
         testEmployee.setEmail(TEST_LOGIN + "@example.com");
         assertDoesNotThrow(() -> userRepo.updateEmployee(testEmployee));
         List<Employee> byEmail = userRepo.findByEmail(TEST_LOGIN);
-        assertTrue(byEmail.stream().anyMatch(e -> e.getId() == testEmployee.getId()));
+        assertTrue(byEmail.stream().anyMatch(
+                e -> e.getId() == testEmployee.getId()));
 
         /* 9c. wyszukaj po zarobkach  */
         List<Employee> bySalary = userRepo.findBySalary(3000, 3500);
-        assertTrue(bySalary.stream().anyMatch(e -> e.getId() == testEmployee.getId()));
+        assertTrue(bySalary.stream().anyMatch(
+                e -> e.getId() == testEmployee.getId()));
 
         /* 9d. wyszukaj po stanowisku  */
         List<Employee> byPosition = userRepo.findByPosition("Kasjer");
-        assertTrue(byPosition.stream().anyMatch(e -> e.getId() == testEmployee.getId()));
+        assertTrue(byPosition.stream().anyMatch(
+                e -> e.getId() == testEmployee.getId()));
 
         /* 10. filtry zwolnień lekarskich  */
-        testEmployee.startSickLeave(Date.valueOf(LocalDate.now().minusDays(1)));
+        testEmployee.startSickLeave(Date.valueOf(LocalDate.now().minusDays(
+                1)));
         assertDoesNotThrow(() -> userRepo.updateEmployee(testEmployee));
         List<Employee> onLeave    = userRepo.getOnSickLeave();
         List<Employee> notOnLeave = userRepo.getNotOnSickLeave();
-        assertTrue(onLeave.stream().anyMatch(e -> e.getId() == testEmployee.getId()));
-        assertTrue(notOnLeave.stream().noneMatch(e -> e.getId() == testEmployee.getId()));
+        assertTrue(onLeave.stream().anyMatch(
+                e -> e.getId() == testEmployee.getId()));
+        assertTrue(notOnLeave.stream().noneMatch(
+                e -> e.getId() == testEmployee.getId()));
     }
 
     /* :::::::::::::::::::::::::::::::
@@ -178,11 +196,13 @@ class  UserRepositoryTest {
         /* 11. miękkie usunięcie pracownika  */
         assertDoesNotThrow(() -> userRepo.removeEmployee(testEmployee));
         Employee deleted = userRepo.findById(testEmployee.getId());
-        assertNull(deleted, "Soft-deleted employee should not be returned");
+        assertNull(deleted,
+                "Soft-deleted employee should not be returned");
 
         /*  Adres powinien pozostać  */
         Address fetched = addressRepo.findAddressById(testAddress.getId());
-        assertNotNull(fetched, "Address should remain after employee deletion");
+        assertNotNull(fetched,
+                "Address should remain after employee deletion");
     }
 
     /* :::::::::::::::::::::::::::::::

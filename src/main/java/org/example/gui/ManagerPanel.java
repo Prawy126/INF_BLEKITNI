@@ -28,8 +28,10 @@ import org.apache.logging.log4j.Logger;
 import java.util.Objects;
 
 /**
- * Panel kierownika, zawiera menu boczne oraz centralny panel widoku.
- * Pozwala nawigować po funkcjach przypisanych do roli kierownika.
+ * Panel kierownika, zawiera menu boczne oraz centralny
+ * panel widoku.
+ * Pozwala nawigować po funkcjach przypisanych
+ * do roli kierownika.
  */
 public class ManagerPanel {
 
@@ -61,13 +63,15 @@ public class ManagerPanel {
             primaryStage.getIcons().add(logoImage);
             logger.debug("Logo dodane jako ikona okna");
         } catch (Exception e) {
-            logger.error("Błąd podczas ładowania logo: {}", e.getMessage(), e);
+            logger.error("Błąd podczas ładowania logo: {}",
+                    e.getMessage(), e);
         }
 
         primaryStage.setTitle("Panel kierownika");
         primaryStage.setMinWidth(700);
         primaryStage.setMinHeight(450);
-        logger.debug("Tytuł okna ustawiony na 'Panel kierownika' z minimalnymi rozmiarami");
+        logger.debug("Tytuł okna ustawiony na 'Panel kierownika' " +
+                "z minimalnymi rozmiarami");
 
         root = new BorderPane();
         root.setPadding(new Insets(10));
@@ -112,11 +116,13 @@ public class ManagerPanel {
         Image image = null;
         try {
             image = new Image(
-                    Objects.requireNonNull(getClass().getResourceAsStream("/logo.png"))
+                    Objects.requireNonNull(getClass().getResourceAsStream(
+                            "/logo.png"))
             );
             logger.debug("Logo dla menu załadowane pomyślnie");
         } catch (Exception e) {
-            logger.error("Błąd podczas ładowania logo dla menu: {}", e.getMessage(), e);
+            logger.error("Błąd podczas ładowania logo dla menu: {}",
+                    e.getMessage(), e);
         }
 
         ImageView logo = new ImageView(image);
@@ -131,7 +137,8 @@ public class ManagerPanel {
 
         Button tasksButton = createStyledButton("Zadania dla pracowników");
         Button absenceButton = createStyledButton("Wnioski o nieobecność");
-        Button logoutButton = createStyledButton("Wyloguj się", "#E74C3C");
+        Button logoutButton = createStyledButton("Wyloguj się",
+                "#E74C3C");
 
         tasksButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Zadania dla pracowników'");
@@ -262,7 +269,8 @@ public class ManagerPanel {
     }
 
     /**
-     * Ustawia podany przycisk jako aktywny, resetując styl poprzedniego.
+     * Ustawia podany przycisk jako aktywny,
+     * resetując styl poprzedniego.
      */
     private void setActiveButton(Button button) {
         String defaultStyle = "-fx-background-color: #2980B9; -fx-text-fill:" +

@@ -29,7 +29,8 @@ import java.util.List;
 public class TaskEmployeeRepository implements AutoCloseable {
 
     /**
-     * Logger do rejestrowania zdarzeń związanych z klasą TaskEmployeeRepository.
+     * Logger do rejestrowania zdarzeń związanych z klasą
+     * TaskEmployeeRepository.
      */
     private static final Logger logger = LogManager.getLogger(
             TaskEmployeeRepository.class);
@@ -69,8 +70,8 @@ public class TaskEmployeeRepository implements AutoCloseable {
             tx.commit();
             logger.info("add() – przypisanie zapisane: {}", te);
         } catch (Exception e) {
-            logger.error("add() – błąd podczas zapisywania przypisania:" +
-                    " {}", te, e);
+            logger.error("add() – błąd podczas zapisywania " +
+                    "przypisania: {}", te, e);
             if (tx.isActive()) tx.rollback();
         } finally {
             em.close();

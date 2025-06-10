@@ -21,7 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class LoginTest {
 
     // regex dla cyfr 0–9 i wielkich liter A–Z
-    private static final Pattern CODE_PATTERN = Pattern.compile("^[0-9A-Z]*$");
+    private static final Pattern CODE_PATTERN
+            = Pattern.compile("^[0-9A-Z]*$");
 
     @Test
     void generateRandomCode_ShouldReturnCorrectLength() {
@@ -54,13 +55,15 @@ public class LoginTest {
         codes.add(c3);
 
         assertEquals(3, codes.size(),
-                "Powinny powstać różne kody przy kolejnych wywołaniach");
+                "Powinny powstać różne kody przy kolejnych " +
+                        "wywołaniach");
     }
 
     @Test
     void generateRandomCode_ZeroLengthReturnsEmpty() {
         String code = Login.generateRandomCode(0);
-        assertNotNull(code, "Kod nie może być null nawet przy długości 0");
+        assertNotNull(code, "Kod nie może być null nawet " +
+                "przy długości 0");
         assertTrue(code.isEmpty(), "Kod długości 0 powinien być pusty");
     }
 }

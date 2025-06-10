@@ -22,12 +22,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PersonTest {
 
-    private Employee createTestEmployee() throws NameException, AgeException, PasswordException, SalaryException {
+    private Employee createTestEmployee()
+            throws NameException, AgeException,
+            PasswordException, SalaryException {
         Address address = new Address();
         address.setCity("TestCity");
 
         return new Employee(
-                "Jan", "Kowalski", 30, "jan@example.com",
+                "Jan", "Kowalski",
+                30, "jan@example.com",
                 "jankowal", "securePass123", address,
                 "Kierownik", new BigDecimal("5000")
         );

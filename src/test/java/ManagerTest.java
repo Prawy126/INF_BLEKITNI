@@ -28,8 +28,10 @@ class ManagerTest {
     void setUp() throws Exception {
         Address address = new Address();
         address.setCity("Warszawa");
-        employee = new Employee("Jan", "Kowalski", 35, "jan@example.com",
-                "jkowal", "bezpieczneHaslo", address, "Manager", new BigDecimal("6000"));
+        employee = new Employee("Jan", "Kowalski",
+                35, "jan@example.com",
+                "jkowal", "bezpieczneHaslo", address,
+                "Manager", new BigDecimal("6000"));
         manager = new Manager(employee);
     }
 
@@ -91,25 +93,29 @@ class ManagerTest {
         Address newAddress = new Address();
         newAddress.setCity("Wrocław");
         manager.updateAddress(newAddress);
-        assertEquals("Wrocław", manager.getEmployee().getAddress().getCity());
+        assertEquals("Wrocław",
+                manager.getEmployee().getAddress().getCity());
     }
 
     @Test
     void testUpdatePassword() {
         manager.updatePassword("newStrongPass");
-        assertEquals("newStrongPass", manager.getEmployee().getPassword());
+        assertEquals("newStrongPass",
+                manager.getEmployee().getPassword());
     }
 
     @Test
     void testUpdateDepartment() {
         manager.updateDepartment("Logistyka");
-        assertEquals("Logistyka", manager.getEmployee().getPosition());
+        assertEquals("Logistyka",
+                manager.getEmployee().getPosition());
     }
 
     @Test
     void testUpdateSalary() {
         manager.updateSalary(new BigDecimal("9000.00"));
-        assertEquals(new BigDecimal("9000.00"), manager.getEmployee().getSalary());
+        assertEquals(new BigDecimal("9000.00"),
+                manager.getEmployee().getSalary());
     }
 
     @Test
@@ -121,7 +127,9 @@ class ManagerTest {
     private Employee createOtherEmployee() throws Exception {
         Address address = new Address();
         address.setCity("Gdańsk");
-        return new Employee("Anna", "Zielińska", 28, "anna@example.com",
-                "aziel", "haslo1234", address, "Specjalista", new BigDecimal("4800"));
+        return new Employee("Anna", "Zielińska",
+                28, "anna@example.com",
+                "aziel", "haslo1234", address,
+                "Specjalista", new BigDecimal("4800"));
     }
 }

@@ -45,7 +45,8 @@ public class LogisticianPanel {
      * @param primaryStage główna scena przypisana do panelu
      */
     public LogisticianPanel(Stage primaryStage) {
-        logger.info("Tworzenie LogisticianPanel dla stage: {}", primaryStage);
+        logger.info("Tworzenie LogisticianPanel " +
+                "dla stage: {}", primaryStage);
 
         this.primaryStage = primaryStage;
         primaryStage.setMinWidth(700);
@@ -61,7 +62,8 @@ public class LogisticianPanel {
             primaryStage.getIcons().add(logoImage);
             logger.debug("Logo dodane jako ikona okna");
         } catch (Exception e) {
-            logger.error("Błąd podczas ładowania logo: {}", e.getMessage(), e);
+            logger.error("Błąd podczas ładowania logo: {}",
+                    e.getMessage(), e);
         }
 
         primaryStage.setTitle("Panel logistyka");
@@ -99,7 +101,8 @@ public class LogisticianPanel {
         VBox menu = new VBox(10);
         menu.setPadding(new Insets(10));
         menu.setAlignment(Pos.TOP_LEFT);
-        menu.setStyle("-fx-background-color: #E0E0E0; -fx-border-radius: 10;" +
+        menu.setStyle("-fx-background-color: #E0E0E0; " +
+                "-fx-border-radius: 10;" +
                 " -fx-background-radius: 10;");
 
         // logo
@@ -110,7 +113,8 @@ public class LogisticianPanel {
             ));
             logger.debug("Logo dla menu załadowane pomyślnie");
         } catch (Exception e) {
-            logger.error("Błąd podczas ładowania logo dla menu: {}", e.getMessage(), e);
+            logger.error("Błąd podczas ładowania logo " +
+                    "dla menu: {}", e.getMessage(), e);
         }
 
         ImageView logo = new ImageView(image);
@@ -121,7 +125,8 @@ public class LogisticianPanel {
         }
 
         // przyciski
-        Button inventoryButton = createStyledButton("Zarządzanie magazynem");
+        Button inventoryButton = createStyledButton("Zarządzanie " +
+                "magazynem");
         inventoryButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Zarządzanie magazynem'");
             setActiveButton(inventoryButton);
@@ -142,10 +147,13 @@ public class LogisticianPanel {
             controller.showInventoryReports();
         });
 
-        Button closeShiftBtn   = createStyledButton("Zamknij zmianę", "#E67E22");
-        closeShiftBtn.setOnAction(e -> controller.showCloseShiftPanel());
+        Button closeShiftBtn   = createStyledButton("Zamknij zmianę",
+                "#E67E22");
+        closeShiftBtn.setOnAction(
+                e -> controller.showCloseShiftPanel());
 
-        Button absenceButton = createStyledButton("Złóż wniosek o nieobecność");
+        Button absenceButton = createStyledButton("Złóż wniosek " +
+                "o nieobecność");
         absenceButton.setOnAction(e -> {
             logger.debug("Kliknięto przycisk 'Złóż wniosek o nieobecność'");
             setActiveButton(absenceButton);
@@ -153,7 +161,8 @@ public class LogisticianPanel {
         });
 
 
-        Button logoutButton = createStyledButton("Wyloguj", "#E74C3C");
+        Button logoutButton = createStyledButton("Wyloguj",
+                "#E74C3C");
         logoutButton.setOnAction(e -> {
             logger.info("Rozpoczęcie procesu wylogowania");
             controller.logout();
@@ -183,7 +192,8 @@ public class LogisticianPanel {
 
         button.setOnMouseEntered(e -> {
             logger.trace("Najechano na przycisk: '{}'", text);
-            ScaleTransition scale = new ScaleTransition(Duration.millis(200), button);
+            ScaleTransition scale = new ScaleTransition(
+                    Duration.millis(200), button);
             scale.setToX(1.1);
             scale.setToY(1.1);
             scale.play();
@@ -191,7 +201,8 @@ public class LogisticianPanel {
 
         button.setOnMouseExited(e -> {
             logger.trace("Zjechano z przycisku: '{}'", text);
-            ScaleTransition scale = new ScaleTransition(Duration.millis(200), button);
+            ScaleTransition scale = new ScaleTransition(
+                    Duration.millis(200), button);
             scale.setToX(1);
             scale.setToY(1);
             scale.play();
@@ -202,7 +213,8 @@ public class LogisticianPanel {
 
     private void animateFadeIn(VBox element, int duration) {
         logger.debug("Animowanie efektu fadeIn dla menu");
-        FadeTransition fade = new FadeTransition(Duration.millis(duration), element);
+        FadeTransition fade = new FadeTransition(
+                Duration.millis(duration), element);
         fade.setFromValue(0);
         fade.setToValue(1);
         fade.play();
@@ -210,8 +222,8 @@ public class LogisticianPanel {
 
     private void animateSlideDown(VBox element, int duration) {
         logger.debug("Animowanie efektu slideDown dla menu");
-        TranslateTransition slide = new TranslateTransition(Duration.millis(duration),
-                element);
+        TranslateTransition slide = new TranslateTransition(
+                Duration.millis(duration), element);
         slide.setFromY(-50);
         slide.setToY(0);
         slide.setInterpolator(Interpolator.EASE_BOTH);
@@ -228,8 +240,8 @@ public class LogisticianPanel {
     }
 
     /**
-     * Ustawia przycisk jako aktywny, przywracając domyślny styl poprzedniemu
-     * i nadając ciemniejszy odcień nowemu.
+     * Ustawia przycisk jako aktywny, przywracając domyślny
+     * styl poprzedniemu i nadając ciemniejszy odcień nowemu.
      */
     private void setActiveButton(Button button) {
         String defaultStyle = "-fx-background-color: #2980B9;" +

@@ -215,7 +215,8 @@ public class Product {
 
     /**
      * Zwraca reprezentację tekstową produktu.
-     * Zawiera informacje o identyfikatorze, nazwie, kategorii i cenie produktu.
+     * Zawiera informacje o identyfikatorze, nazwie, kategorii i cenie
+     * produktu.
      *
      * @return tekstowa reprezentacja produktu
      */

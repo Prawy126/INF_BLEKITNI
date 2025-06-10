@@ -27,13 +27,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EmployeeTest {
 
     @Test
-    void testConstructorInitialization() throws NameException, AgeException, PasswordException, SalaryException {
+    void testConstructorInitialization() throws NameException, AgeException,
+            PasswordException, SalaryException {
         Address address = new Address();
         address.setCity("Warszawa");
 
         Employee employee = new Employee(
                 "John", "Doe", 30, "john@example.com",
-                "jdoe", "pass12345", address, "Manager", new BigDecimal("5000.00")
+                "jdoe", "pass12345", address, "Manager",
+                new BigDecimal("5000.00")
         );
 
         assertEquals("John", employee.getName());
@@ -50,7 +52,8 @@ class EmployeeTest {
     }
 
     @Test
-    void testSettersAndGetters() throws PasswordException, SalaryException, AgeException, NameException {
+    void testSettersAndGetters() throws PasswordException, SalaryException,
+            AgeException, NameException {
         Employee employee = new Employee();
         Address address = new Address();
         address.setCity("Lublin");
@@ -77,13 +80,15 @@ class EmployeeTest {
     }
 
     @Test
-    void testStartSickLeave() throws NameException, AgeException, PasswordException, SalaryException {
+    void testStartSickLeave() throws NameException, AgeException,
+            PasswordException, SalaryException {
         Address address = new Address();
         address.setCity("Kraków");
 
         Employee employee = new Employee(
                 "Anna", "Nowak", 29, "anna@ex.com",
-                "anowak", "haslo1234", address, "Sprzedawca", new BigDecimal("4200")
+                "anowak", "haslo1234", address,
+                "Sprzedawca", new BigDecimal("4200")
         );
 
         Date startDate = new Date();
@@ -111,23 +116,27 @@ class EmployeeTest {
 
     /**
      * Testuje ustawianie i odczyt identyfikatora przez setId/getId.
-     * Wymaga, żeby w klasie Employee istniała metoda public void setId(int).
+     * Wymaga, żeby w klasie Employee istniała
+     * metoda public void setId(int).
      */
     @Test
     void testSetAndGetId() {
         Employee employee = new Employee();
         employee.setId(99);
-        assertEquals(99, employee.getId(), "setId/getId powinny działać poprawnie");
+        assertEquals(99, employee.getId(),
+                "setId/getId powinny działać poprawnie");
     }
 
     @Test
-    void testEndSickLeave() throws NameException, AgeException, PasswordException, SalaryException {
+    void testEndSickLeave() throws NameException, AgeException,
+            PasswordException, SalaryException {
         Address address = new Address();
         address.setCity("Gdańsk");
 
         Employee employee = new Employee(
                 "Tomasz", "Lis", 45, "tomasz@abc.pl",
-                "tlis", "bezpieczneHaslo", address, "Kierownik", new BigDecimal("7500")
+                "tlis", "bezpieczneHaslo", address,
+                "Kierownik", new BigDecimal("7500")
         );
 
         Date startDate = new Date();
@@ -143,15 +152,21 @@ class EmployeeTest {
 
         private List<Employee> employees = new ArrayList<>();
 
-        public Manager(String name, String surname, int age, Address address, String login, String password,
-                       String department, BigDecimal salary) throws PasswordException, SalaryException {
-            super(name, surname, age, address, login, password, department, salary);
+        public Manager(String name, String surname, int age, Address address,
+                       String login, String password,
+                       String department, BigDecimal salary)
+                throws PasswordException, SalaryException {
+            super(name, surname, age, address, login, password,
+                    department, salary);
         }
 
-        public Manager(String name, String surname, int age, Address address, String login, String password,
+        public Manager(String name, String surname, int age, Address address,
+                       String login, String password,
                        String department, BigDecimal salary,
-                       List<Employee> employees) throws PasswordException, SalaryException {
-            this(name, surname, age, address,login,  password, department, salary);
+                       List<Employee> employees)
+                throws PasswordException, SalaryException {
+            this(name, surname, age, address,login,  password,
+                    department, salary);
             this.employees = employees != null ? employees : new ArrayList<>();
         }
 
@@ -193,7 +208,8 @@ class EmployeeTest {
             employee.setAddress(newAddress);
         }
 
-        public void updatePassword(Employee employee, String newPassword)throws PasswordException {
+        public void updatePassword(Employee employee, String newPassword)
+                throws PasswordException {
             employee.setPassword(newPassword);
         }
 
@@ -201,7 +217,8 @@ class EmployeeTest {
             employee.setPosition(newDepartment);
         }
 
-        public void updateSalary(Employee employee, BigDecimal newSalary) throws SalaryException {
+        public void updateSalary(Employee employee, BigDecimal newSalary)
+                throws SalaryException {
             employee.setSalary(newSalary);
         }
 

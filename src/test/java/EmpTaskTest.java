@@ -162,14 +162,16 @@ public class EmpTaskTest {
     @Test
     @DisplayName("getSingleAssignee zwraca poprawnie pracownika")
     void shouldReturnSingleAssignee() {
-        EmpTask task = new EmpTask("T", new Date(), "S", "D", LocalTime.of(1, 0));
+        EmpTask task = new EmpTask("T", new Date(), "S",
+                "D", LocalTime.of(1, 0));
         Employee emp = new Employee(/* wypełnij parametry */);
         // symulujemy powiązanie
         TaskEmployee link = new TaskEmployee(task, emp);
         task.getTaskEmployees().add(link);
 
         assertSame(emp, task.getSingleAssignee(),
-                "getSingleAssignee() powinien zwrócić dokładnie tego pracownika");
+                "getSingleAssignee() powinien zwrócić dokładnie " +
+                        "tego pracownika");
     }
 
 }

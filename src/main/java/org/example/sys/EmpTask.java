@@ -55,7 +55,9 @@ public class EmpTask {
     @Column(name = "usuniety")
     private boolean usuniety = false;
 
-    /** zamiast osobnego pola employee: lista rekordów z tabeli łączącej */
+    /** zamiast osobnego pola employee: lista rekordów z tabeli
+     * łączącej
+     * */
     @OneToMany(mappedBy = "task", fetch
             = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<TaskEmployee> taskEmployees = new ArrayList<>();
@@ -125,7 +127,7 @@ public class EmpTask {
                 durationOfTheShift, priority);
     }
 
-    // ==================== Gettery i Settery z logowaniem ====================
+    // ================= Gettery i Settery z logowaniem ==================
 
     public int getId() {
         logger.trace("Pobrano ID zadania: {}", id);
@@ -211,7 +213,9 @@ public class EmpTask {
         return result;
     }
 
-    /** Wygodna do użycia metoda, gdy zawsze jest dokładnie jeden assignee: */
+    /** Wygodna do użycia metoda, gdy zawsze jest dokładnie jeden
+     * assignee:
+     * */
     public Employee getSingleAssignee() {
         if (taskEmployees.isEmpty()) {
             logger.warn("Brak przypisanego pracownika do zadania");

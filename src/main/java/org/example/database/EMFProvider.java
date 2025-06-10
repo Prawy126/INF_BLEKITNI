@@ -39,24 +39,31 @@ public class EMFProvider {
                 Map<String, String> properties = new HashMap<>();
 
                 // Konfiguracja połączenia
-                String jdbcUrl = String.format("jdbc:mysql://%s:%s/%s?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC",
+                String jdbcUrl = String.format("jdbc:mysql://%s:%s/%s?allow" +
+                                "PublicKeyRetrieval=true&useSSL=" +
+                                "false&serverTimezone=UTC",
                         DatabaseConfig.properties.getProperty("db.host"),
                         DatabaseConfig.properties.getProperty("db.port"),
                         DatabaseConfig.properties.getProperty("db.name"));
 
                 properties.put("jakarta.persistence.jdbc.url", jdbcUrl);
-                properties.put("jakarta.persistence.jdbc.user", DatabaseConfig.properties.getProperty("db.user"));
-                properties.put("jakarta.persistence.jdbc.password", DatabaseConfig.properties.getProperty("db.password"));
-                properties.put("jakarta.persistence.jdbc.driver", "com.mysql.cj.jdbc.Driver");
+                properties.put("jakarta.persistence.jdbc.user", DatabaseConfig
+                        .properties.getProperty("db.user"));
+                properties.put("jakarta.persistence.jdbc.password",
+                        DatabaseConfig.properties.getProperty("db.password"));
+                properties.put("jakarta.persistence.jdbc.driver",
+                        "com.mysql.cj.jdbc.Driver");
 
                 // Konfiguracja Hibernate
-                properties.put("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
+                properties.put("hibernate.dialect",
+                        "org.hibernate.dialect.MySQLDialect");
                 properties.put("hibernate.hbm2ddl.auto", "update");
                 properties.put("hibernate.show_sql", "false");
                 properties.put("hibernate.format_sql", "false");
 
                 // Utwórz własną implementację PersistenceUnitInfo
-                PersistenceUnitInfo persistenceUnitInfo = new PersistenceUnitInfo() {
+                PersistenceUnitInfo persistenceUnitInfo =
+                        new PersistenceUnitInfo() {
                     @Override
                     public String getPersistenceUnitName() {
                         return "myPU";
@@ -102,7 +109,8 @@ public class EMFProvider {
                         // Lista wszystkich klas encyjnych w projekcie
                         List<String> managedClasses = new ArrayList<>();
 
-                        // Dodaj tutaj wszystkie klasy encyjne, które używasz w projekcie
+                        // Dodaj tutaj wszystkie klasy encyjne,
+                        // które używasz w projekcie
                         managedClasses.add("org.example.sys.Employee");
                         managedClasses.add("org.example.sys.Person");
                         managedClasses.add("org.example.sys.Admin");
@@ -113,8 +121,10 @@ public class EMFProvider {
                         managedClasses.add("org.example.sys.Product");
                         managedClasses.add("org.example.sys.Warehouse");
                         managedClasses.add("org.example.sys.Transaction");
-                        managedClasses.add("org.example.sys.TransactionProduct");
-                        managedClasses.add("org.example.sys.TransactionProductId");
+                        managedClasses.add("org.example.sys." +
+                                "TransactionProduct");
+                        managedClasses.add("org.example.sys." +
+                                "TransactionProductId");
                         managedClasses.add("org.example.sys.AbsenceRequest");
                         managedClasses.add("org.example.sys.EmpTask");
                         managedClasses.add("org.example.sys.TaskEmployee");
@@ -122,7 +132,8 @@ public class EMFProvider {
                         managedClasses.add("org.example.sys.TechnicalIssue");
                         managedClasses.add("org.example.sys.Report");
                         managedClasses.add("org.example.sys.Order");
-                        managedClasses.add("org.example.sys.PasswordResetToken");
+                        managedClasses.add("org.example.sys." +
+                                "PasswordResetToken");
 
                         // dodaj pozostałe klasy encyjne, które używasz
 
@@ -162,7 +173,8 @@ public class EMFProvider {
                     }
 
                     @Override
-                    public void addTransformer(ClassTransformer classTransformer) {
+                    public void addTransformer(
+                            ClassTransformer classTransformer) {
                         // Nie implementujemy transformacji klas
                     }
 
@@ -173,12 +185,16 @@ public class EMFProvider {
                 };
 
                 // Utwórz EntityManagerFactory
-                HibernatePersistenceProvider provider = new HibernatePersistenceProvider();
-                emf = provider.createContainerEntityManagerFactory(persistenceUnitInfo, properties);
+                HibernatePersistenceProvider provider =
+                        new HibernatePersistenceProvider();
+                emf = provider.createContainerEntityManagerFactory(
+                        persistenceUnitInfo, properties);
 
-                System.out.println("[EMF] EntityManagerFactory utworzone pomyślnie");
+                System.out.println("[EMF] EntityManagerFactory " +
+                        "utworzone pomyślnie");
             } catch (Exception e) {
-                System.err.println("[EMF] BŁĄD podczas tworzenia EntityManagerFactory: " + e.getMessage());
+                System.err.println("[EMF] BŁĄD podczas tworzenia " +
+                        "EntityManagerFactory: " + e.getMessage());
                 e.printStackTrace();
                 throw e;
             }

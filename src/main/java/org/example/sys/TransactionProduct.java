@@ -22,7 +22,8 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.MapsId;
 
 /**
- * Klasa reprezentująca powiązanie między transakcją a produktem w systemie.
+ * Klasa reprezentująca powiązanie między transakcją a produktem w
+ * systemie.
  * Mapowana na tabelę "Transakcje_Produkty" w bazie danych.
  * Przechowuje informacje o transakcji, produkcie oraz ilości produktu.
  * Implementuje relację typu wiele-do-wielu z dodatkowymi atrybutami

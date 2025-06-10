@@ -63,7 +63,8 @@ public class TransactionProductRepository {
     }
 
     /**
-     * Znajduje pozycję transakcji po kluczu złożonym (transactionId + productId).
+     * Znajduje pozycję transakcji po kluczu złożonym
+     * (transactionId + productId).
      */
     public TransactionProduct findById(
             int transactionId,

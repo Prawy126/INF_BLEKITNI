@@ -59,8 +59,10 @@ class ReportRepositoryTest {
         sqlEnd2   = Date.valueOf(ldEnd2);
 
         // construct two reports
-        r1 = new Report("Raport sprzedaży", ldStart1, ldEnd1, employee, "raporty/sprzedaz_0425.pdf");
-        r2 = new Report("Raport pracowników", ldStart2, ldEnd2, employee, "raporty/pracownicy_0525.pdf");
+        r1 = new Report("Raport sprzedaży", ldStart1, ldEnd1,
+                employee, "raporty/sprzedaz_0425.pdf");
+        r2 = new Report("Raport pracowników", ldStart2, ldEnd2,
+                employee, "raporty/pracownicy_0525.pdf");
     }
 
     @Test
@@ -89,8 +91,10 @@ class ReportRepositoryTest {
 
         // reload
         Report reloaded = raportRepo.findReportById(r1.getId());
-        assertEquals("Raport sprzedaży — zmodyfikowany", reloaded.getReportType());
-        assertEquals("raporty/zmieniony_sprzedaz.pdf", reloaded.getFilePath());
+        assertEquals("Raport sprzedaży — zmodyfikowany",
+                reloaded.getReportType());
+        assertEquals("raporty/zmieniony_sprzedaz.pdf",
+                reloaded.getFilePath());
     }
 
     @Test
@@ -98,7 +102,9 @@ class ReportRepositoryTest {
     void shouldQueryReportsByVariousCriteria() {
         // by type fragment
         List<Report> byType = raportRepo.findByType("sprzedaży");
-        assertTrue(byType.stream().allMatch(r -> r.getReportType().toLowerCase().contains("sprzedaży")));
+        assertTrue(byType.stream().allMatch(
+                r -> r.getReportType().toLowerCase()
+                        .contains("sprzedaży")));
 
         // by start date range
         List<Report> byStart = raportRepo.findByStartDate(sqlStart1, sqlEnd1);
@@ -116,7 +122,8 @@ class ReportRepositoryTest {
 
         // by employee
         List<Report> byEmp = raportRepo.findByEmployee(employee.getId());
-        assertTrue(byEmp.stream().allMatch(r -> r.getEmployee().getId() == employee.getId()));
+        assertTrue(byEmp.stream().allMatch(
+                r -> r.getEmployee().getId() == employee.getId()));
 
         // by file path fragment
         List<Report> byPath = raportRepo.findByFilePath("pracownicy");
@@ -129,11 +136,13 @@ class ReportRepositoryTest {
     void shouldRemoveReportSuccessfully() {
         // delete r2
         assertDoesNotThrow(() -> raportRepo.removeReport(r2.getId()));
-        assertNull(raportRepo.findReportById(r2.getId()), "r2 should no longer exist");
+        assertNull(raportRepo.findReportById(r2.getId()),
+                "r2 should no longer exist");
 
         // final list should not contain r2
         List<Report> allAfter = raportRepo.getAllReports();
-        assertTrue(allAfter.stream().noneMatch(r -> r.getId() == r2.getId()));
+        assertTrue(allAfter.stream().noneMatch(
+                r -> r.getId() == r2.getId()));
     }
 
     @AfterAll

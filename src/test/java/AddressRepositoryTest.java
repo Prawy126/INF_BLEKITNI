@@ -64,24 +64,32 @@ public class AddressRepositoryTest {
         addressRepo.addAddress(address);
 
         // po persist powinno się ustawić ID > 0
-        assertTrue(address.getId() > 0, "ID adresu powinno być ustawione po zapisie");
+        assertTrue(address.getId() > 0, "ID adresu powinno " +
+                "być ustawione po zapisie");
 
         // === 2. Pobranie po ID i weryfikacja ===
         Address found = addressRepo.findAddressById(address.getId());
         assertNotNull(found, "Adres powinien zostać znaleziony po ID");
-        assertEquals("Testowo", found.getTown(), "Miejscowość powinna być zgodna");
-        assertEquals("Miastko", found.getCity(), "Miasto powinno być zgodne");
-        assertEquals("99-999", found.getZipCode(), "Kod pocztowy powinien być zgodny");
-        assertEquals("10B", found.getHouseNumber(), "Numer domu powinien być zgodny");
-        assertEquals("3", found.getApartmentNumber(), "Numer mieszkania powinien być zgodny");
+        assertEquals("Testowo", found.getTown(),
+                "Miejscowość powinna być zgodna");
+        assertEquals("Miastko", found.getCity(),
+                "Miasto powinno być zgodne");
+        assertEquals("99-999", found.getZipCode(),
+                "Kod pocztowy powinien być zgodny");
+        assertEquals("10B", found.getHouseNumber(),
+                "Numer domu powinien być zgodny");
+        assertEquals("3", found.getApartmentNumber(),
+                "Numer mieszkania powinien być zgodny");
 
         // === 3. Pobranie wszystkich adresów ===
         List<Address> all = addressRepo.getAllAddresses();
-        assertFalse(all.isEmpty(), "Lista adresów nie powinna być pusta");
+        assertFalse(all.isEmpty(), "Lista adresów nie powinna" +
+                " być pusta");
 
         // === 4. Usunięcie i weryfikacja usunięcia ===
         addressRepo.removeAddress(address.getId());
         Address deleted = addressRepo.findAddressById(address.getId());
-        assertNull(deleted, "Adres powinien zostać usunięty z repozytorium");
+        assertNull(deleted, "Adres powinien zostać usunięty " +
+                "z repozytorium");
     }
 }

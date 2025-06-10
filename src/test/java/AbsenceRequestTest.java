@@ -46,7 +46,10 @@ public class AbsenceRequestTest {
             request = new AbsenceRequest();
             request.setEmployee(mockEmployee);
 
-        } catch (NameException | AgeException | PasswordException | SalaryException e) {
+        } catch (NameException
+                 | AgeException
+                 | PasswordException
+                 | SalaryException e) {
             fail("Błąd podczas tworzenia mockEmployee: " + e.getMessage());
         }
     }
@@ -74,7 +77,8 @@ public class AbsenceRequestTest {
     @Test
     void testSetAndGetOpis() {
         request.setDescription("Nieobecność z powodu choroby");
-        assertEquals("Nieobecność z powodu choroby", request.getDescription());
+        assertEquals("Nieobecność z powodu choroby",
+                request.getDescription());
     }
 
     @Test
@@ -91,7 +95,8 @@ public class AbsenceRequestTest {
     @Test
     void testSetAndGetStatus() {
         request.setStatus(AbsenceRequest.RequestStatus.ACCEPTED);
-        assertEquals(AbsenceRequest.RequestStatus.ACCEPTED, request.getStatus());
+        assertEquals(AbsenceRequest.RequestStatus.ACCEPTED,
+                request.getStatus());
     }
 
     @Test

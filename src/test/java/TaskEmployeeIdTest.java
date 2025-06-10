@@ -24,8 +24,10 @@ class TaskEmployeeIdTest {
     void testConstructorAndGetters() {
         TaskEmployeeId id = new TaskEmployeeId(5, 10);
 
-        assertEquals(5,  id.getTaskId(),     "getTaskId() powinno zwrócić 5");
-        assertEquals(10, id.getEmployeeId(), "getEmployeeId() powinno zwrócić 10");
+        assertEquals(5,  id.getTaskId(),
+                "getTaskId() powinno zwrócić 5");
+        assertEquals(10, id.getEmployeeId(),
+                "getEmployeeId() powinno zwrócić 10");
     }
 
     /**
@@ -37,8 +39,11 @@ class TaskEmployeeIdTest {
         id.setTaskId(7);
         id.setEmployeeId(14);
 
-        assertEquals(7,  id.getTaskId(),     "getTaskId() powinno zwrócić 7 po wywołaniu setTaskId");
-        assertEquals(14, id.getEmployeeId(), "getEmployeeId() powinno zwrócić 14 po wywołaniu setEmployeeId");
+        assertEquals(7,  id.getTaskId(),
+                "getTaskId() powinno zwrócić 7 po wywołaniu setTaskId");
+        assertEquals(14, id.getEmployeeId(),
+                "getEmployeeId() powinno zwrócić 14 po wywołaniu " +
+                        "setEmployeeId");
     }
 
     /**
@@ -50,8 +55,12 @@ class TaskEmployeeIdTest {
         TaskEmployeeId id2 = new TaskEmployeeId(3, 4);
         TaskEmployeeId id3 = new TaskEmployeeId(4, 5);
 
-        assertEquals(id1, id2,                    "Obiekty o tych samych wartościach powinny być równe");
-        assertEquals(id1.hashCode(), id2.hashCode(), "hashCode() tych samych obiektów powinien być taki sam");
-        assertNotEquals(id1, id3,                 "Obiekty o różnych wartościach nie powinny być równe");
+        assertEquals(id1, id2,
+                "Obiekty o tych samych wartościach powinny być równe");
+        assertEquals(id1.hashCode(), id2.hashCode(),
+                "hashCode() tych samych obiektów powinien być " +
+                        "taki sam");
+        assertNotEquals(id1, id3,
+                "Obiekty o różnych wartościach nie powinny być równe");
     }
 }

@@ -39,7 +39,8 @@ class DatabaseInitializerTest {
 
             // Sprawdzenie czy jakaś przykładowa tabela istnieje
             ResultSet rs = stmt.executeQuery("SELECT * FROM Produkty");
-            assertTrue(rs.next(), "Tabela 'produkty' powinna istnieć po inicjalizacji.");
+            assertTrue(rs.next(), "Tabela 'produkty' powinna " +
+                    "istnieć po inicjalizacji.");
         }
     }
 

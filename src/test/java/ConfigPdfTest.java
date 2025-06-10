@@ -62,7 +62,8 @@ public class ConfigPdfTest {
 
     @Test
     void testSetAll_UpdatesAllValuesAtOnce() {
-        ConfigPdf.setAll("custom/logo.png", "custom/report.pdf", Sort.DATE);
+        ConfigPdf.setAll("custom/logo.png",
+                "custom/report.pdf", Sort.DATE);
 
         assertEquals("custom/logo.png", ConfigPdf.getPathLogo());
         assertEquals("custom/report.pdf", ConfigPdf.getPathPdf());

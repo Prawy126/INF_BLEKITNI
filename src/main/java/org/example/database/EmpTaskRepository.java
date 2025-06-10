@@ -69,7 +69,8 @@ public class EmpTaskRepository implements AutoCloseable {
     }
 
     /**
-     * Znajduje zadanie o podanym identyfikatorze, niezależnie od statusu usunięcia.
+     * Znajduje zadanie o podanym identyfikatorze, niezależnie od statusu
+     * usunięcia.
      * W przypadku błędu, wyjątek jest logowany i zwracana jest wartość null.
      *
      * @param id identyfikator zadania
@@ -94,11 +95,13 @@ public class EmpTaskRepository implements AutoCloseable {
     }
 
     /**
-     * Zwraca wszystkie nieusunięte zadania wraz z przypisanymi pracownikami i ich danymi.
+     * Zwraca wszystkie nieusunięte zadania wraz z przypisanymi pracownikami
+     * i ich danymi.
      * Zapobiega wystąpieniu LazyInitializationException przy dostępie
      * do powiązanych obiektów.
      *
-     * @return lista wszystkich nieusunietych zadań lub pusta lista w przypadku błędu
+     * @return lista wszystkich nieusunietych zadań lub pusta lista w
+     * przypadku błędu
      */
     public List<EmpTask> getAllTasks() {
         logger.debug("getAllTasks() – start");
@@ -127,9 +130,11 @@ public class EmpTaskRepository implements AutoCloseable {
     }
 
     /**
-     * Zwraca wszystkie usunięte zadania wraz z przypisanymi pracownikami i ich danymi.
+     * Zwraca wszystkie usunięte zadania wraz z przypisanymi pracownikami
+     * i ich danymi.
      *
-     * @return lista wszystkich usuniętych zadań lub pusta lista w przypadku błędu
+     * @return lista wszystkich usuniętych zadań lub pusta lista w
+     * przypadku błędu
      */
     public List<EmpTask> getAllDeletedTasks() {
         logger.debug("getAllDeletedTasks() – start");
@@ -266,7 +271,8 @@ public class EmpTaskRepository implements AutoCloseable {
      * Jeśli zadanie nie istnieje, operacja jest logowana jako ostrzeżenie.
      *
      * @param task obiekt EmpTask do usunięcia
-     * @deprecated Zalecane jest używanie metody softDeleteTask() zamiast tej metody.
+     * @deprecated Zalecane jest używanie metody softDeleteTask() zamiast
+     * tej metody.
      */
     @Deprecated
     public void removeTask(EmpTask task) {
@@ -308,7 +314,8 @@ public class EmpTaskRepository implements AutoCloseable {
         try {
             List<EmpTask> list = em.createQuery(
                             "SELECT t FROM EmpTask t " +
-                                    "WHERE LOWER(t.name) LIKE LOWER(CONCAT('%', :frag, '%')) " +
+                                    "WHERE LOWER(t.name) LIKE LOWER(" +
+                                    "CONCAT('%', :frag, '%')) " +
                                     "AND t.usuniety = false",
                             EmpTask.class)
                     .setParameter("frag", nameFragment)
@@ -492,7 +499,8 @@ public class EmpTaskRepository implements AutoCloseable {
     }
 
     /**
-     * Pobiera wszystkie nieusunięte zadania wraz z przypisanymi pracownikami i ich danymi.
+     * Pobiera wszystkie nieusunięte zadania wraz z przypisanymi pracownikami
+     * i ich danymi.
      * Metoda używana w panelu kierownika dla pełnego widoku zadań.
      * Zapobiega wystąpieniu LazyInitializationException.
      *
