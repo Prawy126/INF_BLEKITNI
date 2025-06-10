@@ -48,14 +48,14 @@ class WarehouseRepositoryTest {
         testProduct = new Product("Jogurt truskawkowy",
                 "Nabiał", 3.49);
         assertDoesNotThrow(() -> productRepo.addProduct(testProduct),
-                "Should add product without exception");
+                "Powinno się dodać produkt bez wyjątku");
         assertTrue(testProduct.getId() > 0,
-                "Product should have an ID");
+                "Produkt powinien mieć ID");
 
         // 2. add stock record
         testWarehouse = new Warehouse(testProduct, 120);
         assertDoesNotThrow(() -> warehouseRepo.addWarehouseState(testWarehouse),
-                "Should add warehouse record without exception");
+                "Powinno się dodać rekord magazynowy bez wyjątku");
         // no generated ID here (uses product PK), so ensure getProduct().getId() matches
         assertEquals(testProduct.getId(), testWarehouse.getProduct().getId());
     }
@@ -67,18 +67,20 @@ class WarehouseRepositoryTest {
         List<Warehouse> all = warehouseRepo.getAllStates();
         assertTrue(all.stream().anyMatch(
                 w -> w.getProduct().getId() == testProduct.getId()),
-                "New warehouse record should appear in list");
+                "Nowy rekord magazynu powinien pojawić się na liście");
 
         // 4. update quantity
         testWarehouse.setQuantity(100);
         assertDoesNotThrow(() -> warehouseRepo.updateState(testWarehouse),
-                "Should update warehouse record without exception");
+                "Powinno zaktualizować rekord w magazynie " +
+                        "bez wyjątku.");
 
         Warehouse reloaded = warehouseRepo
                 .findStateByProductId(testProduct.getId());
-        assertNotNull(reloaded, "Reloaded record must not be null");
+        assertNotNull(reloaded, "Przeładowanie zapisu nie może " +
+                "być puste");
         assertEquals(100, reloaded.getQuantity(),
-                "Quantity should be updated to 100");
+                "Ilość powinna zostać zaktualizowana do 100");
     }
 
     @Test
@@ -88,19 +90,19 @@ class WarehouseRepositoryTest {
         List<Warehouse> eq100 = warehouseRepo.findByQuantity(100);
         assertTrue(eq100.stream()
                 .allMatch(w -> w.getQuantity() == 100),
-                "All must have quantity 100");
+                "Wszystko musi mieć ilość 100");
 
         // quantity < 110
         List<Warehouse> lt110 = warehouseRepo.findByQuantityLowerThan(110);
         assertTrue(lt110.stream()
                 .allMatch(w -> w.getQuantity() < 110),
-                "All must have quantity < 110");
+                "Wszystkie muszą mieć ilość < 110");
 
         // quantity > 50
         List<Warehouse> gt50 = warehouseRepo.findByQuantityGreaterThan(50);
         assertTrue(gt50.stream()
                 .allMatch(w -> w.getQuantity() > 50),
-                "All must have quantity > 50");
+                "Wszystkie muszą mieć ilość > 50");
 
         // between 80 and 120
         List<Warehouse> between = warehouseRepo.findByQuantityBetween(80, 120);
@@ -108,26 +110,26 @@ class WarehouseRepositoryTest {
                         .anyMatch(
                                 w -> w.getProduct().getId()
                                         == testProduct.getId()),
-                "Record should appear in [80,120] range");
+                "Rekord powinien pojawić się w zakresie [80,120]");
     }
 
     @Test
     @Order(4)
     void testDelete() {
         assertDoesNotThrow(() -> warehouseRepo.removeState(testProduct.getId()),
-                "Should delete warehouse record without exception");
+                "Należy usunąć rekord magazynu bez wyjątku");
 
         Warehouse gone = warehouseRepo
                 .findStateByProductId(testProduct.getId());
-        assertNull(gone, "Deleted warehouse record " +
-                "should no longer be found");
+        assertNull(gone, "Usunięty rekord magazynu nie powinien " +
+                "być już znaleziony");
 
         List<Warehouse> allAfter = warehouseRepo.getAllStates();
         assertTrue(allAfter.stream()
                         .noneMatch(
                                 w -> w.getProduct().getId()
                                         == testProduct.getId()),
-                "Deleted record must not appear in list");
+                "Usunięty rekord nie może pojawić się na liście");
     }
 
     @AfterAll

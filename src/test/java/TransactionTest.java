@@ -34,8 +34,8 @@ class TransactionTest {
         // ustawiamy jakąś datę, choć nie jest używana w tych testach
         transaction.setDate(new Date());
 
-        p1 = new Product("Widget", "Gadgets", 9.99);
-        p2 = new Product("Gizmo",  "Gadgets", 19.95);
+        p1 = new Product("Widżet", "Gadżety", 9.99);
+        p2 = new Product("Wihajster",  "Gadżety", 19.95);
 
         // w testach CompositeId i TransactionProductTest zależy jeszcze od tego,
         // żeby transaction.getId() zwracało cokolwiek – w razie czego można tu
@@ -48,7 +48,7 @@ class TransactionTest {
      * czy przechowuje poprawną ilość i referencję do Transaction.
      */
     @Test
-    @DisplayName("addProduct should create a TransactionProduct link")
+    @DisplayName("addProduct powinien utworzyć link TransactionProduct")
     void testAddProduct() {
         transaction.addProduct(p1, 3);
 
@@ -69,7 +69,7 @@ class TransactionTest {
      * czy removeProduct usuwa tylko wskazany produkt.
      */
     @Test
-    @DisplayName("removeProduct should remove only the specified " +
+    @DisplayName("removeProduct powinien usuwać tylko określony " +
             "TransactionProduct")
     void testRemoveProduct() {
         transaction.addProduct(p1, 2);
@@ -91,8 +91,8 @@ class TransactionTest {
      * getProducts() powinno odzwierciedlać kolejność dodawania.
      */
     @Test
-    @DisplayName("getProducts should return list of Products " +
-            "in insertion order")
+    @DisplayName("getProducts powinien zwracać listę produktów w kolejności " +
+            "wstawiania")
     void testGetProducts() {
         transaction.addProduct(p1, 1);
         transaction.addProduct(p2, 5);

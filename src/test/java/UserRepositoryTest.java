@@ -76,9 +76,9 @@ class  UserRepositoryTest {
         testAddress.setApartmentNumber("5");
 
         assertDoesNotThrow(() -> addressRepo.addAddress(testAddress),
-                "Should persist address without exception");
+                "Powinien zapisać adres bez wyjątku");
         assertTrue(testAddress.getId() > 0,
-                "Address should get an ID");
+                "Adres powinien otrzymać ID");
 
         /* 2. Dodajemy pracownika powiązanego z tym adresem  */
         testEmployee = new Employee(
@@ -87,9 +87,9 @@ class  UserRepositoryTest {
                 new BigDecimal("3200.00")
         );
         assertDoesNotThrow(() -> userRepo.addEmployee(testEmployee),
-                "Should persist employee without exception");
+                "Należy utrzymać pracownika bez wyjątku");
         assertTrue(testEmployee.getId() > 0,
-                "Employee should get an ID");
+                "Pracownik powinien otrzymać ID");
     }
 
     /* :::::::::::::::::::::::::::::::
@@ -101,18 +101,19 @@ class  UserRepositoryTest {
         List<Employee> kasjerzy = userRepo.getCashiers();
         assertTrue(kasjerzy.stream().anyMatch(
                 e -> e.getId() == testEmployee.getId()),
-                "New cashier should appear in kasjerzy");
+                "Nowy kasjer powinien pojawić się w kasjerzy");
 
         /* 4. wyszukaj tylko po loginie  */
         Employee byLogin = userRepo.findByLogin(TEST_LOGIN);
-        assertNotNull(byLogin, "Should find employee by login");
+        assertNotNull(byLogin, "Powinien znaleźć pracownika według " +
+                "loginu");
         assertEquals(testEmployee.getId(), byLogin.getId());
 
         /* 5. wyszukaj po loginie i haśle  */
         Employee byLoginPass
                 = userRepo.findByLoginAndPassword(TEST_LOGIN, TEST_PASSWORD);
         assertNotNull(byLoginPass,
-                "Login + password should authenticate");
+                "Login i hasło powinny autoryzować");
         assertEquals(testEmployee.getId(), byLoginPass.getId());
     }
 
@@ -124,7 +125,7 @@ class  UserRepositoryTest {
         /* 6. getCurrentEmployee  */
         Employee current = userRepo.getCurrentEmployee();
         assertNotNull(current,
-                "Current logged-in employee must be set");
+                "Bieżący zalogowany pracownik musi być ustawiony");
         assertEquals(testEmployee.getId(), current.getId());
 
         /* 7. znajdź po ID  */
@@ -197,12 +198,12 @@ class  UserRepositoryTest {
         assertDoesNotThrow(() -> userRepo.removeEmployee(testEmployee));
         Employee deleted = userRepo.findById(testEmployee.getId());
         assertNull(deleted,
-                "Soft-deleted employee should not be returned");
+                "Miękko usunięty pracownik nie powinien być zwracany");
 
         /*  Adres powinien pozostać  */
         Address fetched = addressRepo.findAddressById(testAddress.getId());
         assertNotNull(fetched,
-                "Address should remain after employee deletion");
+                "Adres powinien pozostać po usunięciu pracownika");
     }
 
     /* :::::::::::::::::::::::::::::::
