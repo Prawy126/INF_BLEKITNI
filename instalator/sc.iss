@@ -22,10 +22,10 @@ DefaultDirName={autopf}\{#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 DisableProgramGroupPage=no
 ; Komentuje te pliki, jeśli nie istnieją usuń średnika jeśli masz te pliki
-LicenseFile=C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\license.txt
-InfoBeforeFile=C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\przed.txt
-InfoAfterFile=C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\po.txt
-OutputDir=C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\instalator
+LicenseFile=C:\Users\jakub\Pliki\INF_BLEKITNI\license.txt
+InfoBeforeFile=C:\Users\jakub\Pliki\INF_BLEKITNI\przed.txt
+InfoAfterFile=C:\Users\jakub\Pliki\INF_BLEKITNI\po.txt
+OutputDir=C:\Users\jakub\Pliki\INF_BLEKITNI\instalator
 OutputBaseFilename=stonka-setup
 SetupIconFile=C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\src\main\resources\distribution\stonka.ico
 Compression=lzma
