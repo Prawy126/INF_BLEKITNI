@@ -1,6 +1,4 @@
 ; Skrypt instalacyjny dla aplikacji Stonka
-; Wygenerowany: 2025-06-09 15:29:24
-; Autor: JakubOpar
 
 #define MyAppName "Stonka"
 #define MyAppVersion "1.0"
@@ -21,7 +19,7 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 DisableProgramGroupPage=no
-; Komentuje te pliki, jeśli nie istnieją usuń średnika jeśli masz te pliki
+
 LicenseFile=C:\Users\jakub\Pliki\INF_BLEKITNI\license.txt
 InfoBeforeFile=C:\Users\jakub\Pliki\INF_BLEKITNI\przed.txt
 InfoAfterFile=C:\Users\jakub\Pliki\INF_BLEKITNI\po.txt
