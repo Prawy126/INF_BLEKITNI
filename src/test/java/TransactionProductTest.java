@@ -36,15 +36,21 @@ class TransactionProductTest {
         tp.setProduct(prod);
         tp.setQuantity(5);
 
-        assertNotNull(tp.getTransaction(), "transaction powinien być nie-null");
-        assertEquals(10, tp.getTransaction().getId(), "getTransaction().getId() powinno zwrócić 10");
-        assertNotNull(tp.getProduct(), "product powinien być nie-null");
-        assertEquals(20, tp.getProduct().getId(), "getProduct().getId() powinno zwrócić 20");
-        assertEquals(5, tp.getQuantity(), "getQuantity() powinno zwrócić 5");
+        assertNotNull(tp.getTransaction(),
+                "transaction powinien być nie-null");
+        assertEquals(10, tp.getTransaction().getId(),
+                "getTransaction().getId() powinno zwrócić 10");
+        assertNotNull(tp.getProduct(),
+                "product powinien być nie-null");
+        assertEquals(20, tp.getProduct().getId(),
+                "getProduct().getId() powinno zwrócić 20");
+        assertEquals(5, tp.getQuantity(),
+                "getQuantity() powinno zwrócić 5");
     }
 
     /**
-     * Testuje konstruktor pełny (transaction, product, quantity) i poprawność id.
+     * Testuje konstruktor pełny
+     * (transaction, product, quantity) i poprawność id.
      */
     @Test
     void testFullConstructorAndCompositeId() {
@@ -55,9 +61,12 @@ class TransactionProductTest {
 
         TransactionProduct tp = new TransactionProduct(tx, prod, 42);
 
-        TransactionProductId expectedId = new TransactionProductId(7, 11);
-        assertEquals(expectedId, tp.getId(), "id powinno być (7,11)");
-        assertEquals(42, tp.getQuantity(), "quantity powinno być 42");
+        TransactionProductId expectedId = new TransactionProductId(
+                7, 11);
+        assertEquals(expectedId, tp.getId(),
+                "id powinno być (7,11)");
+        assertEquals(42, tp.getQuantity(),
+                "quantity powinno być 42");
     }
 
     /**
@@ -66,9 +75,11 @@ class TransactionProductTest {
     @Test
     void testSetAndGetId() {
         TransactionProduct tp = new TransactionProduct();
-        TransactionProductId id = new TransactionProductId(3, 4);
+        TransactionProductId id = new TransactionProductId(
+                3, 4);
         tp.setId(id);
-        assertEquals(id, tp.getId(), "getId() powinno zwrócić ustawione id");
+        assertEquals(id, tp.getId(),
+                "getId() powinno zwrócić ustawione id");
     }
 
     /**
@@ -78,9 +89,11 @@ class TransactionProductTest {
     void testUpdateQuantity() {
         TransactionProduct tp = new TransactionProduct();
         tp.setQuantity(1);
-        assertEquals(1, tp.getQuantity(), "quantity powinno być 1");
+        assertEquals(1, tp.getQuantity(),
+                "quantity powinno być 1");
 
         tp.setQuantity(99);
-        assertEquals(99, tp.getQuantity(), "quantity powinno zostać zaktualizowane do 99");
+        assertEquals(99, tp.getQuantity(),
+                "quantity powinno zostać zaktualizowane do 99");
     }
 }

@@ -32,7 +32,8 @@ class LogisticianTest {
         address.setCity("Warszawa");
 
         employee = new Employee(
-                "Anna", "Kowalska", 30, "anna@example.com",
+                "Anna", "Kowalska",
+                30, "anna@example.com",
                 "akowalska", "securePass123", address,
                 "Logistyk", new BigDecimal("5000.00")
         );

@@ -17,15 +17,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PasswordHasherTest {
 
     @Test
-    void testHashPassword_Generates64CharacterHash() throws NoSuchAlgorithmException, InvalidKeyException {
+    void testHashPassword_Generates64CharacterHash()
+            throws NoSuchAlgorithmException, InvalidKeyException {
         String password = "test";
         int userId = 123;
         String hash = PasswordHasher.hashPassword(password, userId);
-        assertEquals(64, hash.length(), "HMAC-SHA256 powinien generować 64-znakowy hash");
+        assertEquals(64, hash.length(),
+                "HMAC-SHA256 powinien generować 64-znakowy hash");
     }
 
     @Test
-    void testVerifyPassword_CorrectPassword_ReturnsTrue() throws NoSuchAlgorithmException, InvalidKeyException {
+    void testVerifyPassword_CorrectPassword_ReturnsTrue()
+            throws NoSuchAlgorithmException, InvalidKeyException {
         String password = "test";
         int userId = 123;
         String storedHash = PasswordHasher.hashPassword(password, userId);
@@ -33,25 +36,32 @@ class PasswordHasherTest {
     }
 
     @Test
-    void testVerifyPassword_WrongPassword_ReturnsFalse() throws NoSuchAlgorithmException, InvalidKeyException {
+    void testVerifyPassword_WrongPassword_ReturnsFalse()
+            throws NoSuchAlgorithmException, InvalidKeyException {
         String correctPassword = "test";
         String wrongPassword = "wrong";
         int userId = 123;
-        String storedHash = PasswordHasher.hashPassword(correctPassword, userId);
-        assertFalse(PasswordHasher.verifyPassword(storedHash, wrongPassword, userId));
+        String storedHash = PasswordHasher.hashPassword(
+                correctPassword, userId);
+        assertFalse(PasswordHasher.verifyPassword(
+                storedHash, wrongPassword, userId));
     }
 
     @Test
-    void testVerifyPassword_DifferentUserId_ReturnsFalse() throws NoSuchAlgorithmException, InvalidKeyException {
+    void testVerifyPassword_DifferentUserId_ReturnsFalse()
+            throws NoSuchAlgorithmException, InvalidKeyException {
         String password = "test";
         int originalUserId = 123;
         int differentUserId = 456;
-        String storedHash = PasswordHasher.hashPassword(password, originalUserId);
-        assertFalse(PasswordHasher.verifyPassword(storedHash, password, differentUserId));
+        String storedHash = PasswordHasher.hashPassword(
+                password, originalUserId);
+        assertFalse(PasswordHasher.verifyPassword(
+                storedHash, password, differentUserId));
     }
 
     @Test
-    void testHashPassword_NonAsciiCharacters_ReturnsValidHash() throws NoSuchAlgorithmException, InvalidKeyException {
+    void testHashPassword_NonAsciiCharacters_ReturnsValidHash()
+            throws NoSuchAlgorithmException, InvalidKeyException {
         String password = "pa$$wörd";
         int userId = 123;
         String hash = PasswordHasher.hashPassword(password, userId);
@@ -60,7 +70,8 @@ class PasswordHasherTest {
     }
 
     @Test
-    void testVerifyPassword_ZeroUserId_ReturnsTrue() throws NoSuchAlgorithmException, InvalidKeyException {
+    void testVerifyPassword_ZeroUserId_ReturnsTrue()
+            throws NoSuchAlgorithmException, InvalidKeyException {
         String password = "test";
         int userId = 0;
         String storedHash = PasswordHasher.hashPassword(password, userId);

@@ -43,10 +43,14 @@ class TaskEmployeeTest {
         te.setTask(task);
         te.setEmployee(employee);
 
-        assertNotNull(te.getTask(), "getTask() nie powinno zwracać null");
-        assertEquals(100, te.getTask().getId(), "Id zadania powinno wynosić 100");
-        assertNotNull(te.getEmployee(), "getEmployee() nie powinno zwracać null");
-        assertEquals(200, te.getEmployee().getId(), "Id pracownika powinno wynosić 200");
+        assertNotNull(te.getTask(), "getTask() nie powinno zwracać " +
+                "null");
+        assertEquals(100, te.getTask().getId(), "Id zadania " +
+                "powinno wynosić 100");
+        assertNotNull(te.getEmployee(), "getEmployee() nie powinno " +
+                "zwracać null");
+        assertEquals(200, te.getEmployee().getId(),
+                "Id pracownika powinno wynosić 200");
     }
 
     /**
@@ -57,9 +61,12 @@ class TaskEmployeeTest {
         TaskEmployee te2 = new TaskEmployee(task, employee);
         TaskEmployeeId expectedId = new TaskEmployeeId(100, 200);
 
-        assertEquals(expectedId, te2.getId(), "Id powinno być złożone z (100,200)");
-        assertSame(task, te2.getTask(), "getTask() powinno zwrócić obiekt Task przekazany do konstruktora");
-        assertSame(employee, te2.getEmployee(), "getEmployee() powinno zwrócić obiekt Employee przekazany do konstruktora");
+        assertEquals(expectedId, te2.getId(), "Id powinno być " +
+                "złożone z (100,200)");
+        assertSame(task, te2.getTask(), "getTask() powinno zwrócić " +
+                "obiekt Task przekazany do konstruktora");
+        assertSame(employee, te2.getEmployee(), "getEmployee() " +
+                "powinno zwrócić obiekt Employee przekazany do konstruktora");
     }
 
     /**
@@ -70,6 +77,7 @@ class TaskEmployeeTest {
         TaskEmployeeId id = new TaskEmployeeId(1, 2);
         te.setId(id);
 
-        assertEquals(id, te.getId(), "getId() powinno zwrócić ustawione id");
+        assertEquals(id, te.getId(), "getId() powinno zwrócić " +
+                "ustawione id");
     }
 }

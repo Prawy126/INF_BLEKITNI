@@ -43,7 +43,9 @@ class ReportTest {
         LocalDate start = LocalDate.of(2025, 5, 1);
         LocalDate end = LocalDate.of(2025, 5, 31);
 
-        Report report = new Report("Miesięczny", start, end, employee, "plik.pdf");
+        Report report = new Report(
+                "Miesięczny", start, end,
+                employee, "plik.pdf");
 
         assertEquals("Miesięczny", report.getReportType());
         assertEquals(start, report.getStartDate());

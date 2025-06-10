@@ -54,7 +54,8 @@ public class OrderRepositoryTest {
         userRepo    = new UserRepository();
 
         // 1) produkt testowy
-        product = new Product("Testowy produkt", "Testowa kategoria", 5.99);
+        product = new Product("Testowy produkt",
+                "Testowa kategoria", 5.99);
         productRepo.addProduct(product);
 
         // 2) pierwszy dostępny pracownik
@@ -110,12 +111,14 @@ public class OrderRepositoryTest {
         // wg produktu
         assertTrue(orderRepo.findOrdersByProductId(product.getId())
                 .stream()
-                .allMatch(o -> o.getProduct().getId() == product.getId()));
+                .allMatch(
+                        o -> o.getProduct().getId() == product.getId()));
 
         // wg pracownika
         assertTrue(orderRepo.findOrdersByEmployeeId(employee.getId())
                 .stream()
-                .allMatch(o -> o.getEmployee().getId() == employee.getId()));
+                .allMatch(
+                        o -> o.getEmployee().getId() == employee.getId()));
 
         // wg dokładnej daty
         assertTrue(orderRepo.findOrdersByDate(localOrderDate)

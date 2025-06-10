@@ -31,8 +31,10 @@ class CashierTest {
     void setUp() throws Exception {
         Address address = new Address();
         address.setCity("Łódź");
-        employee = new Employee("Kamil", "Nowak", 29, "kamil@example.com",
-                "kamiln", "silneHaslo1", address, "Kasjer", new BigDecimal("4000"));
+        employee = new Employee("Kamil", "Nowak",
+                29, "kamil@example.com",
+                "kamiln", "silneHaslo1", address,
+                "Kasjer", new BigDecimal("4000"));
         cashier = new Cashier(employee);
     }
 
@@ -44,7 +46,8 @@ class CashierTest {
     @Test
     void testUpdatePassword() throws PasswordException {
         cashier.updatePassword("NoweHaslo123");
-        assertEquals("NoweHaslo123", cashier.getEmployee().getPassword());
+        assertEquals("NoweHaslo123",
+                cashier.getEmployee().getPassword());
     }
 
     @Test

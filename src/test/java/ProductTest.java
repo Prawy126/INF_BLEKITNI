@@ -30,16 +30,20 @@ class ProductTest {
     }
 
     /**
-     * Testuje, czy konstruktor parametryczny ustawia poprawnie pola name, category i price.
+     * Testuje, czy konstruktor parametryczny ustawia poprawnie
+     * pola name, category i price.
      */
     @Test
     @DisplayName("constructor should initialize fields correctly")
     void testParameterizedConstructor() {
         Product product = createTestProduct();
 
-        assertEquals("Chleb", product.getName(),    "Nazwa powinna być 'Chleb'");
-        assertEquals("Pieczywo", product.getCategory(), "Kategoria powinna być 'Pieczywo'");
-        assertEquals(BigDecimal.valueOf(3.49), product.getPrice(), "Cena powinna być 3.49");
+        assertEquals("Chleb", product.getName(),
+                "Nazwa powinna być 'Chleb'");
+        assertEquals("Pieczywo", product.getCategory(),
+                "Kategoria powinna być 'Pieczywo'");
+        assertEquals(BigDecimal.valueOf(3.49), product.getPrice(),
+                "Cena powinna być 3.49");
     }
 
     /**
@@ -50,13 +54,17 @@ class ProductTest {
     void testToString() {
         Product product = createTestProduct();
         String s = product.toString();
-        assertTrue(s.contains("Chleb"),     "toString powinien zawierać 'Chleb'");
-        assertTrue(s.contains("Pieczywo"),  "toString powinien zawierać 'Pieczywo'");
-        assertTrue(s.contains("3.49"),      "toString powinien zawierać '3.49'");
+        assertTrue(s.contains("Chleb"),
+                "toString powinien zawierać 'Chleb'");
+        assertTrue(s.contains("Pieczywo"),
+                "toString powinien zawierać 'Pieczywo'");
+        assertTrue(s.contains("3.49"),
+                "toString powinien zawierać '3.49'");
     }
 
     /**
-     * Testuje settery i gettery dla pola name, category i price (po BigDecimal).
+     * Testuje settery i gettery dla pola
+     * name, category i price (po BigDecimal).
      */
     @Test
     @DisplayName("setters and getters for name, category, price should work")
@@ -66,9 +74,12 @@ class ProductTest {
         product.setCategory("Nabiał");
         product.setPrice(BigDecimal.valueOf(2.99));
 
-        assertEquals("Mleko", product.getName(),      "Name setter/getter nie działa");
-        assertEquals("Nabiał", product.getCategory(), "Category setter/getter nie działa");
-        assertEquals(BigDecimal.valueOf(2.99), product.getPrice(), "Price setter/getter nie działa");
+        assertEquals("Mleko", product.getName(),
+                "Name setter/getter nie działa");
+        assertEquals("Nabiał", product.getCategory(),
+                "Category setter/getter nie działa");
+        assertEquals(BigDecimal.valueOf(2.99), product.getPrice(),
+                "Price setter/getter nie działa");
     }
 
     /**
@@ -119,6 +130,7 @@ class ProductTest {
     void testSetAndGetId() {
         Product product = createTestProduct();
         product.setId(123);
-        assertEquals(123, product.getId(), "Id powinno zostać ustawione na 123");
+        assertEquals(123, product.getId(),
+                "Id powinno zostać ustawione na 123");
     }
 }

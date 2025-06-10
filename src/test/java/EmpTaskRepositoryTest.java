@@ -47,14 +47,20 @@ class EmpTaskRepositoryTest {
         Date d2 = sdf.parse("2025-05-03");
         Date d3 = sdf.parse("2025-05-05");
 
-        zad1 = new EmpTask("Przyjęcie dostawy", d1, "Nowe", "Przyjąć dostawę mleka.", LocalTime.of(2, 30));
-        zad2 = new EmpTask("Sprawdzenie stanów", d2, "Nowe", "Sprawdzić ilość jogurtów.",    LocalTime.of(1, 0));
-        zad3 = new EmpTask("Aktualizacja cen",  d3, "W trakcie", "Aktualizacja cen nabiału.",  null);
+        zad1 = new EmpTask("Przyjęcie dostawy", d1, "Nowe",
+                "Przyjąć dostawę mleka.", LocalTime.of(2, 30));
+        zad2 = new EmpTask("Sprawdzenie stanów", d2, "Nowe",
+                "Sprawdzić ilość jogurtów.",    LocalTime.of(1, 0));
+        zad3 = new EmpTask("Aktualizacja cen",  d3, "W trakcie",
+                "Aktualizacja cen nabiału.",  null);
 
         // persist them
-        assertDoesNotThrow(() -> taskRepo.addTask(zad1), "Should add zad1");
-        assertDoesNotThrow(() -> taskRepo.addTask(zad2), "Should add zad2");
-        assertDoesNotThrow(() -> taskRepo.addTask(zad3), "Should add zad3");
+        assertDoesNotThrow(() -> taskRepo.addTask(zad1),
+                "Should add zad1");
+        assertDoesNotThrow(() -> taskRepo.addTask(zad2),
+                "Should add zad2");
+        assertDoesNotThrow(() -> taskRepo.addTask(zad3),
+                "Should add zad3");
 
         // make sure they got IDs
         assertTrue(zad1.getId() > 0);
@@ -66,27 +72,36 @@ class EmpTaskRepositoryTest {
     @Order(1)
     void testFindAllAndSearch() {
         List<EmpTask> all = taskRepo.getAllTasks();
-        assertTrue(all.size() >= 3, "Should have at least 3 tasks");
+        assertTrue(all.size() >= 3,
+                "Should have at least 3 tasks");
 
         // by name fragment
         List<EmpTask> byName = taskRepo.findByName("Sprawdzenie");
-        assertTrue(byName.stream().allMatch(t -> t.getName().contains("Sprawdzenie")));
+        assertTrue(byName.stream().allMatch(
+                t -> t.getName().contains("Sprawdzenie")));
 
         // by exact date
-        List<EmpTask> byDate = taskRepo.findByDate(assertDoesNotThrow(() -> sdf.parse("2025-05-03")));
-        assertTrue(byDate.stream().allMatch(t -> sdf.format(t.getDate()).equals("2025-05-03")));
+        List<EmpTask> byDate = taskRepo.findByDate(
+                assertDoesNotThrow(() -> sdf.parse("2025-05-03")));
+        assertTrue(byDate.stream().allMatch(
+                t -> sdf.format(t.getDate()).equals("2025-05-03")));
 
         // by status
         List<EmpTask> byStatus = taskRepo.findByStatus("Nowe");
-        assertTrue(byStatus.stream().allMatch(t -> t.getStatus().equals("Nowe")));
+        assertTrue(byStatus.stream().allMatch(
+                t -> t.getStatus().equals("Nowe")));
 
         // by description fragment
-        List<EmpTask> byDesc = taskRepo.findByDescription("mleka");
-        assertTrue(byDesc.stream().allMatch(t -> t.getDescription().toLowerCase().contains("mleka")));
+        List<EmpTask> byDesc = taskRepo.findByDescription(
+                "mleka");
+        assertTrue(byDesc.stream().allMatch(
+                t -> t.getDescription().toLowerCase()
+                        .contains("mleka")));
 
         // by shift duration between 01:00 and 03:00
         List<EmpTask> byTime = taskRepo.findByTimeShiftDuration(
-                LocalTime.of(1, 0), LocalTime.of(3, 0));
+                LocalTime.of(1, 0),
+                LocalTime.of(3, 0));
         assertTrue(
                 byTime.stream().allMatch(t -> {
                     LocalTime ct = t.getDurationOfTheShift();
@@ -121,7 +136,8 @@ class EmpTaskRepositoryTest {
 
         // remaining list
         List<EmpTask> remaining = taskRepo.getAllTasks();
-        assertTrue(remaining.stream().noneMatch(t -> t.getId() == zad2.getId()));
+        assertTrue(remaining.stream().noneMatch(
+                t -> t.getId() == zad2.getId()));
     }
 
     @AfterAll

@@ -108,12 +108,14 @@ class AdminTest {
             addr.setCity("Poznań");
 
             return new Employee(
-                    "Anna", "Kowalska", 28, "anna@wp.pl",
+                    "Anna", "Kowalska",
+                    28, "anna@wp.pl",
                     "akowal", "pass12345", addr,
                     "Sprzedawca", new BigDecimal("4200")
             );
         } catch (Exception e) {
-            throw new RuntimeException("Błąd przy tworzeniu przykładowego pracownika", e);
+            throw new RuntimeException("Błąd przy tworzeniu przykładowego " +
+                    "pracownika", e);
         }
     }
 
@@ -123,12 +125,14 @@ class AdminTest {
             addr.setCity("Gdańsk");
 
             return new Employee(
-                    "Marek", "Nowicki", 32, "marek@wp.pl",
+                    "Marek", "Nowicki",
+                    32, "marek@wp.pl",
                     "mnow", "pass67890", addr,
                     "Magazynier", new BigDecimal("3900")
             );
         } catch (Exception e) {
-            throw new RuntimeException("Błąd przy tworzeniu przykładowego pracownika 2", e);
+            throw new RuntimeException("Błąd przy tworzeniu przykładowego " +
+                    "pracownika 2", e);
         }
     }
 }

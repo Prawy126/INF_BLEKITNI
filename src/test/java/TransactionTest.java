@@ -53,11 +53,13 @@ class TransactionTest {
         transaction.addProduct(p1, 3);
 
         List<TransactionProduct> tps = transaction.getTransactionProducts();
-        assertEquals(1, tps.size(), "Powinien być dokładnie jeden TransactionProduct");
+        assertEquals(1, tps.size(),
+                "Powinien być dokładnie jeden TransactionProduct");
 
         TransactionProduct tp = tps.get(0);
         assertEquals(p1, tp.getProduct(), "Product powinien być p1");
-        assertEquals(3,  tp.getQuantity(), "Quantity powinno być 3");
+        assertEquals(3,  tp.getQuantity(),
+                "Quantity powinno być 3");
         assertEquals(transaction, tp.getTransaction(),
                 "Back-reference do Transaction powinien być ustawiony");
     }
@@ -67,7 +69,8 @@ class TransactionTest {
      * czy removeProduct usuwa tylko wskazany produkt.
      */
     @Test
-    @DisplayName("removeProduct should remove only the specified TransactionProduct")
+    @DisplayName("removeProduct should remove only the specified " +
+            "TransactionProduct")
     void testRemoveProduct() {
         transaction.addProduct(p1, 2);
         transaction.addProduct(p2, 4);
@@ -77,7 +80,8 @@ class TransactionTest {
         // usuwamy p1
         transaction.removeProduct(p1);
         List<TransactionProduct> after = transaction.getTransactionProducts();
-        assertEquals(1, after.size(), "Powinna pozostać jedna pozycja po usunięciu");
+        assertEquals(1, after.size(),
+                "Powinna pozostać jedna pozycja po usunięciu");
         assertEquals(p2, after.get(0).getProduct(),
                 "Pozostały produkt powinien być p2");
     }
@@ -87,13 +91,15 @@ class TransactionTest {
      * getProducts() powinno odzwierciedlać kolejność dodawania.
      */
     @Test
-    @DisplayName("getProducts should return list of Products in insertion order")
+    @DisplayName("getProducts should return list of Products " +
+            "in insertion order")
     void testGetProducts() {
         transaction.addProduct(p1, 1);
         transaction.addProduct(p2, 5);
 
         List<Product> products = transaction.getProducts();
-        assertEquals(2, products.size(), "Powinny być dwa produkty w liście");
+        assertEquals(2, products.size(),
+                "Powinny być dwa produkty w liście");
         assertEquals(p1, products.get(0), "Pierwszy produkt to p1");
         assertEquals(p2, products.get(1), "Drugi produkt to p2");
     }

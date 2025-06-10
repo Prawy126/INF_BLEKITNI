@@ -55,16 +55,21 @@ class WorkloadRepositoryTest {
     void everyItemHasValidFields() {
         for (EmployeeWorkload ew : result) {
             // employeeName()
-            assertNotNull(ew.employeeName(), "employeeName nie może być null");
-            assertFalse(ew.employeeName().isBlank(), "employeeName nie może być pusty");
+            assertNotNull(ew.employeeName(),
+                    "employeeName nie może być null");
+            assertFalse(ew.employeeName().isBlank(),
+                    "employeeName nie może być pusty");
 
             // department()
-            assertNotNull(ew.department(), "department nie może być null");
-            assertFalse(ew.department().isBlank(), "department nie może być pusty");
+            assertNotNull(ew.department(),
+                    "department nie może być null");
+            assertFalse(ew.department().isBlank(),
+                    "department nie może być pusty");
 
             // totalHours()
             assertTrue(ew.totalHours() >= 0,
-                    () -> "totalHours musi być >= 0, a jest " + ew.totalHours());
+                    () -> "totalHours musi być >= 0, a jest "
+                            + ew.totalHours());
         }
     }
 

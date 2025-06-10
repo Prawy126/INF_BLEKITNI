@@ -48,7 +48,8 @@ public class AbsenceRequestRepositoryTest {
 
         // Opróżniamy tabelę Wnioski_o_nieobecnosc i jednocześnie
         // rozciągamy kolumnę Status do VARCHAR(20), żeby pomieścić nazwy enumów
-        emFactory = Persistence.createEntityManagerFactory("myPU");
+        emFactory = Persistence.createEntityManagerFactory(
+                "myPU");
         EntityManager em = emFactory.createEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
@@ -74,7 +75,8 @@ public class AbsenceRequestRepositoryTest {
     }
 
     /**
-     * Testuje dodawanie nowego wniosku oraz pobieranie wszystkich wniosków.
+     * Testuje dodawanie nowego wniosku oraz pobieranie wszystkich
+     * wniosków.
      */
     @Test
     void testAddRequestAndGetAllRequests() throws Exception {
@@ -92,14 +94,16 @@ public class AbsenceRequestRepositoryTest {
         absenceRepo.addRequest(request);
 
         List<AbsenceRequest> all = absenceRepo.getAllRequests();
-        Assertions.assertFalse(all.isEmpty(), "Lista wniosków nie może być pusta po dodaniu");
+        Assertions.assertFalse(all.isEmpty(), "Lista wniosków " +
+                "nie może być pusta po dodaniu");
 
         AbsenceRequest found = all.stream()
                 .filter(r -> r.getId() == request.getId())
                 .findFirst()
                 .orElse(null);
 
-        Assertions.assertNotNull(found, "Dodany wniosek powinien być na liście");
+        Assertions.assertNotNull(found, "Dodany wniosek powinien " +
+                "być na liście");
         Assertions.assertEquals("Test vacation",
                 found.getDescription(),
                 "Opis powinien być zgodny");
@@ -124,7 +128,8 @@ public class AbsenceRequestRepositoryTest {
         absenceRepo.addRequest(request);
 
         AbsenceRequest loaded = absenceRepo.findRequestById(request.getId());
-        Assertions.assertNotNull(loaded, "Wniosek powinien zostać znaleziony po ID");
+        Assertions.assertNotNull(loaded, "Wniosek powinien zostać " +
+                "znaleziony po ID");
 
         Assertions.assertEquals("Test sick leave",
                 loaded.getDescription(),
@@ -157,14 +162,16 @@ public class AbsenceRequestRepositoryTest {
         absenceRepo.updateRequest(request);
 
         AbsenceRequest loaded = absenceRepo.findRequestById(request.getId());
-        Assertions.assertNotNull(loaded, "Po aktualizacji wniosek powinien nadal istnieć");
+        Assertions.assertNotNull(loaded, "Po aktualizacji wniosek " +
+                "powinien nadal istnieć");
         Assertions.assertEquals("Updated description",
                 loaded.getDescription(),
                 "Opis wniosku powinien być zaktualizowany");
     }
 
     /**
-     * Testuje usunięcie wniosku o nieobecność po jego identyfikatorze.
+     * Testuje usunięcie wniosku o nieobecność po jego
+     * identyfikatorze.
      */
     @Test
     void testRemoveRequest() throws Exception {
@@ -185,6 +192,7 @@ public class AbsenceRequestRepositoryTest {
         absenceRepo.removeRequest(id);
 
         AbsenceRequest loaded = absenceRepo.findRequestById(id);
-        Assertions.assertNull(loaded, "Usunięty wniosek nie powinien zostać znaleziony");
+        Assertions.assertNull(loaded, "Usunięty wniosek nie powinien " +
+                "zostać znaleziony");
     }
 }
