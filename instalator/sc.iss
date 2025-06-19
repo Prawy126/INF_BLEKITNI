@@ -1,6 +1,4 @@
 ; Skrypt instalacyjny dla aplikacji Stonka
-; Wygenerowany: 2025-06-09 15:29:24
-; Autor: JakubOpar
 
 #define MyAppName "Stonka"
 #define MyAppVersion "1.0"
@@ -21,11 +19,11 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 DisableProgramGroupPage=no
-; Komentuje te pliki, jeśli nie istnieją usuń średnika jeśli masz te pliki
-LicenseFile=C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\license.txt
-InfoBeforeFile=C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\przed.txt
-InfoAfterFile=C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\po.txt
-OutputDir=C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\instalator
+
+LicenseFile=C:\Users\jakub\Pliki\INF_BLEKITNI\license.txt
+InfoBeforeFile=C:\Users\jakub\Pliki\INF_BLEKITNI\przed.txt
+InfoAfterFile=C:\Users\jakub\Pliki\INF_BLEKITNI\po.txt
+OutputDir=C:\Users\jakub\Pliki\INF_BLEKITNI\instalator
 OutputBaseFilename=stonka-setup
 SetupIconFile=C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\src\main\resources\distribution\stonka.ico
 Compression=lzma
@@ -69,27 +67,27 @@ Name: "{app}\resources\templates"; Permissions: users-full
 
 [Files]
 ; Główne pliki aplikacji
-Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\target\dist\stonka.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\target\dist\stonka.ico"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\target\dist\run.bat"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\target\dist\Projekt-1.0-SNAPSHOT.jar"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "C:\Users\jakub\Pliki\INF_BLEKITNI\CODE\target\dist\stonka.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\jakub\Pliki\INF_BLEKITNI\CODE\target\dist\stonka.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\jakub\Pliki\INF_BLEKITNI\CODE\target\dist\run.bat"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\jakub\Pliki\INF_BLEKITNI\CODE\target\dist\Projekt-1.0-SNAPSHOT.jar"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 
 ; Środowisko uruchomieniowe Java (JRE)
-Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\target\dist\jre\*"; DestDir: "{app}\jre"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\jakub\Pliki\INF_BLEKITNI\CODE\target\dist\jre\*"; DestDir: "{app}\jre"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Biblioteki (wszystkie pliki JAR)
-Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\target\dist\lib\*"; DestDir: "{app}\lib"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\jakub\Pliki\INF_BLEKITNI\CODE\target\dist\lib\*"; DestDir: "{app}\lib"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Pliki konfiguracyjne
-Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\target\dist\config\*"; DestDir: "{app}\config"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\jakub\Pliki\INF_BLEKITNI\CODE\target\dist\config\*"; DestDir: "{app}\config"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Skrypty SQL
-Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\target\dist\sql\*"; DestDir: "{app}\sql"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\jakub\Pliki\INF_BLEKITNI\CODE\target\dist\sql\*"; DestDir: "{app}\sql"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Pliki zasobów
-Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\src\main\resources\*"; DestDir: "{app}\resources"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
-Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\src\main\resources\images\*"; DestDir: "{app}\resources\images"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
-Source: "C:\Users\jakub\Pliki\GIT\INF_BLEKITNI\src\main\resources\templates\*"; DestDir: "{app}\resources\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
+Source: "C:\Users\jakub\Pliki\INF_BLEKITNI\CODE\src\main\resources\*"; DestDir: "{app}\resources"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
+Source: "C:\Users\jakub\Pliki\INF_BLEKITNI\CODE\src\main\resources\images\*"; DestDir: "{app}\resources\images"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
+Source: "C:\Users\jakub\Pliki\INF_BLEKITNI\CODE\src\main\resources\templates\*"; DestDir: "{app}\resources\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\stonka.ico"
